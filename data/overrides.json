@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "Amendments to the published grid. The institute moves lectures after the CSV",
+    "is issued, and the CSV is never reissued — so corrections live here and are",
+    "reapplied every time the catalogue is rebuilt.",
+    "",
+    "'move'   changes an existing meeting's day and/or slot.",
+    "'add'    inserts a meeting that isn't in the CSV.",
+    "'remove' deletes one.",
+    "",
+    "Each entry needs 'code', 'section', and a 'from' that matches a meeting",
+    "exactly, so a typo fails loudly at build time instead of silently doing",
+    "nothing. Keep 'note' and 'since' filled in — a year from now they're the",
+    "only record of why a time differs from the official grid."
+  ],
+  "overrides": [
+    {
+      "op": "move",
+      "code": "CCM",
+      "section": "A",
+      "from": { "day": 2, "start": "16:15" },
+      "to": { "day": 2, "start": "14:30" },
+      "note": "Tuesday lecture moved to 2:30pm",
+      "since": "2026-08-10"
+    }
+  ]
+}
