@@ -1,7 +1,9 @@
-import { DAYS, PHASE_LABEL, pretty, toMinutes, weekdayOf } from "../lib/api";
+import { DAYS, PHASE_LABEL, pretty, toMinutes, weekdayOf, isoDate, inSession }
+  from "../lib/api";
 
-export default function Week({ classes, now }) {
+export default function Week({ classes, now, term }) {
   const today = weekdayOf(now);
+  const date = isoDate(now);
 
   return (
     <>
@@ -22,7 +24,13 @@ export default function Week({ classes, now }) {
                 </div>
               ) : (
                 blocks.map((c) => (
-                  <div className="week-block" key={c.id}>
+                  <div
+                    className="week-block"
+                    key={c.id}
+                    // A pre-mid course after mid-terms is still on the
+                    // timetable but isn't meeting; show it, faded.
+                    style={inSession(c.term_phase, date, term) ? undefined : { opacity: 0.45 }}
+                  >
                     <div className="t">{pretty(c.start_time)}</div>
                     <div className="n">{c.subject}</div>
                     <div className="t" style={{ marginTop: 4, marginBottom: 0 }}>

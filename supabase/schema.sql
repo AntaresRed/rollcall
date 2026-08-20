@@ -56,10 +56,13 @@ create table if not exists public.attendance (
   -- is denormalised here: attendance history must outlive the timetable.
   class_id   uuid references public.classes(id) on delete set null,
   subject    text not null default '',
+  -- Sixteen Term V courses run two back-to-back sessions in one day, so the
+  -- slot has to be part of the identity or the second mark overwrites the first.
+  start_time time not null default '00:00',
   class_date date not null,
   status     text not null check (status in ('present','absent','cancelled')),
   marked_at  timestamptz not null default now(),
-  unique (user_id, subject, class_date)
+  unique (user_id, subject, class_date, start_time)
 );
 create index if not exists attendance_user_idx on public.attendance (user_id, class_date);
 
@@ -80,14 +83,70 @@ create index if not exists push_user_idx on public.push_subscriptions (user_id);
 -- One row per (class, date) once an alert has gone out, so a cron that runs
 -- every 5 minutes never double-pings.
 create table if not exists public.alert_log (
-  -- The class row can disappear when a student swaps courses, so the subject
-  -- is denormalised here: attendance history must outlive the timetable.
-  class_id   uuid references public.classes(id) on delete set null,
-  subject    text not null default '',
+  -- One row per class row per day. Each meeting is its own `classes` row, so a
+  -- course with two sessions in a day still gets two independent alerts.
+  class_id   uuid not null references public.classes(id) on delete cascade,
   class_date date not null,
   sent_at    timestamptz not null default now(),
   primary key (class_id, class_date)
 );
+
+-- ============================================================
+-- Migration for projects created before 2026-08-20.
+-- Safe to run on a fresh database too — every statement is guarded.
+-- ============================================================
+do $$
+begin
+  if not exists (select 1 from information_schema.columns
+                 where table_name = 'attendance' and column_name = 'subject') then
+    alter table public.attendance add column subject text not null default '';
+    update public.attendance a
+       set subject = c.subject
+      from public.classes c
+     where c.id = a.class_id and a.subject = '';
+  end if;
+
+  -- drop the cascade so swapping courses can't wipe history — but only if it
+  -- isn't already fixed, so re-running this file never touches a healthy FK
+  if exists (
+    select 1 from pg_constraint
+    where conname = 'attendance_class_id_fkey' and confdeltype <> 'n'
+  ) then
+    alter table public.attendance drop constraint attendance_class_id_fkey;
+    alter table public.attendance alter column class_id drop not null;
+    alter table public.attendance
+      add constraint attendance_class_id_fkey
+      foreign key (class_id) references public.classes(id) on delete set null;
+  end if;
+
+  if exists (select 1 from pg_constraint where conname = 'attendance_class_id_class_date_key') then
+    alter table public.attendance drop constraint attendance_class_id_class_date_key;
+  end if;
+
+  if not exists (select 1 from information_schema.columns
+                 where table_name = 'attendance' and column_name = 'start_time') then
+    alter table public.attendance add column start_time time not null default '00:00';
+    update public.attendance a
+       set start_time = c.start_time
+      from public.classes c
+     where c.id = a.class_id;
+  end if;
+
+  -- the earlier key omitted the slot, so a course with two sessions in one day
+  -- could only ever hold one mark
+  if exists (select 1 from pg_constraint
+             where conname = 'attendance_user_id_subject_class_date_key') then
+    alter table public.attendance
+      drop constraint attendance_user_id_subject_class_date_key;
+  end if;
+
+  if not exists (select 1 from pg_constraint
+                 where conname = 'attendance_user_subject_date_slot_key') then
+    alter table public.attendance
+      add constraint attendance_user_subject_date_slot_key
+      unique (user_id, subject, class_date, start_time);
+  end if;
+end $$;
 
 -- ============================================================
 -- Row Level Security — every student sees only their own rows
@@ -173,41 +232,3 @@ alter view public.attendance_summary set (security_invoker = true);
 insert into public.terms (label, term_start, midterm_start, midterm_end, term_end, is_current)
 select 'Term V', date '2026-06-15', date '2026-07-27', date '2026-08-01', date '2026-09-19', true
 where not exists (select 1 from public.terms where is_current);
-
-
--- ============================================================
--- Migration for projects created before 2026-08-20.
--- Safe to run on a fresh database too — every statement is guarded.
--- ============================================================
-do $$
-begin
-  if not exists (select 1 from information_schema.columns
-                 where table_name = 'attendance' and column_name = 'subject') then
-    alter table public.attendance add column subject text not null default '';
-    update public.attendance a
-       set subject = c.subject
-      from public.classes c
-     where c.id = a.class_id and a.subject = '';
-  end if;
-
-  -- drop the cascade so swapping courses can't wipe history
-  if exists (select 1 from information_schema.table_constraints
-             where constraint_name = 'attendance_class_id_fkey'
-               and table_name = 'attendance') then
-    alter table public.attendance drop constraint attendance_class_id_fkey;
-    alter table public.attendance alter column class_id drop not null;
-    alter table public.attendance
-      add constraint attendance_class_id_fkey
-      foreign key (class_id) references public.classes(id) on delete set null;
-  end if;
-
-  if exists (select 1 from pg_constraint where conname = 'attendance_class_id_class_date_key') then
-    alter table public.attendance drop constraint attendance_class_id_class_date_key;
-  end if;
-
-  if not exists (select 1 from pg_constraint where conname = 'attendance_user_id_subject_class_date_key') then
-    alter table public.attendance
-      add constraint attendance_user_id_subject_class_date_key
-      unique (user_id, subject, class_date);
-  end if;
-end $$;

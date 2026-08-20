@@ -153,16 +153,28 @@ export async function loadAttendance(sinceDate) {
   if (sinceDate) q = q.gte("class_date", sinceDate);
   const { data, error } = await q;
   if (error) throw error;
-  return data;
+  // Same HH:MM normalisation as classes, so comparisons line up.
+  return data.map((r) => ({ ...r, start_time: hhmm(r.start_time) }));
 }
 
-export async function markAttendance(classId, subject, date, status) {
+/** Identity of one attendance mark: subject + date + slot. */
+export const attendanceKey = (subject, date, startTime) =>
+  `${subject}|${date}|${hhmm(startTime)}`;
+
+export async function markAttendance(cls, date, status) {
   const { data: { user } } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from("attendance")
     .upsert(
-      { user_id: user.id, class_id: classId, subject, class_date: date, status },
-      { onConflict: "user_id,subject,class_date" },
+      {
+        user_id: user.id,
+        class_id: cls.id,
+        subject: cls.subject,
+        start_time: hhmm(cls.start_time),
+        class_date: date,
+        status,
+      },
+      { onConflict: "user_id,subject,class_date,start_time" },
     )
     .select()
     .single();
@@ -170,12 +182,13 @@ export async function markAttendance(classId, subject, date, status) {
   return data;
 }
 
-export async function unmarkAttendance(subject, date) {
+export async function unmarkAttendance(cls, date) {
   const { error } = await supabase
     .from("attendance")
     .delete()
-    .eq("subject", subject)
-    .eq("class_date", date);
+    .eq("subject", cls.subject)
+    .eq("class_date", date)
+    .eq("start_time", hhmm(cls.start_time));
   if (error) throw error;
 }
 

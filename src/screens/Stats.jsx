@@ -55,7 +55,10 @@ export default function Stats({ classes, attendance }) {
         </div>
       ))}
       <p style={{ fontSize: 12.5, color: "var(--mute)", marginTop: 12 }}>
-        The vertical line marks 75%. Cancelled classes are left out of the count.
+        The line marks 75%. Cancelled classes are excluded. These percentages
+        only count sessions you've marked — a class you forgot to mark isn't in
+        the total either way, so treat this as your own record rather than the
+        institute's.
       </p>
     </>
   );

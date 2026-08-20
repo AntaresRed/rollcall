@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { ensureSession } from "./lib/supabase";
 import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
-  isoDate,
+  attendanceKey, isoDate,
 } from "./lib/api";
 import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
@@ -71,17 +71,26 @@ export default function App() {
     };
   }, []);
 
-  const mark = useCallback(async (classId, subject, date, status) => {
+  const mark = useCallback(async (cls, date, status) => {
+    const k = attendanceKey(cls.subject, date, cls.start_time);
     // optimistic — marking attendance should never feel like a network round trip
     setAttendance((prev) => {
-      const rest = prev.filter((a) => !(a.subject === subject && a.class_date === date));
+      const rest = prev.filter(
+        (a) => attendanceKey(a.subject, a.class_date, a.start_time) !== k,
+      );
       return status
-        ? [...rest, { class_id: classId, subject, class_date: date, status }]
+        ? [...rest, {
+            class_id: cls.id,
+            subject: cls.subject,
+            start_time: cls.start_time,
+            class_date: date,
+            status,
+          }]
         : rest;
     });
     try {
-      if (status) await markAttendance(classId, subject, date, status);
-      else await unmarkAttendance(subject, date);
+      if (status) await markAttendance(cls, date, status);
+      else await unmarkAttendance(cls, date);
     } catch {
       setAttendance(await loadAttendance());
       say("That didn't save. Try again.");
@@ -100,7 +109,7 @@ export default function App() {
       window.history.replaceState({}, "", "/");
       return;
     }
-    mark(classId, cls.subject, date, "present");
+    mark(cls, date, "present");
     say("Marked present");
     window.history.replaceState({}, "", "/");
   }, [ready, classes, mark]);
@@ -207,7 +216,7 @@ export default function App() {
         )}
         {tab === "week" && (
           <>
-            <Week classes={classes} now={now} />
+            <Week classes={classes} now={now} term={term} />
             <button className="btn ghost block" style={{ marginTop: 20 }} onClick={startOver}>
               Change my courses
             </button>

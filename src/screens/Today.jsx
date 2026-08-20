@@ -16,8 +16,14 @@ export default function Today({ classes, attendance, term, now, onMark }) {
     [classes, today, date, term],
   );
 
-  const statusOf = (subject) =>
-    attendance.find((a) => a.subject === subject && a.class_date === date)?.status ?? null;
+  // Keyed on the slot too: a course with two sessions in a day gets two marks.
+  const statusOf = (c) =>
+    attendance.find(
+      (a) =>
+        a.subject === c.subject &&
+        a.class_date === date &&
+        String(a.start_time).slice(0, 5) === String(c.start_time).slice(0, 5),
+    )?.status ?? null;
 
   // The now-marker sits above the first class still to come.
   const nextIndex = list.findIndex((c) => toMinutes(c.end_time) > nowMins);
@@ -40,7 +46,7 @@ export default function Today({ classes, attendance, term, now, onMark }) {
       <div className="eyebrow">{DAY_LONG[today]}</div>
       <div className="day">
         {list.map((c, i) => {
-          const status = statusOf(c.subject);
+          const status = statusOf(c);
           const past = toMinutes(c.end_time) <= nowMins;
           const live =
             toMinutes(c.start_time) <= nowMins && nowMins < toMinutes(c.end_time);
@@ -79,9 +85,7 @@ export default function Today({ classes, attendance, term, now, onMark }) {
                         key={key}
                         className={`mark ${key}`}
                         aria-pressed={status === key}
-                        onClick={() =>
-                          onMark(c.id, c.subject, date, status === key ? null : key)
-                        }
+                        onClick={() => onMark(c, date, status === key ? null : key)}
                       >
                         {label}
                       </button>
