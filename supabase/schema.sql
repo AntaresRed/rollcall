@@ -1,6 +1,16 @@
 -- ============================================================
 -- RollCall — schema
 -- Run in Supabase → SQL Editor. Safe to re-run.
+--
+-- SECTION ORDER MATTERS, and not in the obvious way:
+--
+--   tables -> migration -> indexes -> RLS -> view -> seed
+--
+-- On an existing database `create table if not exists` is a no-op, so any
+-- column added by a later release exists only after the migration block has
+-- run. Anything referencing such a column — an index, a view, a policy —
+-- must therefore come after it, not next to its table. Put new indexes in
+-- the Indexes section, not beside the CREATE TABLE.
 -- ============================================================
 
 create extension if not exists pg_cron;
@@ -32,8 +42,6 @@ create table if not exists public.term_breaks (
   to_date    date not null,
   note       text
 );
-create index if not exists term_breaks_term_idx on public.term_breaks (term_id, from_date);
-
 -- ---------- student profile ----------
 create table if not exists public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
@@ -71,11 +79,6 @@ create table if not exists public.classes (
   confirmed    boolean not null default false,
   created_at   timestamptz not null default now()
 );
-create index if not exists classes_user_day_idx
-  on public.classes (user_id, day_of_week, start_time);
-create index if not exists classes_user_date_idx
-  on public.classes (user_id, session_date) where session_date is not null;
-
 -- ---------- rescheduled sessions ----------
 -- A weekly course has no row per occurrence — occurrences are generated from
 -- the pattern — so a moved class is stored as an exception against the date it
@@ -92,11 +95,6 @@ create table if not exists public.session_overrides (
   created_at    timestamptz not null default now(),
   unique (user_id, class_id, original_date)
 );
-create index if not exists session_overrides_user_idx
-  on public.session_overrides (user_id, original_date);
-create index if not exists session_overrides_new_idx
-  on public.session_overrides (user_id, new_date) where new_date is not null;
-
 -- ---------- attendance ----------
 create table if not exists public.attendance (
   id         uuid primary key default gen_random_uuid(),
@@ -113,8 +111,6 @@ create table if not exists public.attendance (
   marked_at  timestamptz not null default now(),
   unique (user_id, subject, class_date, start_time)
 );
-create index if not exists attendance_user_idx on public.attendance (user_id, class_date);
-
 -- ---------- web push ----------
 create table if not exists public.push_subscriptions (
   id         uuid primary key default gen_random_uuid(),
@@ -126,8 +122,6 @@ create table if not exists public.push_subscriptions (
   last_ok_at timestamptz,
   created_at timestamptz not null default now()
 );
-create index if not exists push_user_idx on public.push_subscriptions (user_id);
-
 -- ---------- alert dedupe ----------
 -- One row per (class, date) once an alert has gone out, so a cron that runs
 -- every 5 minutes never double-pings.
@@ -263,6 +257,32 @@ begin
     alter table public.terms drop column midterm_end;
   end if;
 end $$;
+
+-- ============================================================
+-- Indexes
+--
+-- Deliberately after the migration above: on an existing database
+-- `create table if not exists` is a no-op, so columns added by this
+-- release only exist once the migration has run. An index defined
+-- beside its table would reference a column that isn't there yet.
+-- ============================================================
+create index if not exists term_breaks_term_idx on public.term_breaks (term_id, from_date);
+
+create index if not exists classes_user_day_idx
+  on public.classes (user_id, day_of_week, start_time);
+
+create index if not exists classes_user_date_idx
+  on public.classes (user_id, session_date) where session_date is not null;
+
+create index if not exists session_overrides_user_idx
+  on public.session_overrides (user_id, original_date);
+
+create index if not exists session_overrides_new_idx
+  on public.session_overrides (user_id, new_date) where new_date is not null;
+
+create index if not exists attendance_user_idx on public.attendance (user_id, class_date);
+
+create index if not exists push_user_idx on public.push_subscriptions (user_id);
 
 -- ============================================================
 -- Row Level Security — every student sees only their own rows

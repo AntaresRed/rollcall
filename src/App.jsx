@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { ensureSession } from "./lib/supabase";
 import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
@@ -9,15 +9,16 @@ import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
 } from "./lib/push";
 
-import CoursePicker from "./screens/CoursePicker";
-import Onboard from "./screens/Onboard";
-import Confirm from "./screens/Confirm";
+import Splash, { Mark } from "./screens/Splash";
+const CoursePicker = lazy(() => import("./screens/CoursePicker"));
+const Onboard = lazy(() => import("./screens/Onboard"));
+const Confirm = lazy(() => import("./screens/Confirm"));
 import Today from "./screens/Today";
-import Timetable from "./screens/Timetable";
-import Stats from "./screens/Stats";
-import CatchUp from "./screens/CatchUp";
-import TermCalendar from "./screens/TermCalendar";
-import Reschedule from "./screens/Reschedule";
+const Timetable = lazy(() => import("./screens/Timetable"));
+const Stats = lazy(() => import("./screens/Stats"));
+const CatchUp = lazy(() => import("./screens/CatchUp"));
+const TermCalendar = lazy(() => import("./screens/TermCalendar"));
+const Reschedule = lazy(() => import("./screens/Reschedule"));
 
 const TABS = [
   ["today", "Today"],
@@ -52,7 +53,16 @@ export default function App() {
     (async () => {
       try {
         await ensureSession();
-        await registerServiceWorker();
+
+        // Nothing below blocks first paint. Service-worker registration and
+        // the push-subscription check both wait on `serviceWorker.ready`,
+        // which can take seconds on a cold start and has no bearing on
+        // whether the schedule can be drawn.
+        registerServiceWorker()
+          .then(() => alertsActive())
+          .then(setAlerts)
+          .catch(() => setAlerts(false));
+
         const [c, a, t, o] = await Promise.all([
           loadClasses(), loadAttendance(), loadTerm(), loadOverrides(),
         ]);
@@ -60,7 +70,6 @@ export default function App() {
         setAttendance(a);
         setTerm(t);
         setOverrides(o);
-        setAlerts(await alertsActive());
       } catch (err) {
         console.error(err);
         setFatal("Couldn't reach RollCall. Check your connection and reload.");
@@ -72,8 +81,19 @@ export default function App() {
 
   // ---- keep the now-marker honest ----
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30_000);
-    const onVisible = () => document.visibilityState === "visible" && setNow(new Date());
+    // Every screen derives from `now`, so replacing the object on a timer
+    // re-renders the whole tree. Only publish a new value when the minute
+    // it displays has actually changed.
+    const tick = () => setNow((prev) => {
+      const next = new Date();
+      return next.getMinutes() === prev.getMinutes() &&
+             next.getHours() === prev.getHours() &&
+             next.getDate() === prev.getDate()
+        ? prev
+        : next;
+    });
+    const id = setInterval(tick, 20_000);
+    const onVisible = () => document.visibilityState === "visible" && tick();
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearInterval(id);
@@ -180,7 +200,7 @@ export default function App() {
     setEditing(true);
   };
 
-  if (!ready) return <div style={{ padding: 40 }}><div className="spinner" /></div>;
+  if (!ready) return <Splash />;
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
 
   // ---- onboarding ----
@@ -188,6 +208,7 @@ export default function App() {
     return (
       <div className="shell">
         <Masthead now={now} />
+        <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
         <Confirm
           initial={draft}
           onCancel={() => setDraft(null)}
@@ -198,6 +219,7 @@ export default function App() {
             if (!(await alertsActive())) await turnOnAlerts();
           }}
         />
+        </Suspense>
       </div>
     );
   }
@@ -213,6 +235,7 @@ export default function App() {
     return (
       <div className="shell">
         <Masthead now={now} />
+        <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
         {entry === "picker" ? (
           <CoursePicker
             existing={classes}
@@ -226,13 +249,25 @@ export default function App() {
             onUsePicker={() => setEntry("picker")}
           />
         )}
+        </Suspense>
       </div>
     );
   }
 
   // ---- main ----
-  const iosNeedsInstall = isIOS() && !isStandalone();
-  const pendingCount = unmarkedSessions(classes, attendance, term, now, 28, overrides).length;
+  const iosNeedsInstall = useMemo(() => isIOS() && !isStandalone(), []);
+
+  // Both walk weeks of dates against every class, so they are recomputed only
+  // when their inputs move — not on every toast or attendance tap.
+  const pendingCount = useMemo(
+    () => unmarkedSessions(classes, attendance, term, now, 28, overrides).length,
+    [classes, attendance, term, now, overrides],
+  );
+
+  const todaysOccurrences = useMemo(
+    () => occurrencesOn(classes, term, isoDate(now), overrides),
+    [classes, term, now, overrides],
+  );
 
   return (
     <>
@@ -254,9 +289,10 @@ export default function App() {
           </div>
         )}
 
+        <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
         {tab === "today" && (
           <Today
-            occurrences={occurrencesOn(classes, term, isoDate(now), overrides)}
+            occurrences={todaysOccurrences}
             attendance={attendance}
             now={now}
             onMark={mark}
@@ -300,6 +336,7 @@ export default function App() {
         {tab === "stats" && (
           <Stats classes={classes} attendance={attendance} onToggleMute={toggleMute} />
         )}
+        </Suspense>
       </div>
 
       <nav className="tabs" role="tablist">
@@ -330,7 +367,10 @@ function Masthead({ now }) {
   });
   return (
     <header className="masthead">
-      <div className="wordmark">Roll<span>Call</span></div>
+      <div className="wordmark">
+        <Mark size={22} />
+        <b>Roll<i>Call</i></b>
+      </div>
       <div className="masthead-date">{label}</div>
     </header>
   );

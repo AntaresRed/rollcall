@@ -1,29 +1,42 @@
 /* ============================================================
    RollCall — visual system
 
-   Direction: a departure board for your week. Times are the fixed
-   spine of the layout, set in mono in a left gutter; course names
-   hang off them. Cool paper stock rather than warm cream, so the
-   indigo "now" marker reads as a live signal and nothing else on
-   the page competes with it.
+   Direction: highlighter on a printed timetable. The published grid is a
+   monochrome document; what a student adds to it is a bright mark against
+   the one slot that matters right now. So the chrome is a deep board that
+   frames the page like a departure display, content sits on paper stock,
+   and exactly one colour carries "now".
+
+   That colour is magenta rather than the usual productivity blue for a
+   practical reason as much as an aesthetic one: green and red already mean
+   attended and missed, so the live marker has to sit nowhere near either,
+   or it starts to read as a verdict.
    ============================================================ */
 
 :root {
-  --ink: #16181d;
-  --paper: #f1f2ee;
-  --card: #ffffff;
-  --rule: #dcddd6;
-  --slate: #626a73;
-  --mute: #8b9199;
+  /* chrome + surfaces */
+  --board: #171B21;
+  --board-soft: #262C35;
+  --ink: #11151A;
+  --paper: #F4F5F2;
+  --card: #FFFFFF;
+  --rule: #E3E5E0;
+  --rule-strong: #CFD3CC;
+  --slate: #565E66;
+  --mute: #666E77;   /* 4.7:1 on paper — these carry real labels, not decoration */
 
-  --signal: #3b2fd9;      /* now / next / live */
-  --signal-wash: #ecebfb;
-  --present: #14624c;
-  --present-wash: #e2efe9;
-  --absent: #a32e2e;
-  --absent-wash: #f7e6e5;
-  --warn-wash: #fdf1dd;
-  --warn-ink: #8a5a12;
+  /* the one loud colour */
+  --signal: #D6006F;
+  --signal-deep: #A80257;
+  --signal-wash: #FDE9F3;
+
+  /* attendance semantics */
+  --present: #0E6B4F;
+  --present-wash: #E1F0EA;
+  --absent: #B3261E;
+  --absent-wash: #FBE9E7;
+  --warn-ink: #8A5A12;
+  --warn-wash: #FDF3E0;
 
   --sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -52,6 +65,7 @@ button:focus-visible,
 [tabindex]:focus-visible,
 input:focus-visible,
 select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.masthead :focus-visible, .tabs :focus-visible { outline-color: #fff; }
 
 .shell {
   max-width: 620px;
@@ -65,28 +79,34 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   position: sticky;
   top: 0;
   z-index: 20;
-  background: var(--paper);
-  border-bottom: 1px solid var(--rule);
-  padding: calc(12px + env(safe-area-inset-top)) var(--pad) 12px;
+  background: var(--board);
+  color: #fff;
+  padding: calc(11px + env(safe-area-inset-top)) var(--pad) 11px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
 .wordmark {
-  font-weight: 700;
-  font-size: 17px;
-  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.015em;
+  color: #fff;
 }
-.wordmark span { color: var(--signal); }
+.wordmark svg { display: block; }
+.wordmark b { font-weight: 600; }
+.wordmark i { font-style: normal; color: var(--signal); font-weight: 600; }
 
 .masthead-date {
   font-family: var(--mono);
-  font-size: 12px;
-  color: var(--slate);
+  font-size: 11.5px;
+  color: #9AA3AD;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 
 /* ---------- section headings ---------- */
@@ -170,7 +190,7 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   background: var(--warn-wash);
   color: var(--warn-ink);
 }
-.tag.signal { background: var(--signal-wash); color: var(--signal); }
+.tag.signal { background: var(--signal-wash); color: var(--signal-deep); }
 
 /* the live marker — the one loud thing on the page */
 .now-line {
@@ -206,8 +226,8 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   .now-rule::before { animation: pulse 2.4s ease-in-out infinite; }
 }
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 47, 217, 0.45); }
-  50%      { box-shadow: 0 0 0 6px rgba(59, 47, 217, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(214, 0, 111, 0.45); }
+  50%      { box-shadow: 0 0 0 6px rgba(214, 0, 111, 0); }
 }
 
 /* ---------- attendance controls ---------- */
@@ -332,7 +352,7 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   align-items: center;
   justify-content: space-between;
   background: var(--signal-wash);
-  border: 1px solid #d3d0f6;
+  border: 1px solid #F6CFE2;
   border-radius: var(--r);
   padding: 12px 14px;
   font-size: 13.5px;
@@ -440,24 +460,24 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   bottom: 0; left: 0; right: 0;
   z-index: 30;
   display: flex;
-  background: var(--card);
-  border-top: 1px solid var(--rule);
+  background: var(--board);
   padding-bottom: env(safe-area-inset-bottom);
 }
 .tab {
   flex: 1;
   border: 0;
   background: none;
-  padding: 11px 0 12px;
+  padding: 12px 0 13px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--mute);
+  color: #7E8792;
   border-top: 2px solid transparent;
-  margin-top: -1px;
+  transition: color 0.14s;
 }
-.tab[aria-selected="true"] { color: var(--signal); border-top-color: var(--signal); }
+.tab[aria-selected="true"] { color: #fff; border-top-color: var(--signal); }
+.tab:focus-visible { outline-offset: -3px; }
 
 .toast {
   position: fixed;
@@ -882,4 +902,101 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   background: var(--paper);
   color: var(--ink);
   width: 100%;
+}
+
+/* ---------- opening screen ---------- */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 24px;
+  z-index: 60;
+}
+
+.splash-mark {
+  filter: drop-shadow(0 8px 24px rgba(17, 21, 26, 0.16));
+  border-radius: 16px;
+}
+
+.splash-word {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+.splash-word i { font-style: normal; color: var(--signal); }
+
+.splash-msg {
+  margin: 6px 0 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+/* An indeterminate sweep, not a spinner: it says "working" without
+   implying a percentage the app doesn't know. */
+.splash-bar {
+  margin-top: 26px;
+  width: 132px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--rule);
+  overflow: hidden;
+}
+.splash-bar span {
+  display: block;
+  width: 44px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--signal);
+  transform: translateX(-44px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .splash-bar span { animation: sweep 1.15s ease-in-out infinite; }
+  .mark-draw .mark-tick {
+    stroke-dasharray: 42;
+    stroke-dashoffset: 42;
+    animation: draw 0.62s cubic-bezier(0.65, 0, 0.35, 1) 0.12s forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-bar span { transform: translateX(44px); }
+}
+
+@keyframes sweep {
+  0%   { transform: translateX(-44px); }
+  100% { transform: translateX(132px); }
+}
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* placeholder while a lazily-loaded screen arrives — deliberately quiet,
+   since most of these resolve in a few frames from cache */
+.screen-loading {
+  height: 140px;
+  border-radius: var(--r);
+  background: linear-gradient(
+    100deg,
+    var(--rule) 20%, #EDEEEA 38%, var(--rule) 56%
+  );
+  background-size: 220% 100%;
+  opacity: 0.55;
+  margin-top: 24px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .screen-loading { animation: shimmer 1.3s linear infinite; }
+}
+@keyframes shimmer {
+  to { background-position: -220% 0; }
 }

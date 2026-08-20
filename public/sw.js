@@ -1,6 +1,6 @@
 // RollCall service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v4";
+const CACHE = "rollcall-v5";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {

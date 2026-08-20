@@ -143,17 +143,21 @@ export async function clearTimetable() {
 // ---------- term ----------
 
 export async function loadTerm() {
-  const { data } = await supabase.from("terms").select("*").eq("is_current", true).limit(1);
+  // Breaks come back embedded rather than as a second round trip — the term
+  // is on the critical path for first paint.
+  const { data } = await supabase
+    .from("terms")
+    .select("*, term_breaks(*)")
+    .eq("is_current", true)
+    .limit(1);
+
   const term = data?.[0] ?? null;
   if (!term) return null;
 
-  const { data: breaks } = await supabase
-    .from("term_breaks")
-    .select("*")
-    .eq("term_id", term.id)
-    .order("from_date");
-
-  return { ...term, breaks: breaks ?? [] };
+  const breaks = [...(term.term_breaks ?? [])].sort(
+    (a, b) => a.from_date.localeCompare(b.from_date),
+  );
+  return { ...term, breaks };
 }
 
 /** Exam weeks, placement season, Puja vacation — nobody has class. */
@@ -183,7 +187,7 @@ export function inSession(phase, date, term) {
 // ---------- attendance ----------
 
 export async function loadAttendance(sinceDate) {
-  let q = supabase.from("attendance").select("*");
+  let q = supabase.from("attendance").select("*").order("class_date", { ascending: false });
   if (sinceDate) q = q.gte("class_date", sinceDate);
   const { data, error } = await q;
   if (error) throw error;
