@@ -63,14 +63,26 @@ const safe = async <T>(label: string, fn: () => Promise<T>): Promise<T | null> =
   try { return await fn(); } catch (err) { console.error(label, err); return null; }
 };
 
-/** Is this class running on this date, given pre/post-mid-term split? */
-function inSession(phase: string, date: string, term: { midterm_start: string; midterm_end: string; term_start: string; term_end: string } | null): boolean {
+interface Term {
+  term_start: string;
+  pre_mid_end: string;
+  post_mid_start: string;
+  term_end: string;
+  breaks: { from_date: string; to_date: string }[];
+}
+
+/** Is a course of this phase actually meeting on this date? */
+function inSession(phase: string, date: string, term: Term | null): boolean {
   if (!term) return true;
   if (date < term.term_start || date > term.term_end) return false;
-  if (phase === "pre_mid") return date < term.midterm_start;
-  if (phase === "post_mid") return date > term.midterm_end;
-  // 'full' courses pause during the exam week
-  return !(date >= term.midterm_start && date <= term.midterm_end);
+  // Exam weeks, placement season, Puja vacation: nobody has class.
+  if (term.breaks.some((b) => date >= b.from_date && date <= b.to_date)) return false;
+
+  const inPre = date <= term.pre_mid_end;
+  const inPost = date >= term.post_mid_start;
+  if (phase === "pre_mid") return inPre;
+  if (phase === "post_mid") return inPost;
+  return inPre || inPost;
 }
 
 Deno.serve(async () => {
@@ -95,7 +107,7 @@ Deno.serve(async () => {
   const [subs, { data: terms }] = await Promise.all([
     fetchAll<Record<string, string>>((from, to) =>
       admin.from("push_subscriptions").select("*").range(from, to)),
-    admin.from("terms").select("*").eq("is_current", true).limit(1),
+    admin.from("terms").select("*, term_breaks(*)").eq("is_current", true).limit(1),
   ]);
 
   if (!subs.length) {
@@ -103,7 +115,10 @@ Deno.serve(async () => {
       headers: { "Content-Type": "application/json" },
     });
   }
-  const term = terms?.[0] ?? null;
+  const raw = terms?.[0] ?? null;
+  const term: Term | null = raw
+    ? { ...raw, breaks: raw.term_breaks ?? [] }
+    : null;
 
   // Group subscriptions by user so one student with two devices gets one lookup.
   const byUser = new Map<string, typeof subs>();
@@ -124,10 +139,24 @@ Deno.serve(async () => {
     fetchAll<{ id: string; lead_mins: number; timezone: string }>((from, to) =>
       admin.from("profiles").select("id, lead_mins, timezone").range(from, to)),
     fetchAll<Record<string, string>>((from, to) =>
-      admin.from("classes").select("*").eq("confirmed", true).range(from, to)),
+      admin.from("classes").select("*")
+        .eq("confirmed", true)
+        .eq("muted", false)          // per-course mute
+        .range(from, to)),
   ]);
 
   const classes = allClasses.filter((c) => subscribed.has(c.user_id));
+
+  // Rescheduled and cancelled occurrences. A moved class must not alert on the
+  // date it was originally due, and must alert on the date it actually runs.
+  const overrides = (await fetchAll<Record<string, string | null>>((from, to) =>
+    admin.from("session_overrides").select("*").range(from, to)))
+    .filter((o) => subscribed.has(String(o.user_id)));
+
+  const movedFrom = new Set(
+    overrides.map((o) => `${o.class_id}|${String(o.original_date).slice(0, 10)}`),
+  );
+  const classById = new Map(classes.map((c) => [String(c.id), c]));
 
   const leadOf = new Map(profiles.map((p) => [p.id, p.lead_mins ?? 10]));
   const tzOf = new Map(profiles.map((p) => [p.id, p.timezone ?? "Asia/Kolkata"]));
@@ -145,7 +174,13 @@ Deno.serve(async () => {
   for (const cls of classes) {
     const tz = tzOf.get(cls.user_id) ?? "Asia/Kolkata";
     const now = clockFor(tz);
-    if (cls.day_of_week !== now.weekday) continue;
+
+    // A fixed-date session runs once, on its own date; a weekly one repeats.
+    if (cls.session_date) {
+      if (String(cls.session_date).slice(0, 10) !== now.date) continue;
+    } else if (cls.day_of_week !== now.weekday) {
+      continue;
+    }
 
     const lead = leadOf.get(cls.user_id) ?? 10;
     const start = toMinutes(cls.start_time);
@@ -158,9 +193,42 @@ Deno.serve(async () => {
     // sweep still catches it, and the atomic alert_log claim below guarantees
     // it's still delivered exactly once.
     if (now.minutes < opens || now.minutes > start) continue;
-    if (!inSession(cls.term_phase, now.date, term)) continue;
+    // Published dates already avoid exam weeks and vacations, so a dated
+    // session is authoritative and skips the phase window entirely.
+    if (!cls.session_date && !inSession(cls.term_phase, now.date, term)) continue;
+
+    if (movedFrom.has(`${cls.id}|${now.date}`)) continue;  // moved away
 
     due.push({ cls, date: now.date });
+  }
+
+  // Sessions moved *into* today. Their date and slot come from the override,
+  // not from the class row's weekly pattern.
+  for (const o of overrides) {
+    if (!o.new_date) continue;
+    const userId = String(o.user_id);
+    const now = clockFor(tzOf.get(userId) ?? "Asia/Kolkata");
+    if (String(o.new_date).slice(0, 10) !== now.date) continue;
+
+    const base = classById.get(String(o.class_id));
+    if (!base || base.muted) continue;
+
+    const startTime = o.new_start
+      ? String(o.new_start).slice(0, 5)
+      : String(base.start_time).slice(0, 5);
+    const endTime = o.new_end
+      ? String(o.new_end).slice(0, 5)
+      : String(base.end_time).slice(0, 5);
+
+    const lead = leadOf.get(userId) ?? 10;
+    const start = toMinutes(startTime);
+    const opens = Math.max(0, start - lead);
+    if (now.minutes < opens || now.minutes > start) continue;
+
+    due.push({
+      cls: { ...base, start_time: startTime, end_time: endTime, _moved: true },
+      date: now.date,
+    });
   }
 
   if (!due.length) {
@@ -185,7 +253,11 @@ Deno.serve(async () => {
     const lead = leadOf.get(d.cls.user_id) ?? 10;
     const payload = JSON.stringify({
       title: `${d.cls.subject}`,
-      body: `Starts in ${lead} min · ${pretty(d.cls.start_time)}${d.cls.room ? ` · ${d.cls.room}` : ""}`,
+      body: `Starts in ${lead} min · ${pretty(d.cls.start_time)}${d.cls.room ? ` · ${d.cls.room}` : ""}`
+        + (d.cls._moved ? " · rescheduled" : ""),
+      // Shown on platforms that can't render action buttons (iOS, Firefox),
+      // where tapping through to the app is the only route.
+      hint: "Tap to mark attendance",
       classId: d.cls.id,
       classDate: d.date,
       // The service worker drops the alert if it arrives after this. Belt and

@@ -9,7 +9,13 @@ const PHASE_NOTE = {
 };
 
 /** "Mon 10:15 · Wed 12:00" — the whole reason to pick a section. */
-function describe(meetings) {
+function describe(meetings, course) {
+  if (course?.schedule_type === "dates") {
+    const days = [...new Set(meetings.map((m) => m.date))].sort();
+    const first = days[0]?.slice(5).replace("-", "/");
+    const last = days[days.length - 1]?.slice(5).replace("-", "/");
+    return `${meetings.length} sessions · ${days.length} days · ${first}–${last}`;
+  }
   return meetings
     .map((m) => `${DAYS[m.day - 1]} ${pretty(m.start).replace(" ", "")}`)
     .join(" · ");
@@ -41,23 +47,41 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
       const course = catalogue.courses.find((c) => c.code === code);
       if (!course) continue;
       for (const m of course.sections[letter] ?? []) {
+        // Keyed on weekday, not date: a dated ODS session at Thu 16:15 really
+        // does collide with a weekly Thu 16:15 course — just only on the dates
+        // ODS actually runs, which `dated` flags for the wording below.
         const key = `${m.day}|${m.start}`;
         const list = bySlot.get(key) ?? [];
-        list.push({ code, phase: course.phase, day: m.day, start: m.start });
+        list.push({
+          code,
+          phase: course.phase,
+          day: m.day,
+          start: m.start,
+          dated: Boolean(m.date),
+        });
         bySlot.set(key, list);
       }
     }
 
     const out = [];
+    const seen = new Set();
     for (const list of bySlot.values()) {
       for (let i = 0; i < list.length; i++) {
         for (let j = i + 1; j < list.length; j++) {
-          if (!overlappingPhases(list[i].phase, list[j].phase)) continue;
+          const a = list[i];
+          const b = list[j];
+          if (a.code === b.code) continue;          // same course, other date
+          if (!overlappingPhases(a.phase, b.phase)) continue;
+          // A dated course repeats a slot across dates; report the fact once.
+          const k = `${a.day}|${a.start}|${a.code}|${b.code}`;
+          if (seen.has(k)) continue;
+          seen.add(k);
           out.push({
-            a: list[i].code,
-            b: list[j].code,
-            day: DAYS[list[i].day - 1],
-            start: list[i].start,
+            a: a.code,
+            b: b.code,
+            day: DAYS[a.day - 1],
+            start: a.start,
+            onlySomeDates: a.dated || b.dated,
           });
         }
       }
@@ -86,6 +110,7 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
         const course = catalogue.courses.find((c) => c.code === code);
         return course.sections[letter].map((m) => ({
           day_of_week: m.day,
+          session_date: m.date ?? null,
           start_time: m.start,
           end_time: m.end,
           subject: course.name,
@@ -93,6 +118,9 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
           section: letter,
           room: null,
           term_phase: course.phase,
+          credits: course.credits,
+          total_classes: course.total_classes,
+          min_pct: course.min_pct,
         }));
       });
       onSaved(await saveTimetable(rows));
@@ -136,8 +164,12 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
       {clashes.length > 0 && (
         <div className="banner warn">
           <p>
-            {clashes.map((c) => `${c.a} and ${c.b} both run ${c.day} ${pretty(c.start)}`).join("; ")}.
-            Switch a section, or drop one.
+            {clashes
+              .map((c) =>
+                `${c.a} and ${c.b} both run ${c.day} ${pretty(c.start)}` +
+                (c.onlySomeDates ? " (on some dates)" : ""))
+              .join("; ")}
+            . Switch a section, or drop one.
           </p>
         </div>
       )}
@@ -164,7 +196,10 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
                 <span className="body">
                   <span className="course">{course.name}</span>
                   <span className="meta">
-                    <span>{describe(course.sections[active])}</span>
+                    <span>{describe(course.sections[active], course)}</span>
+                    <span className="tag quiet">
+                      {course.credits} cr · {course.total_classes} classes · {course.min_pct}%
+                    </span>
                     {course.phase !== "full" && (
                       <span className="tag">{PHASE_LABEL[course.phase]}</span>
                     )}
@@ -182,7 +217,7 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
                       aria-pressed={active === l}
                       onClick={() => setPicked((p) => ({ ...p, [course.code]: l }))}
                     >
-                      Section {l} · {describe(course.sections[l])}
+                      Section {l} · {describe(course.sections[l], course)}
                     </button>
                   ))}
                 </div>

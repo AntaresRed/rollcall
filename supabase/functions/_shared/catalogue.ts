@@ -6,16 +6,29 @@ export interface CatalogueCourse {
   code: string;
   name: string;
   phase: 'full' | 'pre_mid' | 'post_mid';
-  sections: Record<string, { day: number; start: string; end: string }[]>;
+  /** 3 credits = 20 classes at 75%; 1.5 credits = 10 classes at 80%. */
+  credits: number;
+  total_classes: number;
+  min_pct: number;
+  /** 'weekly' repeats; 'dates' runs on the fixed list in each meeting. */
+  schedule_type?: 'weekly' | 'dates';
+  sections: Record<string, {
+    day: number; start: string; end: string; date?: string;
+  }[]>;
 }
 
 export const TERM = "TERM-V: AY 2026-2027";
 
 export const CATALOGUE: CatalogueCourse[] = [
   {
-    "code": "AIP",
+    "code": "AP",
     "name": "Analytics in Practice",
     "phase": "pre_mid",
+    "credits": 1.5,
+    "total_classes": 10,
+    "min_pct": 80,
+    "venue": "L-51",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -35,66 +48,146 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "BM",
     "name": "Bank Management",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (West-100)",
+    "schedule_type": "dates",
     "sections": {
       "A": [
         {
+          "date": "2026-09-01",
           "day": 2,
           "start": "16:15",
-          "end": "17:30"
+          "end": "17:45"
         },
         {
+          "date": "2026-09-01",
           "day": 2,
           "start": "18:00",
-          "end": "19:15"
+          "end": "19:30"
         },
         {
+          "date": "2026-09-02",
           "day": 3,
           "start": "10:15",
-          "end": "11:30"
+          "end": "11:45"
         },
         {
+          "date": "2026-09-02",
           "day": 3,
           "start": "12:00",
-          "end": "13:15"
-        }
-      ]
-    }
-  },
-  {
-    "code": "BCM",
-    "name": "Business Constraints Management",
-    "phase": "pre_mid",
-    "sections": {
-      "A": [
-        {
-          "day": 2,
-          "start": "18:00",
-          "end": "19:15"
+          "end": "13:30"
         },
         {
-          "day": 3,
-          "start": "16:15",
-          "end": "17:30"
-        }
-      ],
-      "B": [
-        {
+          "date": "2026-09-08",
           "day": 2,
           "start": "16:15",
-          "end": "17:30"
+          "end": "17:45"
         },
         {
-          "day": 3,
+          "date": "2026-09-08",
+          "day": 2,
           "start": "18:00",
-          "end": "19:15"
+          "end": "19:30"
+        },
+        {
+          "date": "2026-09-09",
+          "day": 3,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-09-09",
+          "day": 3,
+          "start": "12:00",
+          "end": "13:30"
+        },
+        {
+          "date": "2026-09-15",
+          "day": 2,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-09-15",
+          "day": 2,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-09-16",
+          "day": 3,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-09-16",
+          "day": 3,
+          "start": "12:00",
+          "end": "13:30"
+        },
+        {
+          "date": "2026-11-03",
+          "day": 2,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-11-03",
+          "day": 2,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-11-04",
+          "day": 3,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-11-04",
+          "day": 3,
+          "start": "12:00",
+          "end": "13:30"
+        },
+        {
+          "date": "2026-11-17",
+          "day": 2,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-11-17",
+          "day": 2,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-11-18",
+          "day": 3,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-11-18",
+          "day": 3,
+          "start": "12:00",
+          "end": "13:30"
         }
       ]
-    }
+    },
+    "official_code": "FI-242"
   },
   {
     "code": "CB",
     "name": "Consumer Behaviour",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "N-22",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -114,6 +207,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "CCM",
     "name": "Consumption Culture & Markets",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "L-4",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -133,6 +231,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "CRA",
     "name": "Country Risk Analysis",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (West-100)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -149,9 +252,14 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "CMLS",
+    "code": "CMLSE",
     "name": "Creating, Managing, and Leading Social Enterprises",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "L-4",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -168,76 +276,89 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "CCBC",
-    "name": "Cross Cultural Business Communication",
-    "phase": "post_mid",
-    "sections": {
-      "A": [
-        {
-          "day": 1,
-          "start": "14:30",
-          "end": "15:45"
-        },
-        {
-          "day": 5,
-          "start": "14:30",
-          "end": "15:45"
-        }
-      ]
-    }
-  },
-  {
-    "code": "DTDP",
+    "code": "DTDPS",
     "name": "Design Thinking for Digital Products and Services",
     "phase": "post_mid",
+    "credits": 1.5,
+    "total_classes": 10,
+    "min_pct": 80,
+    "venue": "Tata Hall (East-West Conference room)",
+    "schedule_type": "dates",
     "sections": {
       "A": [
         {
+          "date": "2026-10-31",
           "day": 6,
           "start": "16:15",
-          "end": "17:30"
+          "end": "17:45"
         },
         {
+          "date": "2026-10-31",
           "day": 6,
           "start": "18:00",
-          "end": "19:15"
+          "end": "19:30"
         },
         {
+          "date": "2026-11-01",
           "day": 7,
           "start": "10:15",
-          "end": "11:30"
+          "end": "11:45"
         },
         {
+          "date": "2026-11-01",
           "day": 7,
           "start": "12:00",
-          "end": "13:15"
-        }
-      ]
-    }
-  },
-  {
-    "code": "ETM",
-    "name": "Economics of Talent Management",
-    "phase": "post_mid",
-    "sections": {
-      "A": [
-        {
-          "day": 1,
-          "start": "16:15",
-          "end": "17:30"
+          "end": "13:30"
         },
         {
-          "day": 2,
-          "start": "14:30",
-          "end": "15:45"
+          "date": "2026-11-14",
+          "day": 6,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-11-15",
+          "day": 7,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-11-15",
+          "day": 7,
+          "start": "12:00",
+          "end": "13:30"
+        },
+        {
+          "date": "2026-11-21",
+          "day": 6,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-11-22",
+          "day": 7,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-11-22",
+          "day": 7,
+          "start": "12:00",
+          "end": "13:30"
         }
       ]
-    }
+    },
+    "official_code": "MI-300"
   },
   {
     "code": "EVIB",
     "name": "Ethics and Values in International Business",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "N-22",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -257,35 +378,146 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "FRM",
     "name": "Financial Risk Management",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (West-100)",
+    "schedule_type": "dates",
     "sections": {
       "A": [
         {
+          "date": "2026-08-28",
           "day": 5,
           "start": "16:15",
-          "end": "17:30"
+          "end": "17:45"
         },
         {
+          "date": "2026-08-28",
           "day": 5,
           "start": "18:00",
-          "end": "19:15"
+          "end": "19:30"
         },
         {
+          "date": "2026-08-29",
           "day": 6,
           "start": "10:15",
-          "end": "11:30"
+          "end": "11:45"
         },
         {
+          "date": "2026-08-29",
           "day": 6,
           "start": "12:00",
-          "end": "13:15"
+          "end": "13:30"
+        },
+        {
+          "date": "2026-09-04",
+          "day": 5,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-09-04",
+          "day": 5,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-09-05",
+          "day": 6,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-09-05",
+          "day": 6,
+          "start": "12:00",
+          "end": "13:30"
+        },
+        {
+          "date": "2026-09-18",
+          "day": 5,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-09-18",
+          "day": 5,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-09-19",
+          "day": 6,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-09-19",
+          "day": 6,
+          "start": "12:00",
+          "end": "13:30"
+        },
+        {
+          "date": "2026-11-13",
+          "day": 5,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-11-13",
+          "day": 5,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-11-14",
+          "day": 6,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-11-14",
+          "day": 6,
+          "start": "12:00",
+          "end": "13:30"
+        },
+        {
+          "date": "2026-11-20",
+          "day": 5,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-11-20",
+          "day": 5,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-11-21",
+          "day": 6,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-11-21",
+          "day": 6,
+          "start": "12:00",
+          "end": "13:30"
         }
       ]
-    }
+    },
+    "official_code": "FI-283"
   },
   {
     "code": "FIM",
     "name": "Fixed Income Markets",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "L-4",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -305,6 +537,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "IASP",
     "name": "Industry Analysis, Strategy and Performance",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "L-4",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -321,9 +558,14 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "ISTP",
-    "name": "Inside Storytelling – Theories and Praxis for Communication and Management",
+    "code": "ISTPCM",
+    "name": "Inside Storytelling - Theories and Praxis for Communication and Management",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (East-150)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -355,6 +597,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "IMC",
     "name": "Integrated Marketing Communication",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (East-150)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -371,38 +618,14 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "IFM",
-    "name": "International Financial Management",
-    "phase": "pre_mid",
-    "sections": {
-      "A": [
-        {
-          "day": 3,
-          "start": "16:15",
-          "end": "17:30"
-        },
-        {
-          "day": 3,
-          "start": "18:00",
-          "end": "19:15"
-        },
-        {
-          "day": 4,
-          "start": "10:15",
-          "end": "11:30"
-        },
-        {
-          "day": 4,
-          "start": "12:00",
-          "end": "13:15"
-        }
-      ]
-    }
-  },
-  {
     "code": "LSCM",
     "name": "Logistics and Supply Chain Management",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "N-22",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -434,6 +657,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MSO",
     "name": "Management of Self in Organisations",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "L-51",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -450,9 +678,14 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "MEIP",
+    "code": "MEIIP",
     "name": "Managerial Excellence: Insights from Indian Philosophy",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "N-22",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -472,6 +705,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MDT",
     "name": "Managing Digital Transformation",
     "phase": "pre_mid",
+    "credits": 1.5,
+    "total_classes": 10,
+    "min_pct": 80,
+    "venue": "L-51",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -491,6 +729,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MDIO",
     "name": "Managing Diversity and Inclusion in Organizations",
     "phase": "pre_mid",
+    "credits": 1.5,
+    "total_classes": 10,
+    "min_pct": 80,
+    "venue": "L-52",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -510,6 +753,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MGC",
     "name": "Managing Global Cities",
     "phase": "post_mid",
+    "credits": 1.5,
+    "total_classes": 10,
+    "min_pct": 80,
+    "venue": "Amphi (East-150)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -529,6 +777,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MR",
     "name": "Managing Retailing",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (West-100)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -548,6 +801,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MTO",
     "name": "Managing Teams in Organizations",
     "phase": "pre_mid",
+    "credits": 1.5,
+    "total_classes": 10,
+    "min_pct": 80,
+    "venue": "L-2",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -564,9 +822,14 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "MTIS",
+    "code": "MTISI4",
     "name": "Managing Technology and Information Systems for Industry 4.0",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (West-100)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -586,6 +849,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MDAA",
     "name": "Market Design: Applications and Analysis",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (West-100)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -605,6 +873,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MTCI",
     "name": "Marketing Theory and Contemporary Issues",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (East-150)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -636,6 +909,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MBPC",
     "name": "Marketing to Bottom of Pyramid Consumers",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (West-100)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -655,12 +933,17 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "MEOB",
     "name": "Methods & Evidences in Organizational Behavior",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "L-51",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
-          "day": 1,
-          "start": "18:00",
-          "end": "19:15"
+          "day": 3,
+          "start": "08:30",
+          "end": "09:45"
         },
         {
           "day": 5,
@@ -674,6 +957,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "NPSM",
     "name": "Non-profit and Social Marketing",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "L-52",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -690,57 +978,14 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "PD",
-    "name": "Pricing Decisions",
-    "phase": "post_mid",
-    "sections": {
-      "A": [
-        {
-          "day": 3,
-          "start": "12:00",
-          "end": "13:15"
-        },
-        {
-          "day": 5,
-          "start": "12:00",
-          "end": "13:15"
-        }
-      ]
-    }
-  },
-  {
-    "code": "SDM",
-    "name": "Sales and Distribution Management",
-    "phase": "full",
-    "sections": {
-      "A": [
-        {
-          "day": 6,
-          "start": "16:15",
-          "end": "17:30"
-        },
-        {
-          "day": 6,
-          "start": "18:00",
-          "end": "19:15"
-        },
-        {
-          "day": 7,
-          "start": "10:15",
-          "end": "11:30"
-        },
-        {
-          "day": 7,
-          "start": "12:00",
-          "end": "13:15"
-        }
-      ]
-    }
-  },
-  {
     "code": "SNA",
     "name": "Social Network Analytics",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "N-22",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -760,6 +1005,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "SDSBA",
     "name": "Statistics for Data Science and Business Analysis",
     "phase": "post_mid",
+    "credits": 1.5,
+    "total_classes": 10,
+    "min_pct": 80,
+    "venue": "L-51",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -779,6 +1029,11 @@ export const CATALOGUE: CatalogueCourse[] = [
     "code": "SDMIB",
     "name": "Strategic Decision Making in International Business",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "L-4",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -795,9 +1050,14 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "TECS",
+    "code": "ECS",
     "name": "The Economics of Corporate Sustainability",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "Amphi (East-150)",
+    "schedule_type": "weekly",
     "sections": {
       "A": [
         {
@@ -814,30 +1074,226 @@ export const CATALOGUE: CatalogueCourse[] = [
     }
   },
   {
-    "code": "ODS",
+    "code": "ODSHEB",
     "name": "THE OPS-DRIVEN STARTUP: How Execution Builds Moats, Markets, And Momentum",
     "phase": "full",
+    "credits": 3.0,
+    "total_classes": 20,
+    "min_pct": 75,
+    "venue": "N-22",
+    "schedule_type": "dates",
     "sections": {
       "A": [
         {
+          "date": "2026-09-10",
           "day": 4,
           "start": "16:15",
-          "end": "17:30"
+          "end": "17:45"
         },
         {
+          "date": "2026-09-10",
           "day": 4,
           "start": "18:00",
-          "end": "19:15"
+          "end": "19:30"
         },
         {
+          "date": "2026-09-11",
           "day": 5,
           "start": "08:30",
-          "end": "09:45"
+          "end": "10:00"
         },
         {
+          "date": "2026-09-11",
           "day": 5,
           "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-09-24",
+          "day": 4,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-09-24",
+          "day": 4,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-09-25",
+          "day": 5,
+          "start": "08:30",
+          "end": "10:00"
+        },
+        {
+          "date": "2026-09-25",
+          "day": 5,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-10-29",
+          "day": 4,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-10-29",
+          "day": 4,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-10-30",
+          "day": 5,
+          "start": "08:30",
+          "end": "10:00"
+        },
+        {
+          "date": "2026-10-30",
+          "day": 5,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-11-12",
+          "day": 4,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-11-12",
+          "day": 4,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-11-13",
+          "day": 5,
+          "start": "08:30",
+          "end": "10:00"
+        },
+        {
+          "date": "2026-11-13",
+          "day": 5,
+          "start": "10:15",
+          "end": "11:45"
+        },
+        {
+          "date": "2026-11-19",
+          "day": 4,
+          "start": "16:15",
+          "end": "17:45"
+        },
+        {
+          "date": "2026-11-19",
+          "day": 4,
+          "start": "18:00",
+          "end": "19:30"
+        },
+        {
+          "date": "2026-11-20",
+          "day": 5,
+          "start": "08:30",
+          "end": "10:00"
+        },
+        {
+          "date": "2026-11-20",
+          "day": 5,
+          "start": "10:15",
+          "end": "11:45"
+        }
+      ]
+    },
+    "official_code": "OM/SM-273"
+  },
+  {
+    "code": "ZTEST",
+    "name": "Tonight Test",
+    "phase": "full",
+    "credits": 3.0,
+    "total_classes": 3,
+    "min_pct": 75,
+    "venue": "—",
+    "schedule_type": "dates",
+    "sections": {
+      "A": [
+        {
+          "date": "2026-08-20",
+          "day": 4,
+          "start": "21:40",
+          "end": "22:55"
+        },
+        {
+          "date": "2026-08-20",
+          "day": 4,
+          "start": "22:10",
+          "end": "23:25"
+        },
+        {
+          "date": "2026-08-20",
+          "day": 4,
+          "start": "22:25",
+          "end": "23:40"
+        }
+      ]
+    }
+  },
+  {
+    "code": "ZSAT",
+    "name": "Saturday Test",
+    "phase": "full",
+    "credits": 3.0,
+    "total_classes": 6,
+    "min_pct": 75,
+    "venue": "—",
+    "schedule_type": "weekly",
+    "sections": {
+      "A": [
+        {
+          "day": 6,
+          "start": "10:15",
           "end": "11:30"
+        },
+        {
+          "day": 6,
+          "start": "14:30",
+          "end": "15:45"
+        },
+        {
+          "day": 6,
+          "start": "16:15",
+          "end": "17:30"
+        }
+      ]
+    }
+  },
+  {
+    "code": "ZSUN",
+    "name": "Sunday Test",
+    "phase": "full",
+    "credits": 3.0,
+    "total_classes": 6,
+    "min_pct": 75,
+    "venue": "—",
+    "schedule_type": "weekly",
+    "sections": {
+      "A": [
+        {
+          "day": 7,
+          "start": "10:15",
+          "end": "11:30"
+        },
+        {
+          "day": 7,
+          "start": "14:30",
+          "end": "15:45"
+        },
+        {
+          "day": 7,
+          "start": "16:15",
+          "end": "17:30"
         }
       ]
     }

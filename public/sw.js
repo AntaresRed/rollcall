@@ -1,6 +1,6 @@
 // RollCall service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v3";
+const CACHE = "rollcall-v4";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -57,16 +57,26 @@ self.addEventListener("push", (event) => {
     return;
   }
 
+  // Notification.maxActions is 0 on iOS and Firefox; there, the buttons below
+  // simply won't appear, so the body carries the instruction instead.
+  const canAct = typeof Notification !== "undefined" && Notification.maxActions > 0;
+
   event.waitUntil(
     self.registration.showNotification(data.title || "Class starting", {
-      body: data.body || "",
+      body: canAct
+        ? data.body || ""
+        : [data.body, data.hint].filter(Boolean).join(" · "),
       icon: "/icon-192.png",
       badge: "/icon-badge.png",
       tag: data.classId ? `class-${data.classId}-${data.classDate}` : "rollcall",
       data,
+      // Chrome shows at most two action buttons, and iOS shows none at all —
+      // so these are a shortcut, never the only way to mark a class. Ignoring
+      // the notification leaves the session in Catch up, which is exactly the
+      // "I'll do it later" path.
       actions: [
-        { action: "present", title: "Mark present" },
-        { action: "open", title: "Open" },
+        { action: "present", title: "Present" },
+        { action: "absent", title: "Absent" },
       ],
     }),
   );
@@ -75,10 +85,17 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const { classId, classDate } = event.notification.data || {};
-  const target =
-    event.action === "present" && classId
-      ? `/?mark=${classId}&date=${classDate}`
-      : "/";
+
+  // The service worker has no Supabase session of its own, so it can't write
+  // the mark directly. It hands the intent to the app via the URL instead,
+  // which then applies it on load.
+  const status = event.action === "present" || event.action === "absent"
+    ? event.action
+    : null;
+
+  const target = status && classId
+    ? `/?mark=${classId}&date=${classDate}&status=${status}`
+    : "/";
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (list) => {

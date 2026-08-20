@@ -1,5 +1,12 @@
 # Deploying this update
 
+> **Update 2026-08-20b.** If you already deployed the earlier version, you need
+> this one too: sixteen Term V courses run two back-to-back sessions in a single
+> day (BM meets Tue 16:15 *and* Tue 18:00), and the attendance key didn't include
+> the slot — so marking the second session silently overwrote the first. Re-run
+> `schema.sql` and redeploy the frontend. No attendance is lost; existing rows
+> are backfilled with their slot.
+
 You already have a live project, so this replaces what's running. Four steps,
 about ten minutes. Do them in order — the schema migration has to land before
 the new frontend talks to it.

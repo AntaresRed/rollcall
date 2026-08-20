@@ -1,20 +1,17 @@
 import { useMemo } from "react";
-import {
-  DAY_LONG, PHASE_LABEL, pretty, toMinutes, weekdayOf, isoDate, inSession,
-} from "../lib/api";
+import { DAY_LONG, PHASE_LABEL, pretty, toMinutes, weekdayOf, isoDate } from "../lib/api";
 
-export default function Today({ classes, attendance, term, now, onMark }) {
+/**
+ * `occurrences` arrive already resolved by the caller: term windows, breaks
+ * and any rescheduling applied, each carrying its effective time. This screen
+ * only has to render them.
+ */
+export default function Today({ occurrences, attendance, now, onMark }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
   const nowMins = now.getHours() * 60 + now.getMinutes();
 
-  const list = useMemo(
-    () =>
-      classes
-        .filter((c) => c.day_of_week === today && inSession(c.term_phase, date, term))
-        .sort((a, b) => toMinutes(a.start_time) - toMinutes(b.start_time)),
-    [classes, today, date, term],
-  );
+  const list = useMemo(() => occurrences, [occurrences]);
 
   // Keyed on the slot too: a course with two sessions in a day gets two marks.
   const statusOf = (c) =>
@@ -45,7 +42,7 @@ export default function Today({ classes, attendance, term, now, onMark }) {
     <>
       <div className="eyebrow">{DAY_LONG[today]}</div>
       <div className="day">
-        {list.map((c, i) => {
+        {list.map(({ cls: c, movedFrom }, i) => {
           const status = statusOf(c);
           const past = toMinutes(c.end_time) <= nowMins;
           const live =
@@ -53,7 +50,7 @@ export default function Today({ classes, attendance, term, now, onMark }) {
           const phase = PHASE_LABEL[c.term_phase];
 
           return (
-            <div key={c.id}>
+            <div key={`${c.id}|${movedFrom ?? date}`}>
               {i === nextIndex && !live && (
                 <div className="now-line" aria-hidden="true">
                   <span className="now-label">{clock}</span>
@@ -73,6 +70,8 @@ export default function Today({ classes, attendance, term, now, onMark }) {
                     {c.room && <span>{c.room}</span>}
                     {phase && <span className="tag">{phase}</span>}
                     {live && <span className="tag signal">In session</span>}
+                    {c.muted && <span className="tag quiet">muted</span>}
+                    {movedFrom && <span className="tag signal">rescheduled</span>}
                   </div>
 
                   <div className="marks">

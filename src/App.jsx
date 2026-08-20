@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { ensureSession } from "./lib/supabase";
 import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
-  attendanceKey, isoDate,
+  attendanceKey, isoDate, setCourseMuted, unmarkedSessions,
+  loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
 } from "./lib/api";
 import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
@@ -12,12 +13,16 @@ import CoursePicker from "./screens/CoursePicker";
 import Onboard from "./screens/Onboard";
 import Confirm from "./screens/Confirm";
 import Today from "./screens/Today";
-import Week from "./screens/Week";
+import Timetable from "./screens/Timetable";
 import Stats from "./screens/Stats";
+import CatchUp from "./screens/CatchUp";
+import TermCalendar from "./screens/TermCalendar";
+import Reschedule from "./screens/Reschedule";
 
 const TABS = [
   ["today", "Today"],
-  ["week", "Week"],
+  ["timetable", "Timetable"],
+  ["catchup", "Catch up"],
   ["stats", "Attendance"],
 ];
 
@@ -26,12 +31,14 @@ export default function App() {
   const [classes, setClasses] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [term, setTerm] = useState(null);
+  const [overrides, setOverrides] = useState([]);
   const [draft, setDraft] = useState(null);      // parsed rows awaiting confirmation
   const [entry, setEntry] = useState("picker");  // 'picker' | 'image'
   const [tab, setTab] = useState("today");
   const [now, setNow] = useState(new Date());
   const [alerts, setAlerts] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [subScreen, setSubScreen] = useState(null);
   const [toast, setToast] = useState("");
   const [fatal, setFatal] = useState("");
 
@@ -46,10 +53,13 @@ export default function App() {
       try {
         await ensureSession();
         await registerServiceWorker();
-        const [c, a, t] = await Promise.all([loadClasses(), loadAttendance(), loadTerm()]);
+        const [c, a, t, o] = await Promise.all([
+          loadClasses(), loadAttendance(), loadTerm(), loadOverrides(),
+        ]);
         setClasses(c);
         setAttendance(a);
         setTerm(t);
+        setOverrides(o);
         setAlerts(await alertsActive());
       } catch (err) {
         console.error(err);
@@ -103,15 +113,19 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const classId = params.get("mark");
     if (!classId) return;
+
     const date = params.get("date") || isoDate();
+    const requested = params.get("status");
+    const status = requested === "absent" ? "absent" : "present";
     const cls = classes.find((c) => c.id === classId);
+
+    window.history.replaceState({}, "", "/");
     if (!cls) {
-      window.history.replaceState({}, "", "/");
+      say("That class is no longer on your timetable");
       return;
     }
-    mark(cls, date, "present");
-    say("Marked present");
-    window.history.replaceState({}, "", "/");
+    mark(cls, date, status);
+    say(status === "absent" ? "Marked absent" : "Marked present");
   }, [ready, classes, mark]);
 
   const turnOnAlerts = async () => {
@@ -126,6 +140,40 @@ export default function App() {
       say("Couldn't turn on alerts. Try again.");
     }
   };
+
+  const toggleMute = useCallback(async (subject, muted) => {
+    setClasses((prev) =>
+      prev.map((c) => (c.subject === subject ? { ...c, muted } : c)));
+    try {
+      await setCourseMuted(subject, muted);
+      say(muted ? "Alerts muted for this course" : "Alerts back on");
+    } catch {
+      setClasses(await loadClasses());
+      say("Couldn't change that. Try again.");
+    }
+  }, []);
+
+  const moveSession = useCallback(async (cls, originalDate, change) => {
+    try {
+      await rescheduleSession(cls, originalDate, change);
+      const [o, a] = await Promise.all([loadOverrides(), loadAttendance()]);
+      setOverrides(o);
+      setAttendance(a);
+      say(change.newDate ? "Class moved" : "Marked as cancelled");
+    } catch {
+      say("Couldn't save that change. Try again.");
+    }
+  }, []);
+
+  const undoMove = useCallback(async (classId, originalDate) => {
+    try {
+      await clearOverride(classId, originalDate);
+      setOverrides(await loadOverrides());
+      say("Put back as published");
+    } catch {
+      say("Couldn't undo that. Try again.");
+    }
+  }, []);
 
   const startOver = () => {
     setEntry("picker");
@@ -184,6 +232,7 @@ export default function App() {
 
   // ---- main ----
   const iosNeedsInstall = isIOS() && !isStandalone();
+  const pendingCount = unmarkedSessions(classes, attendance, term, now, 28, overrides).length;
 
   return (
     <>
@@ -207,22 +256,50 @@ export default function App() {
 
         {tab === "today" && (
           <Today
-            classes={classes}
+            occurrences={occurrencesOn(classes, term, isoDate(now), overrides)}
             attendance={attendance}
-            term={term}
             now={now}
             onMark={mark}
           />
         )}
-        {tab === "week" && (
-          <>
-            <Week classes={classes} now={now} term={term} />
-            <button className="btn ghost block" style={{ marginTop: 20 }} onClick={startOver}>
-              Change my courses
-            </button>
-          </>
+        {tab === "timetable" && subScreen === "calendar" && (
+          <TermCalendar term={term} now={now} onBack={() => setSubScreen(null)} />
         )}
-        {tab === "stats" && <Stats classes={classes} attendance={attendance} />}
+        {tab === "timetable" && subScreen === "reschedule" && (
+          <Reschedule
+            classes={classes}
+            term={term}
+            overrides={overrides}
+            now={now}
+            onMove={moveSession}
+            onClear={undoMove}
+            onBack={() => setSubScreen(null)}
+          />
+        )}
+        {tab === "timetable" && !subScreen && (
+          <Timetable
+            classes={classes}
+            now={now}
+            term={term}
+            overrides={overrides}
+            onEdit={startOver}
+            onShowCalendar={() => setSubScreen("calendar")}
+            onReschedule={() => setSubScreen("reschedule")}
+          />
+        )}
+        {tab === "catchup" && (
+          <CatchUp
+            classes={classes}
+            attendance={attendance}
+            term={term}
+            overrides={overrides}
+            now={now}
+            onMark={mark}
+          />
+        )}
+        {tab === "stats" && (
+          <Stats classes={classes} attendance={attendance} onToggleMute={toggleMute} />
+        )}
       </div>
 
       <nav className="tabs" role="tablist">
@@ -232,9 +309,12 @@ export default function App() {
             className="tab"
             role="tab"
             aria-selected={tab === key}
-            onClick={() => setTab(key)}
+            onClick={() => { setTab(key); setSubScreen(null); }}
           >
             {label}
+            {key === "catchup" && pendingCount > 0 && (
+              <span className="tab-badge">{pendingCount > 9 ? "9+" : pendingCount}</span>
+            )}
           </button>
         ))}
       </nav>

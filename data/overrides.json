@@ -1,27 +1,216 @@
 {
   "_comment": [
-    "Amendments to the published grid. The institute moves lectures after the CSV",
-    "is issued, and the CSV is never reissued — so corrections live here and are",
-    "reapplied every time the catalogue is rebuilt.",
+    "Amendments to the published spreadsheet. The institute changes schedules",
+    "after publishing and never reissues the file, so corrections live here and",
+    "are reapplied on every rebuild.",
     "",
-    "'move'   changes an existing meeting's day and/or slot.",
-    "'add'    inserts a meeting that isn't in the CSV.",
-    "'remove' deletes one.",
-    "",
-    "Each entry needs 'code', 'section', and a 'from' that matches a meeting",
-    "exactly, so a typo fails loudly at build time instead of silently doing",
-    "nothing. Keep 'note' and 'since' filled in — a year from now they're the",
-    "only record of why a time differs from the official grid."
+    "Ops: move / add / remove / credits / set_dates / add_course.",
+    "Target a course by \"name\" (durable) rather than \"code\" (derived).",
+    "Everything is declarative and idempotent: running the build twice is a no-op,",
+    "and an override that no longer matches the sheet fails loudly."
   ],
   "overrides": [
     {
-      "op": "move",
-      "code": "CCM",
+      "op": "set_dates",
+      "name": "THE OPS-DRIVEN STARTUP",
       "section": "A",
-      "from": { "day": 2, "start": "16:15" },
-      "to": { "day": 2, "start": "14:30" },
-      "note": "Tuesday lecture moved to 2:30pm",
-      "since": "2026-08-10"
+      "note": "OM/SM-273 reissued: the workbook's own detail sheet says Friday 10:15+12:00, but the main grid and the circulated correction both say 08:30+10:15. Grid wins.",
+      "since": "2026-08-20",
+      "to": {
+        "sessions": [
+          {
+            "date": "2026-09-10",
+            "start": "16:15",
+            "end": "17:45"
+          },
+          {
+            "date": "2026-09-10",
+            "start": "18:00",
+            "end": "19:30"
+          },
+          {
+            "date": "2026-09-11",
+            "start": "08:30",
+            "end": "10:00"
+          },
+          {
+            "date": "2026-09-11",
+            "start": "10:15",
+            "end": "11:45"
+          },
+          {
+            "date": "2026-09-24",
+            "start": "16:15",
+            "end": "17:45"
+          },
+          {
+            "date": "2026-09-24",
+            "start": "18:00",
+            "end": "19:30"
+          },
+          {
+            "date": "2026-09-25",
+            "start": "08:30",
+            "end": "10:00"
+          },
+          {
+            "date": "2026-09-25",
+            "start": "10:15",
+            "end": "11:45"
+          },
+          {
+            "date": "2026-10-29",
+            "start": "16:15",
+            "end": "17:45"
+          },
+          {
+            "date": "2026-10-29",
+            "start": "18:00",
+            "end": "19:30"
+          },
+          {
+            "date": "2026-10-30",
+            "start": "08:30",
+            "end": "10:00"
+          },
+          {
+            "date": "2026-10-30",
+            "start": "10:15",
+            "end": "11:45"
+          },
+          {
+            "date": "2026-11-12",
+            "start": "16:15",
+            "end": "17:45"
+          },
+          {
+            "date": "2026-11-12",
+            "start": "18:00",
+            "end": "19:30"
+          },
+          {
+            "date": "2026-11-13",
+            "start": "08:30",
+            "end": "10:00"
+          },
+          {
+            "date": "2026-11-13",
+            "start": "10:15",
+            "end": "11:45"
+          },
+          {
+            "date": "2026-11-19",
+            "start": "16:15",
+            "end": "17:45"
+          },
+          {
+            "date": "2026-11-19",
+            "start": "18:00",
+            "end": "19:30"
+          },
+          {
+            "date": "2026-11-20",
+            "start": "08:30",
+            "end": "10:00"
+          },
+          {
+            "date": "2026-11-20",
+            "start": "10:15",
+            "end": "11:45"
+          }
+        ]
+      }
+    },
+    {
+      "op": "add_course",
+      "note": "TEMPORARY — alert testing. Delete before the pilot and rebuild.",
+      "since": "2026-08-20",
+      "to": {
+        "code": "ZTEST",
+        "name": "Tonight Test",
+        "phase": "full",
+        "credits": 3.0,
+        "venue": "—",
+        "schedule_type": "dates",
+        "sections": {
+          "A": [
+            {
+              "date": "2026-08-20",
+              "start": "21:40",
+              "end": "22:55"
+            },
+            {
+              "date": "2026-08-20",
+              "start": "22:10",
+              "end": "23:25"
+            },
+            {
+              "date": "2026-08-20",
+              "start": "22:25",
+              "end": "23:40"
+            }
+          ]
+        },
+        "total_classes": 3
+      }
+    },
+    {
+      "op": "add_course",
+      "note": "TEMPORARY — alert testing. Delete before the pilot and rebuild.",
+      "since": "2026-08-20",
+      "to": {
+        "code": "ZSAT",
+        "name": "Saturday Test",
+        "phase": "full",
+        "credits": 3.0,
+        "venue": "—",
+        "sections": {
+          "A": [
+            {
+              "day": 6,
+              "start": "10:15"
+            },
+            {
+              "day": 6,
+              "start": "14:30"
+            },
+            {
+              "day": 6,
+              "start": "16:15"
+            }
+          ]
+        },
+        "total_classes": 6
+      }
+    },
+    {
+      "op": "add_course",
+      "note": "TEMPORARY — alert testing. Delete before the pilot and rebuild.",
+      "since": "2026-08-20",
+      "to": {
+        "code": "ZSUN",
+        "name": "Sunday Test",
+        "phase": "full",
+        "credits": 3.0,
+        "venue": "—",
+        "sections": {
+          "A": [
+            {
+              "day": 7,
+              "start": "10:15"
+            },
+            {
+              "day": 7,
+              "start": "14:30"
+            },
+            {
+              "day": 7,
+              "start": "16:15"
+            }
+          ]
+        },
+        "total_classes": 6
+      }
     }
   ]
 }

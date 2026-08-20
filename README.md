@@ -143,6 +143,19 @@ Term_5_Schedule.csv ──► build_catalogue.py ──► catalogue.json  (38 c
 
 ## Things worth knowing before you pilot
 
+- **Notification buttons are Chrome-only and capped at two.** iOS and Firefox
+  render none, so the buttons are a shortcut and never the only route — the
+  body text falls back to an instruction there, and ignoring a notification
+  always leaves the session in Catch up.
+- **The service worker can't write attendance itself.** It has no Supabase
+  session, so an action button passes its intent through the URL and the app
+  applies it on load.
+
+- **Sixteen courses meet twice in one day.** Attendance is therefore keyed on
+  `(user, subject, date, start_time)`, not just the date. If you ever change
+  that key, check `scripts/build_catalogue.py` output first — the double
+  sessions are visible there.
+
 - **iOS needs the Home Screen install.** Safari only delivers web push to PWAs added
   to the Home Screen. The app detects this and says so instead of failing silently.
   Measure delivery rates on iPhone during the pilot — if they disappoint, the same

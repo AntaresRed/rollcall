@@ -10,14 +10,29 @@ create extension if not exists pg_net;
 -- One row per intake. Lets alerts respect (Pre-Mid Term) / (Post-Mid Term)
 -- courses, which only run for half the term.
 create table if not exists public.terms (
-  id            uuid primary key default gen_random_uuid(),
-  label         text        not null,
-  term_start    date        not null,
-  midterm_start date        not null,
-  midterm_end   date        not null,
-  term_end      date        not null,
-  is_current    boolean     not null default false
+  id             uuid primary key default gen_random_uuid(),
+  label          text        not null,
+  term_start     date        not null,
+  -- The institute publishes two teaching windows with a gap between them,
+  -- rather than one midterm date, so both edges are stored explicitly.
+  pre_mid_end    date        not null,
+  post_mid_start date        not null,
+  term_end       date        not null,
+  is_current     boolean     not null default false
 );
+
+-- ---------- periods with no classes ----------
+-- Exam weeks, placement season, Puja vacation. Institute-wide: no course
+-- meets, so no alert should fire and nothing lands in Catch up.
+create table if not exists public.term_breaks (
+  id         uuid primary key default gen_random_uuid(),
+  term_id    uuid references public.terms(id) on delete cascade,
+  label      text not null,
+  from_date  date not null,
+  to_date    date not null,
+  note       text
+);
+create index if not exists term_breaks_term_idx on public.term_breaks (term_id, from_date);
 
 -- ---------- student profile ----------
 create table if not exists public.profiles (
@@ -33,6 +48,10 @@ create table if not exists public.classes (
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid not null references auth.users(id) on delete cascade,
   day_of_week  int  not null check (day_of_week between 1 and 7),  -- 1 = Mon
+  -- Null for a normal weekly course. Set for a course that runs on a fixed
+  -- list of dates instead (visiting-faculty blocks), where the row represents
+  -- one specific meeting rather than a weekly recurrence.
+  session_date date,
   start_time   time not null,
   end_time     time not null,
   subject      text not null,
@@ -42,11 +61,41 @@ create table if not exists public.classes (
   -- 'full' | 'pre_mid' | 'post_mid'
   term_phase   text not null default 'full'
                  check (term_phase in ('full','pre_mid','post_mid')),
+  -- Attendance rules travel with the row so the app never needs the catalogue
+  -- to compute a percentage, and a past term's numbers stay correct after the
+  -- catalogue is rebuilt for the next one.
+  credits      numeric(3,1) not null default 3.0,
+  total_classes int         not null default 20,
+  min_pct      int          not null default 75,
+  muted        boolean      not null default false,
   confirmed    boolean not null default false,
   created_at   timestamptz not null default now()
 );
 create index if not exists classes_user_day_idx
   on public.classes (user_id, day_of_week, start_time);
+create index if not exists classes_user_date_idx
+  on public.classes (user_id, session_date) where session_date is not null;
+
+-- ---------- rescheduled sessions ----------
+-- A weekly course has no row per occurrence — occurrences are generated from
+-- the pattern — so a moved class is stored as an exception against the date it
+-- was originally due. new_date NULL means the session was cancelled outright.
+create table if not exists public.session_overrides (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null references auth.users(id) on delete cascade,
+  class_id      uuid not null references public.classes(id) on delete cascade,
+  original_date date not null,
+  new_date      date,
+  new_start     time,
+  new_end       time,
+  note          text,
+  created_at    timestamptz not null default now(),
+  unique (user_id, class_id, original_date)
+);
+create index if not exists session_overrides_user_idx
+  on public.session_overrides (user_id, original_date);
+create index if not exists session_overrides_new_idx
+  on public.session_overrides (user_id, new_date) where new_date is not null;
 
 -- ---------- attendance ----------
 create table if not exists public.attendance (
@@ -146,6 +195,73 @@ begin
       add constraint attendance_user_subject_date_slot_key
       unique (user_id, subject, class_date, start_time);
   end if;
+
+  -- credit rules + per-course mute
+  if not exists (select 1 from information_schema.columns
+                 where table_name = 'classes' and column_name = 'credits') then
+    alter table public.classes add column credits numeric(3,1) not null default 3.0;
+    alter table public.classes add column total_classes int not null default 20;
+    alter table public.classes add column min_pct int not null default 75;
+    -- half-term courses are 1.5 credits: 10 classes at 80%
+    update public.classes
+       set credits = 1.5, total_classes = 10, min_pct = 80
+     where term_phase in ('pre_mid', 'post_mid');
+  end if;
+
+  if not exists (select 1 from information_schema.columns
+                 where table_name = 'classes' and column_name = 'muted') then
+    alter table public.classes add column muted boolean not null default false;
+  end if;
+
+  -- fixed-date courses (visiting faculty blocks)
+  if not exists (select 1 from information_schema.columns
+                 where table_name = 'classes' and column_name = 'session_date') then
+    alter table public.classes add column session_date date;
+    create index if not exists classes_user_date_idx
+      on public.classes (user_id, session_date) where session_date is not null;
+  end if;
+
+  -- two teaching windows instead of a single midterm date
+  if not exists (select 1 from information_schema.columns
+                 where table_name = 'terms' and column_name = 'pre_mid_end') then
+    alter table public.terms add column pre_mid_end date;
+    alter table public.terms add column post_mid_start date;
+    update public.terms
+       set pre_mid_end    = coalesce(pre_mid_end, midterm_start - 1),
+           post_mid_start = coalesce(post_mid_start, midterm_end + 1);
+    alter table public.terms alter column pre_mid_end set not null;
+    alter table public.terms alter column post_mid_start set not null;
+  end if;
+
+  -- rescheduled / cancelled sessions
+  if not exists (select 1 from information_schema.tables
+                 where table_name = 'session_overrides') then
+    create table public.session_overrides (
+      id            uuid primary key default gen_random_uuid(),
+      user_id       uuid not null references auth.users(id) on delete cascade,
+      class_id      uuid not null references public.classes(id) on delete cascade,
+      original_date date not null,
+      new_date      date,
+      new_start     time,
+      new_end       time,
+      note          text,
+      created_at    timestamptz not null default now(),
+      unique (user_id, class_id, original_date)
+    );
+    create index session_overrides_user_idx
+      on public.session_overrides (user_id, original_date);
+    create index session_overrides_new_idx
+      on public.session_overrides (user_id, new_date) where new_date is not null;
+    alter table public.session_overrides enable row level security;
+    create policy "own reschedules" on public.session_overrides
+      for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  end if;
+
+  if exists (select 1 from information_schema.columns
+             where table_name = 'terms' and column_name = 'midterm_start') then
+    alter table public.terms drop column midterm_start;
+    alter table public.terms drop column midterm_end;
+  end if;
 end $$;
 
 -- ============================================================
@@ -155,6 +271,7 @@ alter table public.profiles           enable row level security;
 alter table public.classes            enable row level security;
 alter table public.attendance         enable row level security;
 alter table public.push_subscriptions enable row level security;
+alter table public.session_overrides   enable row level security;
 alter table public.terms              enable row level security;
 
 drop policy if exists "own profile" on public.profiles;
@@ -169,12 +286,20 @@ drop policy if exists "own attendance" on public.attendance;
 create policy "own attendance" on public.attendance
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop policy if exists "own reschedules" on public.session_overrides;
+create policy "own reschedules" on public.session_overrides
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
 drop policy if exists "own subscriptions" on public.push_subscriptions;
 create policy "own subscriptions" on public.push_subscriptions
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 drop policy if exists "read terms" on public.terms;
 create policy "read terms" on public.terms for select using (true);
+
+alter table public.term_breaks enable row level security;
+drop policy if exists "read breaks" on public.term_breaks;
+create policy "read breaks" on public.term_breaks for select using (true);
 
 -- alert_log is written only by the service role (edge function); no policy
 -- means no anon/authenticated access, which is what we want.
@@ -228,7 +353,31 @@ alter view public.attendance_summary set (security_invoker = true);
 --   $$
 -- );
 
--- Seed a term (edit the dates for your intake)
-insert into public.terms (label, term_start, midterm_start, midterm_end, term_end, is_current)
-select 'Term V', date '2026-06-15', date '2026-07-27', date '2026-08-01', date '2026-09-19', true
-where not exists (select 1 from public.terms where is_current);
+-- ============================================================
+-- Term V calendar, from the published spreadsheet
+-- ============================================================
+insert into public.terms (label, term_start, pre_mid_end, post_mid_start, term_end, is_current)
+values ('Term V', date '2026-08-24', date '2026-09-27',
+        date '2026-10-05', date '2026-11-22', true)
+on conflict do nothing;
+
+update public.terms set
+  term_start     = date '2026-08-24',
+  pre_mid_end    = date '2026-09-27',
+  post_mid_start = date '2026-10-05',
+  term_end       = date '2026-11-22'
+where is_current;
+
+delete from public.term_breaks
+ where term_id in (select id from public.terms where is_current);
+
+insert into public.term_breaks (term_id, label, from_date, to_date, note)
+select t.id, v.label, v.from_date, v.to_date, v.note
+from public.terms t,
+     (values
+        ('Mid-term exams', date '2026-09-28', date '2026-10-01', 'September 28 to October 01, 2026 (No class in Mid Term Exam Week)'),
+        ('Summer placement', date '2026-10-08', date '2026-10-16', 'October 8 to October 16, 2026 (No MBA classes)'),
+        ('Puja vacation', date '2026-10-19', date '2026-10-25', 'October 19 to October 25, 2026 (No MBA classes)'),
+        ('End-term exams', date '2026-11-23', date '2026-11-27', 'November 23 to November 27, 2026 (No class in End Term Exam Week)')
+     ) as v(label, from_date, to_date, note)
+where t.is_current;

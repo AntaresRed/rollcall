@@ -187,6 +187,9 @@ Deno.serve(async (req) => {
         section,
         room: c.room?.trim() || null,
         term_phase: course?.phase ?? "full",
+        credits: course?.credits ?? 3.0,
+        total_classes: course?.total_classes ?? 20,
+        min_pct: course?.min_pct ?? 75,
         _matchedCatalogue: Boolean(course),
       }];
     });
