@@ -200,6 +200,25 @@ export default function App() {
     setEditing(true);
   };
 
+  // ---- derived state ----
+  // EVERY hook must sit above the early returns below. React identifies hooks
+  // by call order, so a useMemo placed after `if (!ready) return ...` runs on
+  // some renders and not others, and the component dies the moment that
+  // condition flips. These two walk weeks of dates against every class, so
+  // they are worth memoising — but only from up here.
+  const iosNeedsInstall = useMemo(() => isIOS() && !isStandalone(), []);
+
+  const pendingCount = useMemo(
+    () => unmarkedSessions(classes, attendance, term, now, 28, overrides).length,
+    [classes, attendance, term, now, overrides],
+  );
+
+  const todaysOccurrences = useMemo(
+    () => occurrencesOn(classes, term, isoDate(now), overrides),
+    [classes, term, now, overrides],
+  );
+
+  // ---- everything below this line may return early ----
   if (!ready) return <Splash />;
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
 
@@ -255,20 +274,6 @@ export default function App() {
   }
 
   // ---- main ----
-  const iosNeedsInstall = useMemo(() => isIOS() && !isStandalone(), []);
-
-  // Both walk weeks of dates against every class, so they are recomputed only
-  // when their inputs move — not on every toast or attendance tap.
-  const pendingCount = useMemo(
-    () => unmarkedSessions(classes, attendance, term, now, 28, overrides).length,
-    [classes, attendance, term, now, overrides],
-  );
-
-  const todaysOccurrences = useMemo(
-    () => occurrencesOn(classes, term, isoDate(now), overrides),
-    [classes, term, now, overrides],
-  );
-
   return (
     <>
       <Masthead now={now} />
