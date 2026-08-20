@@ -7,6 +7,7 @@ import {
 } from "./lib/api";
 import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
+  sendTestNotification,
 } from "./lib/push";
 
 import Splash, { Mark } from "./screens/Splash";
@@ -42,6 +43,7 @@ export default function App() {
   const [subScreen, setSubScreen] = useState(null);
   const [toast, setToast] = useState("");
   const [fatal, setFatal] = useState("");
+  const [alertInfo, setAlertInfo] = useState("");
 
   const say = (msg) => {
     setToast(msg);
@@ -200,6 +202,28 @@ export default function App() {
     setEditing(true);
   };
 
+  const testAlert = useCallback(async () => {
+    const r = await sendTestNotification();
+    if (!r.ok) {
+      setAlertInfo(
+        r.reason === "denied"
+          ? "Notifications are blocked for RollCall in your browser settings."
+          : r.reason === "no-service-worker"
+            ? "No service worker is running. Reinstall RollCall from the browser menu."
+            : "This browser can't show alerts.",
+      );
+      return;
+    }
+    // Naming the file that's actually running is the quickest way to spot a
+    // stale service worker, which is the usual reason buttons go missing.
+    setAlertInfo(
+      `Sent. This browser allows ${r.maxActions} action button${r.maxActions === 1 ? "" : "s"}. ` +
+      (r.maxActions === 0
+        ? "Tap the alert itself to mark attendance."
+        : "If you can't see them, pull the notification down to expand it.")
+    );
+  }, []);
+
   // ---- derived state ----
   // EVERY hook must sit above the early returns below. React identifies hooks
   // by call order, so a useMemo placed after `if (!ready) return ...` runs on
@@ -326,6 +350,8 @@ export default function App() {
             onEdit={startOver}
             onShowCalendar={() => setSubScreen("calendar")}
             onReschedule={() => setSubScreen("reschedule")}
+            onTestAlert={testAlert}
+            alertInfo={alertInfo}
           />
         )}
         {tab === "catchup" && (

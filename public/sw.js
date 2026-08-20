@@ -1,6 +1,6 @@
 // RollCall service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v6";
+const CACHE = "rollcall-v7";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -84,7 +84,12 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const { classId, classDate } = event.notification.data || {};
+  const { classId, classDate, test } = event.notification.data || {};
+  if (test) {
+    // Nothing to mark; just bring the app forward.
+    event.waitUntil(self.clients.openWindow("/"));
+    return;
+  }
 
   // The service worker has no Supabase session of its own, so it can't write
   // the mark directly. It hands the intent to the app via the URL instead,

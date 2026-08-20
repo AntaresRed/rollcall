@@ -99,3 +99,43 @@ export async function alertsActive() {
   if (!reg) return false;
   return Boolean(await reg.pushManager.getSubscription());
 }
+
+/**
+ * Fire a notification locally, right now, with the same options a real class
+ * alert uses.
+ *
+ * This separates two failures that look identical from the outside: the push
+ * never arriving, and the push arriving but the device not rendering action
+ * buttons. It also reports what the browser says it supports, which is the
+ * only reliable answer — `Notification.maxActions` is 2 on Chrome, 0 on
+ * Firefox and iOS Safari.
+ */
+export async function sendTestNotification() {
+  if (!pushSupported()) return { ok: false, reason: "unsupported" };
+  if (Notification.permission !== "granted") return { ok: false, reason: "denied" };
+
+  const reg = await readyWithin();
+  if (!reg) return { ok: false, reason: "no-service-worker" };
+
+  const maxActions = Notification.maxActions ?? 0;
+
+  await reg.showNotification("Test alert", {
+    body: maxActions > 0
+      ? "Buttons below? Then class alerts will work."
+      : "This browser shows no buttons — tap the alert itself to mark attendance.",
+    icon: "/icon-192.png",
+    badge: "/icon-badge.png",
+    tag: "rollcall-test",
+    requireInteraction: true,
+    data: { test: true },
+    actions: [
+      { action: "present", title: "Present" },
+      { action: "absent", title: "Absent" },
+    ],
+  });
+
+  // The registration is the source of truth for which script is live — a
+  // stale service worker is the usual reason buttons don't appear.
+  const scriptUrl = reg.active?.scriptURL ?? "unknown";
+  return { ok: true, maxActions, scriptUrl };
+}
