@@ -58,6 +58,11 @@ const pretty = (t: string) => {
   return `${((h + 11) % 12) + 1}:${m} ${h < 12 ? "am" : "pm"}`;
 };
 
+/** Don't let one student's bad data abort the whole sweep. */
+const safe = async <T>(label: string, fn: () => Promise<T>): Promise<T | null> => {
+  try { return await fn(); } catch (err) { console.error(label, err); return null; }
+};
+
 /** Is this class running on this date, given pre/post-mid-term split? */
 function inSession(phase: string, date: string, term: { midterm_start: string; midterm_end: string; term_start: string; term_end: string } | null): boolean {
   if (!term) return true;
@@ -71,12 +76,33 @@ function inSession(phase: string, date: string, term: { midterm_start: string; m
 Deno.serve(async () => {
   const started = Date.now();
 
-  const [{ data: subs }, { data: terms }] = await Promise.all([
-    admin.from("push_subscriptions").select("*"),
+  /** PostgREST caps an unbounded select at 1000 rows, silently. Page through. */
+  async function fetchAll<T>(
+    build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
+  ): Promise<T[]> {
+    const PAGE = 1000;
+    const out: T[] = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await build(from, from + PAGE - 1);
+      if (error) throw error;
+      if (!data?.length) break;
+      out.push(...data);
+      if (data.length < PAGE) break;
+    }
+    return out;
+  }
+
+  const [subs, { data: terms }] = await Promise.all([
+    fetchAll<Record<string, string>>((from, to) =>
+      admin.from("push_subscriptions").select("*").range(from, to)),
     admin.from("terms").select("*").eq("is_current", true).limit(1),
   ]);
 
-  if (!subs?.length) return new Response(JSON.stringify({ sent: 0, note: "no subscribers" }));
+  if (!subs.length) {
+    return new Response(JSON.stringify({ sent: 0, note: "no subscribers" }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const term = terms?.[0] ?? null;
 
   // Group subscriptions by user so one student with two devices gets one lookup.
@@ -89,13 +115,22 @@ Deno.serve(async () => {
 
   const userIds = [...byUser.keys()];
 
-  const [{ data: profiles }, { data: classes }] = await Promise.all([
-    admin.from("profiles").select("id, lead_mins, timezone").in("id", userIds),
-    admin.from("classes").select("*").in("user_id", userIds).eq("confirmed", true),
+  // A 1000-element `in(...)` filter overflows the request URL, so both of
+  // these are fetched wholesale and filtered in memory. At campus scale the
+  // tables are small; revisit if this ever serves more than one institute.
+  const subscribed = new Set(userIds);
+
+  const [profiles, allClasses] = await Promise.all([
+    fetchAll<{ id: string; lead_mins: number; timezone: string }>((from, to) =>
+      admin.from("profiles").select("id, lead_mins, timezone").range(from, to)),
+    fetchAll<Record<string, string>>((from, to) =>
+      admin.from("classes").select("*").eq("confirmed", true).range(from, to)),
   ]);
 
-  const leadOf = new Map(profiles?.map((p) => [p.id, p.lead_mins ?? 10]) ?? []);
-  const tzOf = new Map(profiles?.map((p) => [p.id, p.timezone ?? "Asia/Kolkata"]) ?? []);
+  const classes = allClasses.filter((c) => subscribed.has(c.user_id));
+
+  const leadOf = new Map(profiles.map((p) => [p.id, p.lead_mins ?? 10]));
+  const tzOf = new Map(profiles.map((p) => [p.id, p.timezone ?? "Asia/Kolkata"]));
 
   // Cache clock maths per timezone.
   const clocks = new Map<string, LocalNow>();
@@ -107,17 +142,22 @@ Deno.serve(async () => {
   type Due = { cls: Record<string, string>; date: string };
   const due: Due[] = [];
 
-  for (const cls of classes ?? []) {
+  for (const cls of classes) {
     const tz = tzOf.get(cls.user_id) ?? "Asia/Kolkata";
     const now = clockFor(tz);
     if (cls.day_of_week !== now.weekday) continue;
 
     const lead = leadOf.get(cls.user_id) ?? 10;
     const start = toMinutes(cls.start_time);
-    const opens = start - lead;
+    // Clamped so an early-morning class with a long lead can't open "yesterday".
+    const opens = Math.max(0, start - lead);
 
-    // Fire once the window opens; the sweep interval is the tolerance.
-    if (now.minutes < opens || now.minutes > opens + SWEEP_MINUTES) continue;
+    // Fire anywhere between the window opening and the class starting, not on
+    // one exact tick. A single skipped sweep — a cold start, a pg_cron hiccup,
+    // a slow function — used to mean the alert was lost for good. Now the next
+    // sweep still catches it, and the atomic alert_log claim below guarantees
+    // it's still delivered exactly once.
+    if (now.minutes < opens || now.minutes > start) continue;
     if (!inSession(cls.term_phase, now.date, term)) continue;
 
     due.push({ cls, date: now.date });
@@ -148,6 +188,10 @@ Deno.serve(async () => {
       body: `Starts in ${lead} min · ${pretty(d.cls.start_time)}${d.cls.room ? ` · ${d.cls.room}` : ""}`,
       classId: d.cls.id,
       classDate: d.date,
+      // The service worker drops the alert if it arrives after this. Belt and
+      // braces alongside TTL, since a push service may still deliver late.
+      expiresAt: Date.now() + (toMinutes(d.cls.end_time ?? d.cls.start_time) - toMinutes(d.cls.start_time) + lead) * 60_000,
+      startsAt: `${d.date} ${d.cls.start_time}`,
     });
 
     return devices.map(async (device) => {
@@ -155,6 +199,18 @@ Deno.serve(async () => {
         await webpush.sendNotification(
           { endpoint: device.endpoint, keys: { p256dh: device.p256dh, auth: device.auth } },
           payload,
+          {
+            // Without a TTL, web-push defaults to four weeks: a phone that is
+            // offline or dozing at send time gets the alert whenever it next
+            // wakes — which is how "your class starts in 10 minutes" arrives
+            // at midnight. Expire it instead of delivering it stale.
+            TTL: 15 * 60,
+            // Normal urgency lets Android defer delivery until the device
+            // leaves Doze, which is exactly the wrong behaviour for a
+            // time-critical alert.
+            urgency: "high",
+            topic: `c${String(d.cls.id).replace(/-/g, "").slice(0, 12)}`,
+          },
         );
         sent++;
         await admin.from("push_subscriptions")

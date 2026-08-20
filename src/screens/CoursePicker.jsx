@@ -34,17 +34,31 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
 
   // A student can't be in two rooms at once — surface it before they save.
   const clashes = useMemo(() => {
-    const seen = new Map();
-    const out = [];
+    // Every occupant of a slot is kept, so a three-way pile-up reports all
+    // pairs rather than only the first one found.
+    const bySlot = new Map();
     for (const [code, letter] of chosen) {
       const course = catalogue.courses.find((c) => c.code === code);
-      for (const m of course.sections[letter]) {
+      if (!course) continue;
+      for (const m of course.sections[letter] ?? []) {
         const key = `${m.day}|${m.start}`;
-        const prior = seen.get(key);
-        if (prior && overlappingPhases(prior.phase, course.phase)) {
-          out.push({ a: prior.code, b: code, day: DAYS[m.day - 1], start: m.start });
-        } else if (!prior) {
-          seen.set(key, { code, phase: course.phase });
+        const list = bySlot.get(key) ?? [];
+        list.push({ code, phase: course.phase, day: m.day, start: m.start });
+        bySlot.set(key, list);
+      }
+    }
+
+    const out = [];
+    for (const list of bySlot.values()) {
+      for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+          if (!overlappingPhases(list[i].phase, list[j].phase)) continue;
+          out.push({
+            a: list[i].code,
+            b: list[j].code,
+            day: DAYS[list[i].day - 1],
+            start: list[i].start,
+          });
         }
       }
     }
@@ -134,9 +148,10 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
         )}
 
         {results.map((course) => {
-          const on = Boolean(picked[course.code]);
           const letters = Object.keys(course.sections);
-          const active = picked[course.code] ?? letters[0];
+          const on = Boolean(picked[course.code]);
+          const stored = picked[course.code];
+          const active = stored && course.sections[stored] ? stored : letters[0];
 
           return (
             <div key={course.code} className={`course-row${on ? " on" : ""}`}>
@@ -199,7 +214,13 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
 function seedFrom(rows) {
   const out = {};
   for (const r of rows) {
-    if (r.course_code) out[r.course_code] = r.section || "A";
+    if (!r.course_code) continue;
+    const course = catalogue.courses.find((c) => c.code === r.course_code);
+    if (!course) continue;                       // dropped in a term rollover
+    const letter = r.section && course.sections[r.section]
+      ? r.section
+      : Object.keys(course.sections)[0];
+    out[r.course_code] = letter;
   }
   return out;
 }

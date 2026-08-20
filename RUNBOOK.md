@@ -110,6 +110,13 @@ password — it bypasses every row-level security policy.
 
 ## 5. Schedule the sweep (5 min)
 
+> **Substitute both placeholders before running.** Pasting the block verbatim
+> schedules a job that fails on every tick with `Bad hostname`, and nothing in
+> the app tells you — the only symptom is that alerts never arrive. Check
+> `cron.job_run_details` after five minutes and confirm `status = succeeded`.
+> To fix a bad job: `select cron.unschedule('rollcall-class-alerts');` then
+> reschedule.
+
 In the SQL Editor, with your values filled in:
 
 ```sql
@@ -250,7 +257,60 @@ update public.profiles set lead_mins = 10 where id = '<YOUR_USER_ID>';
 
 ---
 
-## 9. The decision
+## 8e. Notifications at odd hours, or missing entirely
+
+Three distinct causes, three different fixes. Check all three before concluding
+iOS/Android is at fault.
+
+**Leftover test rows.** The test-class SQL inserts a row on today's
+`day_of_week`, which then recurs *every week at that time, forever*. If you ran
+it more than once you now have several. This is the most common cause of an
+alert at a nonsensical hour:
+
+```sql
+select id, day_of_week, start_time, subject, confirmed from classes
+order by day_of_week, start_time;
+
+delete from classes
+ where subject in ('Push test', '30 Second Test')
+    or subject ilike '%test%';
+```
+
+**A lead time still set to 1 or 3 from testing:**
+
+```sql
+select id, lead_mins, timezone from profiles;
+update profiles set lead_mins = 10;   -- back to a sane default
+```
+
+**Duplicate device subscriptions.** Reinstalling the PWA can leave a stale row
+behind, and each row gets its own push:
+
+```sql
+select user_id, count(*) from push_subscriptions group by user_id having count(*) > 1;
+delete from push_subscriptions where last_ok_at is null and created_at < now() - interval '1 day';
+```
+
+Then confirm what the server actually believes it sent:
+
+```sql
+select a.class_date, a.sent_at, c.subject, c.start_time
+from alert_log a join classes c on c.id = a.class_id
+order by a.sent_at desc limit 20;
+```
+
+Compare `sent_at` against the notification's arrival time on the phone. A large
+gap means the push service queued it — that is a delivery problem, not a
+scheduling one, and is what the TTL setting now prevents.
+
+## 9. Already deployed before 2026-08-20?
+
+`schema.sql` ends with a guarded migration block. Re-run the whole file in the
+SQL Editor — it's idempotent, and it moves attendance off the cascading foreign
+key that would otherwise erase a student's history the moment they changed
+courses.
+
+## 10. The decision
 
 **≥95% delivered, within 2 minutes, across three days of not opening the app:**
 Option A holds. Move on to replacing anonymous auth with email or Google sign-in

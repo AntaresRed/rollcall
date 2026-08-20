@@ -28,7 +28,24 @@ function urlBase64ToUint8Array(base64String) {
 
 export async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return null;
-  return navigator.serviceWorker.register("/sw.js");
+  try {
+    return await navigator.serviceWorker.register("/sw.js");
+  } catch (err) {
+    console.error("service worker registration failed", err);
+    return null;
+  }
+}
+
+/**
+ * `navigator.serviceWorker.ready` never rejects — if registration failed it
+ * simply hangs forever, which would freeze the app on its loading spinner.
+ * Always race it.
+ */
+function readyWithin(ms = 5000) {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
 }
 
 /**
@@ -37,12 +54,17 @@ export async function registerServiceWorker() {
  */
 export async function enableAlerts() {
   if (!pushSupported()) return "unsupported";
+  if (!VAPID_PUBLIC) {
+    console.error("VITE_VAPID_PUBLIC_KEY is not set in this build");
+    return "misconfigured";
+  }
   if (isIOS() && !isStandalone()) return "needs-install";
 
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return "denied";
 
-  const reg = await navigator.serviceWorker.ready;
+  const reg = await readyWithin();
+  if (!reg) return "unsupported";
   let sub = await reg.pushManager.getSubscription();
   if (!sub) {
     sub = await reg.pushManager.subscribe({
@@ -73,6 +95,7 @@ export async function enableAlerts() {
 
 export async function alertsActive() {
   if (!pushSupported() || Notification.permission !== "granted") return false;
-  const reg = await navigator.serviceWorker.ready;
+  const reg = await readyWithin();
+  if (!reg) return false;
   return Boolean(await reg.pushManager.getSubscription());
 }

@@ -52,11 +52,14 @@ create index if not exists classes_user_day_idx
 create table if not exists public.attendance (
   id         uuid primary key default gen_random_uuid(),
   user_id    uuid not null references auth.users(id) on delete cascade,
-  class_id   uuid not null references public.classes(id) on delete cascade,
+  -- The class row can disappear when a student swaps courses, so the subject
+  -- is denormalised here: attendance history must outlive the timetable.
+  class_id   uuid references public.classes(id) on delete set null,
+  subject    text not null default '',
   class_date date not null,
   status     text not null check (status in ('present','absent','cancelled')),
   marked_at  timestamptz not null default now(),
-  unique (class_id, class_date)
+  unique (user_id, subject, class_date)
 );
 create index if not exists attendance_user_idx on public.attendance (user_id, class_date);
 
@@ -77,7 +80,10 @@ create index if not exists push_user_idx on public.push_subscriptions (user_id);
 -- One row per (class, date) once an alert has gone out, so a cron that runs
 -- every 5 minutes never double-pings.
 create table if not exists public.alert_log (
-  class_id   uuid not null references public.classes(id) on delete cascade,
+  -- The class row can disappear when a student swaps courses, so the subject
+  -- is denormalised here: attendance history must outlive the timetable.
+  class_id   uuid references public.classes(id) on delete set null,
+  subject    text not null default '',
   class_date date not null,
   sent_at    timestamptz not null default now(),
   primary key (class_id, class_date)
@@ -132,17 +138,20 @@ create trigger on_auth_user_created
 -- ---------- attendance summary ----------
 create or replace view public.attendance_summary as
 select
-  c.user_id,
-  c.subject,
-  count(*) filter (where a.status = 'present')  as present,
+  a.user_id,
+  a.subject,
+  count(*) filter (where a.status = 'present')    as present,
   count(*) filter (where a.status <> 'cancelled') as counted,
   round(
     100.0 * count(*) filter (where a.status = 'present')
     / nullif(count(*) filter (where a.status <> 'cancelled'), 0)
   ) as pct
 from public.attendance a
-join public.classes c on c.id = a.class_id
-group by c.user_id, c.subject;
+group by a.user_id, a.subject;
+
+-- Without this a view runs with its owner's rights and quietly bypasses every
+-- RLS policy above, letting any student read everyone else's numbers.
+alter view public.attendance_summary set (security_invoker = true);
 
 -- ============================================================
 -- Cron: fire the alert sweep every 5 minutes
@@ -164,3 +173,41 @@ group by c.user_id, c.subject;
 insert into public.terms (label, term_start, midterm_start, midterm_end, term_end, is_current)
 select 'Term V', date '2026-06-15', date '2026-07-27', date '2026-08-01', date '2026-09-19', true
 where not exists (select 1 from public.terms where is_current);
+
+
+-- ============================================================
+-- Migration for projects created before 2026-08-20.
+-- Safe to run on a fresh database too — every statement is guarded.
+-- ============================================================
+do $$
+begin
+  if not exists (select 1 from information_schema.columns
+                 where table_name = 'attendance' and column_name = 'subject') then
+    alter table public.attendance add column subject text not null default '';
+    update public.attendance a
+       set subject = c.subject
+      from public.classes c
+     where c.id = a.class_id and a.subject = '';
+  end if;
+
+  -- drop the cascade so swapping courses can't wipe history
+  if exists (select 1 from information_schema.table_constraints
+             where constraint_name = 'attendance_class_id_fkey'
+               and table_name = 'attendance') then
+    alter table public.attendance drop constraint attendance_class_id_fkey;
+    alter table public.attendance alter column class_id drop not null;
+    alter table public.attendance
+      add constraint attendance_class_id_fkey
+      foreign key (class_id) references public.classes(id) on delete set null;
+  end if;
+
+  if exists (select 1 from pg_constraint where conname = 'attendance_class_id_class_date_key') then
+    alter table public.attendance drop constraint attendance_class_id_class_date_key;
+  end if;
+
+  if not exists (select 1 from pg_constraint where conname = 'attendance_user_id_subject_class_date_key') then
+    alter table public.attendance
+      add constraint attendance_user_id_subject_class_date_key
+      unique (user_id, subject, class_date);
+  end if;
+end $$;

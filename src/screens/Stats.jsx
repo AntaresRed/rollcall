@@ -4,14 +4,15 @@ const THRESHOLD = 75;
 
 export default function Stats({ classes, attendance }) {
   const rows = useMemo(() => {
+    // Keyed on the stored subject, not a class lookup — history has to survive
+    // a student dropping the course it came from.
     const bySubject = new Map();
     for (const a of attendance) {
-      const cls = classes.find((c) => c.id === a.class_id);
-      if (!cls || a.status === "cancelled") continue;
-      const entry = bySubject.get(cls.subject) ?? { present: 0, counted: 0 };
+      if (!a.subject || a.status === "cancelled") continue;
+      const entry = bySubject.get(a.subject) ?? { present: 0, counted: 0 };
       entry.counted += 1;
       if (a.status === "present") entry.present += 1;
-      bySubject.set(cls.subject, entry);
+      bySubject.set(a.subject, entry);
     }
     return [...bySubject.entries()]
       .map(([subject, v]) => ({

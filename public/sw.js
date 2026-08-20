@@ -1,6 +1,6 @@
 // RollCall service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v1";
+const CACHE = "rollcall-v3";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -41,6 +41,22 @@ self.addEventListener("push", (event) => {
     /* fall through to defaults */
   }
 
+  // A push service can still deliver a queued alert after its TTL in some
+  // edge cases. Showing "starts in 10 min" for a class that ended hours ago is
+  // worse than showing nothing, so drop it. The spec requires a visible
+  // notification for every push, hence the quiet silent fallback.
+  if (data.expiresAt && Date.now() > data.expiresAt) {
+    event.waitUntil(
+      self.registration.showNotification("RollCall", {
+        body: "A class alert arrived too late to be useful.",
+        tag: "rollcall-stale",
+        silent: true,
+        requireInteraction: false,
+      })
+    );
+    return;
+  }
+
   event.waitUntil(
     self.registration.showNotification(data.title || "Class starting", {
       body: data.body || "",
@@ -65,10 +81,16 @@ self.addEventListener("notificationclick", (event) => {
       : "/";
 
   event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (list) => {
       for (const client of list) {
         if ("focus" in client) {
-          client.navigate(target);
+          // navigate() is unavailable or throws in some engines; focusing the
+          // existing window still beats spawning a second one.
+          try {
+            if ("navigate" in client) await client.navigate(target);
+          } catch (err) {
+            console.warn("navigate failed", err);
+          }
           return client.focus();
         }
       }

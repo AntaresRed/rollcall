@@ -71,15 +71,17 @@ export default function App() {
     };
   }, []);
 
-  const mark = useCallback(async (classId, date, status) => {
-    // optimistic — attendance marking should never feel like a network round trip
+  const mark = useCallback(async (classId, subject, date, status) => {
+    // optimistic — marking attendance should never feel like a network round trip
     setAttendance((prev) => {
-      const rest = prev.filter((a) => !(a.class_id === classId && a.class_date === date));
-      return status ? [...rest, { class_id: classId, class_date: date, status }] : rest;
+      const rest = prev.filter((a) => !(a.subject === subject && a.class_date === date));
+      return status
+        ? [...rest, { class_id: classId, subject, class_date: date, status }]
+        : rest;
     });
     try {
-      if (status) await markAttendance(classId, date, status);
-      else await unmarkAttendance(classId, date);
+      if (status) await markAttendance(classId, subject, date, status);
+      else await unmarkAttendance(subject, date);
     } catch {
       setAttendance(await loadAttendance());
       say("That didn't save. Try again.");
@@ -93,10 +95,15 @@ export default function App() {
     const classId = params.get("mark");
     if (!classId) return;
     const date = params.get("date") || isoDate();
-    mark(classId, date, "present");
+    const cls = classes.find((c) => c.id === classId);
+    if (!cls) {
+      window.history.replaceState({}, "", "/");
+      return;
+    }
+    mark(classId, cls.subject, date, "present");
     say("Marked present");
     window.history.replaceState({}, "", "/");
-  }, [ready, classes.length, mark]);
+  }, [ready, classes, mark]);
 
   const turnOnAlerts = async () => {
     try {
@@ -104,6 +111,7 @@ export default function App() {
       if (result === "enabled") { setAlerts(true); say("Alerts on"); }
       else if (result === "denied") say("Notifications are blocked in your browser settings");
       else if (result === "needs-install") say("Add RollCall to your Home Screen first");
+      else if (result === "misconfigured") say("Alerts aren't configured on this deployment");
       else say("This browser can't do alerts");
     } catch {
       say("Couldn't turn on alerts. Try again.");

@@ -18,6 +18,9 @@ export const PHASE_LABEL = {
   post_mid: "Post-mid",
 };
 
+/** Postgres `time` comes back as "18:00:00"; every lookup key here is "18:00". */
+export const hhmm = (t) => String(t ?? "").slice(0, 5);
+
 export const toMinutes = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
 
 export function pretty(t) {
@@ -61,6 +64,12 @@ export async function parseTimetableImage(file) {
 
 // ---------- classes ----------
 
+const normaliseRow = (r) => ({
+  ...r,
+  start_time: hhmm(r.start_time),
+  end_time: hhmm(r.end_time),
+});
+
 export async function loadClasses() {
   const { data, error } = await supabase
     .from("classes")
@@ -68,19 +77,31 @@ export async function loadClasses() {
     .order("day_of_week")
     .order("start_time");
   if (error) throw error;
-  return data;
+  return data.map(normaliseRow);
 }
 
 /** Replaces the whole timetable — students re-upload when their term changes. */
+/**
+ * Reconcile rather than replace. Deleting every row and reinserting would mint
+ * new class ids on each save, orphaning attendance and — before the schema
+ * fix — cascading it into oblivion. So: keep identical rows untouched, insert
+ * what's new, delete only what the student actually dropped.
+ */
 export async function saveTimetable(rows) {
   const { data: { user } } = await supabase.auth.getUser();
-  await supabase.from("classes").delete().eq("user_id", user.id);
 
-  const payload = rows.map((r) => ({
+  const key = (r) => `${r.day_of_week}|${hhmm(r.start_time)}|${r.subject.trim()}`;
+
+  const { data: current, error: readErr } = await supabase
+    .from("classes").select("*").eq("user_id", user.id);
+  if (readErr) throw readErr;
+
+  const currentByKey = new Map((current ?? []).map((r) => [key(r), r]));
+  const wanted = rows.map((r) => ({
     user_id: user.id,
     day_of_week: r.day_of_week,
-    start_time: r.start_time,
-    end_time: r.end_time || SLOT_ENDS[r.start_time] || r.start_time,
+    start_time: hhmm(r.start_time),
+    end_time: hhmm(r.end_time) || SLOT_ENDS[hhmm(r.start_time)] || hhmm(r.start_time),
     subject: r.subject.trim(),
     course_code: r.course_code ?? null,
     section: r.section ?? null,
@@ -88,10 +109,21 @@ export async function saveTimetable(rows) {
     term_phase: r.term_phase || "full",
     confirmed: true,
   }));
+  const wantedKeys = new Set(wanted.map(key));
 
-  const { data, error } = await supabase.from("classes").insert(payload).select();
-  if (error) throw error;
-  return data;
+  const toInsert = wanted.filter((r) => !currentByKey.has(key(r)));
+  const toDelete = (current ?? []).filter((r) => !wantedKeys.has(key(r))).map((r) => r.id);
+
+  if (toDelete.length) {
+    const { error } = await supabase.from("classes").delete().in("id", toDelete);
+    if (error) throw error;
+  }
+  if (toInsert.length) {
+    const { error } = await supabase.from("classes").insert(toInsert);
+    if (error) throw error;
+  }
+
+  return loadClasses();
 }
 
 export async function clearTimetable() {
@@ -124,13 +156,13 @@ export async function loadAttendance(sinceDate) {
   return data;
 }
 
-export async function markAttendance(classId, date, status) {
+export async function markAttendance(classId, subject, date, status) {
   const { data: { user } } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from("attendance")
     .upsert(
-      { user_id: user.id, class_id: classId, class_date: date, status },
-      { onConflict: "class_id,class_date" },
+      { user_id: user.id, class_id: classId, subject, class_date: date, status },
+      { onConflict: "user_id,subject,class_date" },
     )
     .select()
     .single();
@@ -138,11 +170,11 @@ export async function markAttendance(classId, date, status) {
   return data;
 }
 
-export async function unmarkAttendance(classId, date) {
+export async function unmarkAttendance(subject, date) {
   const { error } = await supabase
     .from("attendance")
     .delete()
-    .eq("class_id", classId)
+    .eq("subject", subject)
     .eq("class_date", date);
   if (error) throw error;
 }
