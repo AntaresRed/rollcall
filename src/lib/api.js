@@ -21,11 +21,24 @@ export const PHASE_LABEL = {
 /** Postgres `time` comes back as "18:00:00"; every lookup key here is "18:00". */
 export const hhmm = (t) => String(t ?? "").slice(0, 5);
 
-export const toMinutes = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+/**
+ * Minutes since midnight.
+ *
+ * Returns NaN rather than throwing when handed something that isn't a time.
+ * Every comparison against NaN is false, so a bad value degrades to "not
+ * now, not past" — a missing marker instead of a blank screen.
+ */
+export const toMinutes = (t) => {
+  const s = String(t ?? "");
+  if (!/^\d{2}:\d{2}/.test(s)) return NaN;
+  return Number(s.slice(0, 2)) * 60 + Number(s.slice(3, 5));
+};
 
 export function pretty(t) {
-  const h = Number(t.slice(0, 2));
-  return `${((h + 11) % 12) + 1}:${t.slice(3, 5)} ${h < 12 ? "am" : "pm"}`;
+  const s = String(t ?? "");
+  if (!/^\d{2}:\d{2}/.test(s)) return "--:--";
+  const h = Number(s.slice(0, 2));
+  return `${((h + 11) % 12) + 1}:${s.slice(3, 5)} ${h < 12 ? "am" : "pm"}`;
 }
 
 export const isoDate = (d = new Date()) =>

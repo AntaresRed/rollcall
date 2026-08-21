@@ -17,6 +17,51 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!--
+      A crash while the app's modules are evaluating happens before React
+      mounts, so no error boundary can catch it and the page simply stays
+      white. This shows the actual error instead, which is the difference
+      between a five-minute fix and an afternoon.
+    -->
+    <script>
+      (function () {
+        var shown = false;
+        function show(msg) {
+          if (shown) return;
+          shown = true;
+          var r = document.getElementById("root");
+          if (!r) return;
+          r.innerHTML =
+            '<div style="font:15px/1.5 system-ui,sans-serif;color:#11151A;' +
+            'max-width:520px;margin:12vh auto;padding:24px">' +
+            '<h1 style="font-size:19px;margin:0 0 10px">RollCall didn\'t start</h1>' +
+            '<p style="color:#565E66;margin:0 0 14px">Something failed while loading. ' +
+            'The details below say what.</p>' +
+            '<pre style="white-space:pre-wrap;word-break:break-word;background:#F4F5F2;' +
+            'border:1px solid #E3E5E0;border-radius:10px;padding:12px;font-size:12.5px;' +
+            'margin:0 0 14px">' + String(msg).replace(/</g, "&lt;") + '</pre>' +
+            '<button onclick="location.reload()" style="font:600 14px system-ui;' +
+            'background:#11151A;color:#fff;border:0;border-radius:8px;padding:10px 16px">' +
+            'Try again</button></div>';
+        }
+        window.addEventListener("error", function (e) {
+          show((e.error && e.error.stack) || e.message || "Unknown error");
+        });
+        window.addEventListener("unhandledrejection", function (e) {
+          show((e.reason && (e.reason.stack || e.reason.message)) || e.reason);
+        });
+        // If nothing has rendered after a few seconds, the app is wedged.
+        setTimeout(function () {
+          var r = document.getElementById("root");
+          if (r && r.childElementCount === 0) {
+            show("The app loaded but never rendered. This is usually a missing " +
+                 "environment variable or a stale service worker.");
+          }
+        }, 8000);
+      })();
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

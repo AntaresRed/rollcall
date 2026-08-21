@@ -2,12 +2,6 @@ import { useMemo, useState } from "react";
 import catalogue from "../data/catalogue.json";
 import { DAYS, PHASE_LABEL, pretty, saveTimetable } from "../lib/api";
 
-const PHASE_NOTE = {
-  full: "Whole term",
-  pre_mid: "Pre-mid term only",
-  post_mid: "Post-mid term only",
-};
-
 /** "Mon 10:15 · Wed 12:00" — the whole reason to pick a section. */
 function describe(meetings, course) {
   if (course?.schedule_type === "dates") {

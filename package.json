@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "eslint src --ext .js,.jsx && vite build",
+    "build": "eslint src --ext .js,.jsx && node scripts/smoke.mjs && vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext .js,.jsx"
+    "lint": "eslint src --ext .js,.jsx",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
@@ -17,7 +18,9 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
     "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.2",
+    "jsdom": "^30.0.1",
     "vite": "^5.4.0"
   }
 }

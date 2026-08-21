@@ -22,8 +22,10 @@ export default function Today({ occurrences, attendance, now, onMark }) {
         String(a.start_time).slice(0, 5) === String(c.start_time).slice(0, 5),
     )?.status ?? null;
 
-  // The now-marker sits above the first class still to come.
-  const nextIndex = list.findIndex((c) => toMinutes(c.end_time) > nowMins);
+  // The now-marker sits above the first class still to come. Note the
+  // destructuring: entries are occurrences, `{ cls, date, movedFrom }`, not
+  // class rows.
+  const nextIndex = list.findIndex(({ cls }) => toMinutes(cls.end_time) > nowMins);
 
   const clock = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 

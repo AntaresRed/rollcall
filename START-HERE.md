@@ -1,0 +1,130 @@
+# RollCall — final package
+
+Replace your project folder's contents with everything in here, then:
+
+```powershell
+npm install
+git add .
+git commit -m "Crash reporting, revised design, rescheduling"
+git push
+```
+
+Then **delete the RollCall icon from your Home Screen and add it again.** The
+service worker is at v8; the old one will keep serving the old bundle until
+it's removed.
+
+---
+
+## Sign-in changed
+
+RollCall now requires a Google account on **@email.iimcal.ac.in**; anonymous
+accounts are gone. This needs a one-time setup in Google Cloud Console and
+Supabase before anyone (including you) can get in — **see `GOOGLE-SIGNIN.md`**.
+
+Until that's done the app will show the sign-in screen and go no further.
+
+## Two things to check first
+
+**1. Your Vercel environment variables must exist.** Vite bakes them in at
+build time, so a missing one produces a working build and a blank page. The app
+now says so out loud instead, but it's quicker to confirm up front:
+
+Vercel → Settings → Environment Variables
+
+| Name | Where it comes from |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase → Settings → API → Project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase → Settings → API → anon public |
+| `VITE_VAPID_PUBLIC_KEY` | `npx web-push generate-vapid-keys` |
+
+If you edit any of them, **redeploy** — editing alone doesn't rebuild.
+
+**2. `.eslintrc.cjs` starts with a dot.** Windows Explorer sometimes hides or
+mangles it. Confirm with `dir -Force`. It's optional: without it, set
+`"build": "vite build"` in `package.json` and everything still works.
+
+---
+
+## Checking your own changes
+
+```powershell
+npm run smoke     # renders every screen, exercises the data layer
+npm run lint      # hook order, undefined variables
+npm run build     # runs both, then builds — fails if either does
+```
+
+`npm run smoke` is the one that matters. Every crash that has reached this app
+was a shape mismatch — an occurrence handed to something expecting a class row
+— which builds cleanly, passes a linter, and dies on first render. The smoke
+test renders all 24 screen states, including empty, malformed and over-budget
+input, and 34 checks push bad values through the date and attendance logic.
+
+It's wired into `build`, so a broken screen fails the Vercel deploy rather than
+shipping a blank page.
+
+## If the app doesn't start
+
+It will now tell you why, in one of three ways:
+
+- **A message before React loads** — something failed while modules were
+  evaluating. Usually a missing environment variable.
+- **"Something went wrong" with a stack trace** — a render crash. The
+  **Clear cache and reload** button unregisters the service worker and empties
+  the caches, which fixes anything caused by a stale bundle.
+- **"The app loaded but never rendered"** after eight seconds — wedged, most
+  often on a stale service worker.
+
+Send whichever message you get; it names the actual fault.
+
+---
+
+## What's in the box
+
+```
+index.html            crash handler that runs before React
+vite.config.js        build config (React stays in the entry chunk on purpose)
+.eslintrc.cjs         catches hook-order and undefined-variable bugs at build
+
+src/
+  main.jsx            entry, wraps the app in the error boundary
+  ErrorBoundary.jsx   render-crash screen with a cache-clearing escape hatch
+  App.jsx             state, routing, alert handling
+  styles.css          design tokens and every component style
+  lib/
+    supabase.js       client, fails loudly if config is missing
+    api.js            all data access, attendance maths, occurrence generation
+    push.js           subscription, permissions, test notification
+  screens/            Splash, Today, Timetable, CatchUp, Stats, Reschedule,
+                      TermCalendar, CoursePicker, Onboard, Confirm
+  data/catalogue.json generated — do not edit by hand
+
+public/               manifest, service worker, icons
+data/
+  overrides.json      schedule amendments; edit these, not the catalogue
+  Class_Schedule_Term-V_AY-2026-27.xlsx
+scripts/
+  build_catalogue.py  rebuilds the catalogue from the spreadsheet
+supabase/
+  schema.sql          run in the SQL Editor; safe to re-run
+  functions/          parse-timetable, send-class-alerts
+```
+
+## Removing the test courses
+
+Delete the `ZTEST`, `ZSAT` and `ZSUN` entries from `data/overrides.json`, then:
+
+```powershell
+python scripts/build_catalogue.py data/Class_Schedule_Term-V_AY-2026-27.xlsx src/data/catalogue.json data/overrides.json
+```
+
+Copy the regenerated `src/data/catalogue.json` array into
+`supabase/functions/_shared/catalogue.ts`, redeploy `parse-timetable`, push.
+
+## Still open
+
+- **Anonymous accounts.** Clearing browser data loses a student's timetable.
+  Worth replacing with email or Google sign-in before anyone relies on this.
+- **iOS delivery.** Unverified: whether notifications still arrive after the
+  app has sat unopened for several days. Only a real phone can answer it.
+
+`RUNBOOK.md` has the full setup and the diagnostic queries.

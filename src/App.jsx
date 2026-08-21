@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, lazy, Suspense } from "react";
-import { ensureSession } from "./lib/supabase";
+import { supabase, getSession, signOut, readAuthError } from "./lib/supabase";
 import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
   attendanceKey, isoDate, setCourseMuted, unmarkedSessions,
@@ -11,6 +11,7 @@ import {
 } from "./lib/push";
 
 import Splash, { Mark } from "./screens/Splash";
+import SignIn from "./screens/SignIn";
 const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 const Onboard = lazy(() => import("./screens/Onboard"));
 const Confirm = lazy(() => import("./screens/Confirm"));
@@ -44,6 +45,8 @@ export default function App() {
   const [toast, setToast] = useState("");
   const [fatal, setFatal] = useState("");
   const [alertInfo, setAlertInfo] = useState("");
+  const [session, setSession] = useState(null);
+  const [authError, setAuthError] = useState(null);
 
   const say = (msg) => {
     setToast(msg);
@@ -54,7 +57,16 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
-        await ensureSession();
+        // A rejected sign-in comes back as parameters on the URL, not as a
+        // thrown error, so it has to be read before anything else.
+        setAuthError(readAuthError());
+
+        const current = await getSession();
+        setSession(current);
+        if (!current) {
+          setReady(true);
+          return;
+        }
 
         // Nothing below blocks first paint. Service-worker registration and
         // the push-subscription check both wait on `serviceWorker.ready`,
@@ -79,6 +91,30 @@ export default function App() {
         setReady(true);
       }
     })();
+  }, []);
+
+  // Google returns to the app mid-load, so the session can arrive after the
+  // first render.
+  useEffect(() => {
+    let had = false;
+    const { data } = supabase.auth.onAuthStateChange((event, next) => {
+      // The reload lives here, not inside a state updater: React invokes
+      // updaters twice in development, which would fire it twice.
+      if (event === "SIGNED_IN" && !had) {
+        had = true;
+        window.location.reload();
+        return;
+      }
+      if (event === "SIGNED_OUT") {
+        window.location.reload();
+        return;
+      }
+      // TOKEN_REFRESHED and USER_UPDATED arrive routinely while the app is
+      // open. They carry a fresh session and need no interruption.
+      had = Boolean(next);
+      setSession(next);
+    });
+    return () => data.subscription.unsubscribe();
   }, []);
 
   // ---- keep the now-marker honest ----
@@ -202,6 +238,11 @@ export default function App() {
     setEditing(true);
   };
 
+  const handleSignOut = useCallback(async () => {
+    if (!confirm("Sign out of RollCall? Your timetable and attendance stay on the server.")) return;
+    await signOut();
+  }, []);
+
   const testAlert = useCallback(async () => {
     const r = await sendTestNotification();
     if (!r.ok) {
@@ -244,13 +285,14 @@ export default function App() {
 
   // ---- everything below this line may return early ----
   if (!ready) return <Splash />;
+  if (!session) return <SignIn error={authError} />;
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
 
   // ---- onboarding ----
   if (draft) {
     return (
       <div className="shell">
-        <Masthead now={now} />
+        <Masthead now={now} session={session} onSignOut={handleSignOut} />
         <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
         <Confirm
           initial={draft}
@@ -277,7 +319,7 @@ export default function App() {
 
     return (
       <div className="shell">
-        <Masthead now={now} />
+        <Masthead now={now} session={session} onSignOut={handleSignOut} />
         <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
         {entry === "picker" ? (
           <CoursePicker
@@ -300,7 +342,7 @@ export default function App() {
   // ---- main ----
   return (
     <>
-      <Masthead now={now} />
+      <Masthead now={now} session={session} onSignOut={handleSignOut} />
       <div className="shell">
         {!alerts && pushSupported() && (
           <div className={`banner${iosNeedsInstall ? " warn" : ""}`}>
@@ -392,17 +434,28 @@ export default function App() {
   );
 }
 
-function Masthead({ now }) {
+function Masthead({ now, session, onSignOut }) {
   const label = now.toLocaleDateString(undefined, {
     weekday: "short", day: "numeric", month: "short",
   });
+  // The local part is enough to confirm which account is in use; the domain
+  // is the same for everyone here.
+  const who = session?.user?.email?.split("@")[0];
+
   return (
     <header className="masthead">
       <div className="wordmark">
         <Mark size={22} />
         <b>Roll<i>Call</i></b>
       </div>
-      <div className="masthead-date">{label}</div>
+      <div className="masthead-right">
+        <span className="masthead-date">{label}</span>
+        {who && (
+          <button className="masthead-user" onClick={onSignOut} title={session.user.email}>
+            {who}
+          </button>
+        )}
+      </div>
     </header>
   );
 }

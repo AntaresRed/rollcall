@@ -1011,3 +1011,114 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   line-height: 1.45;
   color: var(--signal-deep);
 }
+
+/* ---------- crash screen ---------- */
+
+.crash {
+  max-width: 520px;
+  margin: 12vh auto;
+  padding: 24px;
+}
+.crash h1 { font-size: 19px; margin: 0 0 10px; letter-spacing: -0.02em; }
+.crash p { color: var(--slate); margin: 0 0 14px; font-size: 14.5px; }
+.crash pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--slate);
+  max-height: 220px;
+  overflow: auto;
+  margin: 0 0 16px;
+}
+.crash-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- sign in ---------- */
+
+.signin {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px calc(40px + env(safe-area-inset-bottom));
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.signin-mark {
+  filter: drop-shadow(0 8px 24px rgba(17, 21, 26, 0.16));
+  border-radius: 15px;
+}
+
+.signin h1 {
+  margin: 20px 0 8px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.signin h1 i { font-style: normal; color: var(--signal); }
+
+.signin-sub {
+  color: var(--slate);
+  font-size: 14.5px;
+  line-height: 1.5;
+  margin: 0 0 26px;
+}
+
+/* Google requires its button to stay recognisably Google's — white surface,
+   its own mark, unmodified. So this one deliberately ignores the app palette. */
+.btn.google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: #fff;
+  color: #1F1F1F;
+  border: 1px solid var(--rule-strong);
+  border-radius: 9px;
+  padding: 13px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 1px 2px rgba(17, 21, 26, 0.06);
+}
+.btn.google:hover { background: #FAFAFA; }
+.btn.google:disabled { opacity: 0.6; }
+
+.signin-note {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+.signin-retry { margin-top: 18px; color: var(--slate); }
+
+/* ---------- masthead account ---------- */
+
+.masthead-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.masthead-user {
+  background: var(--board-soft);
+  border: 0;
+  color: #C7CDD4;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+  border-radius: 999px;
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.masthead-user:hover { color: #fff; }

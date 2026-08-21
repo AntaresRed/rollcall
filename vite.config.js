@@ -8,10 +8,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Supabase is the bulk of the vendor weight and changes far less
-          // often than the app, so it gets its own long-lived cache entry.
+          // Supabase only — it's the bulk of the vendor weight and changes far
+          // less often than the app, so it earns its own cache entry.
+          //
+          // React deliberately stays in the entry chunk: splitting the
+          // framework out is a known source of module-initialisation ordering
+          // bugs, and those present as a blank page.
           supabase: ["@supabase/supabase-js"],
-          react: ["react", "react-dom"],
         },
       },
     },

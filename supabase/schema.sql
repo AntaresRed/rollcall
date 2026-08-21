@@ -42,6 +42,19 @@ create table if not exists public.term_breaks (
   to_date    date not null,
   note       text
 );
+-- ---------- who may sign in ----------
+-- Enforced by a trigger on auth.users below, not in the app. A check that
+-- lives only in the frontend is worth nothing: anyone can call the Supabase
+-- endpoint directly with their own Google token.
+create table if not exists public.allowed_email_domains (
+  domain text primary key,
+  note   text
+);
+
+insert into public.allowed_email_domains (domain, note)
+values ('email.iimcal.ac.in', 'IIM Calcutta student accounts')
+on conflict (domain) do nothing;
+
 -- ---------- student profile ----------
 create table if not exists public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
@@ -324,6 +337,79 @@ create policy "read breaks" on public.term_breaks for select using (true);
 -- alert_log is written only by the service role (edge function); no policy
 -- means no anon/authenticated access, which is what we want.
 alter table public.alert_log enable row level security;
+
+-- ============================================================
+-- Sign-in restriction
+-- ============================================================
+
+create or replace function public.enforce_allowed_email_domain()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  addr   text := lower(trim(coalesce(new.email, '')));
+  domain text;
+begin
+  -- No address at all means an anonymous sign-in, which this app no longer
+  -- uses: every account must be traceable to a student.
+  if addr = '' then
+    raise exception 'RollCall requires an IIM Calcutta Google account.'
+      using errcode = '42501';
+  end if;
+
+  -- Exactly one '@', with something either side. Without this check,
+  -- 'a@email.iimcal.ac.in@evil.com' reads as the institute domain if you take
+  -- the second field, and as a stranger's if you take the last — so reject the
+  -- shape outright rather than pick a side.
+  if addr !~ '^[^@[:space:]]+@[^@[:space:]]+$' then
+    raise exception 'That address is not in a form RollCall accepts.'
+      using errcode = '42501';
+  end if;
+
+  domain := split_part(addr, '@', 2);
+
+  if not exists (select 1 from public.allowed_email_domains d where d.domain = domain) then
+    raise exception 'RollCall is only open to IIM Calcutta accounts. % is not eligible.', addr
+      using errcode = '42501';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists enforce_email_domain on auth.users;
+create trigger enforce_email_domain
+  before insert on auth.users
+  for each row execute function public.enforce_allowed_email_domain();
+
+-- Readable by the app so the sign-in screen can name the expected domain.
+alter table public.allowed_email_domains enable row level security;
+drop policy if exists "read allowed domains" on public.allowed_email_domains;
+create policy "read allowed domains" on public.allowed_email_domains
+  for select using (true);
+
+-- Supabase's OTP flow provisions the auth.users row the moment a code is
+-- requested, before it's ever verified — so the domain must be checked at
+-- request time too, or a stranger's inbox would just never get a working code
+-- while still holding an account. This RPC is what the app calls instead of
+-- asking Supabase directly, so the check runs before any account exists.
+create or replace function public.request_otp_domain_check(p_email text)
+returns void language plpgsql security definer set search_path = public as $$
+declare
+  addr   text := lower(trim(coalesce(p_email, '')));
+  domain text;
+begin
+  if addr = '' or addr !~ '^[^@[:space:]]+@[^@[:space:]]+$' then
+    raise exception 'Enter a valid email address.' using errcode = '22023';
+  end if;
+
+  domain := split_part(addr, '@', 2);
+
+  if not exists (select 1 from public.allowed_email_domains d where d.domain = domain) then
+    raise exception 'RollCall is only open to IIM Calcutta accounts.' using errcode = '42501';
+  end if;
+end;
+$$;
+
+grant execute on function public.request_otp_domain_check(text) to anon, authenticated;
 
 -- ---------- auto-create a profile on signup ----------
 create or replace function public.handle_new_user()
