@@ -342,38 +342,60 @@ alter table public.alert_log enable row level security;
 -- Sign-in restriction
 -- ============================================================
 
+-- Callable on its own, so the rule can be tested without going near OAuth:
+--   select public.email_is_allowed('anuja2027@email.iimcal.ac.in');
+create or replace function public.email_is_allowed(addr text)
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  v_addr   text := lower(trim(coalesce(addr, '')));
+  v_domain text;
+begin
+  if v_addr = '' then
+    return false;
+  end if;
+
+  -- Exactly one '@', with something either side. Without this,
+  -- 'a@email.iimcal.ac.in@evil.com' reads as the institute domain if you take
+  -- the second field and as a stranger's if you take the last — so reject the
+  -- shape rather than pick a side.
+  if v_addr !~ '^[^@[:space:]]+@[^@[:space:]]+$' then
+    return false;
+  end if;
+
+  -- v_domain, not domain: a variable sharing a name with the column it is
+  -- compared against makes the reference ambiguous, and PL/pgSQL raises
+  -- rather than guessing. Supabase then reports that as
+  -- "Database error saving new user", which says nothing about the cause.
+  v_domain := split_part(v_addr, '@', 2);
+
+  return exists (
+    select 1 from public.allowed_email_domains d where d.domain = v_domain
+  );
+end;
+$$;
+
 create or replace function public.enforce_allowed_email_domain()
 returns trigger language plpgsql security definer set search_path = public as $$
 declare
-  addr   text := lower(trim(coalesce(new.email, '')));
-  domain text;
+  -- OAuth signups normally arrive with email populated; the metadata is a
+  -- fallback in case the provider row lands before the column is filled.
+  v_addr text := coalesce(
+    nullif(trim(coalesce(new.email, '')), ''),
+    nullif(trim(coalesce(new.raw_user_meta_data ->> 'email', '')), ''),
+    ''
+  );
 begin
-  -- No address at all means an anonymous sign-in, which this app no longer
-  -- uses: every account must be traceable to a student.
-  if addr = '' then
-    raise exception 'RollCall requires an IIM Calcutta Google account.'
-      using errcode = '42501';
-  end if;
-
-  -- Exactly one '@', with something either side. Without this check,
-  -- 'a@email.iimcal.ac.in@evil.com' reads as the institute domain if you take
-  -- the second field, and as a stranger's if you take the last — so reject the
-  -- shape outright rather than pick a side.
-  if addr !~ '^[^@[:space:]]+@[^@[:space:]]+$' then
-    raise exception 'That address is not in a form RollCall accepts.'
-      using errcode = '42501';
-  end if;
-
-  domain := split_part(addr, '@', 2);
-
-  if not exists (select 1 from public.allowed_email_domains d where d.domain = domain) then
-    raise exception 'RollCall is only open to IIM Calcutta accounts. % is not eligible.', addr
+  if not public.email_is_allowed(v_addr) then
+    raise exception
+      'RollCall is open to IIM Calcutta accounts only. % is not eligible.',
+      coalesce(nullif(v_addr, ''), '(no address)')
       using errcode = '42501';
   end if;
 
   return new;
 end;
 $$;
+
 
 drop trigger if exists enforce_email_domain on auth.users;
 create trigger enforce_email_domain

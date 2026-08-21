@@ -45,6 +45,25 @@ mangles it. Confirm with `dir -Force`. It's optional: without it, set
 
 ---
 
+## Notification buttons need one new secret
+
+The Present / Absent buttons now write attendance directly, without opening the
+app. A service worker can't safely hold a Supabase session, so each alert
+carries a token authorising that one session for that one student, valid for
+six hours. Set the signing secret and deploy the endpoint:
+
+```powershell
+supabase secrets set ATTENDANCE_TOKEN_SECRET=<a long random string>
+supabase functions deploy mark-attendance --no-verify-jwt
+supabase functions deploy send-class-alerts --no-verify-jwt
+```
+
+Any long random string works. On Windows, `[guid]::NewGuid()` twice over is
+fine; on macOS or Linux, `openssl rand -hex 32`.
+
+Until the secret is set, the buttons fall back to their old behaviour — opening
+the app with the mark applied — so nothing breaks while you get to it.
+
 ## Checking your own changes
 
 ```powershell

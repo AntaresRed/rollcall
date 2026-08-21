@@ -117,6 +117,22 @@ export default function App() {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  // A notification button can write attendance while the app sits open in
+  // another tab. The service worker says so; refetch rather than guess.
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    const onMessage = async (event) => {
+      if (event.data?.type !== "attendance-changed") return;
+      try {
+        setAttendance(await loadAttendance());
+      } catch {
+        /* the next open will pick it up */
+      }
+    };
+    navigator.serviceWorker.addEventListener("message", onMessage);
+    return () => navigator.serviceWorker.removeEventListener("message", onMessage);
+  }, []);
+
   // ---- keep the now-marker honest ----
   useEffect(() => {
     // Every screen derives from `now`, so replacing the object on a timer

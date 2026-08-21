@@ -27,6 +27,46 @@ const admin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const TOKEN_SECRET = Deno.env.get("ATTENDANCE_TOKEN_SECRET") ?? "";
+const FUNCTIONS_BASE = `${Deno.env.get("SUPABASE_URL")}/functions/v1`;
+
+const encoder = new TextEncoder();
+
+const b64url = (bytes: ArrayBuffer | Uint8Array) =>
+  btoa(String.fromCharCode(...new Uint8Array(bytes)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+/**
+ * A token naming exactly one session for one student.
+ *
+ * The action buttons on a notification need to write attendance without the
+ * app being open, and a service worker cannot safely hold a Supabase session.
+ * So the push carries this instead: it authorises one upsert, for one class,
+ * on one date, and stops working a few hours later.
+ */
+async function mintToken(userId: string, cls: Record<string, string>, date: string) {
+  if (!TOKEN_SECRET) return null;
+
+  const claim = {
+    u: userId,
+    c: String(cls.id),
+    s: cls.subject,
+    t: String(cls.start_time).slice(0, 5),
+    d: date,
+    // Long enough to mark a class after it ends, short enough that a stale
+    // notification in a shade can't be used days later.
+    exp: Math.floor(Date.now() / 1000) + 6 * 60 * 60,
+  };
+
+  const key = await crypto.subtle.importKey(
+    "raw", encoder.encode(TOKEN_SECRET),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const body = b64url(encoder.encode(JSON.stringify(claim)));
+  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
+  return `${body}.${b64url(sig)}`;
+}
+
 interface LocalNow {
   date: string;     // YYYY-MM-DD in the student's zone
   weekday: number;  // 1 = Mon
@@ -245,12 +285,20 @@ Deno.serve(async () => {
     if (!error) claimed.push(d);
   }
 
+  // Minted up front so the send loop stays synchronous per device.
+  const tokens = new Map<string, string>();
+  for (const d of claimed) {
+    const t = await mintToken(String(d.cls.user_id), d.cls, d.date);
+    if (t) tokens.set(`${d.cls.id}|${d.date}`, t);
+  }
+
   let sent = 0;
   const dead: string[] = [];
 
   await Promise.all(claimed.flatMap((d) => {
     const devices = byUser.get(d.cls.user_id) ?? [];
     const lead = leadOf.get(d.cls.user_id) ?? 10;
+    const token = tokens.get(`${d.cls.id}|${d.date}`) ?? null;
     const payload = JSON.stringify({
       title: `${d.cls.subject}`,
       body: `Starts in ${lead} min · ${pretty(d.cls.start_time)}${d.cls.room ? ` · ${d.cls.room}` : ""}`
@@ -260,6 +308,10 @@ Deno.serve(async () => {
       hint: "Tap to mark attendance",
       classId: d.cls.id,
       classDate: d.date,
+      // With these the action buttons write straight to the database; without
+      // them the service worker falls back to opening the app.
+      markToken: token,
+      markUrl: `${FUNCTIONS_BASE}/mark-attendance`,
       // The service worker drops the alert if it arrives after this. Belt and
       // braces alongside TTL, since a push service may still deliver late.
       expiresAt: Date.now() + (toMinutes(d.cls.end_time ?? d.cls.start_time) - toMinutes(d.cls.start_time) + lead) * 60_000,

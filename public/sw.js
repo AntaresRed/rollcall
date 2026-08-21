@@ -1,6 +1,6 @@
 // RollCall service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v8";
+const CACHE = "rollcall-v9";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -82,41 +82,100 @@ self.addEventListener("push", (event) => {
   );
 });
 
+/** Bring the app forward, reusing an open window where there is one. */
+async function openApp(target) {
+  const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+  for (const client of list) {
+    if ("focus" in client) {
+      // navigate() is missing or throws in some engines; focusing the existing
+      // window still beats spawning a second one.
+      try {
+        if ("navigate" in client) await client.navigate(target);
+      } catch (err) {
+        console.warn("navigate failed", err);
+      }
+      return client.focus();
+    }
+  }
+  return self.clients.openWindow(target);
+}
+
+/** Tell any open window to refresh, so a mark made here shows up there. */
+async function nudgeOpenWindows() {
+  const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+  for (const client of list) {
+    try {
+      client.postMessage({ type: "attendance-changed" });
+    } catch {
+      /* a window that has gone away is not a problem */
+    }
+  }
+}
+
+async function toast(title, body) {
+  await self.registration.showNotification(title, {
+    body,
+    icon: "/icon-192.png",
+    badge: "/icon-badge.png",
+    tag: "rollcall-ack",
+    silent: true,
+    requireInteraction: false,
+  });
+  // Long enough to read, short enough not to clutter the shade.
+  await new Promise((r) => setTimeout(r, 4000));
+  const shown = await self.registration.getNotifications({ tag: "rollcall-ack" });
+  shown.forEach((n) => n.close());
+}
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const { classId, classDate, test } = event.notification.data || {};
+  const data = event.notification.data || {};
+  const { classId, classDate, test, markToken, markUrl, title } = data;
+
   if (test) {
-    // Nothing to mark; just bring the app forward.
-    event.waitUntil(self.clients.openWindow("/"));
+    event.waitUntil(openApp("/"));
     return;
   }
 
-  // The service worker has no Supabase session of its own, so it can't write
-  // the mark directly. It hands the intent to the app via the URL instead,
-  // which then applies it on load.
   const status = event.action === "present" || event.action === "absent"
     ? event.action
     : null;
 
-  const target = status && classId
-    ? `/?mark=${classId}&date=${classDate}&status=${status}`
-    : "/";
+  // Tapping the notification body, rather than a button, just opens the app.
+  if (!status) {
+    event.waitUntil(openApp("/"));
+    return;
+  }
 
-  event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (list) => {
-      for (const client of list) {
-        if ("focus" in client) {
-          // navigate() is unavailable or throws in some engines; focusing the
-          // existing window still beats spawning a second one.
-          try {
-            if ("navigate" in client) await client.navigate(target);
-          } catch (err) {
-            console.warn("navigate failed", err);
-          }
-          return client.focus();
+  event.waitUntil((async () => {
+    // The push carries a token authorising this one session, so the mark can
+    // be written from here — no session, no app launch, no context switch.
+    if (markToken && markUrl) {
+      try {
+        const res = await fetch(markUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: markToken, status }),
+        });
+        if (res.ok) {
+          await nudgeOpenWindows();
+          await toast(
+            status === "present" ? "Marked present" : "Marked absent",
+            title || "",
+          );
+          return;
         }
+        const body = await res.json().catch(() => ({}));
+        console.warn("mark failed", res.status, body);
+      } catch (err) {
+        console.warn("mark request failed", err);
       }
-      return self.clients.openWindow(target);
-    }),
-  );
+    }
+
+    // Offline, expired, or an older alert with no token: fall back to handing
+    // the intent to the app, which applies it on load.
+    await openApp(
+      classId ? `/?mark=${classId}&date=${classDate}&status=${status}` : "/",
+    );
+  })());
 });

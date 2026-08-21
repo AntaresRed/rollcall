@@ -103,11 +103,22 @@ export function readAuthError() {
   window.history.replaceState({}, "", window.location.pathname);
 
   const text = decodeURIComponent(raw).replace(/\+/g, " ");
+
   if (/not eligible|requires an IIM|42501/i.test(text)) {
+    return { kind: "domain", message: "That account isn't an IIM Calcutta one." };
+  }
+
+  // Supabase collapses anything the database raises during signup into one
+  // opaque string. The rejection rule is much the likeliest cause, so say so
+  // while still showing the raw text for anything else.
+  if (/database error saving new user/i.test(text)) {
     return {
       kind: "domain",
-      message: "That account isn't an IIM Calcutta one.",
+      message:
+        "Sign-in was refused while creating the account. This usually means " +
+        "the address isn't an institute one.",
     };
   }
+
   return { kind: "other", message: text };
 }

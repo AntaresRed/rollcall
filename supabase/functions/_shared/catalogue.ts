@@ -1222,20 +1222,20 @@ export const CATALOGUE: CatalogueCourse[] = [
         {
           "date": "2026-08-21",
           "day": 5,
-          "start": "02:40",
-          "end": "03:55"
+          "start": "22:00",
+          "end": "23:15"
         },
         {
           "date": "2026-08-21",
           "day": 5,
-          "start": "02:55",
-          "end": "04:10"
+          "start": "22:15",
+          "end": "23:30"
         },
         {
           "date": "2026-08-21",
           "day": 5,
-          "start": "03:10",
-          "end": "04:25"
+          "start": "22:30",
+          "end": "23:45"
         }
       ]
     }
