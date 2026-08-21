@@ -42,7 +42,21 @@ export async function getSession() {
     await supabase.auth.signOut().catch(() => {});
     return null;
   }
-  return data.session ?? null;
+
+  const session = data.session ?? null;
+  if (!session) return null;
+
+  // A session left over from the anonymous-sign-in era has no email address.
+  // The database trigger stops new ones being created but says nothing about
+  // tokens already sitting in a browser, so those would sail past the sign-in
+  // screen. Discard them here and make the student sign in properly.
+  if (!session.user?.email) {
+    console.warn("discarding a session with no email address (pre-Google account)");
+    await supabase.auth.signOut().catch(() => {});
+    return null;
+  }
+
+  return session;
 }
 
 /**
