@@ -12,6 +12,7 @@ import Today from "../src/screens/Today";
 import Timetable from "../src/screens/Timetable";
 import CatchUp from "../src/screens/CatchUp";
 import Stats from "../src/screens/Stats";
+import Profile from "../src/screens/Profile";
 import Reschedule from "../src/screens/Reschedule";
 import TermCalendar from "../src/screens/TermCalendar";
 import CoursePicker from "../src/screens/CoursePicker";
@@ -89,6 +90,14 @@ const cases = [
         class_date: `2026-09-${String(i + 1).padStart(2, "0")}`,
         start_time: "16:15", status: "absent",
       }))} onToggleMute={noop} />],
+  ["Profile", <Profile key="p" session={{ user: {
+      email: "anuja2027@email.iimcal.ac.in",
+      user_metadata: { full_name: "Anuja Sharma", avatar_url: "https://example.test/a.jpg" },
+    } }} classes={classes} attendance={attendance} onToggleMute={noop} onSignOut={noop} />],
+  ["Profile / no avatar or name", <Profile key="pn" session={{ user: { email: "x@email.iimcal.ac.in", user_metadata: {} } }}
+      classes={classes} attendance={attendance} onToggleMute={noop} onSignOut={noop} />],
+  ["Profile / no session", <Profile key="ps" session={null}
+      classes={[]} attendance={[]} onToggleMute={noop} onSignOut={noop} />],
   ["Reschedule", <Reschedule key="r" classes={classes} term={term} overrides={overrides} now={now} onMove={noop} onClear={noop} onBack={noop} />],
   ["Reschedule / no classes", <Reschedule key="re" classes={[]} term={term} overrides={[]} now={now} onMove={noop} onClear={noop} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],

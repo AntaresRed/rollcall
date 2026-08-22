@@ -12,21 +12,22 @@ import {
 
 import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
+import { TodayIcon, TimetableIcon, CatchUpIcon, ProfileIcon } from "./screens/TabIcons";
 const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 const Onboard = lazy(() => import("./screens/Onboard"));
 const Confirm = lazy(() => import("./screens/Confirm"));
 import Today from "./screens/Today";
 const Timetable = lazy(() => import("./screens/Timetable"));
-const Stats = lazy(() => import("./screens/Stats"));
+const Profile = lazy(() => import("./screens/Profile"));
 const CatchUp = lazy(() => import("./screens/CatchUp"));
 const TermCalendar = lazy(() => import("./screens/TermCalendar"));
 const Reschedule = lazy(() => import("./screens/Reschedule"));
 
 const TABS = [
-  ["today", "Today"],
-  ["timetable", "Timetable"],
-  ["catchup", "Catch up"],
-  ["stats", "Attendance"],
+  ["today", "Today's classes", TodayIcon],
+  ["timetable", "Timetable", TimetableIcon],
+  ["catchup", "Missed Attendances", CatchUpIcon],
+  ["profile", "Profile", ProfileIcon],
 ];
 
 export default function App() {
@@ -308,7 +309,7 @@ export default function App() {
   if (draft) {
     return (
       <div className="shell">
-        <Masthead now={now} session={session} onSignOut={handleSignOut} />
+        <Masthead now={now} />
         <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
         <Confirm
           initial={draft}
@@ -335,7 +336,7 @@ export default function App() {
 
     return (
       <div className="shell">
-        <Masthead now={now} session={session} onSignOut={handleSignOut} />
+        <Masthead now={now} />
         <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
         {entry === "picker" ? (
           <CoursePicker
@@ -358,7 +359,7 @@ export default function App() {
   // ---- main ----
   return (
     <>
-      <Masthead now={now} session={session} onSignOut={handleSignOut} />
+      <Masthead now={now} />
       <div className="shell">
         {!alerts && pushSupported() && (
           <div className={`banner${iosNeedsInstall ? " warn" : ""}`}>
@@ -422,25 +423,35 @@ export default function App() {
             onMark={mark}
           />
         )}
-        {tab === "stats" && (
-          <Stats classes={classes} attendance={attendance} onToggleMute={toggleMute} />
+        {tab === "profile" && (
+          <Profile
+            session={session}
+            classes={classes}
+            attendance={attendance}
+            onToggleMute={toggleMute}
+            onSignOut={handleSignOut}
+          />
         )}
         </Suspense>
       </div>
 
       <nav className="tabs" role="tablist">
-        {TABS.map(([key, label]) => (
+        {TABS.map(([key, label, Icon]) => (
           <button
             key={key}
             className="tab"
             role="tab"
             aria-selected={tab === key}
+            aria-label={label}
             onClick={() => { setTab(key); setSubScreen(null); }}
           >
-            {label}
-            {key === "catchup" && pendingCount > 0 && (
-              <span className="tab-badge">{pendingCount > 9 ? "9+" : pendingCount}</span>
-            )}
+            <span className="tab-icon">
+              <Icon />
+              {key === "catchup" && pendingCount > 0 && (
+                <span className="tab-badge">{pendingCount > 9 ? "9+" : pendingCount}</span>
+              )}
+            </span>
+            <span className="tab-label">{label}</span>
           </button>
         ))}
       </nav>
@@ -450,28 +461,17 @@ export default function App() {
   );
 }
 
-function Masthead({ now, session, onSignOut }) {
+function Masthead({ now }) {
   const label = now.toLocaleDateString(undefined, {
     weekday: "short", day: "numeric", month: "short",
   });
-  // The local part is enough to confirm which account is in use; the domain
-  // is the same for everyone here.
-  const who = session?.user?.email?.split("@")[0];
-
   return (
     <header className="masthead">
       <div className="wordmark">
         <Mark size={22} />
         <b>Roll<i>Call</i></b>
       </div>
-      <div className="masthead-right">
-        <span className="masthead-date">{label}</span>
-        {who && (
-          <button className="masthead-user" onClick={onSignOut} title={session.user.email}>
-            {who}
-          </button>
-        )}
-      </div>
+      <div className="masthead-date">{label}</div>
     </header>
   );
 }

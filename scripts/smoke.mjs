@@ -6,7 +6,16 @@
  * rendered — a linter can't tell that an occurrence was handed to something
  * expecting a class row. Rendering can.
  */
-import { build } from "esbuild";
+let build;
+try {
+  ({ build } = await import("esbuild"));
+} catch {
+  console.error(
+    "\nCan't run the smoke test: esbuild isn't installed.\n" +
+    "Run `npm install` first — it's a devDependency of this project.\n"
+  );
+  process.exit(1);
+}
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
