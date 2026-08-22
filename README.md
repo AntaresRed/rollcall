@@ -1,12 +1,11 @@
-# RollCall
+# IIMPresent
 
 A PWA that builds a student's weekly timetable from the official Term V grid, sends a
 web push notification before every class, and tracks attendance against the 75% line.
 
 Students pick their courses from a searchable list generated from the published
 schedule — days, times, sections, and pre/post-mid-term windows all come from that
-catalogue, so there is nothing to type and nothing to misread. Reading a screenshot
-is the fallback, not the main path.
+catalogue, so there is nothing to type and nothing to misread.
 
 **Stack:** React + Vite on Vercel · Supabase (Postgres, anonymous auth, Edge Functions,
 pg_cron) · Gemini for image parsing · Web Push via VAPID.
@@ -52,14 +51,7 @@ so you can see who a move affects.
 Because course codes (LSCM, BCM, MTIS…) are unique, the image parser matches on the
 code and looks everything else up locally.
 
-## 3. Gemini key
-
-1. aistudio.google.com → **Get API key** → create one. No card needed.
-2. Check the live rate limits shown for your project — published figures move around.
-3. Confirm the model ID you want on the pricing page; `gemini-2.5-flash` is the
-   default here and `GEMINI_MODEL` overrides it.
-
-## 4. VAPID keys
+## 3. VAPID keys
 
 ```bash
 npx web-push generate-vapid-keys
@@ -67,26 +59,25 @@ npx web-push generate-vapid-keys
 
 Keep the private key secret. The public key is safe in the frontend.
 
-## 5. Deploy the Edge Functions
+## 4. Deploy the Edge Functions
 
 ```bash
 npm i -g supabase
 supabase login
 supabase link --project-ref <PROJECT_REF>
 
-supabase secrets set GEMINI_API_KEY=<key>
 supabase secrets set VAPID_PUBLIC_KEY=<public>
 supabase secrets set VAPID_PRIVATE_KEY=<private>
 supabase secrets set VAPID_SUBJECT=mailto:you@example.com
 supabase secrets set ALLOWED_ORIGIN=https://<your-app>.vercel.app
 
-supabase functions deploy parse-timetable
+supabase functions deploy mark-attendance --no-verify-jwt
 supabase functions deploy send-class-alerts --no-verify-jwt
 ```
 
 `--no-verify-jwt` lets pg_cron call the sweep with the service-role key.
 
-## 6. Schedule the alert sweep
+## 5. Schedule the alert sweep
 
 Uncomment the `cron.schedule` block at the bottom of `schema.sql`, fill in your
 project ref and **service role** key, and run it. It fires every 5 minutes;
@@ -99,7 +90,7 @@ select * from cron.job;
 select * from cron.job_run_details order by start_time desc limit 5;
 ```
 
-## 7. Frontend
+## 6. Frontend
 
 ```bash
 cp .env.example .env.local   # fill in the three values
@@ -123,22 +114,20 @@ end to end and includes the iOS push test protocol.
 ## How the pieces fit
 
 ```
-Term_5_Schedule.csv ──► build_catalogue.py ──► catalogue.json  (38 courses)
-                                                     │
-                        ┌────────────────────────────┴──────────────┐
-                        ▼                                           ▼
-              course picker (primary)                  parse-timetable (fallback)
-              search, tick, choose section             Gemini reads codes off an image
-              clash detection                          key stays server-side
-                        │                                           │
-                        │                                confirmation screen
-                        └────────────────┬──────────────────────────┘
-                                         ▼
-                                    classes table
-                                         │
-        pg_cron every 5 min ─► send-class-alerts ─► web push ─► service worker
-                                         │
-                                         └─ alert_log dedupes, so no double pings
+Class_Schedule_Term-V.xlsx ──► build_catalogue.py ──► catalogue.json
+                                                            │
+                                                     course picker
+                                              search, tick, choose section
+                                                    clash detection
+                                                            │
+                                                       classes table
+                                                            │
+  pg_cron every 5 min ─► send-class-alerts ─► web push ─► service worker
+                                │                              │
+                                │                    "Mark present" button
+                                │                              ▼
+                                │                      mark-attendance
+                                └─ alert_log dedupes, so no double pings
 ```
 
 ## Things worth knowing before you pilot

@@ -1,8 +1,8 @@
 // ============================================================
 // POST /functions/v1/send-class-alerts   (called by pg_cron every 5 min)
 //
-// Finds classes starting inside each student's lead window, sends one web
-// push per class per day, and records it so repeats never happen.
+// Finds classes that started far enough ago to be worth asking about, sends
+// one web push per class per day, and records it so repeats never happen.
 //
 // Secrets required:
 //   supabase secrets set VAPID_PUBLIC_KEY=...
@@ -15,6 +15,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
 
 const SWEEP_MINUTES = 5; // must match the cron interval
+
+// How long the window stays open after it first could have fired. Six sweeps
+// of slack, so a missed tick doesn't lose the alert.
+const WINDOW_MINUTES = 30;
 
 webpush.setVapidDetails(
   Deno.env.get("VAPID_SUBJECT") ?? "mailto:admin@example.com",
@@ -176,8 +180,8 @@ Deno.serve(async () => {
   const subscribed = new Set(userIds);
 
   const [profiles, allClasses] = await Promise.all([
-    fetchAll<{ id: string; lead_mins: number; timezone: string }>((from, to) =>
-      admin.from("profiles").select("id, lead_mins, timezone").range(from, to)),
+    fetchAll<{ id: string; alert_after_mins: number; timezone: string }>((from, to) =>
+      admin.from("profiles").select("id, alert_after_mins, timezone").range(from, to)),
     fetchAll<Record<string, string>>((from, to) =>
       admin.from("classes").select("*")
         .eq("confirmed", true)
@@ -198,7 +202,7 @@ Deno.serve(async () => {
   );
   const classById = new Map(classes.map((c) => [String(c.id), c]));
 
-  const leadOf = new Map(profiles.map((p) => [p.id, p.lead_mins ?? 10]));
+  const afterOf = new Map(profiles.map((p) => [p.id, p.alert_after_mins ?? 15]));
   const tzOf = new Map(profiles.map((p) => [p.id, p.timezone ?? "Asia/Kolkata"]));
 
   // Cache clock maths per timezone.
@@ -222,17 +226,18 @@ Deno.serve(async () => {
       continue;
     }
 
-    const lead = leadOf.get(cls.user_id) ?? 10;
+    const after = afterOf.get(cls.user_id) ?? 15;
     const start = toMinutes(cls.start_time);
-    // Clamped so an early-morning class with a long lead can't open "yesterday".
-    const opens = Math.max(0, start - lead);
+    const end = toMinutes(cls.end_time);
+    // Never past the end of the class: an alert about a lesson that finished
+    // an hour ago is noise, not a prompt.
+    const opens = Math.min(start + after, Math.max(start, end - 5));
 
-    // Fire anywhere between the window opening and the class starting, not on
-    // one exact tick. A single skipped sweep — a cold start, a pg_cron hiccup,
-    // a slow function — used to mean the alert was lost for good. Now the next
-    // sweep still catches it, and the atomic alert_log claim below guarantees
-    // it's still delivered exactly once.
-    if (now.minutes < opens || now.minutes > start) continue;
+    // Fire anywhere in the window, not on one exact tick. A single skipped
+    // sweep — a cold start, a pg_cron hiccup, a slow function — used to mean
+    // the alert was lost for good. Now the next sweep still catches it, and
+    // the atomic alert_log claim below guarantees exactly one delivery.
+    if (now.minutes < opens || now.minutes > opens + WINDOW_MINUTES) continue;
     // Published dates already avoid exam weeks and vacations, so a dated
     // session is authoritative and skips the phase window entirely.
     if (!cls.session_date && !inSession(cls.term_phase, now.date, term)) continue;
@@ -260,10 +265,11 @@ Deno.serve(async () => {
       ? String(o.new_end).slice(0, 5)
       : String(base.end_time).slice(0, 5);
 
-    const lead = leadOf.get(userId) ?? 10;
+    const after = afterOf.get(userId) ?? 15;
     const start = toMinutes(startTime);
-    const opens = Math.max(0, start - lead);
-    if (now.minutes < opens || now.minutes > start) continue;
+    const end = toMinutes(endTime);
+    const opens = Math.min(start + after, Math.max(start, end - 5));
+    if (now.minutes < opens || now.minutes > opens + WINDOW_MINUTES) continue;
 
     due.push({
       cls: { ...base, start_time: startTime, end_time: endTime, _moved: true },
@@ -297,15 +303,16 @@ Deno.serve(async () => {
 
   await Promise.all(claimed.flatMap((d) => {
     const devices = byUser.get(d.cls.user_id) ?? [];
-    const lead = leadOf.get(d.cls.user_id) ?? 10;
+    const after = afterOf.get(d.cls.user_id) ?? 15;
     const token = tokens.get(`${d.cls.id}|${d.date}`) ?? null;
     const payload = JSON.stringify({
       title: `${d.cls.subject}`,
-      body: `Starts in ${lead} min · ${pretty(d.cls.start_time)}${d.cls.room ? ` · ${d.cls.room}` : ""}`
+      body: `Started ${pretty(d.cls.start_time)}${d.cls.room ? ` · ${d.cls.room}` : ""}`
         + (d.cls._moved ? " · rescheduled" : ""),
       // Shown on platforms that can't render action buttons (iOS, Firefox),
       // where tapping through to the app is the only route.
       hint: "Tap to mark attendance",
+      after,
       // The single button covers the common case; the body covers the rest.
       subhint: "Tap the alert itself if you're missing it",
       classId: d.cls.id,
@@ -316,7 +323,10 @@ Deno.serve(async () => {
       markUrl: `${FUNCTIONS_BASE}/mark-attendance`,
       // The service worker drops the alert if it arrives after this. Belt and
       // braces alongside TTL, since a push service may still deliver late.
-      expiresAt: Date.now() + (toMinutes(d.cls.end_time ?? d.cls.start_time) - toMinutes(d.cls.start_time) + lead) * 60_000,
+      // Useful until a while after the class ends, then not.
+      expiresAt: Date.now() + (
+        Math.max(30, toMinutes(d.cls.end_time ?? d.cls.start_time) - toMinutes(d.cls.start_time) - after) + 60
+      ) * 60_000,
       startsAt: `${d.date} ${d.cls.start_time}`,
     });
 
@@ -330,10 +340,12 @@ Deno.serve(async () => {
             // offline or dozing at send time gets the alert whenever it next
             // wakes — which is how "your class starts in 10 minutes" arrives
             // at midnight. Expire it instead of delivering it stale.
-            TTL: 15 * 60,
-            // Normal urgency lets Android defer delivery until the device
-            // leaves Doze, which is exactly the wrong behaviour for a
-            // time-critical alert.
+            // The window is 30 minutes wide now, so a slightly longer TTL
+            // matches how long the alert stays worth showing.
+            TTL: 45 * 60,
+            // Still high: the alert is silent, so it costs the student
+            // nothing to arrive promptly, and normal urgency lets Android
+            // hold it until the device next wakes — which could be hours.
             urgency: "high",
             topic: `c${String(d.cls.id).replace(/-/g, "").slice(0, 12)}`,
           },

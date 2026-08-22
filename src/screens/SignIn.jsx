@@ -32,16 +32,17 @@ export default function SignIn({ error, onRetry }) {
       </div>
 
       <h1>
-        Roll<i>Call</i>
+        IIM<i>Present</i>
       </h1>
+      <p className="signin-motto">No JST for classes.</p>
       <p className="signin-sub">
-        Your timetable, on time. A nudge before every class, and your attendance
-        kept above the line.
+        A nudge once each class is under way, and your attendance kept above
+        the line.
       </p>
 
       {error?.kind === "domain" && (
         <div className="notice" style={{ textAlign: "left" }}>
-          {error.message} RollCall is open to <strong>@{EXPECTED_DOMAIN}</strong>{" "}
+          {error.message} IIMPresent is open to <strong>@{EXPECTED_DOMAIN}</strong>{" "}
           accounts only. Pick your institute account and try again.
         </div>
       )}
@@ -69,6 +70,8 @@ export default function SignIn({ error, onRetry }) {
           Something went wrong — try again
         </button>
       )}
+
+      <p className="made-by">Made by Anuj Kapse</p>
     </div>
   );
 }

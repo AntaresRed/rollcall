@@ -1,4 +1,4 @@
-# RollCall — deploy & test runbook
+# IIMPresent — deploy & test runbook
 
 Goal of this pass: get the app live and answer one question — **do push
 notifications reliably reach an iPhone when the app is closed?** Everything else
@@ -17,7 +17,7 @@ You need: Node 18+, git, a GitHub account, a Google account, one iPhone
 cd rollcall
 git init
 git add .
-git commit -m "RollCall: course picker, alerts, attendance"
+git commit -m "IIMPresent: course picker, alerts, attendance"
 ```
 
 Create an empty repo on GitHub, then:
@@ -114,14 +114,14 @@ password — it bypasses every row-level security policy.
 > schedules a job that fails on every tick with `Bad hostname`, and nothing in
 > the app tells you — the only symptom is that alerts never arrive. Check
 > `cron.job_run_details` after five minutes and confirm `status = succeeded`.
-> To fix a bad job: `select cron.unschedule('rollcall-class-alerts');` then
+> To fix a bad job: `select cron.unschedule('iimpresent-class-alerts');` then
 > reschedule.
 
 In the SQL Editor, with your values filled in:
 
 ```sql
 select cron.schedule(
-  'rollcall-class-alerts',
+  'iimpresent-class-alerts',
   '*/5 * * * *',
   $$
   select net.http_post(
@@ -169,11 +169,11 @@ added to the Home Screen and launched from there.
 
 1. Open the Vercel URL **in Safari** (not Chrome, not in-app browsers).
 2. Share button → **Add to Home Screen** → Add.
-3. Close Safari. Open RollCall **from the Home Screen icon.**
+3. Close Safari. Open IIMPresent **from the Home Screen icon.**
 4. Pick 2–3 courses → Save.
 5. Tap **Turn on alerts** → Allow.
 
-If you see "Add RollCall to your Home Screen first," you opened it in a Safari
+If you see "Add IIMPresent to your Home Screen first," you opened it in a Safari
 tab. Go back to step 2.
 
 **Android:** open in Chrome, accept the install prompt (or menu → Install app),
@@ -199,8 +199,8 @@ account is yours — check `select id, created_at from profiles;` if you have
 several):
 
 ```sql
--- fires in ~6 min: lead time 3 min, class starts 3 min after that
-update public.profiles set lead_mins = 3 where id = '<YOUR_USER_ID>';
+-- alert fires alert_after_mins into the class
+update public.profiles set alert_after_mins = 2 where id = '<YOUR_USER_ID>';
 
 insert into public.classes
   (user_id, day_of_week, start_time, end_time, subject, term_phase, confirmed)
@@ -213,7 +213,7 @@ values (
 );
 ```
 
-Now **swipe RollCall away from the app switcher** — fully closed, not
+Now **swipe IIMPresent away from the app switcher** — fully closed, not
 backgrounded. Lock the phone. Wait.
 
 The notification should arrive about 3 minutes before that start time.
@@ -252,7 +252,7 @@ late. That table is your decision.
 
 ```sql
 delete from public.classes where subject = 'Push test';
-update public.profiles set lead_mins = 10 where id = '<YOUR_USER_ID>';
+update public.profiles set alert_after_mins = 15 where id = '<YOUR_USER_ID>';
 ```
 
 ---
@@ -276,11 +276,11 @@ delete from classes
     or subject ilike '%test%';
 ```
 
-**A lead time still set to 1 or 3 from testing:**
+**An alert offset still set low from testing:**
 
 ```sql
-select id, lead_mins, timezone from profiles;
-update profiles set lead_mins = 10;   -- back to a sane default
+select id, alert_after_mins, timezone from profiles;
+update profiles set alert_after_mins = 15;   -- back to a sane default
 ```
 
 **Duplicate device subscriptions.** Reinstalling the PWA can leave a stale row

@@ -14,8 +14,6 @@ import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
 import { TodayIcon, TimetableIcon, CatchUpIcon, ProfileIcon } from "./screens/TabIcons";
 const CoursePicker = lazy(() => import("./screens/CoursePicker"));
-const Onboard = lazy(() => import("./screens/Onboard"));
-const Confirm = lazy(() => import("./screens/Confirm"));
 import Today from "./screens/Today";
 const Timetable = lazy(() => import("./screens/Timetable"));
 const Profile = lazy(() => import("./screens/Profile"));
@@ -25,7 +23,7 @@ const Reschedule = lazy(() => import("./screens/Reschedule"));
 
 const TABS = [
   ["today", "Today's classes", TodayIcon],
-  ["timetable", "Timetable", TimetableIcon],
+  ["timetable", "Week's Timetable", TimetableIcon],
   ["catchup", "Missed Attendances", CatchUpIcon],
   ["profile", "Profile", ProfileIcon],
 ];
@@ -36,13 +34,12 @@ export default function App() {
   const [attendance, setAttendance] = useState([]);
   const [term, setTerm] = useState(null);
   const [overrides, setOverrides] = useState([]);
-  const [draft, setDraft] = useState(null);      // parsed rows awaiting confirmation
-  const [entry, setEntry] = useState("picker");  // 'picker' | 'image'
   const [tab, setTab] = useState("today");
   const [now, setNow] = useState(new Date());
   const [alerts, setAlerts] = useState(false);
   const [editing, setEditing] = useState(false);
   const [subScreen, setSubScreen] = useState(null);
+  const [returnTab, setReturnTab] = useState(null);
   const [toast, setToast] = useState("");
   const [fatal, setFatal] = useState("");
   const [alertInfo, setAlertInfo] = useState("");
@@ -87,7 +84,7 @@ export default function App() {
         setOverrides(o);
       } catch (err) {
         console.error(err);
-        setFatal("Couldn't reach RollCall. Check your connection and reload.");
+        setFatal("Couldn't reach IIMPresent. Check your connection and reload.");
       } finally {
         setReady(true);
       }
@@ -208,7 +205,7 @@ export default function App() {
       const result = await enableAlerts();
       if (result === "enabled") { setAlerts(true); say("Alerts on"); }
       else if (result === "denied") say("Notifications are blocked in your browser settings");
-      else if (result === "needs-install") say("Add RollCall to your Home Screen first");
+      else if (result === "needs-install") say("Add IIMPresent to your Home Screen first");
       else if (result === "misconfigured") say("Alerts aren't configured on this deployment");
       else say("This browser can't do alerts");
     } catch {
@@ -251,12 +248,14 @@ export default function App() {
   }, []);
 
   const startOver = () => {
-    setEntry("picker");
+    // Remember where the edit was launched from, so saving returns there
+    // rather than dumping the student on Today.
+    setReturnTab(tab);
     setEditing(true);
   };
 
   const handleSignOut = useCallback(async () => {
-    if (!confirm("Sign out of RollCall? Your timetable and attendance stay on the server.")) return;
+    if (!confirm("Sign out of IIMPresent? Your timetable and attendance stay on the server.")) return;
     await signOut();
   }, []);
 
@@ -265,9 +264,9 @@ export default function App() {
     if (!r.ok) {
       setAlertInfo(
         r.reason === "denied"
-          ? "Notifications are blocked for RollCall in your browser settings."
+          ? "Notifications are blocked for IIMPresent in your browser settings."
           : r.reason === "no-service-worker"
-            ? "No service worker is running. Reinstall RollCall from the browser menu."
+            ? "No service worker is running. Reinstall IIMPresent from the browser menu."
             : "This browser can't show alerts.",
       );
       return;
@@ -306,31 +305,13 @@ export default function App() {
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
 
   // ---- onboarding ----
-  if (draft) {
-    return (
-      <div className="shell">
-        <Masthead now={now} />
-        <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
-        <Confirm
-          initial={draft}
-          onCancel={() => setDraft(null)}
-          onSaved={async (saved) => {
-            setClasses(saved);
-            setDraft(null);
-            setTab("today");
-            if (!(await alertsActive())) await turnOnAlerts();
-          }}
-        />
-        </Suspense>
-      </div>
-    );
-  }
-
   if (!classes.length || editing) {
     const finish = async (saved) => {
       setClasses(saved);
       setEditing(false);
-      setTab("today");
+      // First run has nowhere to go back to, so Today is the right landing.
+      setTab(returnTab ?? "today");
+      setReturnTab(null);
       if (!(await alertsActive())) await turnOnAlerts();
     };
 
@@ -338,19 +319,7 @@ export default function App() {
       <div className="shell">
         <Masthead now={now} />
         <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
-        {entry === "picker" ? (
-          <CoursePicker
-            existing={classes}
-            onSaved={finish}
-            onUseImage={() => setEntry("image")}
-          />
-        ) : (
-          <Onboard
-            onParsed={setDraft}
-            onManual={() => setDraft([])}
-            onUsePicker={() => setEntry("picker")}
-          />
-        )}
+          <CoursePicker existing={classes} onSaved={finish} />
         </Suspense>
       </div>
     );
@@ -365,7 +334,7 @@ export default function App() {
           <div className={`banner${iosNeedsInstall ? " warn" : ""}`}>
             {iosNeedsInstall ? (
               <p>
-                On iPhone, alerts only work once RollCall is on your Home Screen.
+                On iPhone, alerts only work once IIMPresent is on your Home Screen.
                 Tap Share, then <strong>Add to Home Screen</strong>, and open it from there.
               </p>
             ) : (
@@ -406,7 +375,6 @@ export default function App() {
             now={now}
             term={term}
             overrides={overrides}
-            onEdit={startOver}
             onShowCalendar={() => setSubScreen("calendar")}
             onReschedule={() => setSubScreen("reschedule")}
             onTestAlert={testAlert}
@@ -429,6 +397,7 @@ export default function App() {
             classes={classes}
             attendance={attendance}
             onToggleMute={toggleMute}
+            onChangeCourses={startOver}
             onSignOut={handleSignOut}
           />
         )}
@@ -469,7 +438,7 @@ function Masthead({ now }) {
     <header className="masthead">
       <div className="wordmark">
         <Mark size={22} />
-        <b>Roll<i>Call</i></b>
+        <b>IIM<i>Present</i></b>
       </div>
       <div className="masthead-date">{label}</div>
     </header>

@@ -1,4 +1,4 @@
-# RollCall — final package
+# IIMPresent — final package
 
 Replace your project folder's contents with everything in here, then:
 
@@ -9,7 +9,7 @@ git commit -m "Crash reporting, revised design, rescheduling"
 git push
 ```
 
-Then **delete the RollCall icon from your Home Screen and add it again.** The
+Then **delete the IIMPresent icon from your Home Screen and add it again.** The
 service worker is at v8; the old one will keep serving the old bundle until
 it's removed.
 
@@ -17,7 +17,7 @@ it's removed.
 
 ## Sign-in changed
 
-RollCall now requires a Google account on **@email.iimcal.ac.in**; anonymous
+IIMPresent now requires a Google account on **@email.iimcal.ac.in**; anonymous
 accounts are gone. This needs a one-time setup in Google Cloud Console and
 Supabase before anyone (including you) can get in — **see `GOOGLE-SIGNIN.md`**.
 
@@ -113,8 +113,8 @@ src/
     supabase.js       client, fails loudly if config is missing
     api.js            all data access, attendance maths, occurrence generation
     push.js           subscription, permissions, test notification
-  screens/            Splash, Today, Timetable, CatchUp, Stats, Reschedule,
-                      TermCalendar, CoursePicker, Onboard, Confirm
+  screens/            Splash, SignIn, Today, Timetable, CatchUp, Stats,
+                      Profile, Reschedule, TermCalendar, CoursePicker
   data/catalogue.json generated — do not edit by hand
 
 public/               manifest, service worker, icons
@@ -125,7 +125,8 @@ scripts/
   build_catalogue.py  rebuilds the catalogue from the spreadsheet
 supabase/
   schema.sql          run in the SQL Editor; safe to re-run
-  functions/          parse-timetable, send-class-alerts
+  fix-signin.sql      standalone patch for the sign-in trigger
+  functions/          send-class-alerts, mark-attendance
 ```
 
 ## Removing the test courses
@@ -136,8 +137,8 @@ Delete the `ZTEST`, `ZSAT` and `ZSUN` entries from `data/overrides.json`, then:
 python scripts/build_catalogue.py data/Class_Schedule_Term-V_AY-2026-27.xlsx src/data/catalogue.json data/overrides.json
 ```
 
-Copy the regenerated `src/data/catalogue.json` array into
-`supabase/functions/_shared/catalogue.ts`, redeploy `parse-timetable`, push.
+Then push. The catalogue is read by the app only, so there is nothing to
+copy into an edge function and nothing to redeploy.
 
 ## Still open
 

@@ -1,6 +1,6 @@
-// RollCall service worker — app shell cache + push delivery.
+// IIMPresent service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v13";
+const CACHE = "iimpresent-v15";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -47,9 +47,9 @@ self.addEventListener("push", (event) => {
   // notification for every push, hence the quiet silent fallback.
   if (data.expiresAt && Date.now() > data.expiresAt) {
     event.waitUntil(
-      self.registration.showNotification("RollCall", {
+      self.registration.showNotification("IIMPresent", {
         body: "A class alert arrived too late to be useful.",
-        tag: "rollcall-stale",
+        tag: "iimpresent-stale",
         silent: true,
         requireInteraction: false,
       })
@@ -68,7 +68,11 @@ self.addEventListener("push", (event) => {
         : [data.body, data.hint].filter(Boolean).join(" · "),
       icon: "/icon-192.png",
       badge: "/icon-badge.png",
-      tag: data.classId ? `class-${data.classId}-${data.classDate}` : "rollcall",
+      tag: data.classId ? `class-${data.classId}-${data.classDate}` : "iimpresent",
+      // No sound, no vibration. These arrive while the student is sitting in
+      // the class they're about — a chime would be the app interrupting a
+      // lecture on its own behalf. It waits in the shade instead.
+      silent: true,
       data,
       // Deliberately one button, not two.
       //
@@ -120,14 +124,14 @@ async function nudgeOpenWindows() {
 // SW_BUILD is echoed in the confirmation so there is no doubt about which
 // version of this file the browser is actually running. A stale worker looks
 // exactly like a logic bug from the outside.
-const SW_BUILD = "v13";
+const SW_BUILD = "v15";
 
 async function toast(title, body, { sticky = false } = {}) {
   await self.registration.showNotification(title, {
     body: `${body}${body ? " · " : ""}sw ${SW_BUILD}`,
     icon: "/icon-192.png",
     badge: "/icon-badge.png",
-    tag: "rollcall-ack",
+    tag: "iimpresent-ack",
     silent: true,
     // Stays put while this is being diagnosed, so the detail can be read
     // rather than vanishing after four seconds.
@@ -135,7 +139,7 @@ async function toast(title, body, { sticky = false } = {}) {
   });
   if (sticky) return;
   await new Promise((r) => setTimeout(r, 4000));
-  const shown = await self.registration.getNotifications({ tag: "rollcall-ack" });
+  const shown = await self.registration.getNotifications({ tag: "iimpresent-ack" });
   shown.forEach((n) => n.close());
 }
 

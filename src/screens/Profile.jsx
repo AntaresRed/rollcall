@@ -10,7 +10,9 @@ import Stats from "./Stats";
  * many courses are close to the line — and confirmation of which account
  * they're signed in with, which matters on a shared laptop.
  */
-export default function Profile({ session, classes, attendance, onToggleMute, onSignOut }) {
+export default function Profile({
+  session, classes, attendance, onToggleMute, onChangeCourses, onSignOut,
+}) {
   const user = session?.user;
   const meta = user?.user_metadata ?? {};
   const name = meta.full_name || meta.name || user?.email?.split("@")[0] || "Student";
@@ -82,11 +84,20 @@ export default function Profile({ session, classes, attendance, onToggleMute, on
 
       <Stats classes={classes} attendance={attendance} onToggleMute={onToggleMute} />
 
-      {onSignOut && (
-        <button className="btn ghost block" style={{ marginTop: 24 }} onClick={onSignOut}>
-          Sign out
-        </button>
-      )}
+      <div className="profile-actions">
+        {onChangeCourses && (
+          <button className="btn ghost block" onClick={onChangeCourses}>
+            Change my courses
+          </button>
+        )}
+        {onSignOut && (
+          <button className="btn ghost block signout" onClick={onSignOut}>
+            Sign out
+          </button>
+        )}
+      </div>
+
+      <p className="made-by">Made by Anuj Kapse</p>
     </>
   );
 }

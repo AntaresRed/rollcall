@@ -16,8 +16,6 @@ import Profile from "../src/screens/Profile";
 import Reschedule from "../src/screens/Reschedule";
 import TermCalendar from "../src/screens/TermCalendar";
 import CoursePicker from "../src/screens/CoursePicker";
-import Onboard from "../src/screens/Onboard";
-import Confirm from "../src/screens/Confirm";
 import SignIn from "../src/screens/SignIn";
 import Splash from "../src/screens/Splash";
 
@@ -77,7 +75,7 @@ const cases = [
   ["SignIn / rejected domain", <SignIn key="si2" error={{ kind: "domain", message: "Nope." }} />],
   ["Today", <Today key="t" occurrences={occ} attendance={attendance} now={now} onMark={noop} />],
   ["Today / empty", <Today key="te" occurrences={[]} attendance={[]} now={now} onMark={noop} />],
-  ["Timetable", <Timetable key="tt" classes={classes} now={now} term={term} overrides={overrides} onEdit={noop} onShowCalendar={noop} onReschedule={noop} onTestAlert={noop} alertInfo="" />],
+  ["Timetable", <Timetable key="tt" classes={classes} now={now} term={term} overrides={overrides} onShowCalendar={noop} onReschedule={noop} onTestAlert={noop} alertInfo="" />],
   ["Timetable / empty", <Timetable key="tte" classes={[]} now={now} term={term} />],
   ["Timetable / during a break", <Timetable key="ttb" classes={classes} now={new Date("2026-10-21T10:00:00")} term={term} overrides={[]} />],
   ["CatchUp", <CatchUp key="cu" classes={classes} attendance={attendance} term={term} overrides={overrides} now={now} onMark={noop} />],
@@ -93,20 +91,17 @@ const cases = [
   ["Profile", <Profile key="p" session={{ user: {
       email: "anuja2027@email.iimcal.ac.in",
       user_metadata: { full_name: "Anuja Sharma", avatar_url: "https://example.test/a.jpg" },
-    } }} classes={classes} attendance={attendance} onToggleMute={noop} onSignOut={noop} />],
+    } }} classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
   ["Profile / no avatar or name", <Profile key="pn" session={{ user: { email: "x@email.iimcal.ac.in", user_metadata: {} } }}
-      classes={classes} attendance={attendance} onToggleMute={noop} onSignOut={noop} />],
+      classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
   ["Profile / no session", <Profile key="ps" session={null}
-      classes={[]} attendance={[]} onToggleMute={noop} onSignOut={noop} />],
+      classes={[]} attendance={[]} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
   ["Reschedule", <Reschedule key="r" classes={classes} term={term} overrides={overrides} now={now} onMove={noop} onClear={noop} onBack={noop} />],
   ["Reschedule / no classes", <Reschedule key="re" classes={[]} term={term} overrides={[]} now={now} onMove={noop} onClear={noop} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
-  ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} onUseImage={noop} />],
+  ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],
   ["CoursePicker / fresh", <CoursePicker key="cpf" existing={[]} onSaved={noop} />],
-  ["Onboard", <Onboard key="o" onParsed={noop} onManual={noop} onUsePicker={noop} />],
-  ["Confirm", <Confirm key="cf" initial={[{ day_of_week: 1, start_time: "10:15", end_time: "11:30", subject: "X", room: "L-1", term_phase: "full", _matchedCatalogue: false }]} onSaved={noop} onCancel={noop} />],
-  ["Confirm / empty", <Confirm key="cfe" initial={[]} onSaved={noop} onCancel={noop} />],
 
   // Deliberately hostile input: rows missing the fields screens read.
   ["Today / malformed rows", <Today key="tm" occurrences={[

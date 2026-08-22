@@ -47,7 +47,7 @@ declare
 begin
   if not public.email_is_allowed(v_addr) then
     raise exception
-      'RollCall is open to IIM Calcutta accounts only. % is not eligible.',
+      'IIMPresent is open to IIM Calcutta accounts only. % is not eligible.',
       coalesce(nullif(v_addr, ''), '(no address)')
       using errcode = '42501';
   end if;

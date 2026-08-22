@@ -1,6 +1,6 @@
 # Google sign-in — setup
 
-RollCall now requires a Google account on **@email.iimcal.ac.in**. Anonymous
+IIMPresent now requires a Google account on **@email.iimcal.ac.in**. Anonymous
 accounts are gone.
 
 About 20 minutes, mostly clicking through Google Cloud Console.
@@ -10,10 +10,10 @@ About 20 minutes, mostly clicking through Google Cloud Console.
 ## 1. Google Cloud Console (10 min)
 
 1. **console.cloud.google.com** → sign in → **Select a project → New Project** →
-   name it `RollCall`.
+   name it `IIMPresent`.
 2. **APIs & Services → OAuth consent screen**
    - User type: **External** (Internal only works if you own the Workspace)
-   - App name `RollCall`, your email for support and developer contact
+   - App name `IIMPresent`, your email for support and developer contact
    - Scopes: the defaults are enough — `email`, `profile`, `openid`
    - Under **Test users**, add your own institute address while the app is
      still unpublished. An unpublished app admits **100 test users at most**,

@@ -1,5 +1,5 @@
 -- ============================================================
--- RollCall — schema
+-- IIMPresent — schema
 -- Run in Supabase → SQL Editor. Safe to re-run.
 --
 -- SECTION ORDER MATTERS, and not in the obvious way:
@@ -59,7 +59,11 @@ on conflict (domain) do nothing;
 create table if not exists public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
   timezone   text        not null default 'Asia/Kolkata',
-  lead_mins  int         not null default 10,   -- how early to alert
+  -- Minutes AFTER a class starts before the alert fires. Prompting someone
+  -- beforehand asks a question they can't answer yet: they haven't decided,
+  -- or haven't arrived. Asking once the class is under way gets a truthful
+  -- answer instead of a guess.
+  alert_after_mins int    not null default 15,
   term_id    uuid        references public.terms(id),
   created_at timestamptz not null default now()
 );
@@ -201,6 +205,16 @@ begin
     alter table public.attendance
       add constraint attendance_user_subject_date_slot_key
       unique (user_id, subject, class_date, start_time);
+  end if;
+
+  -- alerts moved from before a class to after it starts
+  if exists (select 1 from information_schema.columns
+             where table_name = 'profiles' and column_name = 'lead_mins') then
+    alter table public.profiles rename column lead_mins to alert_after_mins;
+    alter table public.profiles alter column alert_after_mins set default 15;
+    -- The old values were "minutes early" and mean nothing under the new
+    -- reading, so everyone starts from the default.
+    update public.profiles set alert_after_mins = 15;
   end if;
 
   -- credit rules + per-course mute
@@ -387,7 +401,7 @@ declare
 begin
   if not public.email_is_allowed(v_addr) then
     raise exception
-      'RollCall is open to IIM Calcutta accounts only. % is not eligible.',
+      'IIMPresent is open to IIM Calcutta accounts only. % is not eligible.',
       coalesce(nullif(v_addr, ''), '(no address)')
       using errcode = '42501';
   end if;
@@ -426,7 +440,7 @@ begin
   domain := split_part(addr, '@', 2);
 
   if not exists (select 1 from public.allowed_email_domains d where d.domain = domain) then
-    raise exception 'RollCall is only open to IIM Calcutta accounts.' using errcode = '42501';
+    raise exception 'IIMPresent is only open to IIM Calcutta accounts.' using errcode = '42501';
   end if;
 end;
 $$;
@@ -470,7 +484,7 @@ alter view public.attendance_summary set (security_invoker = true);
 -- Replace <PROJECT_REF> and <SERVICE_ROLE_KEY> before running.
 -- ============================================================
 -- select cron.schedule(
---   'rollcall-class-alerts',
+--   'iimpresent-class-alerts',
 --   '*/5 * * * *',
 --   $$
 --   select net.http_post(

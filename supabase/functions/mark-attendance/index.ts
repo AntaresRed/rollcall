@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
     if (!claim) {
       // Covers a forged token, a tampered one, and one that has simply aged
       // out — none of which the student can act on, so they read the same.
-      return json({ error: "That alert has expired. Open RollCall to mark it." }, 401);
+      return json({ error: "That alert has expired. Open IIMPresent to mark it." }, 401);
     }
 
     console.log("mark request", {

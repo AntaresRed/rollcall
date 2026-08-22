@@ -9,7 +9,7 @@ const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // console to explain it. Name the problem instead.
 if (!URL || !ANON) {
   throw new Error(
-    "RollCall is missing its Supabase settings. Set VITE_SUPABASE_URL and " +
+    "IIMPresent is missing its Supabase settings. Set VITE_SUPABASE_URL and " +
     "VITE_SUPABASE_ANON_KEY in the Vercel project, then redeploy — Vite reads " +
     "them at build time, so editing them alone isn't enough."
   );

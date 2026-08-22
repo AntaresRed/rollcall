@@ -125,7 +125,9 @@ export async function sendTestNotification() {
       : "This browser shows no buttons — tap the alert itself to mark attendance.",
     icon: "/icon-192.png",
     badge: "/icon-badge.png",
-    tag: "rollcall-test",
+    tag: "iimpresent-test",
+    // Matches real alerts: silent, so testing one in a lecture isn't rude.
+    silent: true,
     requireInteraction: true,
     data: { test: true },
     // Matches the single button real alerts use; see the comment in sw.js.

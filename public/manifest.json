@@ -1,7 +1,7 @@
 {
-  "name": "RollCall \u2014 class alerts & attendance",
-  "short_name": "RollCall",
-  "description": "Your timetable, on time. A nudge before every class, and your attendance kept above the line.",
+  "name": "IIMPresent — class alerts & attendance",
+  "short_name": "IIMPresent",
+  "description": "No JST for classes. A nudge once each class is under way, and your attendance kept above the line.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

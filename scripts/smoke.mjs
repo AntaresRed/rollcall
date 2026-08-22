@@ -24,8 +24,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const cache = path.join(root, "node_modules", ".cache");
 
 const suites = [
-  ["test/smoke.jsx", "rollcall-smoke.cjs"],   // every screen renders
-  ["test/logic.mjs", "rollcall-logic.cjs"],   // data layer under bad input
+  ["test/smoke.jsx", "iimpresent-smoke.cjs"],   // every screen renders
+  ["test/logic.mjs", "iimpresent-logic.cjs"],   // data layer under bad input
 ];
 
 for (const [entry, name] of suites) {

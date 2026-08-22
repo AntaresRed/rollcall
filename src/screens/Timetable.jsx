@@ -14,7 +14,7 @@ import {
  */
 export default function Timetable({
   classes, now, term, overrides = [],
-  onEdit, onShowCalendar, onReschedule, onTestAlert, alertInfo,
+  onShowCalendar, onReschedule, onTestAlert, alertInfo,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -160,12 +160,9 @@ export default function Timetable({
         Weekly view — rescheduled sessions keep their original slot here.
       </p>
 
+      {/* Only what concerns this week's schedule. Choosing courses is an
+          account-level decision and lives on Profile. */}
       <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-        {onEdit && (
-          <button className="btn ghost" style={{ flex: 1 }} onClick={onEdit}>
-            Change my courses
-          </button>
-        )}
         {onReschedule && (
           <button className="btn ghost" style={{ flex: 1 }} onClick={onReschedule}>
             Reschedule

@@ -49,8 +49,9 @@ export default function Splash({ message = "Getting your schedule" }) {
         <Mark size={72} animated />
       </div>
       <div className="splash-word">
-        Roll<i>Call</i>
+        IIM<i>Present</i>
       </div>
+      <p className="splash-motto">No JST for classes.</p>
       <p className="splash-msg">{message}</p>
       <div className="splash-bar" aria-hidden="true">
         <span />

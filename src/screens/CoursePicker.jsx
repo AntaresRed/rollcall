@@ -15,7 +15,7 @@ function describe(meetings, course) {
     .join(" · ");
 }
 
-export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
+export default function CoursePicker({ existing = [], onSaved }) {
   const [query, setQuery] = useState("");
   // { [code]: sectionLetter }
   const [picked, setPicked] = useState(() => seedFrom(existing));
@@ -229,11 +229,6 @@ export default function CoursePicker({ existing = [], onSaved, onUseImage }) {
             ? "Saving…"
             : `Save ${chosen.length || ""} course${chosen.length === 1 ? "" : "s"}`.trim()}
         </button>
-        {onUseImage && (
-          <button className="linklike" style={{ color: "var(--signal)", marginTop: 10 }} onClick={onUseImage}>
-            Read it from a screenshot instead
-          </button>
-        )}
       </div>
     </div>
   );

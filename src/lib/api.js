@@ -47,34 +47,6 @@ export const isoDate = (d = new Date()) =>
 /** JS Sunday-first weekday -> Monday-first 1..7 */
 export const weekdayOf = (d = new Date()) => ((d.getDay() + 6) % 7) + 1;
 
-// ---------- parsing ----------
-
-export async function parseTimetableImage(file) {
-  const base64 = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(",")[1]);
-    reader.onerror = () => reject(new Error("Couldn't read that file."));
-    reader.readAsDataURL(file);
-  });
-
-  const { data: { session } } = await supabase.auth.getSession();
-  const res = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-timetable`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ image: base64, mimeType: file.type || "image/png" }),
-    },
-  );
-
-  const body = await res.json();
-  if (!res.ok) throw new Error(body.error || "Couldn't read the timetable.");
-  return body.classes;
-}
-
 // ---------- classes ----------
 
 const normaliseRow = (r) => ({
@@ -491,9 +463,10 @@ export async function loadSummary() {
   return data;
 }
 
-export async function setLeadMinutes(mins) {
+/** Minutes after a class starts before its attendance alert fires. */
+export async function setAlertAfterMinutes(mins) {
   const { data: { user } } = await supabase.auth.getUser();
-  await supabase.from("profiles").update({ lead_mins: mins }).eq("id", user.id);
+  await supabase.from("profiles").update({ alert_after_mins: mins }).eq("id", user.id);
 }
 
 export async function loadProfile() {

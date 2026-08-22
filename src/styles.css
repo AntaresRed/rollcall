@@ -1235,3 +1235,44 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   margin-top: 3px;
 }
 .ps-cell.warn strong { color: var(--absent); }
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+/* Signing out is destructive-ish and rarely wanted; it reads quieter than
+   the action above it rather than competing for the same attention. */
+.profile-actions .signout { color: var(--slate); }
+
+/* ---------- motto and credit ---------- */
+
+.splash-motto,
+.signin-motto {
+  margin: 5px 0 0;
+  font-size: 13.5px;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--slate);
+}
+
+.signin-motto {
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+
+/* Deliberately quiet: present for whoever looks, absent for everyone else. */
+.made-by {
+  margin: 26px 0 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  text-align: center;
+  /* No opacity fade: at 9.5px it was landing under 4:1, and the small size
+     plus uppercase mono already makes it recede far enough. */
+}

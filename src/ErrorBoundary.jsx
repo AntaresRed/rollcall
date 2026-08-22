@@ -18,7 +18,7 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("RollCall crashed:", error, info?.componentStack);
+    console.error("IIMPresent crashed:", error, info?.componentStack);
   }
 
   render() {
@@ -28,7 +28,7 @@ export default class ErrorBoundary extends Component {
       <div className="crash">
         <h1>Something went wrong</h1>
         <p>
-          RollCall hit an error and stopped. Your timetable and attendance are
+          IIMPresent hit an error and stopped. Your timetable and attendance are
           safe — they're stored on the server, not in the app.
         </p>
         <pre>{String(this.state.error?.stack || this.state.error)}</pre>
