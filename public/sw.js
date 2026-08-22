@@ -1,6 +1,6 @@
 // RollCall service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v9";
+const CACHE = "rollcall-v11";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -112,16 +112,23 @@ async function nudgeOpenWindows() {
   }
 }
 
-async function toast(title, body) {
+// SW_BUILD is echoed in the confirmation so there is no doubt about which
+// version of this file the browser is actually running. A stale worker looks
+// exactly like a logic bug from the outside.
+const SW_BUILD = "v11";
+
+async function toast(title, body, { sticky = false } = {}) {
   await self.registration.showNotification(title, {
-    body,
+    body: `${body}${body ? " · " : ""}sw ${SW_BUILD}`,
     icon: "/icon-192.png",
     badge: "/icon-badge.png",
     tag: "rollcall-ack",
     silent: true,
-    requireInteraction: false,
+    // Stays put while this is being diagnosed, so the detail can be read
+    // rather than vanishing after four seconds.
+    requireInteraction: sticky,
   });
-  // Long enough to read, short enough not to clutter the shade.
+  if (sticky) return;
   await new Promise((r) => setTimeout(r, 4000));
   const shown = await self.registration.getNotifications({ tag: "rollcall-ack" });
   shown.forEach((n) => n.close());
@@ -137,8 +144,12 @@ self.addEventListener("notificationclick", (event) => {
     return;
   }
 
-  const status = event.action === "present" || event.action === "absent"
-    ? event.action
+  // Captured synchronously and verbatim. Reported below exactly as the
+  // browser gave it, because interpreting it first is what hid the fault.
+  const rawAction = event.action;
+
+  const status = rawAction === "present" || rawAction === "absent"
+    ? rawAction
     : null;
 
   // Tapping the notification body, rather than a button, just opens the app.
@@ -157,16 +168,28 @@ self.addEventListener("notificationclick", (event) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: markToken, status }),
         });
+        const body = await res.json().catch(() => ({}));
         if (res.ok) {
           await nudgeOpenWindows();
+          // Report what the server says it stored, not what this worker
+          // intended. If the two ever disagree, the message shows it rather
+          // than hiding it behind an optimistic label.
+          const saved = body?.status ?? status;
           await toast(
-            status === "present" ? "Marked present" : "Marked absent",
-            title || "",
+            saved === "present" ? "Marked present"
+              : saved === "absent" ? "Marked absent"
+              : `Marked ${saved}`,
+            // Deliberately noisy while this is being diagnosed: the button the
+            // browser says was pressed, what was sent, and what came back.
+            `tapped "${rawAction}" · sent ${status} · saved ${saved}` +
+            (body?.startTime ? ` · ${body.startTime}` : ""),
+            { sticky: true },
           );
           return;
         }
-        const body = await res.json().catch(() => ({}));
         console.warn("mark failed", res.status, body);
+        await toast("Couldn't save that", body?.error || `Error ${res.status}`);
+        return;
       } catch (err) {
         console.warn("mark request failed", err);
       }

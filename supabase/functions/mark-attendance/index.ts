@@ -101,6 +101,10 @@ Deno.serve(async (req) => {
       return json({ error: "That alert has expired. Open RollCall to mark it." }, 401);
     }
 
+    console.log("mark request", {
+      user: claim.u, subject: claim.s, date: claim.d, slot: claim.t, status,
+    });
+
     const { error } = await admin.from("attendance").upsert(
       {
         user_id: claim.u,
@@ -118,7 +122,25 @@ Deno.serve(async (req) => {
       return json({ error: "Couldn't save that." }, 500);
     }
 
-    return json({ ok: true, subject: claim.s, status });
+    // Read back rather than trusting the write: this is what the student's
+    // record now actually says.
+    const { data: saved } = await admin
+      .from("attendance")
+      .select("status, class_date, start_time")
+      .eq("user_id", claim.u)
+      .eq("subject", claim.s)
+      .eq("class_date", claim.d)
+      .eq("start_time", claim.t)
+      .maybeSingle();
+
+    return json({
+      ok: true,
+      subject: claim.s,
+      requested: status,
+      status: saved?.status ?? status,
+      classDate: saved?.class_date ?? claim.d,
+      startTime: String(saved?.start_time ?? claim.t).slice(0, 5),
+    });
   } catch (err) {
     console.error(err);
     return json({ error: "Something broke." }, 500);
