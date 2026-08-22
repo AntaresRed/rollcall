@@ -121,17 +121,15 @@ export async function sendTestNotification() {
 
   await reg.showNotification("Test alert", {
     body: maxActions > 0
-      ? "Buttons below? Then class alerts will work."
+      ? "Tap 'Mark present' below to check it writes attendance."
       : "This browser shows no buttons — tap the alert itself to mark attendance.",
     icon: "/icon-192.png",
     badge: "/icon-badge.png",
     tag: "rollcall-test",
     requireInteraction: true,
     data: { test: true },
-    actions: [
-      { action: "present", title: "Present" },
-      { action: "absent", title: "Absent" },
-    ],
+    // Matches the single button real alerts use; see the comment in sw.js.
+    actions: [{ action: "present", title: "Mark present" }],
   });
 
   // The registration is the source of truth for which script is live — a

@@ -1,6 +1,6 @@
 // RollCall service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v12";
+const CACHE = "rollcall-v13";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -64,20 +64,25 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || "Class starting", {
       body: canAct
-        ? data.body || ""
+        ? [data.body, data.subhint].filter(Boolean).join(" · ")
         : [data.body, data.hint].filter(Boolean).join(" · "),
       icon: "/icon-192.png",
       badge: "/icon-badge.png",
       tag: data.classId ? `class-${data.classId}-${data.classDate}` : "rollcall",
       data,
-      // Chrome shows at most two action buttons, and iOS shows none at all —
-      // so these are a shortcut, never the only way to mark a class. Ignoring
-      // the notification leaves the session in Catch up, which is exactly the
-      // "I'll do it later" path.
-      actions: [
-        { action: "present", title: "Present" },
-        { action: "absent", title: "Absent" },
-      ],
+      // Deliberately one button, not two.
+      //
+      // `event.action` is the only signal the API gives about which button was
+      // pressed, and on at least one Android build it reports the second
+      // action for a press on the first. With two buttons that silently
+      // records the opposite of what the student chose. With one, any action
+      // at all can only mean this one — a misreported id has nowhere wrong to
+      // land.
+      //
+      // Present is the button worth having: most classes are attended, so the
+      // common case is one tap. Missing a class is the exception and goes
+      // through the app, where it can't be recorded by mistake.
+      actions: [{ action: "present", title: "Mark present" }],
     }),
   );
 });
@@ -115,7 +120,7 @@ async function nudgeOpenWindows() {
 // SW_BUILD is echoed in the confirmation so there is no doubt about which
 // version of this file the browser is actually running. A stale worker looks
 // exactly like a logic bug from the outside.
-const SW_BUILD = "v12";
+const SW_BUILD = "v13";
 
 async function toast(title, body, { sticky = false } = {}) {
   await self.registration.showNotification(title, {
@@ -148,31 +153,25 @@ self.addEventListener("notificationclick", (event) => {
   // browser gave it, because interpreting it first is what hid the fault.
   const rawAction = event.action;
 
-  // What the platform believes the buttons are. If this doesn't match the
-  // pair that was registered, the fault is in how the notification was
-  // built or replaced — not in reading the click.
-  let actionsSeen = "?";
-  try {
-    actionsSeen = (event.notification.actions || [])
-      .map((a, i) => `${i}:${a.action}/${a.title}`)
-      .join(" ");
-  } catch {
-    actionsSeen = "unavailable";
-  }
-  console.log("notificationclick", { rawAction, actionsSeen, tag: event.notification.tag });
+  // Kept in the console only: this device has been seen reporting the wrong
+  // action id, so the raw value is worth having if anything looks off again.
+  console.log("notificationclick", {
+    rawAction,
+    registered: (event.notification.actions || []).map((a) => a.action),
+    tag: event.notification.tag,
+  });
 
-  // `event.action` is the only signal the API gives about which button was
-  // pressed — there is no index. So if it comes back wrong there is nothing
-  // to cross-check it against, and resolving "by position" would just look
-  // the position up by the same wrong id. Hence the diagnostic above rather
-  // than a workaround: the cause has to be found, not papered over.
-  const status = rawAction === "present" || rawAction === "absent"
-    ? rawAction
-    : null;
+  // With a single registered action, any non-empty action means that button.
+  // The id itself is not trusted — only whether one was pressed at all.
+  const registered = event.notification.actions || [];
+  const status = rawAction && registered.length === 1 ? "present" : null;
 
-  // Tapping the notification body, rather than a button, just opens the app.
+  // Tapping the body opens the app on Today, where the class is at the top
+  // with Present / Absent / Cancelled next to it. That is the route for
+  // marking absent, so it should land somewhere useful rather than the app's
+  // front door.
   if (!status) {
-    event.waitUntil(openApp("/"));
+    event.waitUntil(openApp("/?focus=today"));
     return;
   }
 
@@ -199,10 +198,7 @@ self.addEventListener("notificationclick", (event) => {
               : `Marked ${saved}`,
             // Deliberately noisy while this is being diagnosed: the button the
             // browser says was pressed, what was sent, and what came back.
-            `tapped "${rawAction}" · saved ${saved}` +
-            (body?.startTime ? ` · ${body.startTime}` : "") +
-            ` · buttons [${actionsSeen}]`,
-            { sticky: true },
+            [title, body?.startTime].filter(Boolean).join(" · "),
           );
           return;
         }

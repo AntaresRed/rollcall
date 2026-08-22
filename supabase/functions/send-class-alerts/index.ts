@@ -306,6 +306,8 @@ Deno.serve(async () => {
       // Shown on platforms that can't render action buttons (iOS, Firefox),
       // where tapping through to the app is the only route.
       hint: "Tap to mark attendance",
+      // The single button covers the common case; the body covers the rest.
+      subhint: "Tap the alert itself if you're missing it",
       classId: d.cls.id,
       classDate: d.date,
       // With these the action buttons write straight to the database; without
