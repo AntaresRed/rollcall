@@ -1,6 +1,6 @@
 // RollCall service worker — app shell cache + push delivery.
 
-const CACHE = "rollcall-v11";
+const CACHE = "rollcall-v12";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -115,7 +115,7 @@ async function nudgeOpenWindows() {
 // SW_BUILD is echoed in the confirmation so there is no doubt about which
 // version of this file the browser is actually running. A stale worker looks
 // exactly like a logic bug from the outside.
-const SW_BUILD = "v11";
+const SW_BUILD = "v12";
 
 async function toast(title, body, { sticky = false } = {}) {
   await self.registration.showNotification(title, {
@@ -148,6 +148,24 @@ self.addEventListener("notificationclick", (event) => {
   // browser gave it, because interpreting it first is what hid the fault.
   const rawAction = event.action;
 
+  // What the platform believes the buttons are. If this doesn't match the
+  // pair that was registered, the fault is in how the notification was
+  // built or replaced — not in reading the click.
+  let actionsSeen = "?";
+  try {
+    actionsSeen = (event.notification.actions || [])
+      .map((a, i) => `${i}:${a.action}/${a.title}`)
+      .join(" ");
+  } catch {
+    actionsSeen = "unavailable";
+  }
+  console.log("notificationclick", { rawAction, actionsSeen, tag: event.notification.tag });
+
+  // `event.action` is the only signal the API gives about which button was
+  // pressed — there is no index. So if it comes back wrong there is nothing
+  // to cross-check it against, and resolving "by position" would just look
+  // the position up by the same wrong id. Hence the diagnostic above rather
+  // than a workaround: the cause has to be found, not papered over.
   const status = rawAction === "present" || rawAction === "absent"
     ? rawAction
     : null;
@@ -181,8 +199,9 @@ self.addEventListener("notificationclick", (event) => {
               : `Marked ${saved}`,
             // Deliberately noisy while this is being diagnosed: the button the
             // browser says was pressed, what was sent, and what came back.
-            `tapped "${rawAction}" · sent ${status} · saved ${saved}` +
-            (body?.startTime ? ` · ${body.startTime}` : ""),
+            `tapped "${rawAction}" · saved ${saved}` +
+            (body?.startTime ? ` · ${body.startTime}` : "") +
+            ` · buttons [${actionsSeen}]`,
             { sticky: true },
           );
           return;
