@@ -1,6 +1,6 @@
 // IIMPresent service worker — app shell cache + push delivery.
 
-const CACHE = "iimpresent-v15";
+const CACHE = "iimpresent-v16";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -124,7 +124,7 @@ async function nudgeOpenWindows() {
 // SW_BUILD is echoed in the confirmation so there is no doubt about which
 // version of this file the browser is actually running. A stale worker looks
 // exactly like a logic bug from the outside.
-const SW_BUILD = "v15";
+const SW_BUILD = "v16";
 
 async function toast(title, body, { sticky = false } = {}) {
   await self.registration.showNotification(title, {
@@ -146,12 +146,7 @@ async function toast(title, body, { sticky = false } = {}) {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const data = event.notification.data || {};
-  const { classId, classDate, test, markToken, markUrl, title } = data;
-
-  if (test) {
-    event.waitUntil(openApp("/"));
-    return;
-  }
+  const { classId, classDate, markToken, markUrl, title } = data;
 
   // Captured synchronously and verbatim. Reported below exactly as the
   // browser gave it, because interpreting it first is what hid the fault.

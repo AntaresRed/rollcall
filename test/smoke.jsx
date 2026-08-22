@@ -75,7 +75,7 @@ const cases = [
   ["SignIn / rejected domain", <SignIn key="si2" error={{ kind: "domain", message: "Nope." }} />],
   ["Today", <Today key="t" occurrences={occ} attendance={attendance} now={now} onMark={noop} />],
   ["Today / empty", <Today key="te" occurrences={[]} attendance={[]} now={now} onMark={noop} />],
-  ["Timetable", <Timetable key="tt" classes={classes} now={now} term={term} overrides={overrides} onShowCalendar={noop} onReschedule={noop} onTestAlert={noop} alertInfo="" />],
+  ["Timetable", <Timetable key="tt" classes={classes} now={now} term={term} overrides={overrides} onShowCalendar={noop} onReschedule={noop} />],
   ["Timetable / empty", <Timetable key="tte" classes={[]} now={now} term={term} />],
   ["Timetable / during a break", <Timetable key="ttb" classes={classes} now={new Date("2026-10-21T10:00:00")} term={term} overrides={[]} />],
   ["CatchUp", <CatchUp key="cu" classes={classes} attendance={attendance} term={term} overrides={overrides} now={now} onMark={noop} />],

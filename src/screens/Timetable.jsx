@@ -13,8 +13,7 @@ import {
  * pinned, because six readable columns don't fit in 380px.
  */
 export default function Timetable({
-  classes, now, term, overrides = [],
-  onShowCalendar, onReschedule, onTestAlert, alertInfo,
+  classes, now, term, overrides = [], onShowCalendar, onReschedule,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -171,25 +170,12 @@ export default function Timetable({
             )}
           </button>
         )}
-      </div>
-      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         {onShowCalendar && (
           <button className="btn ghost" style={{ flex: 1 }} onClick={onShowCalendar}>
             Term calendar
           </button>
         )}
-        {onTestAlert && (
-          <button className="btn ghost" style={{ flex: 1 }} onClick={onTestAlert}>
-            Test alert
-          </button>
-        )}
       </div>
-
-      {alertInfo && (
-        <p className="tt-diag">
-          {alertInfo}
-        </p>
-      )}
     </>
   );
 }

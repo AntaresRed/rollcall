@@ -1031,16 +1031,6 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   to { background-position: -220% 0; }
 }
 
-.tt-diag {
-  margin: 10px 0 0;
-  padding: 10px 12px;
-  background: var(--signal-wash);
-  border: 1px solid #F6CFE2;
-  border-radius: var(--r);
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: var(--signal-deep);
-}
 
 /* ---------- crash screen ---------- */
 
