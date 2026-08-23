@@ -97,17 +97,20 @@ try {
   check("MEOB exists", Boolean(meob));
   if (meob) {
     const meetings = meob.sections.A;
-    check("MEOB has 4 meetings", meetings.length === 4);
-    check("2 pre_mid, 2 post_mid",
-      meetings.filter((m) => m.phase === "pre_mid").length === 2 &&
-      meetings.filter((m) => m.phase === "post_mid").length === 2);
+    // Thu (post-mid only), Fri (unmarked in the grid -> applies both
+    // halves, so one entry rather than a duplicate per phase), Sat
+    // (pre-mid only). Auto-detected from the grid's own phase markers,
+    // not a hand-written override.
+    check("MEOB has 3 meetings", meetings.length === 3);
+    check("exactly one pre_mid and one post_mid tagged meeting",
+      meetings.filter((m) => m.phase === "pre_mid").length === 1 &&
+      meetings.filter((m) => m.phase === "post_mid").length === 1);
+    check("the Friday meeting carries no phase (runs all term)",
+      meetings.find((m) => m.day === 5)?.phase === undefined);
     check("course-level phase is full, not pre/post",
       meob.phase === "full");
     check("3 credits / 20 classes since it spans the whole term",
       meob.credits === 3 && meob.total_classes === 20);
-    const fri = meetings.filter((m) => m.day === 5);
-    check("both Friday meetings distinguished by phase, not deduped",
-      fri.length === 2 && fri[0].phase !== fri[1].phase);
   }
 } catch (err) {
   fail++; console.log("  FAIL catalogue check -> " + err.message);

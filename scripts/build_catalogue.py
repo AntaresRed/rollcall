@@ -47,7 +47,10 @@ CREDIT_RULES = {
 GRID_SHEET = "Class Schedule"
 CALENDAR_SHEET = "Calendar"
 
-PHASE_RE = re.compile(r"\(\s*(pre|post)[-\s]?mid\s*term\s*\)", re.I)
+# Matches "(Pre Mid Term)", "(Post-Mid Term Part)", etc. — the institute has
+# used both a bare phase marker and one with a trailing qualifier like
+# "Part", so the word after "term" is optional rather than assumed absent.
+PHASE_RE = re.compile(r"\(\s*(pre|post)[-\s]?mid[-\s]?term(?:\s+\w+)?\s*\)", re.I)
 SECTION_RE = re.compile(r"-([AB])\s*$")
 CREDIT_RE = re.compile(r"([\d.]+)\s*(?:Cr|Credit)", re.I)
 TIME_RE = re.compile(
@@ -302,24 +305,47 @@ def build(xlsx_path):
     details = [d for d in (parse_course_sheet(wb[n]) for n in detail_names) if d]
 
     taken, by_name = set(), {}
+    entries_by_name = defaultdict(list)
     for e in entries:
-        course = by_name.get(e["name"])
-        if not course:
-            credits = 1.5 if e["phase"] in ("pre_mid", "post_mid") else 3.0
-            course = {
-                "code": acronym(e["name"], taken),
-                "name": e["name"],
-                "phase": e["phase"],
-                "credits": credits,
-                **CREDIT_RULES[credits],
-                "venue": e["venue"],
-                "schedule_type": "weekly",
-                "sections": defaultdict(list),
-            }
-            by_name[e["name"]] = course
-        meeting = {"day": e["day"], "start": e["start"], "end": e["end"]}
-        if meeting not in course["sections"][e["section"]]:
-            course["sections"][e["section"]].append(meeting)
+        entries_by_name[e["name"]].append(e)
+
+    for name, group in entries_by_name.items():
+        # A course's grid cells usually agree on one phase — but the
+        # institute has started marking individual meetings ("(Post Mid Term
+        # Part)"), which means the same course can carry a Thursday meeting
+        # that's post-mid-only and a Saturday one that's pre-mid-only while
+        # still running the whole term. "Mixed" is the signal for that: the
+        # course-level phase becomes 'full' (it runs both halves) and each
+        # meeting keeps its own phase instead of inheriting one.
+        phases_seen = {e["phase"] for e in group}
+        mixed = len(phases_seen - {"full"}) > 1 or (
+            len(phases_seen) > 1 and "full" in phases_seen and phases_seen != {"full"}
+        )
+        # (the two clauses cover: {pre_mid, post_mid, ...} and {full, pre_mid}
+        #  style mixes; a single non-full phase like {pre_mid} alone is not
+        #  mixed — that's an ordinary half-term course.)
+
+        course_phase = "full" if mixed else next(iter(phases_seen))
+        credits = 1.5 if course_phase in ("pre_mid", "post_mid") else 3.0
+
+        course = {
+            "code": acronym(name, taken),
+            "name": name,
+            "phase": course_phase,
+            "credits": credits,
+            **CREDIT_RULES[credits],
+            "venue": group[0]["venue"],
+            "schedule_type": "weekly",
+            "sections": defaultdict(list),
+        }
+        by_name[name] = course
+
+        for e in group:
+            meeting = {"day": e["day"], "start": e["start"], "end": e["end"]}
+            if mixed and e["phase"] != "full":
+                meeting["phase"] = e["phase"]
+            if meeting not in course["sections"][e["section"]]:
+                course["sections"][e["section"]].append(meeting)
 
     matched = []
     for d in details:

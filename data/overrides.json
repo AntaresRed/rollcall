@@ -120,37 +120,6 @@
           }
         ]
       }
-    },
-    {
-      "op": "replace_schedule",
-      "name": "Methods & Evidences in Organizational Behavior",
-      "section": "A",
-      "note": "The grid places this at a flat Wed 08:30 / Fri 14:30. The circulated correction says it actually runs different days before and after mid-terms, so the grid pattern is replaced outright rather than patched slot by slot.",
-      "since": "2026-08-23",
-      "to": {
-        "meetings": [
-          {
-            "day": 5,
-            "start": "14:30",
-            "phase": "pre_mid"
-          },
-          {
-            "day": 6,
-            "start": "16:15",
-            "phase": "pre_mid"
-          },
-          {
-            "day": 4,
-            "start": "14:30",
-            "phase": "post_mid"
-          },
-          {
-            "day": 5,
-            "start": "14:30",
-            "phase": "post_mid"
-          }
-        ]
-      }
     }
   ]
 }

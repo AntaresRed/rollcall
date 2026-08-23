@@ -18,13 +18,16 @@ function describe(meetings, course) {
       .join(" · ");
   }
 
-  // Different days before and after mid-terms: say so explicitly, since
-  // listing all four as one flat pattern would misdescribe the course.
-  const label = (phase) =>
-    meetings
-      .filter((m) => m.phase === phase)
-      .map((m) => `${DAYS[m.day - 1]} ${pretty(m.start).replace(" ", "")}`)
-      .join(" & ");
+  // Some meetings run one half of term only; others (no phase tag) run every
+  // week regardless. Those have to appear in BOTH halves' description, or a
+  // weekly Friday meeting would silently vanish just because it isn't also
+  // tagged pre_mid or post_mid.
+  const fmt = (m) => `${DAYS[m.day - 1]} ${pretty(m.start).replace(" ", "")}`;
+  const always = meetings.filter((m) => !m.phase).map(fmt);
+  const label = (phase) => [
+    ...always,
+    ...meetings.filter((m) => m.phase === phase).map(fmt),
+  ].join(" & ");
   return `Pre-mid: ${label("pre_mid")} · Post-mid: ${label("post_mid")}`;
 }
 
