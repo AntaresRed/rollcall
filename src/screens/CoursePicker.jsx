@@ -10,9 +10,22 @@ function describe(meetings, course) {
     const last = days[days.length - 1]?.slice(5).replace("-", "/");
     return `${meetings.length} sessions · ${days.length} days · ${first}–${last}`;
   }
-  return meetings
-    .map((m) => `${DAYS[m.day - 1]} ${pretty(m.start).replace(" ", "")}`)
-    .join(" · ");
+
+  const hasSplit = meetings.some((m) => m.phase);
+  if (!hasSplit) {
+    return meetings
+      .map((m) => `${DAYS[m.day - 1]} ${pretty(m.start).replace(" ", "")}`)
+      .join(" · ");
+  }
+
+  // Different days before and after mid-terms: say so explicitly, since
+  // listing all four as one flat pattern would misdescribe the course.
+  const label = (phase) =>
+    meetings
+      .filter((m) => m.phase === phase)
+      .map((m) => `${DAYS[m.day - 1]} ${pretty(m.start).replace(" ", "")}`)
+      .join(" & ");
+  return `Pre-mid: ${label("pre_mid")} · Post-mid: ${label("post_mid")}`;
 }
 
 export default function CoursePicker({ existing = [], onSaved }) {
@@ -48,7 +61,10 @@ export default function CoursePicker({ existing = [], onSaved }) {
         const list = bySlot.get(key) ?? [];
         list.push({
           code,
-          phase: course.phase,
+          // A meeting's own phase wins when it has one — MEOB's Friday
+          // meeting only clashes with something else also running in the
+          // same half of term, not with the course's nominal "full" phase.
+          phase: m.phase ?? course.phase,
           day: m.day,
           start: m.start,
           dated: Boolean(m.date),
@@ -111,7 +127,10 @@ export default function CoursePicker({ existing = [], onSaved }) {
           course_code: course.code,
           section: letter,
           room: null,
-          term_phase: course.phase,
+          // A meeting can carry its own phase — a course that runs the whole
+          // term but meets on different days before and after mid-terms tags
+          // each meeting individually rather than the course as a whole.
+          term_phase: m.phase ?? course.phase,
           credits: course.credits,
           total_classes: course.total_classes,
           min_pct: course.min_pct,

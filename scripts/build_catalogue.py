@@ -413,11 +413,19 @@ def apply_overrides(catalogue, overrides_path):
                 "schedule_type": sp.get("schedule_type", "weekly"),
                 "sections": {
                     letter: [
-                        {**({"date": m["date"],
-                             "day": date.fromisoformat(m["date"]).isoweekday()}
-                            if m.get("date") else {"day": m["day"]}),
-                         "start": m["start"],
-                         "end": m.get("end", SLOT_END.get(m["start"], m["start"]))}
+                        {
+                            **({"date": m["date"],
+                                "day": date.fromisoformat(m["date"]).isoweekday()}
+                               if m.get("date") else {"day": m["day"]}),
+                            "start": m["start"],
+                            "end": m.get("end", SLOT_END.get(m["start"], m["start"])),
+                            # Per-meeting phase: a course that runs the whole
+                            # term but meets on different days before and
+                            # after mid-terms tags each meeting individually,
+                            # rather than the whole course being pre_mid or
+                            # post_mid. Course-level "phase" stays 'full'.
+                            **({"phase": m["phase"]} if m.get("phase") else {}),
+                        }
                         for m in meetings
                     ]
                     for letter, meetings in sp["sections"].items()
@@ -436,6 +444,37 @@ def apply_overrides(catalogue, overrides_path):
                 f"{ov.get('code') or ov.get('name')!r}"
             )
         letter = ov.get("section", "A")
+
+        if op == "replace_schedule":
+            # Wholesale replacement of one section's meetings — for when the
+            # grid's pattern is wrong outright rather than off by one slot,
+            # so patching meeting-by-meeting would be more fragile than just
+            # stating the correct schedule directly.
+            meetings_in = ov["to"]["meetings"]
+            built = []
+            for m in meetings_in:
+                if m.get("date"):
+                    built.append({
+                        "date": m["date"],
+                        "day": date.fromisoformat(m["date"]).isoweekday(),
+                        "start": m["start"],
+                        "end": m.get("end", SLOT_END.get(m["start"], m["start"])),
+                    })
+                else:
+                    built.append({
+                        "day": m["day"],
+                        "start": m["start"],
+                        "end": m.get("end", SLOT_END.get(m["start"], m["start"])),
+                        **({"phase": m["phase"]} if m.get("phase") else {}),
+                    })
+            course["sections"][letter] = sorted(
+                built, key=lambda x: (x.get("date", ""), x.get("day", 0), x["start"]))
+            course["schedule_type"] = "dates" if any(m.get("date") for m in meetings_in) else "weekly"
+            if "venue" in ov["to"]:
+                course["venue"] = ov["to"]["venue"]
+            applied.append(f"{course['code']}-{letter}: "
+                           f"{ov.get('note', 'replace_schedule')} ({len(built)} meetings)")
+            continue
 
         if op == "set_dates":
             sessions = ov["to"]["sessions"]

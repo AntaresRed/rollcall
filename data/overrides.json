@@ -122,94 +122,34 @@
       }
     },
     {
-      "op": "add_course",
-      "note": "TEMPORARY — alert testing, evening of 21 Aug. Delete before the pilot and rebuild.",
-      "since": "2026-08-21",
+      "op": "replace_schedule",
+      "name": "Methods & Evidences in Organizational Behavior",
+      "section": "A",
+      "note": "The grid places this at a flat Wed 08:30 / Fri 14:30. The circulated correction says it actually runs different days before and after mid-terms, so the grid pattern is replaced outright rather than patched slot by slot.",
+      "since": "2026-08-23",
       "to": {
-        "code": "ZTEST",
-        "name": "Analytics In Practice",
-        "phase": "full",
-        "credits": 3.0,
-        "venue": "—",
-        "schedule_type": "dates",
-        "sections": {
-          "A": [
-            {
-              "date": "2026-08-21",
-              "start": "22:00",
-              "end": "23:15"
-            },
-            {
-              "date": "2026-08-21",
-              "start": "22:15",
-              "end": "23:30"
-            },
-            {
-              "date": "2026-08-21",
-              "start": "22:30",
-              "end": "23:45"
-            }
-          ]
-        },
-        "total_classes": 3
-      }
-    },
-    {
-      "op": "add_course",
-      "note": "TEMPORARY — alert testing. Delete before the pilot and rebuild.",
-      "since": "2026-08-20",
-      "to": {
-        "code": "ZSAT",
-        "name": "Saturday Test",
-        "phase": "full",
-        "credits": 3.0,
-        "venue": "—",
-        "sections": {
-          "A": [
-            {
-              "day": 6,
-              "start": "10:15"
-            },
-            {
-              "day": 6,
-              "start": "14:30"
-            },
-            {
-              "day": 6,
-              "start": "16:15"
-            }
-          ]
-        },
-        "total_classes": 6
-      }
-    },
-    {
-      "op": "add_course",
-      "note": "TEMPORARY — alert testing. Delete before the pilot and rebuild.",
-      "since": "2026-08-20",
-      "to": {
-        "code": "ZSUN",
-        "name": "Sunday Test",
-        "phase": "full",
-        "credits": 3.0,
-        "venue": "—",
-        "sections": {
-          "A": [
-            {
-              "day": 7,
-              "start": "10:15"
-            },
-            {
-              "day": 7,
-              "start": "14:30"
-            },
-            {
-              "day": 7,
-              "start": "16:15"
-            }
-          ]
-        },
-        "total_classes": 6
+        "meetings": [
+          {
+            "day": 5,
+            "start": "14:30",
+            "phase": "pre_mid"
+          },
+          {
+            "day": 6,
+            "start": "16:15",
+            "phase": "pre_mid"
+          },
+          {
+            "day": 4,
+            "start": "14:30",
+            "phase": "post_mid"
+          },
+          {
+            "day": 5,
+            "start": "14:30",
+            "phase": "post_mid"
+          }
+        ]
       }
     }
   ]

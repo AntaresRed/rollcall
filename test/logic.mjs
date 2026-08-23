@@ -3,6 +3,7 @@ import {
   toMinutes, hhmm, pretty, inSession, breakOn, skipBudget, courseStats,
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
 } from "../src/lib/api.js";
+import catalogue from "../src/data/catalogue.json";
 
 let fail = 0;
 const check = (name, cond) => {
@@ -86,6 +87,31 @@ check("catch-up entries are occurrences", um.every(o => o.cls && o.date));
 console.log("\nkeys");
 check("attendanceKey normalises seconds",
   attendanceKey("X", "2026-09-10", "16:15:00") === attendanceKey("X", "2026-09-10", "16:15"));
+
+
+
+
+console.log("\nper-meeting phase (catalogue)");
+try {
+  const meob = catalogue.courses.find((c) => c.code === "MEOB");
+  check("MEOB exists", Boolean(meob));
+  if (meob) {
+    const meetings = meob.sections.A;
+    check("MEOB has 4 meetings", meetings.length === 4);
+    check("2 pre_mid, 2 post_mid",
+      meetings.filter((m) => m.phase === "pre_mid").length === 2 &&
+      meetings.filter((m) => m.phase === "post_mid").length === 2);
+    check("course-level phase is full, not pre/post",
+      meob.phase === "full");
+    check("3 credits / 20 classes since it spans the whole term",
+      meob.credits === 3 && meob.total_classes === 20);
+    const fri = meetings.filter((m) => m.day === 5);
+    check("both Friday meetings distinguished by phase, not deduped",
+      fri.length === 2 && fri[0].phase !== fri[1].phase);
+  }
+} catch (err) {
+  fail++; console.log("  FAIL catalogue check -> " + err.message);
+}
 
 console.log(`\n${fail === 0 ? "all logic checks passed" : fail + " FAILURES"}`);
 process.exit(fail ? 1 : 0);

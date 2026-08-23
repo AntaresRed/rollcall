@@ -242,8 +242,8 @@
           },
           {
             "day": 2,
-            "start": "14:30",
-            "end": "15:45"
+            "start": "16:15",
+            "end": "17:30"
           }
         ]
       }
@@ -962,14 +962,28 @@
       "sections": {
         "A": [
           {
-            "day": 3,
-            "start": "08:30",
-            "end": "09:45"
+            "day": 4,
+            "start": "14:30",
+            "end": "15:45",
+            "phase": "post_mid"
           },
           {
             "day": 5,
             "start": "14:30",
-            "end": "15:45"
+            "end": "15:45",
+            "phase": "pre_mid"
+          },
+          {
+            "day": 5,
+            "start": "14:30",
+            "end": "15:45",
+            "phase": "post_mid"
+          },
+          {
+            "day": 6,
+            "start": "16:15",
+            "end": "17:30",
+            "phase": "pre_mid"
           }
         ]
       }
@@ -1228,96 +1242,6 @@
         ]
       },
       "official_code": "OM/SM-273"
-    },
-    {
-      "code": "ZTEST",
-      "name": "Analytics In Practice",
-      "phase": "full",
-      "credits": 3.0,
-      "total_classes": 3,
-      "min_pct": 75,
-      "venue": "—",
-      "schedule_type": "dates",
-      "sections": {
-        "A": [
-          {
-            "date": "2026-08-21",
-            "day": 5,
-            "start": "22:00",
-            "end": "23:15"
-          },
-          {
-            "date": "2026-08-21",
-            "day": 5,
-            "start": "22:15",
-            "end": "23:30"
-          },
-          {
-            "date": "2026-08-21",
-            "day": 5,
-            "start": "22:30",
-            "end": "23:45"
-          }
-        ]
-      }
-    },
-    {
-      "code": "ZSAT",
-      "name": "Saturday Test",
-      "phase": "full",
-      "credits": 3.0,
-      "total_classes": 6,
-      "min_pct": 75,
-      "venue": "—",
-      "schedule_type": "weekly",
-      "sections": {
-        "A": [
-          {
-            "day": 6,
-            "start": "10:15",
-            "end": "11:30"
-          },
-          {
-            "day": 6,
-            "start": "14:30",
-            "end": "15:45"
-          },
-          {
-            "day": 6,
-            "start": "16:15",
-            "end": "17:30"
-          }
-        ]
-      }
-    },
-    {
-      "code": "ZSUN",
-      "name": "Sunday Test",
-      "phase": "full",
-      "credits": 3.0,
-      "total_classes": 6,
-      "min_pct": 75,
-      "venue": "—",
-      "schedule_type": "weekly",
-      "sections": {
-        "A": [
-          {
-            "day": 7,
-            "start": "10:15",
-            "end": "11:30"
-          },
-          {
-            "day": 7,
-            "start": "14:30",
-            "end": "15:45"
-          },
-          {
-            "day": 7,
-            "start": "16:15",
-            "end": "17:30"
-          }
-        ]
-      }
     }
   ]
 }
