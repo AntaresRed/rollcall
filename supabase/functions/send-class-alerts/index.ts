@@ -347,7 +347,13 @@ Deno.serve(async () => {
             // nothing to arrive promptly, and normal urgency lets Android
             // hold it until the device next wakes — which could be hours.
             urgency: "high",
-            topic: `c${String(d.cls.id).replace(/-/g, "").slice(0, 12)}`,
+            // No `topic` header. It exists to collapse undelivered messages,
+            // which nothing here needs — alert_log already guarantees one
+            // send per class per day, and the notification `tag` handles
+            // replacement on the device. Apple validates the header far more
+            // strictly than Google and rejected ours outright with
+            // BadWebPushTopic, so every iPhone push failed while Android was
+            // unaffected.
           },
         );
         sent++;
