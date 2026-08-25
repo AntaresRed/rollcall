@@ -33,9 +33,13 @@ DAYS = {
 }
 DAY_NAMES = {1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "Sun"}
 
+# Each slot is 90 minutes, matching the same boundaries already used by the
+# institute's dated block courses (Ops Driven, Bank Management, etc.) — this
+# was the actual class length all along; the weekly grid previously assumed
+# 75 minutes and every stored end time was wrong by 15 minutes.
 SLOT_END = {
-    "08:30": "09:45", "10:15": "11:30", "12:00": "13:15",
-    "14:30": "15:45", "16:15": "17:30", "18:00": "19:15",
+    "08:30": "10:00", "10:15": "11:45", "12:00": "13:30",
+    "14:30": "16:00", "16:15": "17:45", "18:00": "19:30",
 }
 
 # 3 credits = 20 classes at 75%; 1.5 credits = 10 classes at 80%.

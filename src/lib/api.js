@@ -7,9 +7,11 @@ export const DAY_LONG = {
 };
 
 export const SLOT_STARTS = ["08:30", "10:15", "12:00", "14:30", "16:15", "18:00"];
+// Each slot is 90 minutes, matching the institute's dated block courses,
+// which already used these exact boundaries.
 export const SLOT_ENDS = {
-  "08:30": "09:45", "10:15": "11:30", "12:00": "13:15",
-  "14:30": "15:45", "16:15": "17:30", "18:00": "19:15",
+    "08:30": "10:00", "10:15": "11:45", "12:00": "13:30",
+    "14:30": "16:00", "16:15": "17:45", "18:00": "19:30",
 };
 
 export const PHASE_LABEL = {
