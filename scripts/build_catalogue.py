@@ -20,6 +20,7 @@ course occupies, the detail sheet says which dates it actually meets.
 """
 
 import json
+import os
 import re
 import sys
 from collections import defaultdict
@@ -395,6 +396,81 @@ def build(xlsx_path):
             matched)
 
 
+# ---------------------------------------------------------------- faculty
+
+def _fac_bigrams(s: str):
+    return {s[i:i + 2] for i in range(len(s) - 1)}
+
+
+def _fac_similarity(a: str, b: str) -> float:
+    A, B = _fac_bigrams(a), _fac_bigrams(b)
+    if not A or not B:
+        return 1.0 if a == b else 0.0
+    return 2 * len(A & B) / (len(A) + len(B))
+
+
+def _fac_normalise_name(name: str) -> str:
+    name = re.sub(r"\(.*?\)", "", name)
+    name = re.sub(
+        r"\b(Pre[- ]?Mid Term|Post[- ]?Mid Term|New Course|Credit Change|"
+        r"Rename|\d(?:st|nd|rd|th) Offering|\d+ Sections?)\b",
+        "", name, flags=re.I,
+    )
+    return re.sub(r"[^a-z0-9\s]", " ", name.lower()).strip()
+    
+
+def attach_faculty(catalogue, faculty_path):
+    """Attach instructor name/role/email onto each catalogue course.
+
+    Matched by official course code first (dated block courses already
+    carry this exactly), falling back to fuzzy name matching for the
+    ordinary weekly-grid courses, whose auto-derived codes don't correspond
+    to the institute's official ones at all.
+    """
+    try:
+        with open(faculty_path, encoding="utf-8") as fh:
+            faculty_courses = json.load(fh)
+    except FileNotFoundError:
+        return [], []
+
+    by_code = {f["official_code"]: f for f in faculty_courses if f.get("official_code")}
+    fac_norm = [(f, _fac_normalise_name(f["name"])) for f in faculty_courses]
+
+    unmatched_catalogue = []
+    used_faculty_names = set()
+
+    for course in catalogue["courses"]:
+        hit = None
+        if course.get("official_code") and course["official_code"] in by_code:
+            hit = by_code[course["official_code"]]
+        else:
+            target = _fac_normalise_name(course["name"])
+            best, best_score = None, 0.0
+            for f, fname in fac_norm:
+                score = _fac_similarity(target, fname)
+                if fname.startswith(target[:20]) or target.startswith(fname[:20]):
+                    score = max(score, 0.9)
+                if score > best_score:
+                    best, best_score = f, score
+            if best_score >= 0.82:
+                hit = best
+
+        if hit:
+            course["instructors"] = [
+                {"name": i["name"], "role": i["role"], "email": i["email"]}
+                for i in hit["instructors"]
+            ]
+            used_faculty_names.add(hit["name"])
+        else:
+            course["instructors"] = []
+            unmatched_catalogue.append(course["name"])
+
+    unmatched_faculty = [
+        f["name"] for f in faculty_courses if f["name"] not in used_faculty_names
+    ]
+    return unmatched_catalogue, unmatched_faculty
+
+
 # ---------------------------------------------------------------- overrides
 
 def apply_overrides(catalogue, overrides_path):
@@ -579,9 +655,24 @@ if __name__ == "__main__":
     src = sys.argv[1] if len(sys.argv) > 1 else "data/Class_Schedule_Term-V_AY-2026-27.xlsx"
     dest = sys.argv[2] if len(sys.argv) > 2 else "src/data/catalogue.json"
     overrides = sys.argv[3] if len(sys.argv) > 3 else "data/overrides.json"
+    faculty = sys.argv[4] if len(sys.argv) > 4 else "data/faculty.json"
 
-    catalogue, matched = build(src)
+    if os.path.exists(src):
+        catalogue, matched = build(src)
+        source_note = f"built from {src}"
+    elif os.path.exists(dest):
+        # Reapplying an amendment or a faculty match doesn't need the source
+        # spreadsheet — the last build is already canonical, and both
+        # overrides and faculty attachment are declarative.
+        with open(dest, encoding="utf-8") as fh:
+            catalogue = json.load(fh)
+        matched = []
+        source_note = f"reapplied over existing {dest}"
+    else:
+        raise SystemExit(f"neither {src} nor {dest} exists — nothing to build from")
+
     applied = apply_overrides(catalogue, overrides)
+    unmatched_cat, unmatched_fac = attach_faculty(catalogue, faculty)
 
     with open(dest, "w", encoding="utf-8") as fh:
         json.dump(catalogue, fh, indent=2, ensure_ascii=False)
@@ -591,7 +682,7 @@ if __name__ == "__main__":
     meetings = sum(len(v) for c in catalogue["courses"] for v in c["sections"].values())
     print(f"{len(catalogue['courses'])} courses "
           f"({len(weekly)} weekly, {len(dated)} fixed-date), "
-          f"{meetings} meetings -> {dest}")
+          f"{meetings} meetings -> {dest} ({source_note})")
 
     cal = catalogue["calendar"]
     print(f"\nterm {cal['term_start']} .. {cal['term_end']}  "
@@ -608,6 +699,17 @@ if __name__ == "__main__":
         print("\noverrides:")
         for a in applied:
             print("  ", a)
+
+    with_faculty = sum(1 for c in catalogue["courses"] if c.get("instructors"))
+    print(f"\nfaculty: {with_faculty}/{len(catalogue['courses'])} courses matched to an instructor")
+    if unmatched_cat:
+        print(f"  catalogue courses with no faculty match ({len(unmatched_cat)}):")
+        for name in unmatched_cat:
+            print(f"    {name}")
+    if unmatched_fac:
+        print(f"  faculty-list courses not offered on the current grid ({len(unmatched_fac)}):")
+        for name in unmatched_fac:
+            print(f"    {name}")
 
     # A session count that doesn't match the credit rule is the likeliest
     # source of a wrong attendance budget, so say so loudly.

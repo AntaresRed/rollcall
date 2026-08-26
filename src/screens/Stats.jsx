@@ -2,6 +2,28 @@ import { useMemo } from "react";
 import { courseStats } from "../lib/api";
 
 /**
+ * "Prof. X · x@iimcal.ac.in" for the course coordinator, plus any other
+ * listed instructor by name (visiting faculty rarely have an institute
+ * email, so that's shown as a role tag rather than a broken mailto).
+ *
+ * Returns null when there's nothing to show, which is the caller's signal
+ * to fall back to the credit/class/percent line instead of leaving the
+ * subtitle blank.
+ */
+function formatInstructors(list) {
+  if (!list || list.length === 0) return null;
+  const cc = list.find((i) => i.role === "CC");
+  const ordered = cc ? [cc, ...list.filter((i) => i !== cc)] : list;
+  return ordered
+    .map((i) =>
+      i.email
+        ? `${i.name} · ${i.email}`
+        : `${i.name}${i.role ? ` (${i.role})` : ""}`,
+    )
+    .join("  ·  ");
+}
+
+/**
  * The headline number is skips remaining, not a percentage. "You can miss two
  * more" is the question students are actually asking; the percentage is the
  * long way round to the same answer.
@@ -26,6 +48,7 @@ export default function Stats({ classes, attendance, onToggleMute }) {
         const spent = r.allowedAbsences - r.skipsLeft;
         const over = r.skipsLeft < 0;
         const tight = r.skipsLeft === 0;
+        const instructorLine = formatInstructors(r.instructors);
 
         return (
           <div className="budget" key={r.subject}>
@@ -33,7 +56,7 @@ export default function Stats({ classes, attendance, onToggleMute }) {
               <div>
                 <div className="budget-name">{r.subject}</div>
                 <div className="budget-sub">
-                  {r.credits} cr · {r.total_classes} classes · {r.min_pct}% needed
+                  {instructorLine ?? `${r.credits} cr · ${r.total_classes} classes · ${r.min_pct}% needed`}
                   {r.muted && <span className="tag quiet" style={{ marginLeft: 6 }}>muted</span>}
                 </div>
               </div>

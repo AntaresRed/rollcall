@@ -1,4 +1,14 @@
 import { supabase } from "./supabase";
+import catalogue from "../data/catalogue.json";
+
+// Looked up by course_code at render time rather than stored on the
+// student's saved class row — instructors are a property of the course, not
+// of one student's enrollment, so this avoids a schema change and avoids
+// instructor data silently going stale if the catalogue is corrected after
+// a student has already picked their courses.
+const INSTRUCTORS_BY_CODE = new Map(
+  catalogue.courses.map((c) => [c.code, c.instructors ?? []]),
+);
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const DAY_LONG = {
@@ -210,6 +220,11 @@ export function courseStats(classes, attendance) {
       subject: c.subject,
       course_code: c.course_code,
       credits: Number(c.credits ?? 3),
+      // Undefined (not looked up, e.g. no course_code at all) is kept
+      // distinct from an empty array (looked up, genuinely no instructor on
+      // file) — the Profile screen falls back to the credit line only in
+      // the first case, not the second.
+      instructors: c.course_code ? INSTRUCTORS_BY_CODE.get(c.course_code) ?? [] : undefined,
       ...skipBudget(c),
       present: 0,
       absent: 0,

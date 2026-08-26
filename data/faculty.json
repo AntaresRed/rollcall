@@ -1,0 +1,670 @@
+[
+  {
+    "official_code": "BC-202",
+    "raw_name": "Ethics and Values in International Business",
+    "name": "Ethics and Values in International Business",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Nisigandha Bhuyan",
+        "role": null,
+        "email": "nisigandha@iimcal.ac.in",
+        "directory_name": "Nisigandha Bhuyan",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "BC-205",
+    "raw_name": "Cross Cultural Business Communication Post Mid Term",
+    "name": "Cross Cultural Business Communication",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Apoorva Bharadwaj",
+        "role": null,
+        "email": "apoorva@iimcal.ac.in",
+        "directory_name": "Apoorva Bharadwaj",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "BC-221",
+    "raw_name": "Managerial Excellence: Insights from Indian Philosophy",
+    "name": "Managerial Excellence: Insights from Indian Philosophy",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Nisigandha Bhuyan",
+        "role": null,
+        "email": "nisigandha@iimcal.ac.in",
+        "directory_name": "Nisigandha Bhuyan",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "BC-222",
+    "raw_name": "Inside Storytelling – Theories and Praxis for Communication and Management 2 Sections",
+    "name": "Inside Storytelling – Theories and Praxis for Communication and Management",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Nandita Roy",
+        "role": null,
+        "email": "nandita@iimcal.ac.in",
+        "directory_name": "Nandita Roy",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "EC-235",
+    "raw_name": "The Economics of Corporate Sustainability",
+    "name": "The Economics of Corporate Sustainability",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Runa Sarkar",
+        "role": null,
+        "email": "runa@iimcal.ac.in",
+        "directory_name": "Runa Sarkar",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "EC/HR-263",
+    "raw_name": "Economics of Talent Management Post Mid Term (Cross listed with the HRM Group)",
+    "name": "Economics of Talent Management",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Tanika Chakraborty",
+        "role": null,
+        "email": "tanika@iimcal.ac.in",
+        "directory_name": "Tanika Chakrabarty",
+        "match_confidence": 0.86
+      }
+    ]
+  },
+  {
+    "official_code": "EC-267",
+    "raw_name": "Market Design: Applications and Analysis New Course",
+    "name": "Market Design: Applications and Analysis",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Madhuparna Karmokar",
+        "role": "CC",
+        "email": "madhuparnak@iimcal.ac.in",
+        "directory_name": "Madhuparna Karmokar",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "Conan Mukherjee",
+        "role": null,
+        "email": "conan.mukherjee@iimcal.ac.in",
+        "directory_name": "Conan Mukherjee",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "FI-242",
+    "raw_name": "Bank Management",
+    "name": "Bank Management",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Sudhir Jaiswall",
+        "role": "CC",
+        "email": "sudhir@iimcal.ac.in",
+        "directory_name": "Sudhir Jaiswal",
+        "match_confidence": 0.95
+      },
+      {
+        "name": "Balachandran R",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "FI-255",
+    "raw_name": "Fixed Income Markets",
+    "name": "Fixed Income Markets",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Vivek Rajvanshi",
+        "role": null,
+        "email": "vivekr@iimcal.ac.in",
+        "directory_name": "Vivek Rajvanshi",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "FI-283",
+    "raw_name": "Financial Risk Management",
+    "name": "Financial Risk Management",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Sudhakar Reddy",
+        "role": "CC",
+        "email": "sudhakar@iimcal.ac.in",
+        "directory_name": "Sudhakara Syamala Reddy",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "Deep Narayan Mukherjee",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.7
+      }
+    ]
+  },
+  {
+    "official_code": "FI-296",
+    "raw_name": "International Financial Management Pre Mid Term",
+    "name": "International Financial Management",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Sudarshan Kumar",
+        "role": "CC",
+        "email": "sudarshank@iimcal.ac.in",
+        "directory_name": "Sudarshan Kumar",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "Satish Krishnan",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "MK-211",
+    "raw_name": "Integrated Marketing Communication",
+    "name": "Integrated Marketing Communication",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Koushiki Choudhury",
+        "role": "CC",
+        "email": "koushiki@iimcal.ac.in",
+        "directory_name": "Koushiki Choudhury",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "D P Ghosh",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.7
+      }
+    ]
+  },
+  {
+    "official_code": "MK-212",
+    "raw_name": "Sales and Distribution Management",
+    "name": "Sales and Distribution Management",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Ramendra Singh",
+        "role": "CC",
+        "email": "ramendra@iimcal.ac.in",
+        "directory_name": "Ramendra Singh",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "Joydeep Biswas",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "MK-214",
+    "raw_name": "Consumer Behaviour",
+    "name": "Consumer Behaviour",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Rashmi Kumari",
+        "role": null,
+        "email": "rashmik@iimcal.ac.in",
+        "directory_name": "Rashmi Kumari",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "MK-229",
+    "raw_name": "Marketing Theory and Contemporary Issues 2 Sections",
+    "name": "Marketing Theory and Contemporary Issues",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Avinash Kumar",
+        "role": "CC",
+        "email": "avinash@iimcal.ac.in",
+        "directory_name": "Avinash Kumar",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "C. D. Mitra",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.7
+      }
+    ]
+  },
+  {
+    "official_code": "MK-252",
+    "raw_name": "Managing Retailing",
+    "name": "Managing Retailing",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Ramendra Singh",
+        "role": "CC",
+        "email": "ramendra@iimcal.ac.in",
+        "directory_name": "Ramendra Singh",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "K. Dasaratharaman",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "MK-255",
+    "raw_name": "Marketing to Bottom of Pyramid Consumers",
+    "name": "Marketing to Bottom of Pyramid Consumers",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Ramendra Singh",
+        "role": null,
+        "email": "ramendra@iimcal.ac.in",
+        "directory_name": "Ramendra Singh",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "MK-264",
+    "raw_name": "Non-profit and Social Marketing",
+    "name": "Non-profit and Social Marketing",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Koushiki Choudhury",
+        "role": null,
+        "email": "koushiki@iimcal.ac.in",
+        "directory_name": "Koushiki Choudhury",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "MK-266",
+    "raw_name": "Pricing Decisions (2nd Offering) Post Mid Term",
+    "name": "Pricing Decisions",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Ritu Mehta",
+        "role": null,
+        "email": "ritumehta@iimcal.ac.in",
+        "directory_name": "Ritu Mehta",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "MI-279",
+    "raw_name": "Social Network Analytics 2nd Offering",
+    "name": "Social Network Analytics",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Uttam K. Sarkar",
+        "role": null,
+        "email": "uttam@iimcal.ac.in",
+        "directory_name": "Uttam Kumar Sarkar",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "MI-281",
+    "raw_name": "Analytics in Practice Pre Mid Term",
+    "name": "Analytics in Practice",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Abhipsa Pal",
+        "role": "CC",
+        "email": "abhipsapal@iimcal.ac.in",
+        "directory_name": "Abhipsa Pal",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "Atanu Ghosh",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.77
+      }
+    ]
+  },
+  {
+    "official_code": "MI-291",
+    "raw_name": "Managing Digital Transformation Pre Mid Term",
+    "name": "Managing Digital Transformation",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Abhipsa Pal",
+        "role": null,
+        "email": "abhipsapal@iimcal.ac.in",
+        "directory_name": "Abhipsa Pal",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "MI-298",
+    "raw_name": "Managing Technology and Information Systems for Industry 4.0",
+    "name": "Managing Technology and Information Systems for Industry 4.0",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Abhipsa Pal",
+        "role": "CC",
+        "email": "abhipsapal@iimcal.ac.in",
+        "directory_name": "Abhipsa Pal",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "Atanu Ghosh",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.77
+      }
+    ]
+  },
+  {
+    "official_code": "MI-300",
+    "raw_name": "Design Thinking for Digital Products and Services Post-Mid Term, Credit Change",
+    "name": "Design Thinking for Digital Products and Services ,",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Priya Seetharaman",
+        "role": "CC",
+        "email": "priyas@iimcal.ac.in",
+        "directory_name": "Priya Seetharaman",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "Anbu Rathinavel",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      },
+      {
+        "name": "Ramakrishnan V.",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "OB-215",
+    "raw_name": "Methods & Evidences in Organizational Behavior",
+    "name": "Methods & Evidences in Organizational Behavior",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Rajiv Kumar",
+        "role": null,
+        "email": "rajiv@iimcal.ac.in",
+        "directory_name": "Rajiv Kumar",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "OB-223",
+    "raw_name": "Management of Self in Organisations",
+    "name": "Management of Self in Organisations",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Abhishek Goel",
+        "role": null,
+        "email": "agoel@iimcal.ac.in",
+        "directory_name": "Abhishek Goel",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "OB-238",
+    "raw_name": "Creating, Managing, and Leading Social Enterprises",
+    "name": "Creating, Managing, and Leading Social Enterprises",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Devi Vijay",
+        "role": null,
+        "email": "devivijay@iimcal.ac.in",
+        "directory_name": "Devi Vijay",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "OB-243",
+    "raw_name": "Managing Teams in Organizations Pre Mid Term",
+    "name": "Managing Teams in Organizations",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Chayanika Bhayana",
+        "role": null,
+        "email": "chayanika@iimcal.ac.in",
+        "directory_name": "Chayanika Bhayana",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "OB-244",
+    "raw_name": "Managing Diversity and Inclusion in Organizations Pre Mid Term",
+    "name": "Managing Diversity and Inclusion in Organizations",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Anupama Kondayya",
+        "role": null,
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "OM-238",
+    "raw_name": "Logistics and Supply Chain Management : (Cap of 54 students [1 section] for 54 to 100 registrations and 108 students [2 sections] for more than 100 registrations) 2nd Offering",
+    "name": "Logistics and Supply Chain Management :",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Balram Avittathur",
+        "role": null,
+        "email": "balram@iimcal.ac.in",
+        "directory_name": "Balram Avittathur",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "OM-257",
+    "raw_name": "Statistics for Data Science and Business Analysis Post Mid Term",
+    "name": "Statistics for Data Science and Business Analysis",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Sabyasachi Mukhopadhyay",
+        "role": null,
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "OM-260",
+    "raw_name": "Business Constraints Management Pre Mid Term [Cap of 60 students (1 section) for 60 to 100 registrations and 120 students (2 sections) for more than 100 registrations] Credit Change + Rename",
+    "name": "Business Constraints Management [Cap of 60 students for 60 to 100 registrations and 120 students for more than 100 registrations] +",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Umang Varshney",
+        "role": null,
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "OM/SM-273",
+    "raw_name": "THE OPS-DRIVEN STARTUP: How Execution Builds Moats, Markets, And Momentum (Cross listed with the EC Group)",
+    "name": "THE OPS-DRIVEN STARTUP: How Execution Builds Moats, Markets, And Momentum",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Partha Priya Datta",
+        "role": "CC",
+        "email": "ppdatta@iimcal.ac.in",
+        "directory_name": "Partha Priya Datta",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "R Rangarajan Iyengar",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "PP-215",
+    "raw_name": "Country Risk Analysis (54 IIMC Students + 6 Exchange Students) 2nd Offering",
+    "name": "Country Risk Analysis",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Biju Paul Abraham",
+        "role": null,
+        "email": "abraham@iimcal.ac.in",
+        "directory_name": "Biju Paul Abraham",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "PP-259",
+    "raw_name": "Consumption Culture & Markets",
+    "name": "Consumption Culture & Markets",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Manish Thakur",
+        "role": null,
+        "email": "mt@iimcal.ac.in",
+        "directory_name": "Manish Thakur",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "PP-278",
+    "raw_name": "Managing Global Cities Post Mid Term",
+    "name": "Managing Global Cities",
+    "credit": "1.5",
+    "instructors": [
+      {
+        "name": "Rohit Negi",
+        "role": null,
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  },
+  {
+    "official_code": "SM-252",
+    "raw_name": "Strategic Decision Making in International Business",
+    "name": "Strategic Decision Making in International Business",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Ramya T Venkateswaran",
+        "role": null,
+        "email": "ramyatv@iimcal.ac.in",
+        "directory_name": "Ramya Tarakad Venkateswaran",
+        "match_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "official_code": "SM-260",
+    "raw_name": "Industry Analysis, Strategy and Performance",
+    "name": "Industry Analysis, Strategy and Performance",
+    "credit": "3",
+    "instructors": [
+      {
+        "name": "Kaushik Roy",
+        "role": "CC",
+        "email": "kaushik@iimcal.ac.in",
+        "directory_name": "Kaushik Roy",
+        "match_confidence": 1.0
+      },
+      {
+        "name": "Ranjan Das",
+        "role": "VF",
+        "email": null,
+        "directory_name": null,
+        "match_confidence": 0.0
+      }
+    ]
+  }
+]

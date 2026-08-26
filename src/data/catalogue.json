@@ -63,7 +63,19 @@
             "end": "11:45"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Abhipsa Pal",
+          "role": "CC",
+          "email": "abhipsapal@iimcal.ac.in"
+        },
+        {
+          "name": "Atanu Ghosh",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "BM",
@@ -198,7 +210,19 @@
           }
         ]
       },
-      "official_code": "FI-242"
+      "official_code": "FI-242",
+      "instructors": [
+        {
+          "name": "Sudhir Jaiswall",
+          "role": "CC",
+          "email": "sudhir@iimcal.ac.in"
+        },
+        {
+          "name": "Balachandran R",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "CB",
@@ -222,7 +246,14 @@
             "end": "19:30"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Rashmi Kumari",
+          "role": null,
+          "email": "rashmik@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "CCM",
@@ -246,7 +277,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Manish Thakur",
+          "role": null,
+          "email": "mt@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "CRA",
@@ -270,7 +308,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Biju Paul Abraham",
+          "role": null,
+          "email": "abraham@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "CMLSE",
@@ -294,7 +339,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Devi Vijay",
+          "role": null,
+          "email": "devivijay@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "DTDPS",
@@ -369,7 +421,24 @@
           }
         ]
       },
-      "official_code": "MI-300"
+      "official_code": "MI-300",
+      "instructors": [
+        {
+          "name": "Priya Seetharaman",
+          "role": "CC",
+          "email": "priyas@iimcal.ac.in"
+        },
+        {
+          "name": "Anbu Rathinavel",
+          "role": "VF",
+          "email": null
+        },
+        {
+          "name": "Ramakrishnan V.",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "EVIB",
@@ -393,7 +462,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Nisigandha Bhuyan",
+          "role": null,
+          "email": "nisigandha@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "FRM",
@@ -528,7 +604,19 @@
           }
         ]
       },
-      "official_code": "FI-283"
+      "official_code": "FI-283",
+      "instructors": [
+        {
+          "name": "Sudhakar Reddy",
+          "role": "CC",
+          "email": "sudhakar@iimcal.ac.in"
+        },
+        {
+          "name": "Deep Narayan Mukherjee",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "FIM",
@@ -552,7 +640,14 @@
             "end": "13:30"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Vivek Rajvanshi",
+          "role": null,
+          "email": "vivekr@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "IASP",
@@ -576,7 +671,19 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Kaushik Roy",
+          "role": "CC",
+          "email": "kaushik@iimcal.ac.in"
+        },
+        {
+          "name": "Ranjan Das",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "ISTPCM",
@@ -612,7 +719,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Nandita Roy",
+          "role": null,
+          "email": "nandita@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "IMC",
@@ -636,7 +750,19 @@
             "end": "13:30"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Koushiki Choudhury",
+          "role": "CC",
+          "email": "koushiki@iimcal.ac.in"
+        },
+        {
+          "name": "D P Ghosh",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "LSCM",
@@ -672,7 +798,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Balram Avittathur",
+          "role": null,
+          "email": "balram@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "MSO",
@@ -696,7 +829,14 @@
             "end": "19:30"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Abhishek Goel",
+          "role": null,
+          "email": "agoel@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "MEIIP",
@@ -720,7 +860,14 @@
             "end": "11:45"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Nisigandha Bhuyan",
+          "role": null,
+          "email": "nisigandha@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "MDT",
@@ -744,7 +891,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Abhipsa Pal",
+          "role": null,
+          "email": "abhipsapal@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "MDIO",
@@ -768,7 +922,14 @@
             "end": "11:45"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Anupama Kondayya",
+          "role": null,
+          "email": null
+        }
+      ]
     },
     {
       "code": "MGC",
@@ -792,7 +953,14 @@
             "end": "13:30"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Rohit Negi",
+          "role": null,
+          "email": null
+        }
+      ]
     },
     {
       "code": "MR",
@@ -816,7 +984,19 @@
             "end": "13:30"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Ramendra Singh",
+          "role": "CC",
+          "email": "ramendra@iimcal.ac.in"
+        },
+        {
+          "name": "K. Dasaratharaman",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "MTO",
@@ -840,7 +1020,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Chayanika Bhayana",
+          "role": null,
+          "email": "chayanika@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "MTISI4",
@@ -864,7 +1051,19 @@
             "end": "10:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Abhipsa Pal",
+          "role": "CC",
+          "email": "abhipsapal@iimcal.ac.in"
+        },
+        {
+          "name": "Atanu Ghosh",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "MDAA",
@@ -888,7 +1087,19 @@
             "end": "13:30"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Madhuparna Karmokar",
+          "role": "CC",
+          "email": "madhuparnak@iimcal.ac.in"
+        },
+        {
+          "name": "Conan Mukherjee",
+          "role": null,
+          "email": "conan.mukherjee@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "MTCI",
@@ -924,7 +1135,19 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Avinash Kumar",
+          "role": "CC",
+          "email": "avinash@iimcal.ac.in"
+        },
+        {
+          "name": "C. D. Mitra",
+          "role": "VF",
+          "email": null
+        }
+      ]
     },
     {
       "code": "MBPC",
@@ -948,7 +1171,14 @@
             "end": "11:45"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Ramendra Singh",
+          "role": null,
+          "email": "ramendra@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "MEOB",
@@ -979,7 +1209,14 @@
             "phase": "pre_mid"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Rajiv Kumar",
+          "role": null,
+          "email": "rajiv@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "NPSM",
@@ -1003,7 +1240,14 @@
             "end": "16:00"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Koushiki Choudhury",
+          "role": null,
+          "email": "koushiki@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "SNA",
@@ -1027,7 +1271,14 @@
             "end": "13:30"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Uttam K. Sarkar",
+          "role": null,
+          "email": "uttam@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "SDSBA",
@@ -1051,7 +1302,14 @@
             "end": "11:45"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Sabyasachi Mukhopadhyay",
+          "role": null,
+          "email": null
+        }
+      ]
     },
     {
       "code": "SDMIB",
@@ -1075,7 +1333,14 @@
             "end": "17:45"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Ramya T Venkateswaran",
+          "role": null,
+          "email": "ramyatv@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "ECS",
@@ -1099,7 +1364,14 @@
             "end": "17:45"
           }
         ]
-      }
+      },
+      "instructors": [
+        {
+          "name": "Runa Sarkar",
+          "role": null,
+          "email": "runa@iimcal.ac.in"
+        }
+      ]
     },
     {
       "code": "ODSHEB",
@@ -1234,7 +1506,19 @@
           }
         ]
       },
-      "official_code": "OM/SM-273"
+      "official_code": "OM/SM-273",
+      "instructors": [
+        {
+          "name": "Partha Priya Datta",
+          "role": "CC",
+          "email": "ppdatta@iimcal.ac.in"
+        },
+        {
+          "name": "R Rangarajan Iyengar",
+          "role": "VF",
+          "email": null
+        }
+      ]
     }
   ]
 }
