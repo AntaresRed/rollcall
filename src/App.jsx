@@ -19,6 +19,7 @@ const Profile = lazy(() => import("./screens/Profile"));
 const CatchUp = lazy(() => import("./screens/CatchUp"));
 const TermCalendar = lazy(() => import("./screens/TermCalendar"));
 const Reschedule = lazy(() => import("./screens/Reschedule"));
+const Faculty = lazy(() => import("./screens/Faculty"));
 
 const TABS = [
   ["today", "Today's classes", TodayIcon],
@@ -345,6 +346,9 @@ export default function App() {
             onBack={() => setSubScreen(null)}
           />
         )}
+        {tab === "timetable" && subScreen === "faculty" && (
+          <Faculty classes={classes} onBack={() => setSubScreen(null)} />
+        )}
         {tab === "timetable" && !subScreen && (
           <Timetable
             classes={classes}
@@ -353,6 +357,7 @@ export default function App() {
             overrides={overrides}
             onShowCalendar={() => setSubScreen("calendar")}
             onReschedule={() => setSubScreen("reschedule")}
+            onShowFaculty={() => setSubScreen("faculty")}
           />
         )}
         {tab === "catchup" && (

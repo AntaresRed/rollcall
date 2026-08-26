@@ -15,6 +15,7 @@ import Stats from "../src/screens/Stats";
 import Profile from "../src/screens/Profile";
 import Reschedule from "../src/screens/Reschedule";
 import TermCalendar from "../src/screens/TermCalendar";
+import Faculty from "../src/screens/Faculty";
 import CoursePicker from "../src/screens/CoursePicker";
 import SignIn from "../src/screens/SignIn";
 import Splash from "../src/screens/Splash";
@@ -96,6 +97,8 @@ const cases = [
       classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
   ["Profile / no session", <Profile key="ps" session={null}
       classes={[]} attendance={[]} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
+  ["Faculty", <Faculty key="f" classes={classes} onBack={noop} />],
+  ["Faculty / no courses picked", <Faculty key="fe" classes={[]} onBack={noop} />],
   ["Reschedule", <Reschedule key="r" classes={classes} term={term} overrides={overrides} now={now} onMove={noop} onClear={noop} onBack={noop} />],
   ["Reschedule / no classes", <Reschedule key="re" classes={[]} term={term} overrides={[]} now={now} onMove={noop} onClear={noop} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],

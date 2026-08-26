@@ -129,7 +129,7 @@ export default function CoursePicker({ existing = [], onSaved }) {
           subject: course.name,
           course_code: course.code,
           section: letter,
-          room: null,
+          room: course.venue || null,
           // A meeting can carry its own phase — a course that runs the whole
           // term but meets on different days before and after mid-terms tags
           // each meeting individually rather than the course as a whole.

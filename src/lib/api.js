@@ -10,6 +10,14 @@ const INSTRUCTORS_BY_CODE = new Map(
   catalogue.courses.map((c) => [c.code, c.instructors ?? []]),
 );
 
+// Same reasoning as instructors, plus a second one: the saved class row's
+// own `room` was null for every student who picked their courses before
+// CoursePicker started carrying venue through, and this fallback means
+// those existing rows still show a venue without a database backfill.
+const VENUE_BY_CODE = new Map(
+  catalogue.courses.map((c) => [c.code, c.venue || null]),
+);
+
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const DAY_LONG = {
   1: "Monday", 2: "Tuesday", 3: "Wednesday",
@@ -210,6 +218,29 @@ export function skipBudget({ total_classes = 20, min_pct = 75 } = {}) {
   return { total, mustAttend, allowedAbsences: Math.max(0, total - mustAttend) };
 }
 
+/**
+ * One row per selected course, carrying only its instructors — deliberately
+ * lighter than courseStats(), which also computes attendance and doesn't
+ * belong on a screen that has nothing to do with marking.
+ *
+ * `instructors: undefined` means the course's code doesn't resolve to a
+ * catalogue entry at all; `[]` means it resolved but genuinely has no
+ * instructor on file. The Faculty screen tells those apart in its copy.
+ */
+export function courseFaculty(classes) {
+  const bySubject = new Map();
+  for (const c of classes) {
+    if (bySubject.has(c.subject)) continue;
+    bySubject.set(c.subject, {
+      subject: c.subject,
+      course_code: c.course_code,
+      instructors: c.course_code ? INSTRUCTORS_BY_CODE.get(c.course_code) ?? [] : undefined,
+      venue: c.room || VENUE_BY_CODE.get(c.course_code) || null,
+    });
+  }
+  return [...bySubject.values()].sort((a, b) => a.subject.localeCompare(b.subject));
+}
+
 /** Per-course rollup used by both the Attendance screen and the Today header. */
 export function courseStats(classes, attendance) {
   const bySubject = new Map();
@@ -225,6 +256,7 @@ export function courseStats(classes, attendance) {
       // file) — the Profile screen falls back to the credit line only in
       // the first case, not the second.
       instructors: c.course_code ? INSTRUCTORS_BY_CODE.get(c.course_code) ?? [] : undefined,
+      venue: c.room || VENUE_BY_CODE.get(c.course_code) || null,
       ...skipBudget(c),
       present: 0,
       absent: 0,

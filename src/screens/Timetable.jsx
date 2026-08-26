@@ -13,7 +13,7 @@ import {
  * pinned, because six readable columns don't fit in 380px.
  */
 export default function Timetable({
-  classes, now, term, overrides = [], onShowCalendar, onReschedule,
+  classes, now, term, overrides = [], onShowCalendar, onReschedule, onShowFaculty,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -161,9 +161,9 @@ export default function Timetable({
 
       {/* Only what concerns this week's schedule. Choosing courses is an
           account-level decision and lives on Profile. */}
-      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+      <div className="tt-actions">
         {onReschedule && (
-          <button className="btn ghost" style={{ flex: 1 }} onClick={onReschedule}>
+          <button className="btn ghost" onClick={onReschedule}>
             Reschedule
             {upcomingChanges > 0 && (
               <span className="tag signal" style={{ marginLeft: 6 }}>{upcomingChanges}</span>
@@ -171,8 +171,13 @@ export default function Timetable({
           </button>
         )}
         {onShowCalendar && (
-          <button className="btn ghost" style={{ flex: 1 }} onClick={onShowCalendar}>
+          <button className="btn ghost" onClick={onShowCalendar}>
             Term calendar
+          </button>
+        )}
+        {onShowFaculty && (
+          <button className="btn ghost" onClick={onShowFaculty}>
+            Faculty details
           </button>
         )}
       </div>

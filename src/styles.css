@@ -642,6 +642,26 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   margin-top: 3px;
 }
 
+/* A separate line rather than folded into budget-sub — that line already
+   carries either the instructor or the credit fallback, and cramming venue
+   in too made it wrap awkwardly on courses with two instructors. */
+.budget-venue {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 2px;
+}
+.budget-venue::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--rule-strong);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
 /* The number is the answer to the question people actually have. */
 .budget-count {
   text-align: right;
@@ -1265,4 +1285,58 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   text-align: center;
   /* No opacity fade: at 9.5px it was landing under 4:1, and the small size
      plus uppercase mono already makes it recede far enough. */
+}
+
+/* ---------- timetable action buttons ---------- */
+
+.tt-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+/* Three buttons in a two-column grid: the third sits alone in the next row
+   rather than cramming into one line or forcing an awkward three-way flex. */
+.tt-actions .btn { width: 100%; }
+
+/* ---------- faculty details ---------- */
+
+.faculty-card {
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 0;
+}
+.faculty-card .course { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+
+.faculty-note {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--mute);
+}
+
+.faculty-list { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+
+.faculty-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.faculty-person {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.faculty-name { font-size: 14px; font-weight: 500; }
+
+.faculty-email {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--signal-deep);
+  text-decoration: none;
+}
+.faculty-email:hover { text-decoration: underline; }
+.faculty-email.muted {
+  color: var(--mute);
+  font-style: italic;
 }

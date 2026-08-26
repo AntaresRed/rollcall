@@ -59,6 +59,7 @@ export default function Stats({ classes, attendance, onToggleMute }) {
                   {instructorLine ?? `${r.credits} cr · ${r.total_classes} classes · ${r.min_pct}% needed`}
                   {r.muted && <span className="tag quiet" style={{ marginLeft: 6 }}>muted</span>}
                 </div>
+                {r.venue && <div className="budget-venue">{r.venue}</div>}
               </div>
               <div className={`budget-count${over ? " over" : tight ? " tight" : ""}`}>
                 <strong>{Math.max(0, r.skipsLeft)}</strong>
