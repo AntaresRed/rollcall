@@ -5,6 +5,7 @@ import {
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
+import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
 import catalogue from "../src/data/catalogue.json";
 
 let fail = 0;
@@ -235,6 +236,28 @@ console.log("calendar export (.ics)");
   check("every event has a start and an end",
     spans.length === built.count && spans.every((s) => s.start && s.end));
   check("no event ends before it starts", spans.every((s) => s.end > s.start));
+}
+
+console.log("");
+console.log("venue directions");
+survives("no venue", () => venueNote(null));
+survives("unknown venue", () => venueNote("Somewhere else"));
+check("an unknown venue has no note", venueNote("Tata Hall (East-West Conference room)") === null);
+check("every noted venue resolves", NOTED_VENUES.every((v) => venueNote(v)));
+// The directions are keyed loosely on purpose: the source sheet has spelled
+// the same room several ways across terms, and a note silently vanishing over
+// a hyphen is the failure this guards against.
+check("punctuation and case don't matter",
+  venueNote("l4") === venueNote("L-4") &&
+  venueNote("AMPHI EAST 150") === venueNote("Amphi (East-150)"));
+check("similar room numbers stay distinct", venueNote("L-51") === null && venueNote("L-4") !== null);
+// A note pointing at a room no course meets in is a note nobody will ever
+// see — most likely the catalogue renamed the venue underneath it.
+{
+  const published = new Set(catalogue.courses.map((c) => c.venue).filter(Boolean));
+  const orphans = NOTED_VENUES.filter((v) => ![...published].some((p) => venueNote(p) === venueNote(v)));
+  if (orphans.length) console.log("       orphaned: " + orphans.join(", "));
+  check("every noted venue is one the catalogue actually uses", orphans.length === 0);
 }
 
 

@@ -697,6 +697,30 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 /* The pin recedes a step so the room number stays the thing being read. */
 .venue-chip svg { flex: 0 0 auto; color: #9AA3AD; }
 
+/* Rooms with written directions get a caret; the rest are inert labels, and
+   look it. */
+.venue-chip.has-note { padding-right: 6px; }
+.venue-caret { transition: transform 0.15s ease; }
+.venue-chip.open .venue-caret { transform: rotate(180deg); }
+
+/* Breaks onto its own line in both places the chip appears: a flex row of
+   metadata on Today, and a plain block under the course name on Profile. */
+.venue-note {
+  display: block;
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 7px;
+  padding-left: 9px;
+  border-left: 2px solid var(--rule-strong);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--slate);
+}
+
 /* The number is the answer to the question people actually have. */
 .budget-count {
   text-align: right;

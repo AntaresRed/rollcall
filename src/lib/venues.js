@@ -1,0 +1,37 @@
+/**
+ * How to actually find a room.
+ *
+ * Hand-written, and deliberately not part of catalogue.json: that file is
+ * regenerated wholesale from the institute spreadsheet by
+ * scripts/build_catalogue.py, so anything written into it by hand is lost the
+ * next time the schedule changes. These directions come from people who know
+ * the campus, not from a sheet, so they live where a rebuild can't reach them.
+ *
+ * Keyed loosely — see `key()` — because the venue string reaching this module
+ * comes from a spreadsheet cell that has spelled the same room "L-4", "L4"
+ * and "L 4" in different terms, and a wayfinding note going missing over a
+ * hyphen is exactly the failure this is meant to prevent.
+ */
+
+/** "Amphi (East-150)" and "amphi east 150" both reduce to "amphieast150". */
+const key = (venue) => String(venue ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const NOTES = new Map([
+  ["Amphi (East-150)", "NAB Ground floor, first Amphi towards the side of Auditorium."],
+  ["N-22", "NAB first floor, on your right when you climb up the stairs, left if you come from lift."],
+  ["L-4", "OAB Ground floor, keep walking straight from MBA office, cross L1 & L2."],
+  ["L-2", "OAB Ground floor, opposite of L1."],
+].map(([venue, note]) => [key(venue), note]));
+
+/** The venues these directions were written for, as written — for the test
+ *  that checks each one still matches something the catalogue publishes. */
+export const NOTED_VENUES = ["Amphi (East-150)", "N-22", "L-4", "L-2"];
+
+/**
+ * Directions to a venue, or null when none have been written for it.
+ *
+ * Null is the normal case — most rooms have no note, and the chip renders
+ * exactly as before for those rather than growing a control that reveals
+ * nothing.
+ */
+export const venueNote = (venue) => (venue ? NOTES.get(key(venue)) ?? null : null);
