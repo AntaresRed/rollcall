@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { courseStats } from "../lib/api";
+import VenueChip from "./VenueChip";
 
 /**
  * "Prof. X · x@iimcal.ac.in" for the course coordinator, plus any other
@@ -21,27 +22,6 @@ function formatInstructors(list) {
         : `${i.name}${i.role ? ` (${i.role})` : ""}`,
     )
     .join("  ·  ");
-}
-
-/**
- * Where the class actually is. Venue is the one detail on this screen a
- * student reads under time pressure — walking, deciding which building — so
- * it's a chip rather than another line of grey metadata, and it sits in
- * neutral ink rather than the signal colour, which this app reserves for
- * "now" and for attendance verdicts.
- */
-function PinIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <path
-        d="M6 1.2c-1.93 0-3.5 1.53-3.5 3.42C2.5 7.2 6 10.8 6 10.8s3.5-3.6 3.5-6.18C9.5 2.73 7.93 1.2 6 1.2Z"
-        stroke="currentColor"
-        strokeWidth="1.15"
-        strokeLinejoin="round"
-      />
-      <circle cx="6" cy="4.6" r="1.2" fill="currentColor" />
-    </svg>
-  );
 }
 
 /**
@@ -81,12 +61,7 @@ export default function Stats({ classes, attendance, onToggleMute }) {
                   {r.muted && <span className="tag quiet" style={{ marginLeft: 6 }}>muted</span>}
                 </div>
                 {r.venue && (
-                  <div className="budget-venue">
-                    <span className="venue-chip">
-                      <PinIcon />
-                      {r.venue}
-                    </span>
-                  </div>
+                  <div className="budget-venue"><VenueChip venue={r.venue} /></div>
                 )}
               </div>
               <div className={`budget-count${over ? " over" : tight ? " tight" : ""}`}>

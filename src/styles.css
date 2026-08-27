@@ -88,10 +88,36 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   gap: 12px;
 }
 
+.masthead-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 40px of tap target on a 32px button: the arrow sits at the very top-left
+   corner of the screen, where a thumb is least accurate. */
+.masthead-back {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: -4px 0 -4px -6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+.masthead-back:active { background: rgba(255, 255, 255, 0.2); }
+
 .wordmark {
   display: flex;
   align-items: center;
   gap: 9px;
+  min-width: 0;
   font-weight: 600;
   font-size: 16px;
   letter-spacing: -0.015em;
@@ -647,10 +673,11 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
    in too made it wrap awkwardly on courses with two instructors. */
 .budget-venue { margin-top: 7px; }
 
-/* The venue reads as a label stuck on the course, not as more metadata. The
-   card sits on paper stock, so a white fill with a solid rule lifts off the
-   page on its own — no colour needed, which matters because every colour in
-   this system already means something (signal = now, green/red = verdict). */
+/* The venue reads as a label stuck on the course, not as more metadata — so
+   it's filled in the board colour, the same stock the masthead is printed on.
+   Deliberately not a colour: every colour here already means something
+   (signal = now, green/red = verdict), and a coloured venue would read as a
+   status rather than a place. */
 .venue-chip {
   display: inline-flex;
   align-items: center;
@@ -658,16 +685,17 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   max-width: 100%;
   padding: 3px 9px 3px 7px;
   border-radius: 999px;
-  background: var(--card);
-  border: 1px solid var(--rule-strong);
+  background: var(--board);
+  border: 1px solid var(--board);
   font-family: var(--mono);
   font-size: 11.5px;
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: var(--ink);
+  color: #fff;
   line-height: 1.35;
 }
-.venue-chip svg { flex: 0 0 auto; color: var(--slate); }
+/* The pin recedes a step so the room number stays the thing being read. */
+.venue-chip svg { flex: 0 0 auto; color: #9AA3AD; }
 
 /* The number is the answer to the question people actually have. */
 .budget-count {
@@ -1304,8 +1332,8 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   gap: 8px;
   margin-top: 16px;
 }
-/* Three buttons in a two-column grid: the third sits alone in the next row
-   rather than cramming into one line or forcing an awkward three-way flex. */
+/* Four buttons in a two-column grid — an even 2x2 rather than one line of
+   four, which no phone has room for. */
 .tt-actions .btn { width: 100%; }
 
 
@@ -1486,3 +1514,72 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 }
 .dir-field dd a:hover { text-decoration: underline; }
 .dir-field dd .muted { color: var(--mute); }
+
+
+/* ---------- calendar export ---------- */
+
+.export-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px;
+  margin-bottom: 14px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+}
+.export-figure {
+  flex: 0 0 auto;
+  text-align: center;
+  line-height: 1;
+}
+.export-figure strong {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.export-figure span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.export-detail {
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink);
+}
+.export-sub {
+  margin-top: 4px;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--slate);
+}
+
+/* Numbered because these are steps taken in order in another app, where
+   getting the sequence wrong means starting again. */
+.steps {
+  margin: 0 0 4px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--slate);
+}
+.steps li { margin-bottom: 6px; }
+.steps code, .mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.fineprint {
+  margin-top: 18px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}

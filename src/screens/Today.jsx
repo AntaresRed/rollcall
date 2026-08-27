@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { DAY_LONG, PHASE_LABEL, pretty, toMinutes, weekdayOf, isoDate } from "../lib/api";
+import { DAY_LONG, PHASE_LABEL, pretty, toMinutes, weekdayOf, isoDate, venueOf } from "../lib/api";
+import VenueChip from "./VenueChip";
 
 /**
  * `occurrences` arrive already resolved by the caller: term windows, breaks
@@ -69,7 +70,10 @@ export default function Today({ occurrences, attendance, now, onMark }) {
                 <div>
                   <div className="course">{c.subject}</div>
                   <div className="meta">
-                    {c.room && <span>{c.room}</span>}
+                    {/* venueOf, not c.room: rows saved before the course
+                        picker carried venue through have a null room, and the
+                        catalogue still knows where the course meets. */}
+                    <VenueChip venue={venueOf(c)} />
                     {phase && <span className="tag">{phase}</span>}
                     {live && <span className="tag signal">In session</span>}
                     {c.muted && <span className="tag quiet">muted</span>}

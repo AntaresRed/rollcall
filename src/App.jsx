@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, lazy, Suspense } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 import { supabase, getSession, signOut, readAuthError } from "./lib/supabase";
 import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
@@ -20,6 +20,17 @@ const CatchUp = lazy(() => import("./screens/CatchUp"));
 const TermCalendar = lazy(() => import("./screens/TermCalendar"));
 const Reschedule = lazy(() => import("./screens/Reschedule"));
 const Faculty = lazy(() => import("./screens/Faculty"));
+const CalendarExport = lazy(() => import("./screens/CalendarExport"));
+
+// What the masthead's back arrow says it returns to, per sub-screen. Tabs
+// themselves don't stack — they're a flat choice, and back through a tab you
+// only glanced at is worse than no back at all — so only these push a level.
+const SUB_SCREEN_BACK = {
+  calendar: "Back to timetable",
+  reschedule: "Back to timetable",
+  faculty: "Back to timetable",
+  export: "Back to timetable",
+};
 
 const TABS = [
   ["today", "Today's classes", TodayIcon],
@@ -44,6 +55,9 @@ export default function App() {
   const [fatal, setFatal] = useState("");
   const [session, setSession] = useState(null);
   const [authError, setAuthError] = useState(null);
+  // Set by CoursePicker while its selection differs from what's saved, so
+  // backing out of it can warn — and stay silent when there's nothing to lose.
+  const pickerDirty = useRef(false);
 
   const say = (msg) => {
     setToast(msg);
@@ -250,8 +264,22 @@ export default function App() {
     // Remember where the edit was launched from, so saving returns there
     // rather than dumping the student on Today.
     setReturnTab(tab);
+    pickerDirty.current = false;
     setEditing(true);
   };
+
+  const leaveEditing = () => {
+    if (pickerDirty.current &&
+        !confirm("Leave without saving? Your changes to the course list will be lost.")) return;
+    pickerDirty.current = false;
+    setEditing(false);
+    setTab(returnTab ?? tab);
+    setReturnTab(null);
+  };
+
+  // Stable identity: CoursePicker recomputes its dirty flag whenever this
+  // prop changes, and App re-renders every time the clock ticks over a minute.
+  const notePickerDirty = useCallback((dirty) => { pickerDirty.current = dirty; }, []);
 
   const handleSignOut = useCallback(async () => {
     if (!confirm("Sign out of IIMPresent? Your timetable and attendance stay on the server.")) return;
@@ -285,6 +313,7 @@ export default function App() {
   if (!classes.length || editing) {
     const finish = async (saved) => {
       setClasses(saved);
+      pickerDirty.current = false;
       setEditing(false);
       // First run has nowhere to go back to, so Today is the right landing.
       setTab(returnTab ?? "today");
@@ -294,9 +323,19 @@ export default function App() {
 
     return (
       <div className="shell">
-        <Masthead now={now} />
+        {/* No way back on first run: there is no app behind this screen yet,
+            and an arrow that leads nowhere is worse than none. */}
+        <Masthead
+          now={now}
+          onBack={editing && classes.length ? leaveEditing : null}
+          backLabel="Back without saving"
+        />
         <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
-          <CoursePicker existing={classes} onSaved={finish} />
+          <CoursePicker
+            existing={classes}
+            onSaved={finish}
+            onDirtyChange={notePickerDirty}
+          />
         </Suspense>
       </div>
     );
@@ -305,7 +344,11 @@ export default function App() {
   // ---- main ----
   return (
     <>
-      <Masthead now={now} />
+      <Masthead
+        now={now}
+        onBack={subScreen ? () => setSubScreen(null) : null}
+        backLabel={SUB_SCREEN_BACK[subScreen]}
+      />
       <div className="shell">
         {!alerts && pushSupported() && (
           <div className={`banner${iosNeedsInstall ? " warn" : ""}`}>
@@ -349,6 +392,14 @@ export default function App() {
         {tab === "timetable" && subScreen === "faculty" && (
           <Faculty classes={classes} onBack={() => setSubScreen(null)} />
         )}
+        {tab === "timetable" && subScreen === "export" && (
+          <CalendarExport
+            classes={classes}
+            term={term}
+            overrides={overrides}
+            onBack={() => setSubScreen(null)}
+          />
+        )}
         {tab === "timetable" && !subScreen && (
           <Timetable
             classes={classes}
@@ -358,6 +409,7 @@ export default function App() {
             onShowCalendar={() => setSubScreen("calendar")}
             onReschedule={() => setSubScreen("reschedule")}
             onShowFaculty={() => setSubScreen("faculty")}
+            onExport={() => setSubScreen("export")}
           />
         )}
         {tab === "catchup" && (
@@ -409,15 +461,35 @@ export default function App() {
   );
 }
 
-function Masthead({ now }) {
+/**
+ * `onBack` is passed only on screens that were opened from another one — the
+ * timetable's sub-screens and the course editor. The four tabs are a flat
+ * choice rather than a stack, so nothing there gets an arrow.
+ */
+function Masthead({ now, onBack = null, backLabel = "Back" }) {
   const label = now.toLocaleDateString(undefined, {
     weekday: "short", day: "numeric", month: "short",
   });
   return (
     <header className="masthead">
-      <div className="wordmark">
-        <Mark size={22} />
-        <b>IIM<i>Present</i></b>
+      <div className="masthead-left">
+        {onBack && (
+          <button className="masthead-back" onClick={onBack} aria-label={backLabel} title={backLabel}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path
+                d="M11 3.5 5.5 9l5.5 5.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
+        <div className="wordmark">
+          <Mark size={22} />
+          <b>IIM<i>Present</i></b>
+        </div>
       </div>
       <div className="masthead-date">{label}</div>
     </header>

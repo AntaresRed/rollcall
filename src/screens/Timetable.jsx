@@ -14,6 +14,7 @@ import {
  */
 export default function Timetable({
   classes, now, term, overrides = [], onShowCalendar, onReschedule, onShowFaculty,
+  onExport,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -178,6 +179,11 @@ export default function Timetable({
         {onShowFaculty && (
           <button className="btn ghost" onClick={onShowFaculty}>
             Faculty details
+          </button>
+        )}
+        {onExport && (
+          <button className="btn ghost" onClick={onExport}>
+            Add to calendar
           </button>
         )}
       </div>

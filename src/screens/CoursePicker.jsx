@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import catalogue from "../data/catalogue.json";
 import { DAYS, PHASE_LABEL, pretty, saveTimetable } from "../lib/api";
 
@@ -31,12 +31,23 @@ function describe(meetings, course) {
   return `Pre-mid: ${label("pre_mid")} · Post-mid: ${label("post_mid")}`;
 }
 
-export default function CoursePicker({ existing = [], onSaved }) {
+export default function CoursePicker({ existing = [], onSaved, onDirtyChange }) {
   const [query, setQuery] = useState("");
   // { [code]: sectionLetter }
   const [picked, setPicked] = useState(() => seedFrom(existing));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // The screen can now be left without saving, so whoever owns the way out
+  // needs to know whether leaving costs anything. Compared against the same
+  // seed the picks started from — reordering can't happen, so a plain
+  // key-by-key comparison is enough.
+  useEffect(() => {
+    if (!onDirtyChange) return;
+    const seed = seedFrom(existing);
+    const keys = new Set([...Object.keys(seed), ...Object.keys(picked)]);
+    onDirtyChange([...keys].some((k) => seed[k] !== picked[k]));
+  }, [picked, existing, onDirtyChange]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -22,6 +22,11 @@ const VENUE_BY_CODE = new Map(
   catalogue.courses.map((c) => [c.code, c.venue || null]),
 );
 
+/** Where a class meets: the row's own room if it has one, else the venue the
+ *  catalogue publishes for that course code. */
+export const venueOf = (cls) =>
+  cls?.room?.trim() || VENUE_BY_CODE.get(cls?.course_code) || null;
+
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const DAY_LONG = {
   1: "Monday", 2: "Tuesday", 3: "Wednesday",
@@ -237,7 +242,7 @@ export function courseStats(classes, attendance) {
       // file) — the Profile screen falls back to the credit line only in
       // the first case, not the second.
       instructors: c.course_code ? INSTRUCTORS_BY_CODE.get(c.course_code) ?? [] : undefined,
-      venue: c.room || VENUE_BY_CODE.get(c.course_code) || null,
+      venue: venueOf(c),
       ...skipBudget(c),
       present: 0,
       absent: 0,

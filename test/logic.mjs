@@ -4,6 +4,7 @@ import {
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
+import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
 import catalogue from "../src/data/catalogue.json";
 
 let fail = 0;
@@ -147,6 +148,94 @@ check("a picked course tags its instructor", (() => {
 })());
 check("mineOnly with no picked courses shows nobody",
   facultyDirectory([], "", true).length === 0);
+
+console.log("");
+console.log("calendar export (.ics)");
+{
+  const icsClasses = [
+    { id: "c1", subject: "Consumption, Culture & Markets", course_code: "CCM", section: "A",
+      day_of_week: 1, start_time: "10:15", end_time: "11:45", room: "Amphi (East-150)",
+      term_phase: "full", session_date: null },
+  ];
+  const built = buildTimetableIcs(icsClasses, term, [], new Date("2026-09-10T12:00:00Z"));
+  const ics = built.ics;
+
+  survives("no classes", () => buildTimetableIcs([], term, []));
+  survives("no term", () => buildTimetableIcs(icsClasses, null, []));
+  check("no term yields no file", buildTimetableIcs(icsClasses, null, []).ics === null);
+  check("wrapped in VCALENDAR",
+    ics.startsWith("BEGIN:VCALENDAR\r\n") && ics.trimEnd().endsWith("END:VCALENDAR"));
+  check("every line ends CRLF", !/[^\r]\n/.test(ics));
+  check("VEVENT count matches the reported count",
+    (ics.match(/BEGIN:VEVENT/g) || []).length === built.count);
+  check("every VEVENT is closed",
+    (ics.match(/BEGIN:VEVENT/g) || []).length === (ics.match(/END:VEVENT/g) || []).length);
+  check("carries the timezone it dates events in",
+    ics.includes("BEGIN:VTIMEZONE") && ics.includes("TZID:Asia/Kolkata"));
+  check("events are dated in that zone", ics.includes("DTSTART;TZID=Asia/Kolkata:"));
+  // Only classes: breaks and the mid-term gap decide which dates exist, they
+  // are never events themselves.
+  check("Puja week produces no event",
+    !/DTSTART;TZID=Asia\/Kolkata:2026101[9]|DTSTART;TZID=Asia\/Kolkata:2026102[0-5]/.test(ics));
+  check("the gap between teaching windows produces no event",
+    !/DTSTART;TZID=Asia\/Kolkata:2026100[1-4]/.test(ics));
+  check("nothing falls outside the term",
+    [...ics.matchAll(/DTSTART;TZID=Asia\/Kolkata:(\d{8})/g)]
+      .every((m) => m[1] >= "20260824" && m[1] <= "20261122"));
+  // A comma in a course name is a field separator in iCalendar until escaped.
+  check("commas in a summary are escaped",
+    ics.includes("SUMMARY:Consumption\\, Culture & Markets"));
+  check("the venue rides along", ics.includes("LOCATION:Amphi (East-150)"));
+  check("no line exceeds 75 octets", ics.split("\r\n").every(
+    (l) => new TextEncoder().encode(l).length <= 75));
+
+  // The point of a stable UID: exporting again after moving a class has to
+  // edit the event the calendar already holds, not add a second one.
+  const uidOn = (text, dt) => {
+    const events = text.split("BEGIN:VEVENT").slice(1);
+    const hit = events.find((e) => e.includes(`DTSTART;TZID=Asia/Kolkata:${dt}`));
+    return hit && hit.match(/UID:(\S+)/)[1];
+  };
+  const original = uidOn(ics, "20260907T101500");
+  const movedIcs = buildTimetableIcs(icsClasses, term,
+    [{ class_id: "c1", original_date: "2026-09-07", new_date: "2026-09-09",
+       new_start: "14:30", new_end: "16:00" }],
+    new Date("2026-09-10T12:00:00Z")).ics;
+  check("a moved class keeps the UID it was exported under",
+    Boolean(original) && uidOn(movedIcs, "20260909T143000") === original);
+  check("and vacates its original slot", !uidOn(movedIcs, "20260907T101500"));
+  check("moving doesn't change the event count",
+    (movedIcs.match(/BEGIN:VEVENT/g) || []).length === built.count);
+  check("SEQUENCE rises between exports",
+    exportSequence(new Date("2026-09-10T13:00:00Z")) >
+    exportSequence(new Date("2026-09-10T12:00:00Z")));
+  // Folding is counted in octets, and the catalogue really does carry en
+  // dashes and curly quotes — a fold placed by character count can both
+  // overrun the limit and split a multi-byte sequence in half.
+  const longName = "Inside Storytelling – Theories and Praxis for Communication and Management";
+  const foldedIcs = buildTimetableIcs(
+    [{ ...icsClasses[0], subject: longName }], term, [], new Date("2026-09-10T12:00:00Z"),
+  ).ics;
+  check("a long name is folded within the octet limit",
+    foldedIcs.split("\r\n").every((l) => new TextEncoder().encode(l).length <= 75));
+  check("and unfolds back to exactly what went in",
+    foldedIcs.replace(/\r\n /g, "").includes(`SUMMARY:${longName}`));
+  check("folding did not break the multi-byte character", foldedIcs.includes("�") === false);
+  check("the filename is safe to write to disk",
+    /^[a-z0-9-]+\.ics$/.test(icsFilename(term)));
+
+  // Two events sharing a UID is how you get a calendar that silently keeps
+  // only one of them.
+  const uids = [...ics.matchAll(/UID:(\S+)/g)].map((m) => m[1]);
+  check("every event has its own UID", new Set(uids).size === uids.length);
+  const spans = ics.split("BEGIN:VEVENT").slice(1).map((e) => ({
+    start: e.match(/DTSTART;TZID=Asia\/Kolkata:(\d{8}T\d{6})/)?.[1],
+    end: e.match(/DTEND;TZID=Asia\/Kolkata:(\d{8}T\d{6})/)?.[1],
+  }));
+  check("every event has a start and an end",
+    spans.length === built.count && spans.every((s) => s.start && s.end));
+  check("no event ends before it starts", spans.every((s) => s.end > s.start));
+}
 
 
 console.log(`\n${fail === 0 ? "all logic checks passed" : fail + " FAILURES"}`);

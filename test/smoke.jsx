@@ -16,6 +16,7 @@ import Profile from "../src/screens/Profile";
 import Reschedule from "../src/screens/Reschedule";
 import TermCalendar from "../src/screens/TermCalendar";
 import Faculty from "../src/screens/Faculty";
+import CalendarExport from "../src/screens/CalendarExport";
 import CoursePicker from "../src/screens/CoursePicker";
 import SignIn from "../src/screens/SignIn";
 import Splash from "../src/screens/Splash";
@@ -109,9 +110,13 @@ const cases = [
         new_start: "08:30", new_end: "10:00", note: null }]}
       now={now} onMove={noop} onClear={noop} onBack={noop} />],
   ["Reschedule / no term", <Reschedule key="rt" classes={classes} term={null} overrides={overrides} now={now} onMove={noop} onClear={noop} />],
+  ["CalendarExport", <CalendarExport key="ce" classes={classes} term={term} overrides={overrides} onBack={noop} />],
+  ["CalendarExport / no courses", <CalendarExport key="cen" classes={[]} term={term} overrides={[]} onBack={noop} />],
+  ["CalendarExport / no term", <CalendarExport key="cet" classes={classes} term={null} overrides={[]} onBack={noop} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
   ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],
+  ["CoursePicker / reports dirtiness", <CoursePicker key="cpd" existing={classes} onSaved={noop} onDirtyChange={noop} />],
   ["CoursePicker / fresh", <CoursePicker key="cpf" existing={[]} onSaved={noop} />],
 
   // Deliberately hostile input: rows missing the fields screens read.
