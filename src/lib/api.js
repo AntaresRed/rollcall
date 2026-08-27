@@ -10,6 +10,10 @@ const INSTRUCTORS_BY_CODE = new Map(
   catalogue.courses.map((c) => [c.code, c.instructors ?? []]),
 );
 
+/** Read by the faculty directory, which lives in its own lazily-loaded
+ *  module and shouldn't build a second copy of this map to do so. */
+export const instructorsFor = (code) => INSTRUCTORS_BY_CODE.get(code) ?? [];
+
 // Same reasoning as instructors, plus a second one: the saved class row's
 // own `room` was null for every student who picked their courses before
 // CoursePicker started carrying venue through, and this fallback means
@@ -216,29 +220,6 @@ export function skipBudget({ total_classes = 20, min_pct = 75 } = {}) {
   const total = Number(total_classes) || 0;
   const mustAttend = Math.ceil((total * Number(min_pct)) / 100);
   return { total, mustAttend, allowedAbsences: Math.max(0, total - mustAttend) };
-}
-
-/**
- * One row per selected course, carrying only its instructors — deliberately
- * lighter than courseStats(), which also computes attendance and doesn't
- * belong on a screen that has nothing to do with marking.
- *
- * `instructors: undefined` means the course's code doesn't resolve to a
- * catalogue entry at all; `[]` means it resolved but genuinely has no
- * instructor on file. The Faculty screen tells those apart in its copy.
- */
-export function courseFaculty(classes) {
-  const bySubject = new Map();
-  for (const c of classes) {
-    if (bySubject.has(c.subject)) continue;
-    bySubject.set(c.subject, {
-      subject: c.subject,
-      course_code: c.course_code,
-      instructors: c.course_code ? INSTRUCTORS_BY_CODE.get(c.course_code) ?? [] : undefined,
-      venue: c.room || VENUE_BY_CODE.get(c.course_code) || null,
-    });
-  }
-  return [...bySubject.values()].sort((a, b) => a.subject.localeCompare(b.subject));
 }
 
 /** Per-course rollup used by both the Attendance screen and the Today header. */

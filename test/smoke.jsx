@@ -99,8 +99,16 @@ const cases = [
       classes={[]} attendance={[]} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
   ["Faculty", <Faculty key="f" classes={classes} onBack={noop} />],
   ["Faculty / no courses picked", <Faculty key="fe" classes={[]} onBack={noop} />],
+  ["Faculty / no classes prop at all", <Faculty key="fn" onBack={noop} />],
   ["Reschedule", <Reschedule key="r" classes={classes} term={term} overrides={overrides} now={now} onMove={noop} onClear={noop} onBack={noop} />],
   ["Reschedule / no classes", <Reschedule key="re" classes={[]} term={term} overrides={[]} now={now} onMove={noop} onClear={noop} />],
+  // A session already moved once, off a date that has since passed — the case
+  // the screen used to have no way to reach.
+  ["Reschedule / change against a past date", <Reschedule key="rp" classes={classes} term={term}
+      overrides={[{ id: "o3", class_id: "c1", original_date: "2026-09-03", new_date: "2026-08-28",
+        new_start: "08:30", new_end: "10:00", note: null }]}
+      now={now} onMove={noop} onClear={noop} onBack={noop} />],
+  ["Reschedule / no term", <Reschedule key="rt" classes={classes} term={null} overrides={overrides} now={now} onMove={noop} onClear={noop} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
   ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],

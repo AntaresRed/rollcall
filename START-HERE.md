@@ -116,6 +116,7 @@ src/
   screens/            Splash, SignIn, Today, Timetable, CatchUp, Stats,
                       Profile, Reschedule, TermCalendar, CoursePicker
   data/catalogue.json generated — do not edit by hand
+  data/directory.json generated — do not edit by hand
 
 public/               manifest, service worker, icons
 data/
@@ -123,6 +124,8 @@ data/
   Class_Schedule_Term-V_AY-2026-27.xlsx
 scripts/
   build_catalogue.py  rebuilds the catalogue from the spreadsheet
+  build_faculty.py    matches course instructors to directory emails
+  build_directory.py  rebuilds src/data/directory.json from FacultyDirectory.tsv
 supabase/
   schema.sql          run in the SQL Editor; safe to re-run
   fix-signin.sql      standalone patch for the sign-in trigger
@@ -139,6 +142,20 @@ python scripts/build_catalogue.py data/Class_Schedule_Term-V_AY-2026-27.xlsx src
 
 Then push. The catalogue is read by the app only, so there is nothing to
 copy into an edge function and nothing to redeploy.
+
+## When the faculty directory changes
+
+The Faculty details screen reads `src/data/directory.json`, which is the whole
+of `FacultyDirectory.tsv` — name, room, extension, direct line, email. When a
+new sheet arrives:
+
+```powershell
+python scripts/build_directory.py data/FacultyDirectory.tsv src/data/directory.json
+```
+
+`build_faculty.py` is a separate step and answers a different question — which
+directory entry each course instructor is — so run it too if the course sheet
+changed, then rebuild the catalogue to attach the result.
 
 ## Still open
 

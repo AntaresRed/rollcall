@@ -3,6 +3,7 @@ import {
   toMinutes, hhmm, pretty, inSession, breakOn, skipBudget, courseStats,
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
 } from "../src/lib/api.js";
+import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import catalogue from "../src/data/catalogue.json";
 
 let fail = 0;
@@ -115,6 +116,38 @@ try {
 } catch (err) {
   fail++; console.log("  FAIL catalogue check -> " + err.message);
 }
+
+console.log("\nfaculty directory");
+survives("no arguments at all", () => facultyDirectory());
+survives("junk query", () => facultyDirectory([], "((("));
+survives("classes missing course_code", () => facultyDirectory([{ subject: "Bare" }], ""));
+check("empty query returns everybody", facultyDirectory([], "").length === facultyCount);
+check("every person has at least one office",
+  facultyDirectory([], "").every((p) => p.offices.length > 0));
+// Merged rather than listed twice: the sheet carries this person under their
+// own name and again under their dean's title, with a different room, a
+// different extension and a role address.
+check("a dean's two rows collapse to one entry with two offices", (() => {
+  const hits = facultyDirectory([], "manish thakur");
+  return hits.length === 1 && hits[0].offices.length === 2 && hits[0].title === "Dean NIER";
+})());
+check("search finds a room typed without its hyphen",
+  facultyDirectory([], "k208").some((p) => p.name === "Abhipsa Pal"));
+check("search finds an extension", facultyDirectory([], "2080").length >= 1);
+check("every query token has to match",
+  facultyDirectory([], "abhipsa zzzznotathing").length === 0);
+check("unknown query is empty, not everybody",
+  facultyDirectory([], "zzzznotathing").length === 0);
+// The catalogue's instructor emails came from a confident directory match in
+// build_faculty.py, so the join back to a person here is exact.
+check("a picked course tags its instructor", (() => {
+  const code = catalogue.courses.find((c) => (c.instructors ?? []).some((i) => i.email))?.code;
+  const rows = facultyDirectory([{ subject: "Some Course", course_code: code }], "");
+  return rows.some((p) => p.courses.includes("Some Course"));
+})());
+check("mineOnly with no picked courses shows nobody",
+  facultyDirectory([], "", true).length === 0);
+
 
 console.log(`\n${fail === 0 ? "all logic checks passed" : fail + " FAILURES"}`);
 process.exit(fail ? 1 : 0);
