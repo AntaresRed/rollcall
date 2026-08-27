@@ -183,7 +183,7 @@ export default function Timetable({
         )}
         {onExport && (
           <button className="btn ghost" onClick={onExport}>
-            Add to calendar
+            Add to Google / Apple calendar
           </button>
         )}
       </div>
