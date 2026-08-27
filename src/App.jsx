@@ -349,7 +349,12 @@ export default function App() {
         onBack={subScreen ? () => setSubScreen(null) : null}
         backLabel={SUB_SCREEN_BACK[subScreen]}
       />
-      <div className="shell">
+      {/* Widened only for the plain grid view — the day columns are what
+          actually benefit from a laptop's extra width. Every other screen,
+          this one included when a sub-screen is open, reads as prose or a
+          list and is better off at the narrow column width it already has;
+          stretching those to a 27" monitor would just make the lines long. */}
+      <div className={`shell${tab === "timetable" && !subScreen ? " shell-grid" : ""}`}>
         {!alerts && pushSupported() && (
           <div className={`banner${iosNeedsInstall ? " warn" : ""}`}>
             {iosNeedsInstall ? (

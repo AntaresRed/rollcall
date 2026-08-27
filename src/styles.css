@@ -73,6 +73,17 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   padding: 0 var(--pad) calc(96px + env(safe-area-inset-bottom));
 }
 
+/* On a laptop-width screen, the week's timetable gets room to lay every day
+   out side by side instead of needing the horizontal scroll a phone has no
+   choice about. Scoped to the plain grid view only (see the class's home in
+   App.jsx) — Faculty, Reschedule and the rest are lists and prose, and read
+   worse stretched wide, so they keep the narrow column. The breakpoint is a
+   width, not a device: a phone rotated into a wide landscape window gets the
+   grid too, which is the correct outcome, not an edge case to guard against. */
+@media (min-width: 860px) {
+  .shell.shell-grid { max-width: 1040px; }
+}
+
 /* ---------- masthead ---------- */
 
 .masthead {
@@ -848,7 +859,17 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   border: 1px solid var(--rule);
   border-radius: var(--r);
   overflow: hidden;
+  /* Forces every column to its widest unwrapped line — a long venue name,
+     mainly — rather than letting it wrap. That's the point on a phone: a
+     guaranteed-readable column and a horizontal scroll are a fair trade.
+     On the wide desktop grid below, the same rule would keep forcing a
+     scrollbar no matter how much width .shell-grid hands it, since it sizes
+     off content rather than the container — so it's switched off there and
+     long names wrap in the cell instead. */
   min-width: max-content;
+}
+@media (min-width: 860px) {
+  .shell-grid .tt-grid { min-width: 0; }
 }
 
 /* the time gutter stays put while the days scroll under it */
