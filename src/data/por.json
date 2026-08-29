@@ -1,0 +1,2335 @@
+{
+  "student-council": {
+    "label": "Student Council",
+    "sections": [
+      {
+        "label": null,
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Tushar Bhartiya",
+            "phone": "7252895480",
+            "email": "president@email.iimcal.ac.in"
+          },
+          {
+            "role": "General Secretary/HAS",
+            "name": "Jaskaran Singh",
+            "phone": "9779177678",
+            "email": "hasecy@email.iimcal.ac.in"
+          },
+          {
+            "role": "Treasurer",
+            "name": "Sparsh Jain",
+            "phone": "7505481411",
+            "email": "treasurer@email.iimcal.ac.in"
+          },
+          {
+            "role": "Alumni Secretary",
+            "name": "Nikita Bhidore",
+            "phone": "7224908198",
+            "email": "alumnisecy@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sports Secretary",
+            "name": "Janani S",
+            "phone": "8939252653",
+            "email": "sportssecy@email.iimcal.ac.in"
+          },
+          {
+            "role": "Cultural Secretary",
+            "name": "Gargie Basar Bhuyan",
+            "phone": "9401099567",
+            "email": "culsecy@email.iimcal.ac.in"
+          },
+          {
+            "role": "Library Representative",
+            "name": "Sourav",
+            "phone": "6392867759",
+            "email": "librep@email.iimcal.ac.in"
+          },
+          {
+            "role": "IT Representative",
+            "name": "Naman Singh",
+            "phone": "7231939779",
+            "email": "itrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "ER Secretary",
+            "name": "Anjali Joy",
+            "phone": "9497530894",
+            "email": "ercell@email.iimcal.ac.in"
+          },
+          {
+            "role": "ER Secretary",
+            "name": "Preeti Mekala",
+            "phone": "8555074429",
+            "email": "ercell@email.iimcal.ac.in"
+          },
+          {
+            "role": "MBA Representative",
+            "name": "Devika",
+            "phone": "9161255021",
+            "email": "pgprep@email.iimcal.ac.in"
+          },
+          {
+            "role": "MBA Representative",
+            "name": "Aravind C",
+            "phone": "8590660620",
+            "email": "pgprep@email.iimcal.ac.in"
+          },
+          {
+            "role": "MBA Representative",
+            "name": "Kartik Saini",
+            "phone": "8168081315",
+            "email": "pgprep@email.iimcal.ac.in"
+          },
+          {
+            "role": "MBA Representative",
+            "name": "Sahil Singh",
+            "phone": "9127477236",
+            "email": "pgprep@email.iimcal.ac.in"
+          },
+          {
+            "role": "STEP Representative",
+            "name": "Rudradeep Chakraborty",
+            "phone": "6363728167",
+            "email": "steprep@email.iimcal.ac.in"
+          },
+          {
+            "role": "WH Hostel Representative",
+            "name": "Vivek Patel",
+            "phone": "8081325747",
+            "email": "whrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "WH Mess Representative",
+            "name": "Mayank Raj Kankas",
+            "phone": "8952800777",
+            "email": "whmessrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "OH Hostel Representative",
+            "name": "Srishti Verma",
+            "phone": "9650012290",
+            "email": "ohrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "OH Mess Representative",
+            "name": "Hitesh Mohnot",
+            "phone": "7073654383",
+            "email": "ohmessrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "LVH Hostel Representative",
+            "name": "Subhadip Patra",
+            "phone": "8777645015",
+            "email": "lvhrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "LVH Mess Representative",
+            "name": "Penta Charvitha Sri",
+            "phone": "7032309976",
+            "email": "lvhmessrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "NH Hostel Representative",
+            "name": "Aita Manish",
+            "phone": "7318020844",
+            "email": "nhrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "NH Mess Representative",
+            "name": "Aasif Alam",
+            "phone": "9123169600",
+            "email": "nhmessrep@email.iimcal.ac.in"
+          },
+          {
+            "role": "ISG Heads",
+            "name": "Harshit Kumar Singh",
+            "phone": "9997932006",
+            "email": "isg@email.iimcal.ac.in"
+          },
+          {
+            "role": "ISG Heads",
+            "name": "Arpan Samuel Topno",
+            "phone": "7761932485",
+            "email": "isg@email.iimcal.ac.in"
+          },
+          {
+            "role": "ISG Heads",
+            "name": "sankeerthana valaboju",
+            "phone": "6303444607",
+            "email": "isg@email.iimcal.ac.in"
+          }
+        ]
+      }
+    ]
+  },
+  "preparation-committee": {
+    "label": "Preparation Committee",
+    "sections": [
+      {
+        "label": null,
+        "kind": null,
+        "people": [
+          {
+            "role": null,
+            "name": "Raksha Agrawal",
+            "phone": "9407459099",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Saloni Singh",
+            "phone": "7060165502",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Nivetha Ravichandran",
+            "phone": "8200986228",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Ankit Patel",
+            "phone": "8210318024",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Akash Deep",
+            "phone": "8770471652",
+            "email": null
+          }
+        ]
+      }
+    ]
+  },
+  "placement-representatives": {
+    "label": "Placement Representatives",
+    "sections": [
+      {
+        "label": null,
+        "kind": null,
+        "people": [
+          {
+            "role": null,
+            "name": "Hetav Hiten Shah",
+            "phone": "7605026260",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Shaurya Singh",
+            "phone": "7605026261",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Hema Prerana Marada",
+            "phone": "7605026262",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Nikhil Yadav",
+            "phone": "7605026263",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Naveen Yadav",
+            "phone": "7605026264",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Thoutam Mahonnath",
+            "phone": "7605026265",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Sparsh Maharshi",
+            "phone": "7605026266",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Abhishek Kumar",
+            "phone": "7605026267",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Rohan Yadav",
+            "phone": "7605026268",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Amit Prasad",
+            "phone": "7605026269",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Aashik Riza Muhammed",
+            "phone": "6292317943",
+            "email": null
+          },
+          {
+            "role": null,
+            "name": "Sri Karan Reddy",
+            "phone": "6292317944",
+            "email": null
+          }
+        ]
+      }
+    ]
+  },
+  "clubs": {
+    "label": "Clubs",
+    "sections": [
+      {
+        "label": "ICQC",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Avinash Mishra",
+            "phone": "8697573729",
+            "email": "avinashm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Shrabasti Dey",
+            "phone": "7022132141",
+            "email": "shrabastid2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Treasurer",
+            "name": "Swagat Subhakanta Das",
+            "phone": "7749914583",
+            "email": "swagats2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Secretary",
+            "name": "Prahlad Rao",
+            "phone": "7259424904",
+            "email": "prahlada2027@iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Events & Logistics",
+            "name": "Aabhas Amol",
+            "phone": "6200349716",
+            "email": "aabhasa2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Events & Logistics",
+            "name": "Satansu Mohanty",
+            "phone": "7624957950",
+            "email": "satansum21@email.iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Events & Logistics",
+            "name": "Vivek Bagai",
+            "phone": "8920117733",
+            "email": "vivekb2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Sponsorship & Outreach",
+            "name": "Chaitanya Iyer",
+            "phone": null,
+            "email": "chaitanyai2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Sponsorship & Outreach",
+            "name": "Harsh Singh",
+            "phone": "9373252419",
+            "email": "harshsy2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Sponsorship & Outreach",
+            "name": "Soham Bhowmick",
+            "phone": "9205209025",
+            "email": "sohamb2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Content & Design",
+            "name": "Amartya Bansod",
+            "phone": "9372425738",
+            "email": "amartyaa2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Content & Design",
+            "name": "Payal Arora",
+            "phone": "9911757803",
+            "email": "payala2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Heads of Content & Design",
+            "name": "Vishesh Bhaskar",
+            "phone": "9560872759",
+            "email": "visheshb2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Dramatics Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Shail Prajapati",
+            "phone": "6355403517",
+            "email": "shailp2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Ayushman Dwivedi",
+            "phone": "9784081188",
+            "email": "ayushmand2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design & PR Head",
+            "name": "Pratik Kumar Behera",
+            "phone": "8908503155",
+            "email": "pratikk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Mridul Tiwari",
+            "phone": "8879482670",
+            "email": "mridult2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistics Head",
+            "name": "Raghav Garg",
+            "phone": "9997044497",
+            "email": "raghavg2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Play Director",
+            "name": "Vasu Gupta",
+            "phone": "8427340236",
+            "email": "vasug2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Play Director",
+            "name": "Nikita Priyadarshini",
+            "phone": "9437145524",
+            "email": "nikitap2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Consult Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Kanav Bansal",
+            "phone": "9540715776",
+            "email": "kanavb2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Shyam Gandhi",
+            "phone": "9923244781",
+            "email": "shyams2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development Head",
+            "name": "Falak Kalra",
+            "phone": "9971812669",
+            "email": "falakk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "External Relations & Live Projects Head",
+            "name": "Anchal Saini",
+            "phone": "8988377986",
+            "email": "anchals2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Team",
+            "name": "Kartik Saini",
+            "phone": "8168081315",
+            "email": "kartiks2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Team",
+            "name": "Akshat Monga",
+            "phone": "9625613986",
+            "email": "akshatmo2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development Team",
+            "name": "Arnav Singh",
+            "phone": "9650970048",
+            "email": "arnavs2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development Team",
+            "name": "Janet Egans A",
+            "phone": "6383317033",
+            "email": "janete2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development Team",
+            "name": "Vasu Gupta",
+            "phone": "8427340236",
+            "email": "vasug2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "External Relations & Live Projects Team",
+            "name": "Utkarsh Agarwal",
+            "phone": "7888219451",
+            "email": "utkarshag2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "MarC",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Aman Ehtesham",
+            "phone": "9831960784",
+            "email": "amane2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President / Events Head",
+            "name": "Khushi Nayyar",
+            "phone": "8826363965",
+            "email": "khushin2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Design Head",
+            "name": "Krushi Patel",
+            "phone": "9316187756",
+            "email": "krushin2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Industrial Relations Head",
+            "name": "Kartik R K",
+            "phone": "7338461020",
+            "email": "kartikk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Content Head",
+            "name": "Janet Egans A",
+            "phone": "6383317033",
+            "email": "janete2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Team",
+            "name": "Seeta Ram",
+            "phone": "8003325531",
+            "email": "seetar2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Design Team",
+            "name": "Joshua Kelio",
+            "phone": "7005308614",
+            "email": "joshuak2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Design Team",
+            "name": "Shristi Kumari",
+            "phone": "9709062709",
+            "email": "shristik2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Industrial Relations Team",
+            "name": "Mayank Raj Kankas",
+            "phone": "8952800777",
+            "email": "mayankr2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Industrial Relations Team",
+            "name": "Nikita Bhidore",
+            "phone": "7224908198",
+            "email": "nikitab2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "PMTech Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President & Head of Sponsorship & Industry Relations",
+            "name": "Vedant Aher",
+            "phone": "8805929413",
+            "email": "vedantb2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President & Head of Events",
+            "name": "Kartikey Mishra",
+            "phone": "7017178901",
+            "email": "kartikeym2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President & Head of Learning and Development",
+            "name": "Rushil V",
+            "phone": "6361591047",
+            "email": "rushilv2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President & Head of Marketing and Design",
+            "name": "Abhishek Pawar",
+            "phone": "9930283013",
+            "email": "abhishekm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events",
+            "name": "Aayam Ayan",
+            "phone": "8799703966",
+            "email": "aayama2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events",
+            "name": "Kandukuri Phani Sai Krishna Vamsee",
+            "phone": "9515248101",
+            "email": "saikrishnap2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development",
+            "name": "Avinash Mishra",
+            "phone": "8697573729",
+            "email": "avinashm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development",
+            "name": "Hriddhima Saha",
+            "phone": "8250094479",
+            "email": "hriddhimas2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development",
+            "name": "Sahaj Srivastava",
+            "phone": "9461371861",
+            "email": "sahajs2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship and Industry Relations",
+            "name": "Arpan Samuel Topno",
+            "phone": "7761932485",
+            "email": "arpans2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing and Design",
+            "name": "Sakshi Raichandani",
+            "phone": "8208417060",
+            "email": "sakshir2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing and Design",
+            "name": "Shambhavi Dhote",
+            "phone": "9981615917",
+            "email": "shambhavid2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "E Cell",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Pankaj Kumar",
+            "phone": "9939205167",
+            "email": "pankajk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Aryan",
+            "phone": "6209558069",
+            "email": "aryan2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events & Engagement",
+            "name": "Ayush Kumar",
+            "phone": "9304620025",
+            "email": "ayushk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Industry Relations & Outreach",
+            "name": "Ruchir Sahni",
+            "phone": "7349075557",
+            "email": "ruchirs2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Creative & Designs",
+            "name": "Anoori Baha Topno",
+            "phone": "7250242757",
+            "email": "anoorib2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship & Partnerships",
+            "name": "Vrishank Kedia",
+            "phone": "7977364352",
+            "email": "vrishankk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development",
+            "name": "Meet Gandhi",
+            "phone": "7284050482",
+            "email": "meetm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events & Engagement",
+            "name": "Prerna Gupta",
+            "phone": "7897044346",
+            "email": "prernag2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events & Engagement",
+            "name": "Bhavuk Pareyani",
+            "phone": "8982532731",
+            "email": "bhavukp2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Industry Relations & Outreach",
+            "name": "Aayam Ayan",
+            "phone": "8799703966",
+            "email": "aayama2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Industry Relations & Outreach",
+            "name": "Aahana Batra",
+            "phone": "8909859372",
+            "email": "aahanb2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Creative & Designs",
+            "name": "Amit Kalaliya",
+            "phone": "8222923955",
+            "email": "amitk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Creative & Designs",
+            "name": "Devika",
+            "phone": "9161255021",
+            "email": "devika2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship & Partnerships",
+            "name": "Kartik Saini",
+            "phone": "8168081315",
+            "email": "kartiks2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship & Partnerships",
+            "name": "Shivansh Raina",
+            "phone": "9419286921",
+            "email": "shivanshx2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development",
+            "name": "Anshul Ruikar",
+            "phone": "7397956746",
+            "email": "anshulm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development",
+            "name": "Mudit Trivedi",
+            "phone": "9429269925",
+            "email": "muditx2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "PetPals",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Meghana Vihulekar",
+            "phone": "9867707058",
+            "email": "meghanam2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Abhishek",
+            "phone": "9814902641",
+            "email": "abhishek2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Akriti Verma",
+            "phone": "9907429972",
+            "email": "akritiv2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR & Marketing Head",
+            "name": "Riya Mandal",
+            "phone": "9002097463",
+            "email": "riyam2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistics Head",
+            "name": "Isha Chinderkar",
+            "phone": "9594290015",
+            "email": "ishai2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Treatments Support",
+            "name": "Ayushman Dwivedi",
+            "phone": "9784081188",
+            "email": "ayushmand2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Treatments Support",
+            "name": "Puneet Mishra",
+            "phone": "7011872759",
+            "email": "puneetm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Treatments Support",
+            "name": "Aayush Jain",
+            "phone": "9810115481",
+            "email": "aayushj2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing and Design",
+            "name": "Kritika Parashar",
+            "phone": "9971943527",
+            "email": "kritikap2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing and Design",
+            "name": "Paveen Bansal",
+            "phone": "9717892367",
+            "email": "paavenb2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "GMLC",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Barkha Agarwal",
+            "phone": "8209923076",
+            "email": "barkhaa2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Nikita Priyadarshini",
+            "phone": "9437145524",
+            "email": "nikitap2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning & Development Head",
+            "name": "Harshavardhan Devsoth",
+            "phone": "6304348081",
+            "email": "harshavardhand2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Planning & Operations Head",
+            "name": "Harsh Kumar",
+            "phone": "6299245313",
+            "email": "harshk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Sumit Gupta",
+            "phone": "8081561851",
+            "email": "sumitg2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Industry Relations Head",
+            "name": "Shivang",
+            "phone": "9910089873",
+            "email": "shivangm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Branding Head",
+            "name": "Ayush Kumar",
+            "phone": "9304620025",
+            "email": "ayushk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing Head",
+            "name": "Sauhaard Batra",
+            "phone": "9872321370",
+            "email": "sauhaardb2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Economics Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Megha Mittal",
+            "phone": "9821825357",
+            "email": "megham2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "VP- Events",
+            "name": "Kartikey Mishra",
+            "phone": "7017178901",
+            "email": "kartikeym2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "VP- L&D",
+            "name": "Bhavuk Pareyani",
+            "phone": "8982532731",
+            "email": "bhavukp2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "VP- Design & PR",
+            "name": "Mohitabinav M",
+            "phone": "7358646157",
+            "email": "mohitabinavm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Sushma K",
+            "phone": "9600154568",
+            "email": "sushmak2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "L&D Head",
+            "name": "Sagar Chandra",
+            "phone": "8800140973",
+            "email": "sagarc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design Head",
+            "name": "Amit Gupta",
+            "phone": "7011675769",
+            "email": "amitg2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Hues",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Shristi Kumari",
+            "phone": "9709062709",
+            "email": "shristik2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Anchal Saini",
+            "phone": "8988377986",
+            "email": "anchals2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Shrutika Negi",
+            "phone": "7876029096",
+            "email": "shrutikan2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing Head",
+            "name": "Dipti Bharti",
+            "phone": "8982694690",
+            "email": "diptib2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistics Head",
+            "name": "Rekha Gajbhiye",
+            "phone": "9359745949",
+            "email": "rekhar2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "VP, Events Head",
+            "name": "Anamika",
+            "phone": "7061508413",
+            "email": "anamika2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "VP, Marketing Head",
+            "name": "Khushee Soni",
+            "phone": "9810732470",
+            "email": "khushees2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "VP, Content Head",
+            "name": "Karan Chincholy",
+            "phone": "9676382872",
+            "email": "karanc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "VP, Logistics Head",
+            "name": "Sourajita Dewasi",
+            "phone": "9109457087",
+            "email": "sourajitad2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "INCA",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Allada Navdeep",
+            "phone": "8768988300",
+            "email": "navdeepn2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Kashish Yadav",
+            "phone": "9026554873",
+            "email": "kashishy2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events and Operations Head",
+            "name": "Kamisetti Ravi Teja",
+            "phone": "7382104466",
+            "email": "ravir2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Content and Design Head",
+            "name": "Amireddy Chandana Reddy",
+            "phone": "9515751203",
+            "email": "chandanac2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship Head",
+            "name": "Subhadip Patra",
+            "phone": "8777645015",
+            "email": "subhadipp2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Marketing Head",
+            "name": "Anamika",
+            "phone": "7061508413",
+            "email": "anamika2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Armageddon",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Prabhjot",
+            "phone": "9888533660",
+            "email": "Prabhjots2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Rekha",
+            "phone": "9359745949",
+            "email": "Rekhar2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR & Sponsorship Head",
+            "name": "Anmol",
+            "phone": "9783379117",
+            "email": "anmol2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Finance & Treasury Head",
+            "name": "Seeta Ram",
+            "phone": "8003325531",
+            "email": "seetar2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "ER & Workshop Head",
+            "name": "Nisha",
+            "phone": "9310993663",
+            "email": "nisha2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events",
+            "name": "Niket Kumar",
+            "phone": "9426545845",
+            "email": "niketk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR & Sponsorship",
+            "name": "Amrit Raj",
+            "phone": "7079640904",
+            "email": "amritr2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "ER & Workshop",
+            "name": "Aditya badwal",
+            "phone": "8077047009",
+            "email": "Adityab2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Finance & Treasury",
+            "name": "Bharat Singla",
+            "phone": "7696622543",
+            "email": "bharats2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Choreography Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Aanchal Singh",
+            "phone": "9065055324",
+            "email": "aanchals2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Apaar Neel Chakma",
+            "phone": "9953332841",
+            "email": "apaarc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Kissi Singha",
+            "phone": "7738551988",
+            "email": "kissis2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design & PR",
+            "name": "Ria Agarwal",
+            "phone": "8128546248",
+            "email": "Riaa2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistics",
+            "name": "Shreyshi Singh",
+            "phone": "9157226669",
+            "email": "shreyshis2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Tanishq Gupta",
+            "phone": "8130783045",
+            "email": "tanishqg2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design & PR",
+            "name": "Navdha Mangal",
+            "phone": "7838524152",
+            "email": "navdham2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistics",
+            "name": "Simran Choudhary",
+            "phone": "9460212881",
+            "email": "simranc2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Shiksha",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Mayuri Koli",
+            "phone": null,
+            "email": "mayurim2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Mehul Paarakh",
+            "phone": "6265864781",
+            "email": "mehulp2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Public Relations Head",
+            "name": "Nisha",
+            "phone": "9310993663",
+            "email": "nisha2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events & Logistics Head",
+            "name": "Niket Kumar",
+            "phone": "9426545845",
+            "email": "niketk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Publicity & Design Head",
+            "name": "Sakshi Raichandani",
+            "phone": "8208417060",
+            "email": "sakshir2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship Head",
+            "name": "Subhadip Patra",
+            "phone": "8777645015",
+            "email": "subhadipp2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Luminati",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Chandra Sekhar Makka",
+            "phone": "8328344997",
+            "email": "chandrasekharc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Deepjyoti Das",
+            "phone": "8723074722",
+            "email": "deepjyotid2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Aman Kumar",
+            "phone": "8396008068",
+            "email": "amank2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Marketing Head",
+            "name": "Diya Sairuq",
+            "phone": "6282673731",
+            "email": "diyas2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Content and Creative Head",
+            "name": "Hiba Menya",
+            "phone": "7005803238",
+            "email": "menyam2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Operations and Logistics Head",
+            "name": "Dibakar Das",
+            "phone": "7686956064",
+            "email": "dibakard2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Operations and Logistics Head",
+            "name": "Isha Karanwal",
+            "phone": "7986465216",
+            "email": "ishak2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship and Finance Head",
+            "name": "Amireddy Chandana",
+            "phone": "9515751203",
+            "email": "chandanac2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Culinary Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Yenni Deekshitha",
+            "phone": "6305356328",
+            "email": "deekshithad2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Niteesh Pillutla",
+            "phone": "6304552399",
+            "email": "niteeshn2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events and Logistics Head",
+            "name": "Vamsi Krishna R",
+            "phone": "6300930117",
+            "email": "vamshiv2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Marketing Head",
+            "name": "Uday Teja Puvvula",
+            "phone": "8688221676",
+            "email": "udayu2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Content  Head",
+            "name": "Nithin Kumar M",
+            "phone": "9151621273",
+            "email": "nithinn2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design Head",
+            "name": "Sanyam Golcha",
+            "phone": "8209263539",
+            "email": "sanyamg2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Operations Head",
+            "name": "Dibakar Das",
+            "phone": "7686956064",
+            "email": "dibakard2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship Head",
+            "name": "Chandana Amireddy",
+            "phone": "9515751203",
+            "email": "chandanac2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Joka Film Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Malla Hemanth",
+            "phone": "8688695109",
+            "email": "Hemanthh2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Megavath Srihari",
+            "phone": "7892816924",
+            "email": "sriharis2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Aatif Manzoor Choudhary",
+            "phone": "8825008520",
+            "email": "aatifm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR Head",
+            "name": "Jaswar Raghavendra Doddi",
+            "phone": "9390191730",
+            "email": "jaswarr2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Content Head",
+            "name": "Jagilinki Vamsi Krishna",
+            "phone": "7093794554",
+            "email": "vamsiv2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design Head",
+            "name": "Chandra Sekhar Makka",
+            "phone": "8328344997",
+            "email": "chandrasekharc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistic Head",
+            "name": "Pratik Kumar Behera",
+            "phone": "8908503155",
+            "email": "pratikk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistic Head",
+            "name": "Bhavuk Pareyani",
+            "phone": "8982532731",
+            "email": "bhavukp2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Analytics Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Soodini Abhinav Reddy",
+            "phone": "8688020904",
+            "email": "abhinava2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Dheeraj Pawar",
+            "phone": "9390082496",
+            "email": "dheerajp2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "L&D Head",
+            "name": "Aditya Badwal",
+            "phone": "8077047009",
+            "email": "adityab2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Marketing Head",
+            "name": "Tejas Patil",
+            "phone": "8291085044",
+            "email": "tejasn2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship Head",
+            "name": "Sai Rohith Dasari",
+            "phone": "9177776123",
+            "email": "rohiths2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design Head",
+            "name": "Debarghya Mondal",
+            "phone": "9547927327",
+            "email": "debarghyam2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Core Team",
+            "name": "Raghvendra Pratap Singh",
+            "phone": "8989699029",
+            "email": "raghvendrap2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Core Team",
+            "name": "Meet Gandhi",
+            "phone": "7284050482",
+            "email": "meetm2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Finance and Investments Club",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Rounak Porel",
+            "phone": "8420754219",
+            "email": "rounakp2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Ayushman Dwivedi",
+            "phone": "9784081188",
+            "email": "ayushmand2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Competitions and Events Head",
+            "name": "Disha Agarwal",
+            "phone": "7003834791",
+            "email": "dishaa2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Social Media and Publications Head",
+            "name": "Kashika Agarwal",
+            "phone": "9674801399",
+            "email": "kashikaa2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Learning and Development Head",
+            "name": "Debabrata Sarkar",
+            "phone": "9674941887",
+            "email": "debabratas2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship and ER Head",
+            "name": "Sankalp Saxena",
+            "phone": "9910130185",
+            "email": "sankalps2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "JAF Fund Manager",
+            "name": "Kashish Agarwal",
+            "phone": "6290392643",
+            "email": "kashisha2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship and ER Coordinator",
+            "name": "Rupali",
+            "phone": "7042426265",
+            "email": "rupali2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Competitions and Events Coordinator",
+            "name": "Aaishi Agrawal",
+            "phone": "8878151225",
+            "email": "aaishia2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "JAF Research Head",
+            "name": "Saloni Baweja",
+            "phone": "8949464499",
+            "email": "salonib2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "JAF Research Head",
+            "name": "Akash Deep",
+            "phone": "8770471652",
+            "email": "akashd2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "JBS BaroC",
+        "kind": null,
+        "people": [
+          {
+            "role": "President",
+            "name": "Harsh Kashyap",
+            "phone": "7042430647",
+            "email": "harshka2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Samruddhi Sunil Ingle",
+            "phone": "9405503522",
+            "email": "samruddhis2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events and Social Media Head",
+            "name": "Kissi Sanjay Singha",
+            "phone": "7738551988",
+            "email": "kissis2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistics Head",
+            "name": "Divyansh Maduriya",
+            "phone": "6265061993",
+            "email": "divyanshm2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Abhishek Mungekar",
+            "phone": "9820075245",
+            "email": "abhishekv2027@email.iimcal.ac.in"
+          }
+        ]
+      }
+    ]
+  },
+  "sigs-chapters": {
+    "label": "SIGs and Chapters",
+    "sections": [
+      {
+        "label": "BMB",
+        "kind": "SIG",
+        "people": [
+          {
+            "role": "President",
+            "name": "Yash Vinayak Patil",
+            "phone": "9324377117",
+            "email": "Yashv2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Shubh Yadav",
+            "phone": "9599582320",
+            "email": "shubhy2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Community & Media",
+            "name": "Nikita Priyadarshini",
+            "phone": "9437145524",
+            "email": "nikitap2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Operations & Logistics",
+            "name": "Priyanshu Jharwal",
+            "phone": "6350652079",
+            "email": "priyanshuj2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Events & Engagement",
+            "name": "Seeta Ram",
+            "phone": "8003325531",
+            "email": "seetar2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Partnerships & Sponsorship",
+            "name": "Ishu Chaudhary",
+            "phone": "8602304201",
+            "email": "ishuc2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "JokaMeditates",
+        "kind": "SIG",
+        "people": [
+          {
+            "role": "President",
+            "name": "Ishu Chaudhary",
+            "phone": "8602304201",
+            "email": "ishuc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Gogada Sai Krishna",
+            "phone": "9390312061",
+            "email": "saikrishnas2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Operations & Logistics",
+            "name": "Ruchir Sahni",
+            "phone": "7349075557",
+            "email": "ruchirs2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Practice & Wellbeing",
+            "name": "Meghnana Vihulekar",
+            "phone": "9867707058",
+            "email": "meghanam2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Community & Media",
+            "name": "Harshavardhan Devsoth",
+            "phone": "6304348081",
+            "email": "harshavardhand2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Events & Engagement",
+            "name": "Chandana Amireddy",
+            "phone": "9515751203",
+            "email": "chandanac2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Case Collective",
+        "kind": "SIG",
+        "people": [
+          {
+            "role": "President",
+            "name": "Amit Gupta",
+            "phone": "7011675769",
+            "email": "amitg2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Khushi Agrawal",
+            "phone": "7972784526",
+            "email": "khushik2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Learning and Development",
+            "name": "Aaishi Agrawal",
+            "phone": "8878151225",
+            "email": "aaishia2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Events",
+            "name": "Abhishek Kumar",
+            "phone": "7550169203",
+            "email": "abhisheku2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Sponsorships and Partnerships",
+            "name": "Sujay Bharadwaj",
+            "phone": "7043132425",
+            "email": "sujayb2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Social Media",
+            "name": "Chandra Sekhar Makka",
+            "phone": "8328344997",
+            "email": "chandrasekharc2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "The Literary Club",
+        "kind": "SIG",
+        "people": [
+          {
+            "role": "President",
+            "name": "Priyanshu Jharwal",
+            "phone": "6350652079",
+            "email": "priyanshuj2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice-President",
+            "name": "Debasmita Haldar",
+            "phone": "8652028919",
+            "email": "debasmitah2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "External Relations Head",
+            "name": "Sauhaard Batra",
+            "phone": "9872321370",
+            "email": "sauhaardb2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Content & Creatives Head",
+            "name": "Ayanish Sardar",
+            "phone": "9007833158",
+            "email": "ayanishs2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Navdha Mangal",
+            "phone": "7838524152",
+            "email": "navdham2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Women in Management",
+        "kind": "SIG",
+        "people": [
+          {
+            "role": "President",
+            "name": "Sunishtha Arora",
+            "phone": "6396096522",
+            "email": "sunishthaa2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Aditi Jha",
+            "phone": "9958286284",
+            "email": "aditij2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Events",
+            "name": "Payal Arora",
+            "phone": "9911757803",
+            "email": "payala2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of PR & Marketing",
+            "name": "Srishti Verma",
+            "phone": "9650012290",
+            "email": "srishtiv2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Head of Industrial Relations",
+            "name": "Sourajita Dewasi",
+            "phone": "9109457087",
+            "email": "sourajitad2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "SPIC MACAY",
+        "kind": "SIG",
+        "people": [
+          {
+            "role": "President",
+            "name": "Kantam Chetana",
+            "phone": "7680927563",
+            "email": "chetanac2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Dhriti Sunder Saha",
+            "phone": "8116635746",
+            "email": "dhritis2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events and Logistics",
+            "name": "Debasmita Haldar",
+            "phone": "8652028919",
+            "email": "debasmitah2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events and Logistics",
+            "name": "Subhadip Patra",
+            "phone": "8777645015",
+            "email": "subhadipp2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events and Logistics",
+            "name": "Bharat Singla",
+            "phone": "7696622543",
+            "email": "bharats2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Marketing",
+            "name": "Karan Chincholy",
+            "phone": "9676382872",
+            "email": "karanc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Marketing",
+            "name": "Chandana Reddy",
+            "phone": "9515751203",
+            "email": "chandanac2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Public Policy Club",
+        "kind": "SIG",
+        "people": [
+          {
+            "role": "President",
+            "name": "Dibakar Das",
+            "phone": "7686956064",
+            "email": "dibakard2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Anindya Chatterjee",
+            "phone": "7838867613",
+            "email": "anindyac2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship Head",
+            "name": "T. Algeria Kom",
+            "phone": "8787415552",
+            "email": "algeriaa2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Operations and Events Head",
+            "name": "Sourav Deb",
+            "phone": "7449382453",
+            "email": "souravd2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Policy and Industry Head",
+            "name": "Aditi Jha",
+            "phone": "9958286284",
+            "email": "aditij2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Environmental Initiatives Head",
+            "name": "Subhayan Chatterjee",
+            "phone": "6290664967",
+            "email": "subhayanc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR and Media Head",
+            "name": "Hriddhima Saha",
+            "phone": "8902008010",
+            "email": "hriddhimas2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "TedxIIMCalcutta",
+        "kind": "Chapter",
+        "people": [
+          {
+            "role": "President",
+            "name": "Tanmay Jani",
+            "phone": "6358721690",
+            "email": "tanmayt2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing outreach & PR",
+            "name": "Abhinav Singh Yadav",
+            "phone": "7007397046",
+            "email": "abhinavs2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing outreach & PR",
+            "name": "Debabrata Sarkar",
+            "phone": "9674941887",
+            "email": "debabratas2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Production & Design",
+            "name": "Vaibhav Ravindra Kamble",
+            "phone": "8355952427",
+            "email": "vaibhavr2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Production & Design",
+            "name": "Aditya Narayan",
+            "phone": "6363002658",
+            "email": "adityan2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship",
+            "name": "Ayush Kumar",
+            "phone": "9304620025",
+            "email": "ayushk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship",
+            "name": "Sourav Deb",
+            "phone": "7449382453",
+            "email": "souravd2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "Hult Prize",
+        "kind": "Chapter",
+        "people": [
+          {
+            "role": "President",
+            "name": "Aditya Rishi",
+            "phone": "8409485590",
+            "email": "adityar2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice President",
+            "name": "Rushil V",
+            "phone": "6361591047",
+            "email": "rushilv2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events Head",
+            "name": "Prabhjot",
+            "phone": "9888533660",
+            "email": "Prabhjots2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Sponsorship Head",
+            "name": "Devika",
+            "phone": "9161255021",
+            "email": "devika2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR Head",
+            "name": "Sahaj Srivastava",
+            "phone": "9461371861",
+            "email": "sahajs2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Content & Design Head",
+            "name": "Vrishank Kedia",
+            "phone": "7977364352",
+            "email": "vrishankk2027@email.iimcal.ac.in"
+          }
+        ]
+      },
+      {
+        "label": "TSEC",
+        "kind": "Chapter",
+        "people": [
+          {
+            "role": "President",
+            "name": "Amrit Raj",
+            "phone": "7079640904",
+            "email": "amritr2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Vice - President",
+            "name": "Avantheka Chinnusamy",
+            "phone": "9578045405",
+            "email": "avanthekac2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Core Team",
+            "name": "Sourav",
+            "phone": "6392867759",
+            "email": "sourav2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Core Team",
+            "name": "Kantam Chetana",
+            "phone": "7680927563",
+            "email": "chetanac2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Core Team",
+            "name": "Harsh Kumar",
+            "phone": "6299245313",
+            "email": "harshk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Core Team",
+            "name": "Aditya Rishi",
+            "phone": "8409485590",
+            "email": "adityar2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Core Team",
+            "name": "Ayush Kumar",
+            "phone": "9304620025",
+            "email": "ayushk2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Core Team",
+            "name": "Abhinav Singh Yadav",
+            "phone": "7007397046",
+            "email": "abhinavs2027@email.iimcal.ac.in"
+          }
+        ]
+      }
+    ]
+  },
+  "cultural-cell": {
+    "label": "Cultural Cell",
+    "sections": [
+      {
+        "label": null,
+        "kind": null,
+        "people": [
+          {
+            "role": "Events Head",
+            "name": "Subhash Raj Perabathina",
+            "phone": "8056026753",
+            "email": "subhashs2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design Head",
+            "name": "Ankita Sahoo",
+            "phone": "8249588862",
+            "email": "ankitas2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Marketing and PR head",
+            "name": "Nikita Priyadarshini",
+            "phone": "9437145524",
+            "email": "nikitap2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR, Marketing and Sponsorship",
+            "name": "Samraddhi Kanaujia",
+            "phone": "7905074199",
+            "email": "samraddhik2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Design",
+            "name": "Karan Chincholy",
+            "phone": "9676382872",
+            "email": "karanc2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events",
+            "name": "Manish Aita",
+            "phone": "7318020844",
+            "email": "manisha2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistics",
+            "name": "Pitamber Agrawal",
+            "phone": "9128124219",
+            "email": "pitambera2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "PR, Marketing and Sponsorship",
+            "name": "Ratnakar Goswami",
+            "phone": "6393851044",
+            "email": "ratnakarg2027@email.iimcal.ac"
+          },
+          {
+            "role": "Design",
+            "name": "Yenni Deekshitha",
+            "phone": "6305356328",
+            "email": "deekshithad2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Logistics",
+            "name": "Srajan Shrivastava",
+            "phone": "7869613111",
+            "email": "srajans2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events",
+            "name": "Shubh Yadav",
+            "phone": "9599582320",
+            "email": "shubhy2027@email.iimcal.ac.in"
+          },
+          {
+            "role": "Events",
+            "name": "Nisha",
+            "phone": "9310993663",
+            "email": "nisha2027@email.iimcal.ac.in"
+          }
+        ]
+      }
+    ]
+  },
+  "sports-council": {
+    "label": "Sports Council and Captains",
+    "sections": [
+      {
+        "label": "Sports Council",
+        "kind": null,
+        "people": [
+          {
+            "role": "Design",
+            "name": "Deepjyoti Das",
+            "phone": "8723074722",
+            "email": null
+          },
+          {
+            "role": "Design",
+            "name": "Diya S",
+            "phone": "6282673731",
+            "email": null
+          },
+          {
+            "role": "Design",
+            "name": "Jay Patidar",
+            "phone": "9009560886",
+            "email": null
+          },
+          {
+            "role": "Events",
+            "name": "Hiba Nahar",
+            "phone": "7025228807",
+            "email": null
+          },
+          {
+            "role": "Events",
+            "name": "Govind S",
+            "phone": "9447132500",
+            "email": null
+          },
+          {
+            "role": "Events",
+            "name": "Mandar Shende",
+            "phone": "8830390946",
+            "email": null
+          },
+          {
+            "role": "Logistics",
+            "name": "Amay Patil",
+            "phone": "9082866037",
+            "email": null
+          },
+          {
+            "role": "Logistics",
+            "name": "Shraddhesh Milind Zagade",
+            "phone": "9960106166",
+            "email": null
+          },
+          {
+            "role": "Logistics",
+            "name": "Paawan Bahl",
+            "phone": "9910207855",
+            "email": null
+          },
+          {
+            "role": "Logistics",
+            "name": "Niket Kumar",
+            "phone": "9426545845",
+            "email": null
+          },
+          {
+            "role": "Sangharsh - Events Head",
+            "name": "Sahil Chahar",
+            "phone": "9718953565",
+            "email": null
+          },
+          {
+            "role": "Sangharsh - Hospitality Head",
+            "name": "Aatif Manzoor Choudhary",
+            "phone": "8825008520",
+            "email": null
+          },
+          {
+            "role": "Sangharsh - Security & Crowd Control Head",
+            "name": "Naidana Jayketh",
+            "phone": "9908947959",
+            "email": null
+          },
+          {
+            "role": "Sponsorship",
+            "name": "Palak Tibrewal",
+            "phone": "6204863018",
+            "email": null
+          },
+          {
+            "role": "Sponsorship",
+            "name": "Puneet Mishra",
+            "phone": "7011872759",
+            "email": null
+          },
+          {
+            "role": "Sponsorship",
+            "name": "Swapnil Sonkar",
+            "phone": "8655777831",
+            "email": null
+          },
+          {
+            "role": "Treasurer",
+            "name": "Samala Hrishikesh Goud",
+            "phone": "6281948386",
+            "email": null
+          }
+        ]
+      },
+      {
+        "label": "Sports Captains",
+        "kind": null,
+        "people": [
+          {
+            "role": "Badminton M",
+            "name": "Tejas Sunil Patil",
+            "phone": "9022050725",
+            "email": null
+          },
+          {
+            "role": "Badminton W",
+            "name": "Janani S",
+            "phone": "8939252653",
+            "email": null
+          },
+          {
+            "role": "Basketball M",
+            "name": "Amartya Anil Bansod",
+            "phone": "9372425738",
+            "email": null
+          },
+          {
+            "role": "BasketBall W",
+            "name": "Isha Karanwal",
+            "phone": "7986465216",
+            "email": null
+          },
+          {
+            "role": "Box Cricket W",
+            "name": "Janet Egans A",
+            "phone": "6383317033",
+            "email": null
+          },
+          {
+            "role": "Carrom",
+            "name": "Subhash Raj",
+            "phone": "8056026753",
+            "email": null
+          },
+          {
+            "role": "Chess M",
+            "name": "Ankit Bhattacharya",
+            "phone": "9987650240",
+            "email": null
+          },
+          {
+            "role": "Chess W",
+            "name": "Anaswara Sunil",
+            "phone": "7034714446",
+            "email": null
+          },
+          {
+            "role": "Cricket",
+            "name": "Pragun Sai Kolli",
+            "phone": "8897991297",
+            "email": null
+          },
+          {
+            "role": "E-Sports",
+            "name": "Raghvendra Pratap Singh",
+            "phone": "8989699029",
+            "email": null
+          },
+          {
+            "role": "Football M",
+            "name": "Kartikeya Bhaira",
+            "phone": "9461823485",
+            "email": null
+          },
+          {
+            "role": "Futsal W",
+            "name": "Aastha Yadav",
+            "phone": "8743944989",
+            "email": null
+          },
+          {
+            "role": "Hockey",
+            "name": "Sumit Gupta",
+            "phone": "8081561851",
+            "email": null
+          },
+          {
+            "role": "Kabaddi M",
+            "name": "Seetaram",
+            "phone": "8003325531",
+            "email": null
+          },
+          {
+            "role": "Kabaddi W",
+            "name": "Hiba Nahar",
+            "phone": "7025228807",
+            "email": null
+          },
+          {
+            "role": "Kho Kho",
+            "name": "Shyam Gandhi",
+            "phone": "9923244781",
+            "email": null
+          },
+          {
+            "role": "Powerlifting M",
+            "name": "Shubham Yadav",
+            "phone": "9682211856",
+            "email": null
+          },
+          {
+            "role": "Powerlifting W",
+            "name": "Simar Madra",
+            "phone": "8968708005",
+            "email": null
+          },
+          {
+            "role": "Snooker & Pool",
+            "name": "Utkarsh Deepak Hutgikar",
+            "phone": "9373870837",
+            "email": null
+          },
+          {
+            "role": "Squash M",
+            "name": "Arnav Singh",
+            "phone": "9650970048",
+            "email": null
+          },
+          {
+            "role": "Squash W",
+            "name": "Tijil Malhotra",
+            "phone": "9711109462",
+            "email": null
+          },
+          {
+            "role": "Swimming",
+            "name": "Madhu Gupta",
+            "phone": "6372803486",
+            "email": null
+          },
+          {
+            "role": "Table Tennis M",
+            "name": "Manan Devani",
+            "phone": "9925049513",
+            "email": null
+          },
+          {
+            "role": "Table Tennis W",
+            "name": "Nikita Bhidore",
+            "phone": "7224908198",
+            "email": null
+          },
+          {
+            "role": "Tennis M",
+            "name": "Sauhaard Batra",
+            "phone": "9872321370",
+            "email": null
+          },
+          {
+            "role": "Tennis W",
+            "name": "Mani Kamboj",
+            "phone": "9896595229",
+            "email": null
+          },
+          {
+            "role": "Throwball M",
+            "name": "Vihar Kanara",
+            "phone": "9913930356",
+            "email": null
+          },
+          {
+            "role": "Throwball W",
+            "name": "Penta Charvitha Sri",
+            "phone": "7032309976",
+            "email": null
+          },
+          {
+            "role": "Ultimate Frisbee",
+            "name": "Aman Falor",
+            "phone": "7597394231",
+            "email": null
+          },
+          {
+            "role": "Volleyball M",
+            "name": "Samala Hrishikesh Goud",
+            "phone": "6281948386",
+            "email": null
+          },
+          {
+            "role": "Volleyball W",
+            "name": "Simran Choudhary",
+            "phone": "9460212881",
+            "email": null
+          },
+          {
+            "role": "Gym Rep",
+            "name": "Rachit Chaudhary",
+            "phone": "6355281922",
+            "email": null
+          }
+        ]
+      }
+    ]
+  }
+}

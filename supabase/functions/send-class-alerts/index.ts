@@ -117,7 +117,19 @@ interface Term {
 
 /** Is a course of this phase actually meeting on this date? */
 function inSession(phase: string, date: string, term: Term | null): boolean {
-  if (!term) return true;
+  // Fail closed, not open.
+  //
+  // This used to `return true` with no term, on the reasoning that a missing
+  // calendar shouldn't silence anybody. But a push is not a render: it can't
+  // be taken back, and its buttons write attendance. Without the calendar
+  // there is no way to know whether a half-term course is in its half, and
+  // answering "yes" fires a post-mid course's alerts from the first week of
+  // term — every sweep, for two months, for every student who picked it.
+  //
+  // So a phase-limited course is held until the calendar can confirm it. A
+  // full-term course still alerts, since it meets every teaching week
+  // regardless; the only thing lost is suppression during break weeks.
+  if (!term) return phase !== "pre_mid" && phase !== "post_mid";
   if (date < term.term_start || date > term.term_end) return false;
   // Exam weeks, placement season, Puja vacation: nobody has class.
   if (term.breaks.some((b) => date >= b.from_date && date <= b.to_date)) return false;
@@ -148,11 +160,21 @@ Deno.serve(async () => {
     return out;
   }
 
-  const [subs, { data: terms }] = await Promise.all([
+  const [subs, termRes] = await Promise.all([
     fetchAll<Record<string, string>>((from, to) =>
       admin.from("push_subscriptions").select("*").range(from, to)),
     admin.from("terms").select("*, term_breaks(*)").eq("is_current", true).limit(1),
   ]);
+
+  // The term drives every phase and break decision below, so losing it is not
+  // a detail to swallow. The error was previously discarded by destructuring
+  // only `data`, which made a failed lookup indistinguishable from a healthy
+  // sweep — and, with the old fail-open inSession, silently wrong.
+  if (termRes.error) console.error("terms lookup failed", termRes.error);
+  const terms = termRes.data;
+  if (!terms?.length) {
+    console.error("no term marked is_current — phase-limited alerts are being held");
+  }
 
   if (!subs.length) {
     return new Response(JSON.stringify({ sent: 0, note: "no subscribers" }), {
@@ -278,7 +300,9 @@ Deno.serve(async () => {
   }
 
   if (!due.length) {
-    return new Response(JSON.stringify({ sent: 0, ms: Date.now() - started }));
+    return new Response(JSON.stringify({
+      sent: 0, ms: Date.now() - started, termResolved: Boolean(term),
+    }));
   }
 
   // Claim each (class, date) atomically — the insert fails if another sweep
@@ -301,10 +325,32 @@ Deno.serve(async () => {
   let sent = 0;
   const dead: string[] = [];
 
-  await Promise.all(claimed.flatMap((d) => {
+  // Per-alert outcomes, not just a running total: an alert whose every send
+  // failed for a reason that might not fail again has to give its alert_log
+  // claim back, or it is lost for the day. See the unclaim below.
+  type Outcome = "ok" | "dead" | "retry";
+
+  const outcomes = await Promise.all(claimed.map(async (d) => {
     const devices = byUser.get(d.cls.user_id) ?? [];
     const after = afterOf.get(d.cls.user_id) ?? 15;
     const token = tokens.get(`${d.cls.id}|${d.date}`) ?? null;
+
+    // How long this alert stays worth delivering: until an hour after the
+    // class ends, since its real job is to get attendance marked and that
+    // stays useful once the lecture is over.
+    //
+    // ONE number, used for both gates. They used to disagree: the payload
+    // said the alert was good for a couple of hours while the TTL told the
+    // push service to bin it after 45 minutes. On Android that gap is the
+    // whole bug — Chrome gets killed or dozes, FCM queues the message, and
+    // anything not collected inside 45 minutes is destroyed rather than
+    // delivered late. The student sees nothing, and no retry ever comes
+    // because alert_log has already recorded the send.
+    const usefulMinutes = Math.max(
+      30,
+      toMinutes(d.cls.end_time ?? d.cls.start_time) - toMinutes(d.cls.start_time) - after,
+    ) + 60;
+
     const payload = JSON.stringify({
       title: `${d.cls.subject}`,
       body: `Started ${pretty(d.cls.start_time)}${d.cls.room ? ` · ${d.cls.room}` : ""}`
@@ -321,28 +367,33 @@ Deno.serve(async () => {
       // them the service worker falls back to opening the app.
       markToken: token,
       markUrl: `${FUNCTIONS_BASE}/mark-attendance`,
-      // The service worker drops the alert if it arrives after this. Belt and
-      // braces alongside TTL, since a push service may still deliver late.
-      // Useful until a while after the class ends, then not.
-      expiresAt: Date.now() + (
-        Math.max(30, toMinutes(d.cls.end_time ?? d.cls.start_time) - toMinutes(d.cls.start_time) - after) + 60
-      ) * 60_000,
+      // The service worker drops the alert if it arrives after this. It is
+      // the backstop, not the primary gate — hence the two minutes of grace
+      // over the TTL below. Without that margin a push collected right on
+      // the TTL boundary would arrive a few milliseconds "late" and be
+      // replaced by the stale-alert placeholder, which is a worse outcome
+      // than simply showing it.
+      expiresAt: Date.now() + (usefulMinutes + 2) * 60_000,
       startsAt: `${d.date} ${d.cls.start_time}`,
     });
 
-    return devices.map(async (device) => {
+    const results = await Promise.all(devices.map(async (device): Promise<Outcome> => {
       try {
         await webpush.sendNotification(
           { endpoint: device.endpoint, keys: { p256dh: device.p256dh, auth: device.auth } },
           payload,
           {
-            // Without a TTL, web-push defaults to four weeks: a phone that is
-            // offline or dozing at send time gets the alert whenever it next
-            // wakes — which is how "your class starts in 10 minutes" arrives
-            // at midnight. Expire it instead of delivering it stale.
-            // The window is 30 minutes wide now, so a slightly longer TTL
-            // matches how long the alert stays worth showing.
-            TTL: 45 * 60,
+            // Without a TTL, web-push defaults to four weeks: a phone that
+            // is offline or dozing at send time gets the alert whenever it
+            // next wakes — which is how "your class starts in 10 minutes"
+            // arrives at midnight. So it still expires; it now expires at
+            // exactly the point the app itself stops considering the alert
+            // useful, rather than at an unrelated fixed 45 minutes.
+            //
+            // This is the one lever that helps an Android phone whose
+            // browser has been killed: the message survives in FCM's queue
+            // until Chrome next runs, and is shown late instead of never.
+            TTL: usefulMinutes * 60,
             // Still high: the alert is silent, so it costs the student
             // nothing to arrive promptly, and normal urgency lets Android
             // hold it until the device next wakes — which could be hours.
@@ -360,20 +411,50 @@ Deno.serve(async () => {
         await admin.from("push_subscriptions")
           .update({ last_ok_at: new Date().toISOString() })
           .eq("id", device.id);
+        return "ok";
       } catch (err) {
         const status = (err as { statusCode?: number }).statusCode;
-        // 404/410 = the browser threw the subscription away.
-        if (status === 404 || status === 410) dead.push(device.id);
-        else console.error("push failed", status, err);
+        // 404/410 = the browser threw the subscription away. That device is
+        // gone for good; there is nothing to retry.
+        if (status === 404 || status === 410) {
+          dead.push(device.id);
+          return "dead";
+        }
+        // Anything else — a 500 from FCM, a timeout, a DNS blip — may well
+        // succeed on the next sweep.
+        console.error("push failed", status, err);
+        return "retry";
       }
-    });
+    }));
+
+    return { d, results };
   }));
+
+  // Hand back the claim on an alert that reached nobody but might still.
+  //
+  // alert_log is what stops the five-minute cron double-pinging, and it is
+  // written *before* the send. So a transient failure used to burn the claim:
+  // the row said "sent", the student got nothing, and no later sweep would
+  // ever try again. Deleting the row puts the alert back in play for the rest
+  // of its 30-minute window, which is what bounds the retrying — and any send
+  // that did succeed keeps the claim, so nobody is pinged twice.
+  const unclaim = outcomes.filter(({ results }) =>
+    results.length > 0 && !results.includes("ok") && results.includes("retry"));
+
+  for (const { d } of unclaim) {
+    const { error } = await admin.from("alert_log").delete()
+      .eq("class_id", d.cls.id).eq("class_date", d.date);
+    if (error) console.error("could not release alert claim", d.cls.id, d.date, error);
+  }
 
   if (dead.length) {
     await admin.from("push_subscriptions").delete().in("id", dead);
   }
 
   return new Response(JSON.stringify({
-    sent, pruned: dead.length, ms: Date.now() - started,
+    sent, pruned: dead.length, retrying: unclaim.length, ms: Date.now() - started,
+    // Surfaced so a broken term calendar is visible in the cron logs rather
+    // than only in the alerts students do or don't receive.
+    termResolved: Boolean(term),
   }), { headers: { "Content-Type": "application/json" } });
 });

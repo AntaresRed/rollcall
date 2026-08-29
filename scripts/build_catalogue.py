@@ -674,7 +674,7 @@ if __name__ == "__main__":
     applied = apply_overrides(catalogue, overrides)
     unmatched_cat, unmatched_fac = attach_faculty(catalogue, faculty)
 
-    with open(dest, "w", encoding="utf-8") as fh:
+    with open(dest, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(catalogue, fh, indent=2, ensure_ascii=False)
 
     weekly = [c for c in catalogue["courses"] if c["schedule_type"] == "weekly"]
@@ -720,3 +720,37 @@ if __name__ == "__main__":
             if len(ms) != c["total_classes"]:
                 print(f"\n  ! {c['code']}-{letter}: {len(ms)} sessions vs "
                       f"total_classes {c['total_classes']}")
+
+    # ------------------------------------------------------------ repair SQL
+    #
+    # supabase/repair-stale-classes.sql carries a copy of the catalogue inline,
+    # so it goes stale the moment this file is rebuilt — and a stale repair is
+    # worse than none, because running it would quietly write the *previous*
+    # catalogue's phases and venues over rows this one just corrected.
+    #
+    # Regenerating it here means the two cannot drift and there is no second
+    # command to remember. A failure is fatal rather than a warning: a
+    # catalogue whose repair SQL silently didn't regenerate is precisely the
+    # mismatch this exists to prevent.
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    repair_script = os.path.join(repo_root, "scripts", "build_repair_sql.py")
+    repair_out = os.path.join(repo_root, "supabase", "repair-stale-classes.sql")
+
+    if not os.path.exists(repair_script):
+        # A checkout without the generator should still be able to build a
+        # catalogue; it just has to be told the repair SQL is now behind.
+        print(f"\nnote: {repair_script} is missing, so "
+              f"supabase/repair-stale-classes.sql was NOT regenerated and is "
+              f"now out of date with {dest}.")
+    else:
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, repair_script, dest, repair_out],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            print("\n! the repair SQL could not be regenerated, so "
+                  f"supabase/repair-stale-classes.sql is now out of date with {dest}:")
+            print((result.stderr or result.stdout or "").strip())
+            raise SystemExit(1)
+        print("\n" + (result.stdout or "").strip())

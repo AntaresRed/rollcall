@@ -58,12 +58,22 @@ async function verify(token: string): Promise<Claim | null> {
   const [body, sig] = String(token ?? "").split(".");
   if (!body || !sig) return null;
 
-  const ok = await crypto.subtle.verify(
-    "HMAC",
-    await hmacKey(),
-    b64urlDecode(sig),
-    encoder.encode(body),
-  );
+  // atob() throws on anything that isn't valid base64, so a mangled token —
+  // truncated by a notification shade, hand-edited, whatever — used to escape
+  // this function entirely and surface as a 500 "Something broke." The
+  // intended answer for an unusable token is the 401 below, which tells the
+  // student something they can act on.
+  let ok = false;
+  try {
+    ok = await crypto.subtle.verify(
+      "HMAC",
+      await hmacKey(),
+      b64urlDecode(sig),
+      encoder.encode(body),
+    );
+  } catch {
+    return null;
+  }
   if (!ok) return null;
 
   let claim: Claim;

@@ -257,7 +257,113 @@ update public.profiles set alert_after_mins = 15 where id = '<YOUR_USER_ID>';
 
 ---
 
-## 8e. Notifications at odd hours, or missing entirely
+## 8e. An alert for a course that should not be running
+
+A half-term course firing in the wrong half — a post-mid course alerting in
+August, say — is not a scheduling bug. It is one of two data problems, and the
+first one is far more likely.
+
+**A stale class row.** The alert sweep decides whether a course is in session
+from `classes.term_phase` on the student's own saved row, and nothing else.
+Until this was fixed, saving your courses only ever inserted and deleted rows,
+never updated them — so a row kept whatever the catalogue said on the day the
+course was first picked. When the institute corrected a course afterwards, the
+row kept the old value for ever, and re-picking the course did not help: it
+matched on day, time and subject, so it was left alone every time.
+
+Find them, then repair them:
+
+```sql
+select c.subject, c.course_code, c.day_of_week, c.start_time, c.term_phase
+  from classes c
+ where c.term_phase = 'full'
+ order by c.subject;
+```
+
+`supabase/repair-stale-classes.sql` fixes every affected row in one pass. It
+carries the current catalogue inline, so run STEP 1 to see exactly what it
+would change, then STEP 2. It only writes rows that genuinely differ, and never
+touches `muted`, `confirmed`, or `id` — so mute settings and attendance
+history survive.
+
+**It regenerates itself.** `build_catalogue.py` rebuilds it as its final step,
+because a repair file still carrying the *previous* catalogue would write last
+term's phases and venues over the rows this one just corrected. There is no
+second command to remember, and a catalogue build that cannot regenerate it
+stops with a non-zero exit rather than leaving the two out of step.
+
+The app now also patches drifted rows whenever a student saves their courses,
+so this is a one-off catch-up for rows already stored, not a recurring chore.
+
+**No current term.** Every phase and break decision needs the term calendar. If
+no row has `is_current`, the sweep now holds all half-term alerts rather than
+guessing — previously it assumed "in session" and fired them all year.
+
+```sql
+select label, term_start, pre_mid_end, post_mid_start, term_end, is_current
+  from terms where is_current;
+```
+
+Nothing back means the seed at the end of `schema.sql` was never run. The sweep
+also reports this on every invocation:
+
+```json
+{ "sent": 0, "termResolved": false }
+```
+
+`termResolved: false` in the cron logs is the signal; fix the term row and it
+returns to `true`.
+
+## 8f. Alerts that arrive the moment you open the app (Android)
+
+The signature: nothing at the time the class starts, then the real alert lands
+within a second of opening RollCall. Sometimes it never arrives at all.
+
+This is not the sweep misfiring. Confirm that first:
+
+```sql
+select a.sent_at, c.subject, c.start_time, p.alert_after_mins
+from alert_log a
+join classes c on c.id = a.class_id
+left join profiles p on p.id = c.user_id
+order by a.sent_at desc limit 20;
+```
+
+If `sent_at` is roughly `alert_after_mins` past `start_time`, the server did
+its job on time and the delay is in delivery.
+
+**What is happening.** Web push on Android goes through FCM, which can only
+hand a message to Chrome while Chrome is running. When the OS or an OEM
+battery manager has killed the browser process, FCM queues the message and
+flushes it the instant Chrome next starts — which is exactly what opening the
+app does. Nothing in this codebase can force that wake-up.
+
+**What the code now does about it.** The message used to carry a fixed 45
+minute TTL while its payload claimed the alert stayed useful for over two
+hours. Any phone that woke in the gap got nothing, permanently: FCM had
+already destroyed the message, and `alert_log` had already recorded the send
+so no sweep would retry. Both gates are now the same number — until an hour
+after the class ends — so a phone waking late gets the alert late rather than
+never. A typical 90-minute class went from 45 to 135 minutes of survivable
+queue time.
+
+Separately, a send that fails for a retryable reason (an FCM 5xx, a timeout)
+now releases its `alert_log` claim, so a later sweep inside the same 30-minute
+window tries again. It used to burn the claim and lose the alert silently.
+`retrying` in the sweep's JSON response counts these.
+
+**What only the phone can fix.** The hold-then-flush behaviour itself is
+Android power management, and it is a device setting:
+
+- Settings → Apps → Chrome → Battery → **Unrestricted**
+- The same for RollCall itself if it is installed as its own app icon
+- Turn off any OEM "battery optimisation", "app sleep", "deep clear" or
+  "auto-launch management" for Chrome — Xiaomi, OnePlus, Oppo, Vivo, Realme
+  and Samsung are all aggressive here, and it is the usual culprit
+- Do not swipe Chrome out of the recents list; that kills the process that
+  receives push
+
+## 8g. Notifications at odd hours, or missing entirely
 
 Three distinct causes, three different fixes. Check all three before concluding
 iOS/Android is at fault.

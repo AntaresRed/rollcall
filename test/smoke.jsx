@@ -17,6 +17,9 @@ import Reschedule from "../src/screens/Reschedule";
 import TermCalendar from "../src/screens/TermCalendar";
 import Faculty from "../src/screens/Faculty";
 import CalendarExport from "../src/screens/CalendarExport";
+import ScheduleAdmin from "../src/screens/ScheduleAdmin";
+import StudentContacts from "../src/screens/StudentContacts";
+import PorDetails from "../src/screens/PorDetails";
 import CoursePicker from "../src/screens/CoursePicker";
 import SignIn from "../src/screens/SignIn";
 import Splash from "../src/screens/Splash";
@@ -90,6 +93,9 @@ const cases = [
         class_date: `2026-09-${String(i + 1).padStart(2, "0")}`,
         start_time: "16:15", status: "absent",
       }))} onToggleMute={noop} />],
+  ["Profile / admin", <Profile key="pa" session={{ user: { email: "a@email.iimcal.ac.in", user_metadata: {} } }}
+      classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop}
+      onScheduleAdmin={noop} />],
   ["Profile", <Profile key="p" session={{ user: {
       email: "anuja2027@email.iimcal.ac.in",
       user_metadata: { full_name: "Anuja Sharma", avatar_url: "https://example.test/a.jpg" },
@@ -113,6 +119,11 @@ const cases = [
   ["CalendarExport", <CalendarExport key="ce" classes={classes} term={term} overrides={overrides} onBack={noop} />],
   ["CalendarExport / no courses", <CalendarExport key="cen" classes={[]} term={term} overrides={[]} onBack={noop} />],
   ["CalendarExport / no term", <CalendarExport key="cet" classes={classes} term={null} overrides={[]} onBack={noop} />],
+  ["ScheduleAdmin", <ScheduleAdmin key="sa" onBack={noop} />],
+  ["StudentContacts", <StudentContacts key="sc" onBack={noop} />],
+  ["StudentContacts / no back button", <StudentContacts key="scn" />],
+  ["PorDetails", <PorDetails key="por" onBack={noop} />],
+  ["PorDetails / no back button", <PorDetails key="porn" />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
   ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],

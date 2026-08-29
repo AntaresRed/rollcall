@@ -1628,3 +1628,315 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   line-height: 1.5;
   color: var(--mute);
 }
+
+
+/* ---------- schedule admin ---------- */
+
+.admin-live {
+  background: var(--board);
+  color: #fff;
+  border-radius: var(--r);
+  padding: 13px 15px;
+  margin-bottom: 4px;
+}
+.admin-live-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9AA3AD;
+}
+.admin-live-term {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2px;
+}
+.admin-live-meta {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: #9AA3AD;
+  margin-top: 3px;
+}
+
+/* The input itself is hidden inside the label, so the whole block is the
+   target rather than a stray browser-styled button beside it. */
+.admin-drop {
+  display: block;
+  text-align: center;
+  padding: 20px 16px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r);
+  background: var(--card);
+  cursor: pointer;
+}
+.admin-drop:hover { border-color: var(--signal); }
+.admin-drop input { display: none; }
+.admin-drop-title { display: block; font-size: 14.5px; font-weight: 600; }
+.admin-drop-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--mute);
+}
+.admin-drop-sub code { font-family: var(--mono); font-size: 11.5px; }
+
+.admin-errors {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-staged {
+  margin-top: 12px;
+  padding: 13px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--card);
+}
+.admin-staged-head { display: flex; align-items: center; gap: 8px; }
+.admin-staged-meta {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--slate);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.admin-row {
+  display: flex;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.admin-row.live { background: linear-gradient(90deg, var(--signal-wash), transparent 60%); }
+.admin-row-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.admin-diff {
+  margin-top: 10px;
+  padding: 11px;
+  border-radius: 8px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.admin-diff em { color: var(--mute); }
+
+/* The one difference publishing can't repair by itself, so it reads as a
+   warning rather than as another line of the list. */
+.admin-diff-warn {
+  background: var(--warn-wash);
+  color: var(--warn-ink);
+  border-radius: 6px;
+  padding: 9px 10px;
+  margin-bottom: 9px;
+}
+
+.admin-diff-line { display: flex; gap: 10px; margin-top: 5px; }
+.admin-diff-line dt {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-top: 2px;
+  min-width: 92px;
+}
+.admin-diff-line dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+
+/* ---------- student contacts ---------- */
+
+.stu-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule);
+  padding: 12px 0;
+}
+.stu-head {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.stu-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+/* The registration number is an identifier, not prose — mono keeps the digits
+   aligned down the list so a half-remembered one can be scanned for. */
+.stu-reg {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+
+.stu-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.contact-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 5px 9px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+}
+.contact-phone svg { color: var(--slate); }
+.contact-phone:hover { border-color: var(--signal); }
+.contact-phone.muted {
+  color: var(--mute);
+  font-style: italic;
+  border-style: dashed;
+  font-family: var(--sans);
+  font-size: 12.5px;
+}
+
+/* WhatsApp's own green, because that is what the button is — using the app's
+   accent here would say "this is the important one", which it isn't. */
+.contact-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--present);
+  background: var(--present-wash);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+.contact-wa:hover { filter: brightness(0.96); }
+
+@media (max-width: 460px) {
+  .stu-card { align-items: flex-start; }
+  .stu-actions { width: 100%; }
+}
+
+
+/* ---------- POR details ---------- */
+
+/* The trail is the only thing telling you how deep you are, so it sits above
+   the content rather than under it, and every step back up is one tap. */
+.por-crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: -4px 0 14px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+.por-crumb-wrap { display: inline-flex; align-items: center; gap: 2px; }
+.por-crumb-sep { color: var(--rule-strong); padding: 0 2px; }
+.por-crumb {
+  border: 0;
+  background: none;
+  padding: 3px 4px;
+  color: var(--signal-deep);
+  font: inherit;
+  border-radius: 4px;
+}
+.por-crumb:hover:not(:disabled) { background: var(--signal-wash); }
+/* The last crumb is where you already are — shown, but not a way to go there. */
+.por-crumb:disabled { color: var(--slate); cursor: default; }
+
+.por-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.por-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 15px 14px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--r);
+  color: var(--ink);
+}
+.por-item:hover { border-color: var(--signal); }
+.por-item-label { flex: 1; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.por-item-count {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.por-item-go { flex: 0 0 auto; color: var(--rule-strong); }
+
+.por-section { margin-bottom: 6px; }
+.por-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.por-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule);
+  padding: 11px 0;
+}
+.por-who { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.por-name { font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; }
+/* The post is what people search this screen by, so it reads as a label
+   rather than as an afterthought under the name. */
+.por-role {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--slate);
+}
+.por-email {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--signal-deep);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.por-email:hover { text-decoration: underline; }
+
+.por-contact { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+
+@media (max-width: 460px) {
+  .por-row { align-items: flex-start; }
+  .por-contact { width: 100%; }
+}

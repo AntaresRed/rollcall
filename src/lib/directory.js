@@ -79,7 +79,13 @@ export function facultyDirectory(classes = [], query = "", mineOnly = false) {
 
     const hay = `${person._text} ${courses.join(" ").toLowerCase()}`;
     const flat = `${person._squashed}${squash(courses.join(" "))}`;
-    const hit = tokens.every((t) => hay.includes(t) || flat.includes(squash(t)));
+    // The squashed comparison is skipped for a token that squashes to nothing:
+    // every string contains "", so a query of pure punctuation would otherwise
+    // match every person on the directory rather than none.
+    const hit = tokens.every((t) => {
+      const flatToken = squash(t);
+      return hay.includes(t) || (flatToken !== "" && flat.includes(flatToken));
+    });
     if (!hit) continue;
 
     rows.push({

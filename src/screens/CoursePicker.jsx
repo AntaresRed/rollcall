@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import catalogue from "../data/catalogue.json";
+import { activeCatalogue } from "../lib/catalogue";
 import { DAYS, PHASE_LABEL, pretty, saveTimetable } from "../lib/api";
 
 /** "Mon 10:15 · Wed 12:00" — the whole reason to pick a section. */
@@ -32,9 +32,13 @@ function describe(meetings, course) {
 }
 
 export default function CoursePicker({ existing = [], onSaved, onDirtyChange }) {
+  // Whichever schedule is live — a published upload, or the bundled copy when
+  // nothing has been published. Read once per render rather than imported, so
+  // this screen can't hold a stale one after a publish.
+  const catalogue = activeCatalogue();
   const [query, setQuery] = useState("");
   // { [code]: sectionLetter }
-  const [picked, setPicked] = useState(() => seedFrom(existing));
+  const [picked, setPicked] = useState(() => seedFrom(existing, activeCatalogue()));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,10 +48,10 @@ export default function CoursePicker({ existing = [], onSaved, onDirtyChange }) 
   // key-by-key comparison is enough.
   useEffect(() => {
     if (!onDirtyChange) return;
-    const seed = seedFrom(existing);
+    const seed = seedFrom(existing, catalogue);
     const keys = new Set([...Object.keys(seed), ...Object.keys(picked)]);
     onDirtyChange([...keys].some((k) => seed[k] !== picked[k]));
-  }, [picked, existing, onDirtyChange]);
+  }, [picked, existing, onDirtyChange, catalogue]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -55,16 +59,20 @@ export default function CoursePicker({ existing = [], onSaved, onDirtyChange }) 
     return catalogue.courses.filter(
       (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q),
     );
-  }, [query]);
+  }, [query, catalogue.courses]);
 
   const chosen = Object.entries(picked);
 
   // A student can't be in two rooms at once — surface it before they save.
+  // Keyed on `picked`, not on `chosen`: Object.entries() returns a new array
+  // every render, so depending on it meant this memo recomputed on every
+  // keystroke in the search box and every section toggle — the one thing a
+  // memo exists to stop.
   const clashes = useMemo(() => {
     // Every occupant of a slot is kept, so a three-way pile-up reports all
     // pairs rather than only the first one found.
     const bySlot = new Map();
-    for (const [code, letter] of chosen) {
+    for (const [code, letter] of Object.entries(picked)) {
       const course = catalogue.courses.find((c) => c.code === code);
       if (!course) continue;
       for (const m of course.sections[letter] ?? []) {
@@ -111,7 +119,7 @@ export default function CoursePicker({ existing = [], onSaved, onDirtyChange }) 
       }
     }
     return out;
-  }, [chosen]);
+  }, [picked, catalogue.courses]);
 
   const toggle = (course) => {
     setPicked((p) => {
@@ -268,7 +276,7 @@ export default function CoursePicker({ existing = [], onSaved, onDirtyChange }) 
 }
 
 /** Pre-tick whatever the student already saved, so editing feels continuous. */
-function seedFrom(rows) {
+function seedFrom(rows, catalogue) {
   const out = {};
   for (const r of rows) {
     if (!r.course_code) continue;

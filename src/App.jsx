@@ -4,7 +4,9 @@ import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
   attendanceKey, isoDate, setCourseMuted, unmarkedSessions,
   loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
+  loadPublishedCatalogue, loadProfile,
 } from "./lib/api";
+import { setActiveCatalogue } from "./lib/catalogue";
 import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
 } from "./lib/push";
@@ -21,6 +23,9 @@ const TermCalendar = lazy(() => import("./screens/TermCalendar"));
 const Reschedule = lazy(() => import("./screens/Reschedule"));
 const Faculty = lazy(() => import("./screens/Faculty"));
 const CalendarExport = lazy(() => import("./screens/CalendarExport"));
+const ScheduleAdmin = lazy(() => import("./screens/ScheduleAdmin"));
+const StudentContacts = lazy(() => import("./screens/StudentContacts"));
+const PorDetails = lazy(() => import("./screens/PorDetails"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -29,7 +34,10 @@ const SUB_SCREEN_BACK = {
   calendar: "Back to timetable",
   reschedule: "Back to timetable",
   faculty: "Back to timetable",
+  students: "Back to timetable",
+  por: "Back to timetable",
   export: "Back to timetable",
+  admin: "Back to profile",
 };
 
 const TABS = [
@@ -55,6 +63,7 @@ export default function App() {
   const [fatal, setFatal] = useState("");
   const [session, setSession] = useState(null);
   const [authError, setAuthError] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   // Set by CoursePicker while its selection differs from what's saved, so
   // backing out of it can warn — and stay silent when there's nothing to lose.
   const pickerDirty = useRef(false);
@@ -88,9 +97,16 @@ export default function App() {
           .then(setAlerts)
           .catch(() => setAlerts(false));
 
-        const [c, a, t, o] = await Promise.all([
+        // The published schedule has to be in place before the first screen
+        // renders: the catalogue lookups are module state, so swapping them
+        // later would leave already-rendered screens on the old one.
+        const [c, a, t, o, published, profile] = await Promise.all([
           loadClasses(), loadAttendance(), loadTerm(), loadOverrides(),
+          loadPublishedCatalogue(),
+          loadProfile().catch(() => null),
         ]);
+        if (published?.payload) setActiveCatalogue(published.payload);
+        setIsAdmin(Boolean(profile?.is_admin));
         setClasses(c);
         setAttendance(a);
         setTerm(t);
@@ -212,6 +228,22 @@ export default function App() {
     mark(cls, date, status);
     say(status === "absent" ? "Marked absent" : "Marked present");
   }, [ready, classes, mark]);
+
+  // The service worker opens the app at /?focus=today when a notification's
+  // body is tapped. Nothing reads that parameter — the app lands on Today
+  // anyway, because Today is the default tab and the notification triggers a
+  // fresh load — so all it does is sit in the address bar afterwards. Clear
+  // it, and leave every other parameter alone: this runs after `ready`, so
+  // Supabase has already consumed the OAuth `code` by now, but there is no
+  // reason to touch what it hasn't.
+  useEffect(() => {
+    if (!ready) return;
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("focus")) return;
+    params.delete("focus");
+    const rest = params.toString();
+    window.history.replaceState({}, "", rest ? `${window.location.pathname}?${rest}` : window.location.pathname);
+  }, [ready]);
 
   const turnOnAlerts = async () => {
     try {
@@ -397,6 +429,15 @@ export default function App() {
         {tab === "timetable" && subScreen === "faculty" && (
           <Faculty classes={classes} onBack={() => setSubScreen(null)} />
         )}
+        {tab === "profile" && subScreen === "admin" && isAdmin && (
+          <ScheduleAdmin onBack={() => setSubScreen(null)} />
+        )}
+        {tab === "timetable" && subScreen === "students" && (
+          <StudentContacts onBack={() => setSubScreen(null)} />
+        )}
+        {tab === "timetable" && subScreen === "por" && (
+          <PorDetails onBack={() => setSubScreen(null)} />
+        )}
         {tab === "timetable" && subScreen === "export" && (
           <CalendarExport
             classes={classes}
@@ -414,6 +455,8 @@ export default function App() {
             onShowCalendar={() => setSubScreen("calendar")}
             onReschedule={() => setSubScreen("reschedule")}
             onShowFaculty={() => setSubScreen("faculty")}
+            onShowStudents={() => setSubScreen("students")}
+            onShowPor={() => setSubScreen("por")}
             onExport={() => setSubScreen("export")}
           />
         )}
@@ -427,7 +470,7 @@ export default function App() {
             onMark={mark}
           />
         )}
-        {tab === "profile" && (
+        {tab === "profile" && !subScreen && (
           <Profile
             session={session}
             classes={classes}
@@ -435,6 +478,7 @@ export default function App() {
             onToggleMute={toggleMute}
             onChangeCourses={startOver}
             onSignOut={handleSignOut}
+            onScheduleAdmin={isAdmin ? () => setSubScreen("admin") : null}
           />
         )}
         </Suspense>

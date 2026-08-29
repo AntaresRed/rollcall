@@ -1,31 +1,21 @@
 import { supabase } from "./supabase";
-import catalogue from "../data/catalogue.json";
+import { instructorsFor, venueForCode } from "./catalogue";
 
-// Looked up by course_code at render time rather than stored on the
-// student's saved class row — instructors are a property of the course, not
-// of one student's enrollment, so this avoids a schema change and avoids
-// instructor data silently going stale if the catalogue is corrected after
-// a student has already picked their courses.
-const INSTRUCTORS_BY_CODE = new Map(
-  catalogue.courses.map((c) => [c.code, c.instructors ?? []]),
-);
-
-/** Read by the faculty directory, which lives in its own lazily-loaded
- *  module and shouldn't build a second copy of this map to do so. */
-export const instructorsFor = (code) => INSTRUCTORS_BY_CODE.get(code) ?? [];
-
-// Same reasoning as instructors, plus a second one: the saved class row's
-// own `room` was null for every student who picked their courses before
-// CoursePicker started carrying venue through, and this fallback means
-// those existing rows still show a venue without a database backfill.
-const VENUE_BY_CODE = new Map(
-  catalogue.courses.map((c) => [c.code, c.venue || null]),
-);
+// Instructors and venue are looked up by course_code at render time rather
+// than stored on the student's saved class row — they are properties of the
+// course, not of one student's enrollment, so this avoids a schema change and
+// avoids the data silently going stale if the catalogue is corrected after a
+// student has already picked their courses.
+//
+// Both now come from ./catalogue, which holds whichever schedule is live: the
+// one published by an admin, or the copy compiled into the bundle when
+// nothing has been published.
+export { instructorsFor };
 
 /** Where a class meets: the row's own room if it has one, else the venue the
  *  catalogue publishes for that course code. */
 export const venueOf = (cls) =>
-  cls?.room?.trim() || VENUE_BY_CODE.get(cls?.course_code) || null;
+  cls?.room?.trim() || venueForCode(cls?.course_code) || null;
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const DAY_LONG = {
@@ -94,12 +84,54 @@ export async function loadClasses() {
   return data.map(normaliseRow);
 }
 
-/** Replaces the whole timetable — students re-upload when their term changes. */
+// Fields on a saved class row that the catalogue owns, and may correct after a
+// student has already picked the course. Deliberately excludes `muted` and
+// `confirmed`, which belong to the student, and the three fields that make up
+// the reconcile key below, which cannot drift by definition.
+const CATALOGUE_FIELDS = [
+  "day_of_week", "end_time", "course_code", "section",
+  "room", "term_phase", "credits", "total_classes", "min_pct",
+];
+
+const NUMERIC_FIELDS = new Set(["day_of_week", "credits", "total_classes", "min_pct"]);
+
+/** Compare like with like: Postgres hands back "13:30:00" for a time and may
+ *  hand back a numeric as either a number or a string, and "" and null both
+ *  mean "nothing here". Without this every save would look like a drift. */
+const normField = (field, v) => {
+  if (field === "end_time") return hhmm(v);
+  if (NUMERIC_FIELDS.has(field)) return v === null || v === undefined || v === "" ? null : Number(v);
+  const s = typeof v === "string" ? v.trim() : v;
+  return s === "" || s === undefined ? null : s;
+};
+
+/**
+ * Which catalogue-owned fields on an existing row no longer agree with the
+ * catalogue — the patch needed to bring it back in line, or {} if it's fine.
+ *
+ * This exists because the institute corrects the published schedule after
+ * students have already picked their courses. Before it, saveTimetable only
+ * ever inserted and deleted, so a row that survived a re-save kept whatever
+ * the catalogue said on the day it was first created — for ever. A course
+ * later corrected to post-mid kept `term_phase: 'full'`, and the alert sweep,
+ * which reads that column and nothing else, fired its notifications from the
+ * first week of term. Re-picking the course didn't help: the row matched on
+ * day, time and subject, so it was left alone every time.
+ */
+export function catalogueDrift(existing, wanted) {
+  const patch = {};
+  for (const f of CATALOGUE_FIELDS) {
+    if (normField(f, existing?.[f]) !== normField(f, wanted?.[f])) patch[f] = wanted[f];
+  }
+  return patch;
+}
+
 /**
  * Reconcile rather than replace. Deleting every row and reinserting would mint
  * new class ids on each save, orphaning attendance and — before the schema
- * fix — cascading it into oblivion. So: keep identical rows untouched, insert
- * what's new, delete only what the student actually dropped.
+ * fix — cascading it into oblivion. So: keep the row and its id, patch it back
+ * into line with the catalogue if it has drifted, insert what's new, delete
+ * only what the student actually dropped.
  */
 export async function saveTimetable(rows) {
   const { data: { user } } = await supabase.auth.getUser();
@@ -137,6 +169,17 @@ export async function saveTimetable(rows) {
   const toInsert = wanted.filter((r) => !currentByKey.has(key(r)));
   const toDelete = (current ?? []).filter((r) => !wantedKeys.has(key(r))).map((r) => r.id);
 
+  // ...but not its stale catalogue data. Patching in place rather than
+  // deleting and reinserting is what keeps the id, and so keeps the
+  // attendance already marked against it.
+  const toUpdate = [];
+  for (const r of wanted) {
+    const existing = currentByKey.get(key(r));
+    if (!existing) continue;
+    const patch = catalogueDrift(existing, r);
+    if (Object.keys(patch).length) toUpdate.push({ id: existing.id, patch });
+  }
+
   if (toDelete.length) {
     const { error } = await supabase.from("classes").delete().in("id", toDelete);
     if (error) throw error;
@@ -144,6 +187,13 @@ export async function saveTimetable(rows) {
   if (toInsert.length) {
     const { error } = await supabase.from("classes").insert(toInsert);
     if (error) throw error;
+  }
+  if (toUpdate.length) {
+    const results = await Promise.all(
+      toUpdate.map(({ id, patch }) => supabase.from("classes").update(patch).eq("id", id)),
+    );
+    const failed = results.find((r) => r.error);
+    if (failed) throw failed.error;
   }
 
   return loadClasses();
@@ -187,7 +237,13 @@ export function breakOn(date, term) {
  * date clears all of it.
  */
 export function inSession(phase, date, term) {
-  if (!term) return true;
+  // Same fail-closed rule as the alert sweep, and for a related reason: with
+  // no term loaded there is no way to place a half-term course, and calling it
+  // "in session" doesn't just mis-draw the grid — Catch up would ask the
+  // student to mark attendance for meetings that never happened, and marking
+  // them writes rows. A full-term course still shows, so a failed term fetch
+  // degrades to a slightly over-full timetable rather than an empty one.
+  if (!term) return phase !== "pre_mid" && phase !== "post_mid";
   if (date < term.term_start || date > term.term_end) return false;
   if (breakOn(date, term)) return false;
 
@@ -241,7 +297,7 @@ export function courseStats(classes, attendance) {
       // distinct from an empty array (looked up, genuinely no instructor on
       // file) — the Profile screen falls back to the credit line only in
       // the first case, not the second.
-      instructors: c.course_code ? INSTRUCTORS_BY_CODE.get(c.course_code) ?? [] : undefined,
+      instructors: c.course_code ? instructorsFor(c.course_code) : undefined,
       venue: venueOf(c),
       ...skipBudget(c),
       present: 0,
@@ -302,6 +358,26 @@ export async function loadOverrides() {
 }
 
 /**
+ * Where a meeting sits *before* the change being made now — which is not
+ * necessarily where the timetable published it.
+ *
+ * A session moved once already had its attendance row carried to the new slot
+ * by rescheduleSession. Looking for that row back at `originalDate` therefore
+ * found nothing on a second move, and the mark was left stranded on a date the
+ * class no longer runs. The same miss made "Cancelled" do nothing at all to a
+ * class that had been moved first.
+ *
+ * `originalDate` stays the identity of the exception either way; this is only
+ * about locating the attendance row that goes with it.
+ */
+export function currentSlotOf(cls, originalDate, prior) {
+  return {
+    date: prior?.new_date ?? originalDate,
+    start: prior?.new_start ? hhmm(prior.new_start) : hhmm(cls?.start_time),
+  };
+}
+
+/**
  * Move one occurrence of a class to a different date and/or time.
  *
  * `newDate === null` cancels the session outright. Any attendance already
@@ -313,6 +389,15 @@ export async function rescheduleSession(cls, originalDate, { newDate, newStart, 
 
   const start = newStart ? hhmm(newStart) : null;
   const end = newEnd ? hhmm(newEnd) : (start ? SLOT_ENDS[start] ?? start : null);
+
+  const { data: prior } = await supabase
+    .from("session_overrides")
+    .select("new_date, new_start")
+    .eq("class_id", cls.id)
+    .eq("original_date", originalDate)
+    .maybeSingle();
+
+  const { date: currentDate, start: currentStart } = currentSlotOf(cls, originalDate, prior);
 
   const { error } = await supabase.from("session_overrides").upsert(
     {
@@ -329,19 +414,25 @@ export async function rescheduleSession(cls, originalDate, { newDate, newStart, 
   if (error) throw error;
 
   // Carry any existing mark across to where the class actually happened.
+  //
+  // One case is still beyond reach: a session moved and then cancelled loses
+  // the record of where it went (the override's new_date is overwritten with
+  // null), so giving it a date afterwards cannot find the mark. Recovering
+  // that needs somewhere to remember the previous slot, which is a schema
+  // change rather than a fix here.
   const existing = await supabase
     .from("attendance")
     .select("*")
     .eq("subject", cls.subject)
-    .eq("class_date", originalDate)
-    .eq("start_time", hhmm(cls.start_time))
+    .eq("class_date", currentDate)
+    .eq("start_time", currentStart)
     .maybeSingle();
 
   if (existing.data) {
     if (newDate) {
       await supabase
         .from("attendance")
-        .update({ class_date: newDate, start_time: start ?? hhmm(cls.start_time) })
+        .update({ class_date: newDate, start_time: start ?? currentStart })
         .eq("id", existing.data.id);
     } else {
       // Cancelled: keep the record but stop it counting against the budget.
@@ -508,4 +599,78 @@ export async function loadProfile() {
   const { data: { user } } = await supabase.auth.getUser();
   const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
   return data;
+}
+
+
+// ---------- schedule administration ----------
+
+/**
+ * The schedule the app should run on.
+ *
+ * Returns null when nothing has been published, which is the caller's cue to
+ * stay on the bundled copy. Errors are swallowed for the same reason: a
+ * student who can't reach this table should still get their timetable, not a
+ * blank screen.
+ */
+export async function loadPublishedCatalogue() {
+  const { data, error } = await supabase
+    .from("catalogues")
+    .select("id, payload, label, published_at")
+    .eq("is_published", true)
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.warn("could not load the published schedule; using the bundled one", error.message);
+    return null;
+  }
+  return data ?? null;
+}
+
+/** Every upload, newest first. Admin-only by policy — a student's request
+ *  comes back with just the published row, or nothing. */
+export async function loadCatalogues() {
+  const { data, error } = await supabase
+    .from("catalogues")
+    .select("id, label, source_name, note, uploaded_at, published_at, is_published")
+    .order("uploaded_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Store an uploaded schedule as a draft. Inert until publishCatalogue(). */
+export async function uploadCatalogue(payload, { label, sourceName, note } = {}) {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data, error } = await supabase
+    .from("catalogues")
+    .insert({
+      payload,
+      label: label || payload?.term || "Untitled schedule",
+      source_name: sourceName ?? null,
+      note: note ?? null,
+      uploaded_by: user?.id ?? null,
+    })
+    .select("id, label, uploaded_at")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/** The single act of going live. Everything it touches moves together. */
+export async function publishCatalogue(id) {
+  const { data, error } = await supabase.rpc("publish_catalogue", { p_id: id });
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteCatalogue(id) {
+  const { error } = await supabase.from("catalogues").delete().eq("id", id);
+  if (error) throw error;
+}
+
+/** The full payload of one upload, for previewing it against what's live. */
+export async function loadCataloguePayload(id) {
+  const { data, error } = await supabase
+    .from("catalogues").select("payload").eq("id", id).single();
+  if (error) throw error;
+  return data.payload;
 }

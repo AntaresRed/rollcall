@@ -117,6 +117,8 @@ src/
                       Profile, Reschedule, TermCalendar, CoursePicker
   data/catalogue.json generated — do not edit by hand
   data/directory.json generated — do not edit by hand
+  data/students.json  generated — do not edit by hand
+  data/por.json       generated — do not edit by hand
 
 public/               manifest, service worker, icons
 data/
@@ -126,8 +128,14 @@ scripts/
   build_catalogue.py  rebuilds the catalogue from the spreadsheet
   build_faculty.py    matches course instructors to directory emails
   build_directory.py  rebuilds src/data/directory.json from FacultyDirectory.tsv
+  build_students.py   rebuilds src/data/students.json from the contacts CSV
+  build_por.py        rebuilds src/data/por.json from the POR workbook
+  build_repair_sql.py emits the SQL that realigns saved class rows with a
+                      corrected catalogue (see RUNBOOK 8e). Run automatically
+                      by build_catalogue.py — you never call this directly.
 supabase/
   schema.sql          run in the SQL Editor; safe to re-run
+  admin-schedule.sql  adds the super-admin flag and schedule publishing
   fix-signin.sql      standalone patch for the sign-in trigger
   functions/          send-class-alerts, mark-attendance
 ```
@@ -157,6 +165,74 @@ python scripts/build_directory.py data/FacultyDirectory.tsv src/data/directory.j
 directory entry each course instructor is — so run it too if the course sheet
 changed, then rebuild the catalogue to attach the result.
 
+## When the student contact list changes
+
+The Student contacts screen reads `src/data/students.json`, built from the
+cohort's collected contact CSV (Name, RegistrationNumber, Phone):
+
+```powershell
+python scripts/build_students.py data/SplitContacts62.csv src/data/students.json
+```
+
+The script refuses to guess at a number it can't trust — anything that isn't
+ten digits starting 6-9 is left blank and reported, rather than published as
+fact. It also prints any registration number claimed by two people. Both are
+worth reading; both mean the source CSV needs a fix, not the JSON.
+
+## When the POR contact sheet changes
+
+The POR details screen reads `src/data/por.json`, built from the eight-sheet
+POR contacts workbook:
+
+```powershell
+python scripts/build_por.py "data/POR Contacts Sheet.xlsx" src/data/por.json
+```
+
+Two things about that script are worth knowing before a rebuild:
+
+**It knows the shape of each sheet, not each sheet's code.** The `SHEETS`
+table near the top says which column holds the post, the name, the number and
+the email, and whether the sheet groups its rows (Clubs, SIGs and Chapters
+name a group only on its first row). A sheet added next year is an entry in
+that table.
+
+**Four numbers are corrected on the way through**, listed in `CORRECTIONS`
+with the reason for each — found by cross-checking every number against the
+student roll. Those corrections are *verified* on every run: if a reissued
+workbook has already fixed one, or changed the cell to something else, the
+build fails rather than quietly reapplying a stale fix. Delete the entry when
+the source is corrected. Sequential numbers that clearly belong to an issued
+block — the Placement Representatives' — are deliberately left alone.
+
+## Publishing a new term schedule
+
+Run `supabase/admin-schedule.sql` once. It adds `profiles.is_admin`, a
+`catalogues` table, and `publish_catalogue()`. The admin account must have
+signed in at least once before running it, since the profile row is what gets
+flagged.
+
+Afterwards, Profile grows a **Schedule admin** button for that account only.
+The flow:
+
+1. Build the catalogue from the spreadsheet as usual:
+   `python scripts/build_catalogue.py data/Class_Schedule_Term-V_AY-2026-27.xlsx src/data/catalogue.json data/overrides.json`
+2. Upload the resulting `catalogue.json` on the Schedule admin screen. It is
+   checked and stored as a **draft** — nothing changes for anybody.
+3. Press *What would change?* to see the difference against what is live.
+4. Press **Publish**.
+
+Publishing sets the term dates and break weeks for everyone and corrects the
+saved rows of students who already picked those courses — phase, venue, credit
+rules, end time — keeping row ids so attendance stays attached. It never adds
+or removes a course from anyone's timetable, and never touches `muted`.
+
+The one thing it cannot repair is a course whose *meeting times* moved: saved
+rows are matched on day and start time, so those students keep the old slot
+until they re-pick the course. The preview calls this out before you publish.
+
+Until something is published the app runs on the copy compiled into the
+bundle, exactly as before.
+
 ## Still open
 
 - **Anonymous accounts.** Clearing browser data loses a student's timetable.
@@ -165,3 +241,6 @@ changed, then rebuild the catalogue to attach the result.
   app has sat unopened for several days. Only a real phone can answer it.
 
 `RUNBOOK.md` has the full setup and the diagnostic queries.
+
+`VENDOR-HANDOFF.md` is the operational handoff document — written for whoever
+takes over running the portal day to day, not necessarily a developer.

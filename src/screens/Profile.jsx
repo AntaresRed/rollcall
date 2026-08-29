@@ -12,6 +12,7 @@ import Stats from "./Stats";
  */
 export default function Profile({
   session, classes, attendance, onToggleMute, onChangeCourses, onSignOut,
+  onScheduleAdmin,
 }) {
   const user = session?.user;
   const meta = user?.user_metadata ?? {};
@@ -85,6 +86,13 @@ export default function Profile({
       <Stats classes={classes} attendance={attendance} onToggleMute={onToggleMute} />
 
       <div className="profile-actions">
+        {/* Only rendered for an admin, and only as a way in — the database
+            policies are what actually decide who may publish. */}
+        {onScheduleAdmin && (
+          <button className="btn ghost block" onClick={onScheduleAdmin}>
+            Schedule admin
+          </button>
+        )}
         {onChangeCourses && (
           <button className="btn ghost block" onClick={onChangeCourses}>
             Change my courses

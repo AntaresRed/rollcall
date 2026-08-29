@@ -96,7 +96,7 @@ if __name__ == "__main__":
     dest = sys.argv[2] if len(sys.argv) > 2 else "src/data/directory.json"
 
     people = build(src)
-    with open(dest, "w", encoding="utf-8") as fh:
+    with open(dest, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(people, fh, indent=2, ensure_ascii=False)
 
     offices = sum(len(p["offices"]) for p in people)

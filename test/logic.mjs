@@ -2,10 +2,14 @@
 import {
   toMinutes, hhmm, pretty, inSession, breakOn, skipBudget, courseStats,
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
+  catalogueDrift, currentSlotOf,
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
 import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
+import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
+import { searchStudents, studentCount, studentsMissingPhone, prettyPhone, telHref, whatsAppHref } from "../src/lib/students.js";
+import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 
 let fail = 0;
@@ -140,6 +144,10 @@ check("every query token has to match",
   facultyDirectory([], "abhipsa zzzznotathing").length === 0);
 check("unknown query is empty, not everybody",
   facultyDirectory([], "zzzznotathing").length === 0);
+// Punctuation squashes to "", and every string contains "" — this used to
+// return the whole directory.
+check("a query of pure punctuation matches nobody",
+  facultyDirectory([], "(((").length === 0);
 // The catalogue's instructor emails came from a confident directory match in
 // build_faculty.py, so the join back to a person here is exact.
 check("a picked course tags its instructor", (() => {
@@ -258,6 +266,371 @@ check("similar room numbers stay distinct", venueNote("L-51") === null && venueN
   const orphans = NOTED_VENUES.filter((v) => ![...published].some((p) => venueNote(p) === venueNote(v)));
   if (orphans.length) console.log("       orphaned: " + orphans.join(", "));
   check("every noted venue is one the catalogue actually uses", orphans.length === 0);
+}
+
+console.log("");
+console.log("stale catalogue data on saved rows");
+{
+  // The exact shape that fired "Managing Global Cities" alerts in August: the
+  // catalogue says post-mid, the row saved months ago still says full, and the
+  // alert sweep reads only the row.
+  const saved = { day_of_week: 3, end_time: "12:00:00", course_code: "MGC", section: "A",
+    room: "Amphi (East-150)", term_phase: "full", credits: "1.5", total_classes: 10, min_pct: 80 };
+  const fromCatalogue = { day_of_week: 3, end_time: "12:00", course_code: "MGC", section: "A",
+    room: "Amphi (East-150)", term_phase: "post_mid", credits: 1.5, total_classes: 10, min_pct: 80 };
+
+  const patch = catalogueDrift(saved, fromCatalogue);
+  check("a stale term_phase is caught", patch.term_phase === "post_mid");
+  check("and nothing else is dragged along with it", Object.keys(patch).length === 1);
+
+  // Every one of these differences is a formatting artefact of the round trip
+  // through Postgres, not a real change. Treating them as drift would rewrite
+  // every row on every save.
+  check("a row that already agrees needs no patch",
+    Object.keys(catalogueDrift(fromCatalogue, fromCatalogue)).length === 0);
+  check("seconds on a time are not a difference",
+    catalogueDrift({ ...fromCatalogue, end_time: "12:00:00" }, fromCatalogue).end_time === undefined);
+  check("a numeric returned as a string is not a difference",
+    catalogueDrift({ ...fromCatalogue, credits: "1.5" }, fromCatalogue).credits === undefined);
+  check("empty string and null both mean nothing on file",
+    catalogueDrift({ ...fromCatalogue, section: "" }, { ...fromCatalogue, section: null }).section === undefined);
+
+  check("a corrected venue is caught too",
+    catalogueDrift({ ...fromCatalogue, room: "L-51" }, fromCatalogue).room === "Amphi (East-150)");
+  check("corrected credit rules are caught",
+    Object.keys(catalogueDrift(
+      { ...fromCatalogue, credits: 3, total_classes: 20, min_pct: 75 }, fromCatalogue,
+    )).length === 3);
+  // These belong to the student, not the catalogue, and a re-save must not
+  // reach in and reset them.
+  check("the student's own mute setting is never touched",
+    catalogueDrift({ ...fromCatalogue, muted: true }, { ...fromCatalogue, muted: false }).muted === undefined);
+  survives("junk rows", () => catalogueDrift(null, undefined));
+}
+
+console.log("");
+console.log("no term loaded");
+// Fails closed: a half-term course can't be placed without the calendar, and
+// guessing "yes" is what fired post-mid alerts from the first week of term.
+check("a post-mid course is held", inSession("post_mid", "2026-08-28", null) === false);
+check("a pre-mid course is held", inSession("pre_mid", "2026-08-28", null) === false);
+check("a full-term course still runs", inSession("full", "2026-08-28", null) === true);
+// With the calendar present nothing changes.
+check("post-mid stays out of the pre-mid window", inSession("post_mid", "2026-08-28", term) === false);
+check("post-mid runs once its half starts", inSession("post_mid", "2026-10-06", term) === true);
+check("pre-mid runs in the pre-mid window", inSession("pre_mid", "2026-08-28", term) === true);
+{
+  // Catch up must not invent sessions for a course that isn't running: marking
+  // one writes an attendance row for a class that never happened.
+  const postMid = [{ id: "pm", subject: "Managing Global Cities", day_of_week: 5,
+    start_time: "12:00", end_time: "13:30", term_phase: "post_mid" }];
+  const asked = unmarkedSessions(postMid, [], null, new Date("2026-08-28T23:00:00"), 28, []);
+  check("catch-up asks about nothing when the term is unknown", asked.length === 0);
+}
+
+console.log("");
+console.log("finding the mark that belongs to a rescheduled meeting");
+{
+  const cls = { id: "c1", subject: "W", start_time: "10:15" };
+
+  // Never moved: the meeting is where the timetable put it.
+  const fresh = currentSlotOf(cls, "2026-09-07", null);
+  check("an untouched meeting sits at its published slot",
+    fresh.date === "2026-09-07" && fresh.start === "10:15");
+  check("no override row is the same as none at all",
+    currentSlotOf(cls, "2026-09-07", undefined).date === "2026-09-07");
+
+  // Moved once. The attendance row went with it, so a second move has to look
+  // for it there — this is the case that used to strand the mark.
+  const moved = currentSlotOf(cls, "2026-09-07",
+    { new_date: "2026-09-09", new_start: "14:30" });
+  check("a moved meeting is looked for where it was moved to",
+    moved.date === "2026-09-09" && moved.start === "14:30");
+  check("and not at the date it was originally due", moved.date !== "2026-09-07");
+
+  // Postgres hands times back with seconds.
+  check("seconds on the override time are stripped",
+    currentSlotOf(cls, "2026-09-07",
+      { new_date: "2026-09-09", new_start: "14:30:00" }).start === "14:30");
+
+  // Cancelled: new_date is null, so the meeting is back at its published slot.
+  const cancelled = currentSlotOf(cls, "2026-09-07",
+    { new_date: null, new_start: null });
+  check("a cancelled meeting resolves to its published slot",
+    cancelled.date === "2026-09-07" && cancelled.start === "10:15");
+
+  survives("junk everywhere", () => currentSlotOf(null, "2026-09-07", null));
+}
+
+console.log("");
+console.log("schedule upload validation");
+{
+  // The real deployed catalogue must always be publishable, or the admin
+  // screen would refuse the very file the app is running on.
+  const real = validateCatalogue(catalogue);
+  if (!real.ok) console.log("       " + real.errors.join("; "));
+  check("the live catalogue passes its own validator", real.ok);
+  check("and is summarised correctly",
+    real.summary.courses === catalogue.courses.length && real.summary.meetings > 0);
+
+  for (const junk of [null, undefined, 42, "text", [], {}])
+    survives("junk input " + JSON.stringify(junk), () => validateCatalogue(junk));
+  check("an empty object is rejected", validateCatalogue({}).ok === false);
+  check("a bare array is rejected", validateCatalogue([]).ok === false);
+
+  const base = () => JSON.parse(JSON.stringify(catalogue));
+
+  check("no courses is rejected", validateCatalogue({ ...base(), courses: [] }).ok === false);
+
+  // Each of these would fail silently rather than loudly if it reached the
+  // database, which is the whole reason the check exists.
+  const noSections = base();
+  noSections.courses[0].sections = {};
+  check("a course nobody could pick is rejected", validateCatalogue(noSections).ok === false);
+
+  const dupe = base();
+  dupe.courses.push({ ...dupe.courses[0] });
+  check("a duplicate course code is rejected", validateCatalogue(dupe).ok === false);
+
+  const badDay = base();
+  Object.values(badDay.courses[0].sections)[0][0].day = 9;
+  check("a weekday outside 1-7 is rejected", validateCatalogue(badDay).ok === false);
+
+  const badTime = base();
+  Object.values(badTime.courses[0].sections)[0][0].start = "noon";
+  check("a start time that isn't HH:MM is rejected", validateCatalogue(badTime).ok === false);
+
+  const overlap = base();
+  overlap.calendar.post_mid_start = overlap.calendar.pre_mid_end;
+  check("overlapping teaching windows are rejected", validateCatalogue(overlap).ok === false);
+
+  const backwards = base();
+  backwards.calendar.breaks = [{ label: "X", from: "2026-10-25", to: "2026-10-19" }];
+  check("a break that ends before it starts is rejected", validateCatalogue(backwards).ok === false);
+
+  const noCal = base();
+  delete noCal.calendar;
+  check("a missing calendar is rejected", validateCatalogue(noCal).ok === false);
+  check("every problem is reported, not just the first",
+    validateCatalogue({ courses: [{}, {}] }).errors.length > 1);
+}
+
+console.log("");
+console.log("what publishing would change");
+{
+  const base = () => JSON.parse(JSON.stringify(catalogue));
+  const same = diffCatalogues(catalogue, base());
+  check("an identical file changes nothing",
+    !same.added.length && !same.removed.length && !same.changed.length &&
+    !same.meetingsMoved.length && !same.calendarChanged.length);
+
+  const next = base();
+  next.courses[0].venue = "Somewhere else";
+  const venueOnly = diffCatalogues(catalogue, next);
+  check("a corrected venue shows as a change",
+    venueOnly.changed.length === 1 && venueOnly.changed[0].fields.includes("venue"));
+  check("and is not mistaken for a moved meeting", venueOnly.meetingsMoved.length === 0);
+
+  const phased = base();
+  phased.courses[0].phase = phased.courses[0].phase === "full" ? "post_mid" : "full";
+  check("a corrected phase shows as a change",
+    diffCatalogues(catalogue, phased).changed[0].fields.includes("phase"));
+
+  // The case publishing cannot repair: saved rows are matched on day and
+  // start time, so a moved meeting matches nothing.
+  const moved = base();
+  Object.values(moved.courses[0].sections)[0][0].start = "18:00";
+  const movedDiff = diffCatalogues(catalogue, moved);
+  check("a moved meeting is called out separately",
+    movedDiff.meetingsMoved.includes(catalogue.courses[0].code));
+
+  const dropped = base();
+  const goneCode = dropped.courses.pop().code;
+  check("a dropped course is listed", diffCatalogues(catalogue, dropped).removed.includes(goneCode));
+
+  const addedCat = base();
+  addedCat.courses.push({ ...addedCat.courses[0], code: "ZZNEW", name: "New" });
+  check("a new course is listed", diffCatalogues(catalogue, addedCat).added.includes("ZZNEW"));
+
+  const shifted = base();
+  shifted.calendar.term_end = "2026-11-30";
+  check("changed term dates are listed",
+    diffCatalogues(catalogue, shifted).calendarChanged.includes("term_end"));
+
+  survives("diffing junk", () => diffCatalogues(null, undefined));
+}
+
+console.log("");
+console.log("swapping the live schedule");
+{
+  check("starts on the bundled copy", activeCatalogue().term === catalogue.term);
+  // A failed fetch must not leave the app with no courses at all.
+  setActiveCatalogue(null);
+  check("null falls back to the bundled copy", activeCatalogue().courses.length > 0);
+  setActiveCatalogue({ courses: [] });
+  check("an empty catalogue falls back too", activeCatalogue().courses.length > 0);
+  setActiveCatalogue({ term: "Term VI", courses: [{ code: "X", name: "X", sections: {} }] });
+  check("a real payload takes effect", activeCatalogue().term === "Term VI");
+  setActiveCatalogue(null);   // leave the module as we found it
+  check("and can be put back", activeCatalogue().term === catalogue.term);
+}
+
+console.log("");
+console.log("student contacts");
+{
+  const all = searchStudents("");
+  check("an empty query returns the whole batch", all.length === studentCount);
+  survives("no argument", () => searchStudents());
+  survives("junk query", () => searchStudents("((("));
+  check("junk matches nobody", searchStudents("(((").length === 0);
+
+  // Every entry has to be reachable, or somebody is simply missing from the
+  // list with nothing to show it.
+  check("everyone has a name", all.every((p) => p.name && p.name.trim().length > 0));
+  check("no name still carries its registration number",
+    all.every((p) => !/\d{3,4}\/\d{2}/.test(p.name)));
+  check("every phone on file is ten digits",
+    all.every((p) => p.phone === null || /^[6-9]\d{9}$/.test(p.phone)));
+  check("the roll is sorted by name",
+    all.every((p, i) => i === 0 || all[i - 1].name.toLowerCase() <= p.name.toLowerCase()));
+
+  // Both source-data faults are now fixed at source: Excel had destroyed one
+  // number into scientific notation, and one registration number was claimed
+  // by two people. These assert the corrected state, so a regression in the
+  // CSV or the build script shows up here rather than in the app.
+  check("every student now has a usable number", studentsMissingPhone === 0);
+  check("the re-collected number is in place",
+    searchStudents("Raksha Agrawal")[0]?.phone === "9407459099");
+  check("no registration number is claimed twice", (() => {
+    const regs = searchStudents("").map((p) => p.reg).filter(Boolean);
+    return new Set(regs).size === regs.length;
+  })());
+
+  // Searching by the three things a person actually half-remembers.
+  check("finds by name", searchStudents("pranjal").some((p) => p.name === "Pranjal Chakraborty"));
+  check("name search ignores case", searchStudents("PRANJAL").length === searchStudents("pranjal").length);
+  check("finds by registration number", searchStudents("0446/62").length === 1);
+  check("finds a registration number typed without its slash",
+    searchStudents("044662").length === 1);
+  check("finds by a partial registration number", searchStudents("0446").length >= 1);
+  check("finds by phone number", searchStudents("9038112791").length === 1);
+  check("finds a phone typed with the spaces it is displayed with",
+    searchStudents("90381 12791").length === 1);
+
+  check("every token has to match", searchStudents("pranjal zzzznotathing").length === 0);
+  check("an unmatched query is empty, not everybody",
+    searchStudents("zzzznotathing").length === 0);
+
+  // The pair that used to share 0429/62 now resolve to one person each.
+  check("0429/62 is Khushpreet Singh alone", (() => {
+    const hits = searchStudents("0429/62");
+    return hits.length === 1 && hits[0].name === "Khushpreet Singh";
+  })());
+  check("0459/62 is Hetav Hiten Shah alone", (() => {
+    const hits = searchStudents("0459/62");
+    return hits.length === 1 && hits[0].name === "Hetav Hiten Shah";
+  })());
+
+  check("phone numbers display in 5+5 groups", prettyPhone("9038112791") === "90381 12791");
+  survives("formatting a missing number", () => prettyPhone(null));
+  check("a missing number formats to nothing", prettyPhone(null) === "");
+  // Both links need the country code the stored number never carries.
+  check("call links carry the country code", telHref("9038112791") === "tel:+919038112791");
+  check("whatsapp links carry it too", whatsAppHref("9038112791") === "https://wa.me/919038112791");
+  check("no link is offered for a missing number",
+    telHref(null) === null && whatsAppHref(null) === null);
+}
+
+console.log("");
+console.log("POR details");
+{
+  // The menu is the hierarchy the council describes, not the workbook's tabs.
+  check("four options at the top", POR_MENU.length === 4);
+  check("in the order asked for",
+    POR_MENU.map((n) => n.id).join(",") ===
+    "student-council,cdpo,cultural-bodies,sports-council");
+  check("CDPO opens two", nodeAt(["cdpo"]).children.length === 2);
+  check("Cultural Bodies opens three", nodeAt(["cultural-bodies"]).children.length === 3);
+  // A node either opens a menu or shows people, never both — the screen picks
+  // which to render on exactly that distinction.
+  const walk = (nodes) => nodes.flatMap((n) => [n, ...walk(n.children ?? [])]);
+  check("no node is both a menu and a list",
+    walk(POR_MENU).every((n) => Boolean(n.children) !== Boolean(n.dataset)));
+  check("every leaf resolves to people",
+    walk(POR_MENU).filter((n) => n.dataset).every((n) => porSize(n.dataset) > 0));
+
+  check("paths resolve", nodeAt(["cultural-bodies", "clubs"]).dataset === "clubs");
+  check("a path that does not resolve is null", nodeAt(["nope", "clubs"]) === null);
+  survives("no path at all", () => nodeAt());
+  check("the trail names each step",
+    trailOf(["cultural-bodies", "clubs"]).map((n) => n.label).join(" / ") ===
+    "Cultural Bodies / Clubs");
+
+  check("a branch counts everyone beneath it",
+    countUnder(nodeAt(["cdpo"])) ===
+    porSize("preparation-committee") + porSize("placement-representatives"));
+  check("the total is every list added up",
+    porTotal === POR_MENU.reduce((n, x) => n + countUnder(x), 0) && porTotal > 300);
+
+  // Sports Council carries its captains in the same sheet, under a divider.
+  const sports = searchPor("sports-council", "");
+  check("sports keeps council and captains apart",
+    sports.length === 2 && sports[0].label === "Sports Council" &&
+    sports[1].label === "Sports Captains");
+
+  // Two sheets, one screen — but a SIG is still tellable from a Chapter.
+  const sigs = searchPor("sigs-chapters", "");
+  check("SIGs and Chapters are merged but still tagged",
+    sigs.some((s) => s.kind === "SIG") && sigs.some((s) => s.kind === "Chapter"));
+
+  check("clubs keep one section per club", searchPor("clubs", "").length === 20);
+
+  // Searching, including by the section name itself.
+  const byName = searchPor("student-council", "Tushar");
+  check("finds a person by name",
+    byName.reduce((n, s) => n + s.people.length, 0) === 1);
+  check("finds by post", searchPor("student-council", "treasurer").length >= 1);
+  check("finds by role email", searchPor("student-council", "president@").length === 1);
+  check("finds a whole club by its name", (() => {
+    const hits = searchPor("clubs", "hult prize");
+    return hits.length === 0;   // Hult Prize is a Chapter, not a Club
+  })());
+  check("and finds it on the screen that has it", (() => {
+    const hits = searchPor("sigs-chapters", "hult");
+    return hits.length === 1 && hits[0].people.length === 6;
+  })());
+  check("finds by phone number", (() => {
+    const hits = searchPor("student-council", "7252895480");
+    return hits.reduce((n, s) => n + s.people.length, 0) === 1;
+  })());
+
+  // Empty sections are dropped, so no heading is ever left over nothing.
+  check("a search never leaves an empty section",
+    searchPor("clubs", "avinash").every((s) => s.people.length > 0));
+  check("every token has to match",
+    searchPor("clubs", "avinash zzzznotathing").length === 0);
+  check("a query of pure punctuation matches nobody",
+    searchPor("clubs", "(((").length === 0);
+  survives("an unknown dataset", () => searchPor("nope", "x"));
+  check("an unknown dataset is empty", searchPor("nope", "").length === 0);
+
+  // Data integrity across every list.
+  const everyone = Object.keys({
+    "student-council": 1, "preparation-committee": 1, "placement-representatives": 1,
+    clubs: 1, "sigs-chapters": 1, "cultural-cell": 1, "sports-council": 1,
+  }).flatMap((id) => searchPor(id, "").flatMap((s) => s.people));
+  check("every entry has a name", everyone.every((p) => p.name && p.name.trim()));
+  check("every number on file is ten digits",
+    everyone.every((p) => p.phone === null || /^[6-9]\d{9}$/.test(p.phone)));
+  check("no sheet title was read as a person",
+    !everyone.some((p) => /^(placement representatives|cultural cell|sports captains)$/i.test(p.name)));
+  // The four corrections the build script applies.
+  const sank = everyone.find((p) => /sankeerthana/i.test(p.name));
+  check("the nine-digit number was corrected", sank?.phone === "6303444607");
+  const algeria = everyone.find((p) => /algeria/i.test(p.name));
+  const sourav = everyone.find((p) => p.name === "Sourav Deb");
+  check("the swapped pair was put back",
+    algeria?.phone === "8787415552" && sourav?.phone === "7449382453");
 }
 
 

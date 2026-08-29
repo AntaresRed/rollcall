@@ -71,7 +71,14 @@ export default function CatchUp({ classes, attendance, term, overrides = [], now
           </div>
 
           {items.map(({ cls, movedFrom }) => (
-            <div className="catchup-row" key={`${cls.id}-${date}-${cls.start_time}`}>
+            // movedFrom is part of the identity, not decoration. A class
+            // pushed from one Monday to the next lands on a date it already
+            // meets, at the same slot — without it both occurrences carry the
+            // same key and React renders one where there should be two.
+            <div
+              className="catchup-row"
+              key={`${cls.id}-${date}-${cls.start_time}-${movedFrom ?? ""}`}
+            >
               <div className="catchup-time">{pretty(cls.start_time).replace(" ", "")}</div>
               <div style={{ minWidth: 0 }}>
                 <div className="course">{cls.subject}</div>
