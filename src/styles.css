@@ -501,8 +501,10 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Icon over label. Four names of this length are unreadable as text alone on
-   a phone, so the icon carries recognition and the label confirms it. */
+/* Icon over label. Names of this length are unreadable as text alone on a
+   phone, so the icon carries recognition and the label confirms it. Five
+   tabs leave roughly 70px each on a small phone, which the two-line clamp
+   below is what makes survivable. */
 .tab {
   flex: 1 1 0;
   min-width: 0;
@@ -1377,9 +1379,39 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   gap: 8px;
   margin-top: 16px;
 }
-/* Four buttons in a two-column grid — an even 2x2 rather than one line of
-   four, which no phone has room for. */
+/* Two buttons side by side. The grid rather than a flex row so they stay
+   equal width whatever their labels say. */
 .tt-actions .btn { width: 100%; }
+
+
+/* ---------- utils hub ---------- */
+
+/* Each entry gets a line explaining what it is, which the ghost buttons these
+   replaced had no room for. Same card language as the POR menu, one level
+   taller to carry the description. */
+.util-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.util-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--r);
+  color: var(--ink);
+}
+.util-item:hover { border-color: var(--signal); }
+.util-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.util-label { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.util-desc { font-size: 12.5px; line-height: 1.4; color: var(--slate); }
+.util-go { flex: 0 0 auto; color: var(--rule-strong); }
 
 
 /* ---------- shared screen furniture ---------- */

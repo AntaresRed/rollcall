@@ -30,7 +30,7 @@ import webpush from "npm:web-push@3.6.7";
  * bare 500 turned up and there was no way to tell a deploy artefact from a
  * real fault.
  */
-const BUILD = "2026-08-29b";
+const BUILD = "2026-08-29c";
 
 const SWEEP_MINUTES = 5; // must match the cron interval
 
@@ -120,6 +120,46 @@ const pretty = (t: string) => {
   return `${((h + 11) % 12) + 1}:${m} ${h < 12 ? "am" : "pm"}`;
 };
 
+/**
+ * How many extra goes a failed read gets, and how long to wait before each.
+ * Two retries inside a second, against a sweep that normally finishes in
+ * about one and a cron interval of five minutes — cheap enough not to think
+ * about, long enough to outlast a blip.
+ */
+const RETRY_BACKOFF_MS = [250, 750];
+
+/**
+ * One PostgREST read, retried through a transient failure.
+ *
+ * The sweep intermittently died on its very first read with `JWT issued at
+ * future`. The token it presents is the static service-role key, months old
+ * and unchanged between a failing sweep and the one five minutes later that
+ * works — so the `iat` cannot be what moved. What varies is the clock of
+ * whichever backend instance validated it, and a read rejected by a skewed
+ * instance succeeds on the next attempt.
+ *
+ * Abandoning a sweep over this was never dangerous: the window stays open for
+ * WINDOW_MINUTES, so six later sweeps each get their turn at the same alert.
+ * The cost was to the logs — an unexplained 500 roughly every hour is one
+ * nobody looks at by the time a real fault produces one.
+ *
+ * A genuinely broken query (a renamed column, a dropped table) still fails;
+ * it just takes a second longer to say so. That is worth not having to
+ * enumerate which errors count as transient and be wrong about one.
+ */
+async function readWithRetry<T>(
+  label: string,
+  run: () => PromiseLike<{ data: T | null; error: unknown }>,
+): Promise<{ data: T | null; error: unknown }> {
+  let result = await run();
+  for (let i = 0; result.error && i < RETRY_BACKOFF_MS.length; i++) {
+    console.warn(`${label}: attempt ${i + 1} failed, retrying`, result.error);
+    await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS[i]));
+    result = await run();
+  }
+  return result;
+}
+
 /** Don't let one student's bad data abort the whole sweep. */
 const safe = async <T>(label: string, fn: () => Promise<T>): Promise<T | null> => {
   try { return await fn(); } catch (err) { console.error(label, err); return null; }
@@ -186,7 +226,8 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
     const PAGE = 1000;
     const out: T[] = [];
     for (let from = 0; ; from += PAGE) {
-      const { data, error } = await build(from, from + PAGE - 1);
+      const { data, error } = await readWithRetry(
+        `page from ${from}`, () => build(from, from + PAGE - 1));
       if (error) throw error;
       if (!data?.length) break;
       out.push(...data);
@@ -198,7 +239,8 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
   const [subs, termRes] = await Promise.all([
     fetchAll<Record<string, string>>((from, to) =>
       admin.from("push_subscriptions").select("*").range(from, to)),
-    admin.from("terms").select("*, term_breaks(*)").eq("is_current", true).limit(1),
+    readWithRetry("terms lookup", () =>
+      admin.from("terms").select("*, term_breaks(*)").eq("is_current", true).limit(1)),
   ]);
 
   // The term drives every phase and break decision below, so losing it is not

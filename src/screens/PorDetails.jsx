@@ -60,7 +60,7 @@ export default function PorDetails({ onBack }) {
         style={{ marginTop: 18 }}
         onClick={() => (path.length ? upTo(path.length - 1) : onBack?.())}
       >
-        {path.length ? `Back to ${trail[trail.length - 2]?.label ?? "all POR details"}` : "Back to timetable"}
+        {path.length ? `Back to ${trail[trail.length - 2]?.label ?? "all POR details"}` : "Back to utils"}
       </button>
     </>
   );

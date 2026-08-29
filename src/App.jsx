@@ -13,7 +13,7 @@ import {
 
 import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
-import { TodayIcon, TimetableIcon, CatchUpIcon, ProfileIcon } from "./screens/TabIcons";
+import { TodayIcon, TimetableIcon, CatchUpIcon, UtilsIcon, ProfileIcon } from "./screens/TabIcons";
 const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 import Today from "./screens/Today";
 const Timetable = lazy(() => import("./screens/Timetable"));
@@ -26,6 +26,7 @@ const CalendarExport = lazy(() => import("./screens/CalendarExport"));
 const ScheduleAdmin = lazy(() => import("./screens/ScheduleAdmin"));
 const StudentContacts = lazy(() => import("./screens/StudentContacts"));
 const PorDetails = lazy(() => import("./screens/PorDetails"));
+const Utils = lazy(() => import("./screens/Utils"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -33,10 +34,10 @@ const PorDetails = lazy(() => import("./screens/PorDetails"));
 const SUB_SCREEN_BACK = {
   calendar: "Back to timetable",
   reschedule: "Back to timetable",
-  faculty: "Back to timetable",
-  students: "Back to timetable",
-  por: "Back to timetable",
-  export: "Back to timetable",
+  faculty: "Back to utils",
+  students: "Back to utils",
+  por: "Back to utils",
+  export: "Back to utils",
   admin: "Back to profile",
 };
 
@@ -44,6 +45,7 @@ const TABS = [
   ["today", "Today's classes", TodayIcon],
   ["timetable", "Week's Timetable", TimetableIcon],
   ["catchup", "Missed Attendances", CatchUpIcon],
+  ["utils", "Utils", UtilsIcon],
   ["profile", "Profile", ProfileIcon],
 ];
 
@@ -426,19 +428,19 @@ export default function App() {
             onBack={() => setSubScreen(null)}
           />
         )}
-        {tab === "timetable" && subScreen === "faculty" && (
-          <Faculty classes={classes} onBack={() => setSubScreen(null)} />
-        )}
         {tab === "profile" && subScreen === "admin" && isAdmin && (
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
         )}
-        {tab === "timetable" && subScreen === "students" && (
+        {tab === "utils" && subScreen === "faculty" && (
+          <Faculty classes={classes} onBack={() => setSubScreen(null)} />
+        )}
+        {tab === "utils" && subScreen === "students" && (
           <StudentContacts onBack={() => setSubScreen(null)} />
         )}
-        {tab === "timetable" && subScreen === "por" && (
+        {tab === "utils" && subScreen === "por" && (
           <PorDetails onBack={() => setSubScreen(null)} />
         )}
-        {tab === "timetable" && subScreen === "export" && (
+        {tab === "utils" && subScreen === "export" && (
           <CalendarExport
             classes={classes}
             term={term}
@@ -446,6 +448,7 @@ export default function App() {
             onBack={() => setSubScreen(null)}
           />
         )}
+        {tab === "utils" && !subScreen && <Utils onOpen={setSubScreen} />}
         {tab === "timetable" && !subScreen && (
           <Timetable
             classes={classes}
@@ -454,10 +457,6 @@ export default function App() {
             overrides={overrides}
             onShowCalendar={() => setSubScreen("calendar")}
             onReschedule={() => setSubScreen("reschedule")}
-            onShowFaculty={() => setSubScreen("faculty")}
-            onShowStudents={() => setSubScreen("students")}
-            onShowPor={() => setSubScreen("por")}
-            onExport={() => setSubScreen("export")}
           />
         )}
         {tab === "catchup" && (
@@ -512,8 +511,9 @@ export default function App() {
 
 /**
  * `onBack` is passed only on screens that were opened from another one — the
- * timetable's sub-screens and the course editor. The four tabs are a flat
- * choice rather than a stack, so nothing there gets an arrow.
+ * timetable's and Utils' sub-screens, schedule admin, and the course editor.
+ * The tabs themselves are a flat choice rather than a stack, so nothing there
+ * gets an arrow.
  */
 function Masthead({ now, onBack = null, backLabel = "Back" }) {
   const label = now.toLocaleDateString(undefined, {

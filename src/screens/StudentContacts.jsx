@@ -110,7 +110,7 @@ export default function StudentContacts({ onBack }) {
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
-          Back to timetable
+          Back to utils
         </button>
       )}
     </>

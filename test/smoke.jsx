@@ -20,6 +20,7 @@ import CalendarExport from "../src/screens/CalendarExport";
 import ScheduleAdmin from "../src/screens/ScheduleAdmin";
 import StudentContacts from "../src/screens/StudentContacts";
 import PorDetails from "../src/screens/PorDetails";
+import Utils from "../src/screens/Utils";
 import CoursePicker from "../src/screens/CoursePicker";
 import SignIn from "../src/screens/SignIn";
 import Splash from "../src/screens/Splash";
@@ -124,6 +125,7 @@ const cases = [
   ["StudentContacts / no back button", <StudentContacts key="scn" />],
   ["PorDetails", <PorDetails key="por" onBack={noop} />],
   ["PorDetails / no back button", <PorDetails key="porn" />],
+  ["Utils", <Utils key="u" onOpen={noop} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
   ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],

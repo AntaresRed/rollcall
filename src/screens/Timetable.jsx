@@ -13,8 +13,7 @@ import {
  * pinned, because six readable columns don't fit in 380px.
  */
 export default function Timetable({
-  classes, now, term, overrides = [], onShowCalendar, onReschedule, onShowFaculty,
-  onShowStudents, onShowPor, onExport,
+  classes, now, term, overrides = [], onShowCalendar, onReschedule,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -160,8 +159,10 @@ export default function Timetable({
         Weekly view — rescheduled sessions keep their original slot here.
       </p>
 
-      {/* Only what concerns this week's schedule. Choosing courses is an
-          account-level decision and lives on Profile. */}
+      {/* Only what concerns this week's schedule. The directories and the
+          calendar export are reference material rather than changes to the
+          week, so they live under Utils; choosing courses is an account-level
+          decision and lives on Profile. */}
       <div className="tt-actions">
         {onReschedule && (
           <button className="btn ghost" onClick={onReschedule}>
@@ -174,26 +175,6 @@ export default function Timetable({
         {onShowCalendar && (
           <button className="btn ghost" onClick={onShowCalendar}>
             Term calendar
-          </button>
-        )}
-        {onShowFaculty && (
-          <button className="btn ghost" onClick={onShowFaculty}>
-            Faculty details
-          </button>
-        )}
-        {onExport && (
-          <button className="btn ghost" onClick={onExport}>
-            Add to Google / Apple calendar
-          </button>
-        )}
-        {onShowStudents && (
-          <button className="btn ghost" onClick={onShowStudents}>
-            Student contacts
-          </button>
-        )}
-        {onShowPor && (
-          <button className="btn ghost" onClick={onShowPor}>
-            POR Details
           </button>
         )}
       </div>

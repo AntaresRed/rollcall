@@ -337,7 +337,7 @@ Every response also carries a `build` marker, so which version is actually
 live is readable rather than guessed at:
 
 ```json
-{ "sent": 0, "ms": 1034, "termResolved": true, "build": "2026-08-29b" }
+{ "sent": 0, "ms": 1034, "termResolved": true, "build": "2026-08-29c" }
 ```
 
 No `build` field at all means a deploy older than 2026-08-29 is still running.
@@ -353,6 +353,21 @@ Server Error":
 `released` counts the alerts that had been claimed in `alert_log` but never
 delivered, and were handed back so the next sweep retries them. Alerts that
 did reach a device keep their claim, so nobody is pinged twice.
+
+### `"message": "JWT issued at future"`
+
+Seen intermittently, roughly hourly, always on the sweep's first read and with
+`"released": 0` — nothing had been claimed yet, so nothing was owed back.
+
+It is not a fault in this project. The function presents the static
+service-role key, which is months old and identical between a sweep that fails
+and the one five minutes later that works, so its `iat` cannot be what moved;
+what varies is the clock of whichever backend instance validated it. There is
+nothing to fix at this end and no key to rotate.
+
+Since `2026-08-29c` every read retries twice (250ms, then 750ms) before giving
+up, which is enough to ride out the skew. If these reappear, check that the
+build marker is at least `2026-08-29c` before investigating anything else.
 
 **A `500` whose body is the bare string `Internal Server Error` is a different
 animal.** That one never reached the handler at all — the function failed to

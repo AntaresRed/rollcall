@@ -114,7 +114,10 @@ src/
     api.js            all data access, attendance maths, occurrence generation
     push.js           subscription, permissions, test notification
   screens/            Splash, SignIn, Today, Timetable, CatchUp, Stats,
-                      Profile, Reschedule, TermCalendar, CoursePicker
+                      Profile, Reschedule, TermCalendar, CoursePicker,
+                      Utils (the hub) and what it opens — Faculty,
+                      CalendarExport, StudentContacts, PorDetails —
+                      plus ScheduleAdmin, reached from Profile
   data/catalogue.json generated — do not edit by hand
   data/directory.json generated — do not edit by hand
   data/students.json  generated — do not edit by hand

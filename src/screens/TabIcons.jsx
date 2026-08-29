@@ -1,7 +1,7 @@
 /**
  * Tab icons.
  *
- * Four labels of this length can't be read as text alone on a phone, so the
+ * Labels of this length can't be read as text alone on a phone, so the
  * icon carries the recognition and the label confirms it. Single stroke
  * weight throughout, inheriting currentColor so the active state is one
  * property change.
@@ -45,6 +45,17 @@ export function CatchUpIcon() {
     <svg {...base}>
       <circle cx="12" cy="12" r="9" />
       <path d="M12 7.5v5l3 2" />
+    </svg>
+  );
+}
+
+/** A drawer of reference material — the directories and the export. */
+export function UtilsIcon() {
+  return (
+    <svg {...base}>
+      <rect x="3" y="4" width="18" height="7" rx="2" />
+      <rect x="3" y="13" width="18" height="7" rx="2" />
+      <path d="M10 7.5h4M10 16.5h4" />
     </svg>
   );
 }

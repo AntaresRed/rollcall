@@ -50,7 +50,7 @@ export default function CalendarExport({ classes, term, overrides = [], onBack }
         </div>
         {onBack && (
           <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
-            Back to timetable
+            Back to utils
           </button>
         )}
       </>
@@ -117,7 +117,7 @@ export default function CalendarExport({ classes, term, overrides = [], onBack }
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
-          Back to timetable
+          Back to utils
         </button>
       )}
     </>

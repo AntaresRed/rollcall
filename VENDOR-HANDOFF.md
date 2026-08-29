@@ -24,27 +24,36 @@ it cannot be bypassed by calling the API directly.
 
 ## 2. What a student sees
 
-Four tabs, always visible at the bottom of the screen:
+Five tabs, always visible at the bottom of the screen:
 
 | Tab | What it does |
 | --- | --- |
 | **Today's classes** | Today's sessions in order, with Present / Absent / Cancelled buttons and a live marker on whichever class is happening right now. |
 | **Week's Timetable** | The whole week as a grid — time down the side, days across. On a laptop-width screen every day fits side by side; on a phone it scrolls sideways with the time column pinned. |
 | **Missed Attendances** | Sessions from the last 4 weeks that were never marked, so a forgetful week doesn't quietly wreck the attendance percentage. |
+| **Utils** | Reference material — the three directories and the calendar export. Nothing here changes a timetable or an attendance record. |
 | **Profile** | Account info, a per-course "skips left" budget, changing picked courses, sign out. The admin-only **Schedule admin** screen (§4a) opens from here too. |
 
-From **Week's Timetable**, four more screens open:
+From **Week's Timetable**, two more screens open — the two that change or
+explain the week in front of you:
 
 - **Reschedule** — move or cancel a single occurrence of a class, including
   one that already happened (for entering a change after the fact).
 - **Term calendar** — term dates, the pre-mid/post-mid teaching windows, and
   break weeks (exams, placements, Puja vacation).
-- **Faculty directory** — every IIM Calcutta faculty member (room, extension,
+
+From **Utils**, four more:
+
+- **Faculty details** — every IIM Calcutta faculty member (room, extension,
   direct line, email), searchable, with the student's own instructors tagged
   and pinned to the top.
-- **Add to calendar** — downloads a `.ics` file of the student's whole term,
-  with on-screen steps for importing it into Google Calendar or Apple
-  Calendar. It's a one-time snapshot, not a live sync — see §6.
+- **Add to Google / Apple calendar** — downloads a `.ics` file of the
+  student's whole term, with on-screen steps for importing it. It's a
+  one-time snapshot, not a live sync — see §6.
+- **Student contacts** — the batch by name, registration number and phone,
+  searchable, with tap-to-call and WhatsApp links.
+- **POR details** — positions of responsibility, drilled down through the
+  student council, CDPO, cultural bodies and the sports council.
 
 **First run:** a student who hasn't picked courses yet lands on a searchable
 course picker instead of these tabs. It warns if two picked courses would
