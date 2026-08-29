@@ -333,7 +333,18 @@ page, say) makes the cast fail and takes the whole result with it.
 A healthy row is `200` with `"termResolved": true`. `"sent": 0` outside class
 hours is correct, not a fault.
 
-A `500` now carries a reason rather than a bare "Internal Server Error":
+Every response also carries a `build` marker, so which version is actually
+live is readable rather than guessed at:
+
+```json
+{ "sent": 0, "ms": 1034, "termResolved": true, "build": "2026-08-29b" }
+```
+
+No `build` field at all means a deploy older than 2026-08-29 is still running.
+Bump `BUILD` at the top of the function whenever you change it.
+
+A `500` **with a JSON body** carries a reason rather than a bare "Internal
+Server Error":
 
 ```json
 { "error": "sweep failed", "message": "...", "released": 3, "ms": 412 }
@@ -341,9 +352,20 @@ A `500` now carries a reason rather than a bare "Internal Server Error":
 
 `released` counts the alerts that had been claimed in `alert_log` but never
 delivered, and were handed back so the next sweep retries them. Alerts that
-did reach a device keep their claim, so nobody is pinged twice. A single 500
-at the moment of a `functions deploy` is the old worker being replaced
-mid-request and is expected; a recurring one is not, and `message` names it.
+did reach a device keep their claim, so nobody is pinged twice.
+
+**A `500` whose body is the bare string `Internal Server Error` is a different
+animal.** That one never reached the handler at all — the function failed to
+boot, before any `try` existed. The usual cause is a cold isolate failing to
+fetch a remote import; the imports are pinned to exact versions to make that
+cacheable and as unlikely as possible, but it can still happen. The only place
+the real error appears is the function logs (Dashboard → Edge Functions →
+send-class-alerts → Logs).
+
+The good news is that this one is self-healing: nothing ran, so nothing was
+claimed and nothing is owed back, and the alert window is `WINDOW_MINUTES = 30`
+against a five-minute cron — six sweeps cover every alert. One failed boot
+costs nothing. A run of them spanning more than half an hour would.
 
 Count them over the retained window before concluding anything:
 

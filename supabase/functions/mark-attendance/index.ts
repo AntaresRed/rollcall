@@ -12,7 +12,13 @@
 //   supabase functions deploy mark-attendance --no-verify-jwt
 // ============================================================
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Pinned exactly, not left floating on "@2". A range has to be resolved and
+// re-fetched every time a cold isolate boots, which is a network round trip
+// that can fail — and a boot failure happens before any handler exists, so
+// it surfaces as a bare "Internal Server Error" with nothing to catch it.
+// An exact version is cacheable, reproducible, and matches what the frontend
+// is locked to in package-lock.json.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.2";
 
 const SECRET = Deno.env.get("ATTENDANCE_TOKEN_SECRET")!;
 

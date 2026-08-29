@@ -11,8 +11,26 @@
 // Generate the pair once with:  npx web-push generate-vapid-keys
 // ============================================================
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Pinned exactly, not left floating on "@2". A range has to be resolved and
+// re-fetched every time a cold isolate boots, which is a network round trip
+// that can fail — and a boot failure happens before any handler exists, so
+// it surfaces as a bare "Internal Server Error" with nothing to catch it.
+// An exact version is cacheable, reproducible, and matches what the frontend
+// is locked to in package-lock.json.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.2";
 import webpush from "npm:web-push@3.6.7";
+
+/**
+ * Echoed in every response so which version is actually live can be read off
+ * the cron log, rather than inferred from whether some field happens to be
+ * present. Bump it whenever this file changes.
+ *
+ * The absence of this marker means a build older than 2026-08-29 is still
+ * running — which is exactly the question that could not be answered when a
+ * bare 500 turned up and there was no way to tell a deploy artefact from a
+ * real fault.
+ */
+const BUILD = "2026-08-29b";
 
 const SWEEP_MINUTES = 5; // must match the cron interval
 
@@ -194,7 +212,7 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
   }
 
   if (!subs.length) {
-    return new Response(JSON.stringify({ sent: 0, note: "no subscribers" }), {
+    return new Response(JSON.stringify({ sent: 0, note: "no subscribers", build: BUILD }), {
       headers: { "Content-Type": "application/json" },
     });
   }
@@ -318,7 +336,7 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
 
   if (!due.length) {
     return new Response(JSON.stringify({
-      sent: 0, ms: Date.now() - started, termResolved: Boolean(term),
+      sent: 0, ms: Date.now() - started, termResolved: Boolean(term), build: BUILD,
     }));
   }
 
@@ -487,6 +505,7 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
     // Surfaced so a broken term calendar is visible in the cron logs rather
     // than only in the alerts students do or don't receive.
     termResolved: Boolean(term),
+    build: BUILD,
   }), { headers: { "Content-Type": "application/json" } });
 }
 
@@ -519,6 +538,7 @@ Deno.serve(async () => {
       message: String((err as { message?: string })?.message ?? err),
       released,
       ms: Date.now() - started,
+      build: BUILD,
     }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 });
