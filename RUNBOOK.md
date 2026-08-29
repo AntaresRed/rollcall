@@ -314,6 +314,46 @@ also reports this on every invocation:
 `termResolved: false` in the cron logs is the signal; fix the term row and it
 returns to `true`.
 
+### Reading what the cron sweep actually got back
+
+pg_cron calls the sweep through `net.http_post`, and pg_net keeps the response
+body for a few hours. That is the most direct health check there is, and it
+needs no keys and no CLI:
+
+```sql
+select created, status_code, left(content, 300) as body
+  from net._http_response
+ order by created desc
+ limit 10;
+```
+
+Do not cast `content` to json in that query — a non-JSON body (a gateway error
+page, say) makes the cast fail and takes the whole result with it.
+
+A healthy row is `200` with `"termResolved": true`. `"sent": 0` outside class
+hours is correct, not a fault.
+
+A `500` now carries a reason rather than a bare "Internal Server Error":
+
+```json
+{ "error": "sweep failed", "message": "...", "released": 3, "ms": 412 }
+```
+
+`released` counts the alerts that had been claimed in `alert_log` but never
+delivered, and were handed back so the next sweep retries them. Alerts that
+did reach a device keep their claim, so nobody is pinged twice. A single 500
+at the moment of a `functions deploy` is the old worker being replaced
+mid-request and is expected; a recurring one is not, and `message` names it.
+
+Count them over the retained window before concluding anything:
+
+```sql
+select date_trunc('hour', created) as hour,
+       count(*) filter (where status_code = 200) as ok,
+       count(*) filter (where status_code <> 200) as failed
+  from net._http_response group by 1 order by 1 desc;
+```
+
 ## 8f. Alerts that arrive the moment you open the app (Android)
 
 The signature: nothing at the time the class starts, then the real alert lands

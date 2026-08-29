@@ -3,3 +3,6 @@ dist
 .env
 .env.local
 .DS_Store
+
+# Supabase CLI local state (which project this checkout is linked to)
+supabase/.temp

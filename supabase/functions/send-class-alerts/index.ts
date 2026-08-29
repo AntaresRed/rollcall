@@ -141,9 +141,26 @@ function inSession(phase: string, date: string, term: Term | null): boolean {
   return inPre || inPost;
 }
 
-Deno.serve(async () => {
-  const started = Date.now();
+/**
+ * Alerts this run has claimed in alert_log but not yet accounted for.
+ *
+ * The claim is written *before* the push goes out, and the claim is what stops
+ * the five-minute cron double-pinging. So anything that throws between the two
+ * would leave the claim standing with nothing delivered, and no later sweep
+ * would ever try again — the alert is simply gone for the day, for everybody
+ * in that window. Whatever is still in here when the handler throws is handed
+ * back so the next sweep can retry it.
+ *
+ * Entries are removed as soon as one device accepts the push, so a crash
+ * midway through sending never releases an alert that did reach somebody.
+ */
+type Pending = Map<string, { classId: string; date: string }>;
 
+/**
+ * The sweep itself, kept as a named function purely so the handler below can
+ * wrap it in one try/catch without re-indenting three hundred lines.
+ */
+async function sweep(started: number, pending: Pending): Promise<Response> {
   /** PostgREST caps an unbounded select at 1000 rows, silently. Page through. */
   async function fetchAll<T>(
     build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
@@ -312,7 +329,12 @@ Deno.serve(async () => {
     const { error } = await admin
       .from("alert_log")
       .insert({ class_id: d.cls.id, class_date: d.date });
-    if (!error) claimed.push(d);
+    if (!error) {
+      claimed.push(d);
+      // Owed back until this alert reaches a device or is deliberately
+      // released below.
+      pending.set(`${d.cls.id}|${d.date}`, { classId: String(d.cls.id), date: d.date });
+    }
   }
 
   // Minted up front so the send loop stays synchronous per device.
@@ -427,6 +449,10 @@ Deno.serve(async () => {
       }
     }));
 
+    // Delivered to at least one device: this alert is no longer owed back, so
+    // a later crash cannot cause it to be sent twice.
+    if (results.includes("ok")) pending.delete(`${d.cls.id}|${d.date}`);
+
     return { d, results };
   }));
 
@@ -447,6 +473,11 @@ Deno.serve(async () => {
     if (error) console.error("could not release alert claim", d.cls.id, d.date, error);
   }
 
+  // Every claim has now been settled deliberately — delivered, released above,
+  // or kept because the subscription is gone for good. Nothing is owed back,
+  // so the handler's catch has nothing left to undo.
+  pending.clear();
+
   if (dead.length) {
     await admin.from("push_subscriptions").delete().in("id", dead);
   }
@@ -457,4 +488,37 @@ Deno.serve(async () => {
     // than only in the alerts students do or don't receive.
     termResolved: Boolean(term),
   }), { headers: { "Content-Type": "application/json" } });
+}
+
+Deno.serve(async () => {
+  const started = Date.now();
+  const pending: Pending = new Map();
+
+  try {
+    return await sweep(started, pending);
+  } catch (err) {
+    // Without this the whole sweep aborted as a bare "Internal Server Error":
+    // every student's alerts for that five-minute window lost, the claims left
+    // standing so no later sweep would retry them, and nothing in the response
+    // to say what had failed. Least diagnosable failure the system could
+    // produce, and the one most worth naming.
+    console.error("sweep failed", err);
+
+    let released = 0;
+    for (const { classId, date } of pending.values()) {
+      const { error } = await admin.from("alert_log").delete()
+        .eq("class_id", classId).eq("class_date", date);
+      if (error) console.error("could not release claim after failure", classId, date, error);
+      else released += 1;
+    }
+
+    // Still a 500, so a failed sweep stays visible as a failure in the cron
+    // logs — but one that says what broke and how many alerts it handed back.
+    return new Response(JSON.stringify({
+      error: "sweep failed",
+      message: String((err as { message?: string })?.message ?? err),
+      released,
+      ms: Date.now() - started,
+    }), { status: 500, headers: { "Content-Type": "application/json" } });
+  }
 });
