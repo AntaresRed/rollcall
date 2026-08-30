@@ -113,7 +113,7 @@ src/
     supabase.js       client, fails loudly if config is missing
     api.js            all data access, attendance maths, occurrence generation
     push.js           subscription, permissions, test notification
-  screens/            Splash, SignIn, Today, Timetable, CatchUp, Stats,
+  screens/            Splash, SignIn, Today, Timetable, EditAttendance, Stats,
                       Profile, Reschedule, TermCalendar, CoursePicker,
                       AttendanceBreakdown,
                       Utils (the hub) and what it opens — Faculty,

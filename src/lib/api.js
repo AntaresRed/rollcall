@@ -523,46 +523,106 @@ export function occurrencesOn(classes, term, date, overrides = []) {
 }
 
 /**
- * Past sessions with no attendance mark, newest first.
+ * A ceiling on the no-calendar window. Longer than an academic year, so it
+ * never truncates a real term; short enough that a corrupt timestamp cannot
+ * turn the day-by-day walk below into a loop over twenty thousand days.
+ */
+const MAX_UNSCOPED_DAYS = 400;
+
+/**
+ * How far back to look when no term calendar is published.
+ *
+ * The calendar is the normal answer, and a rolling window used to be the
+ * fallback — which meant that in the one situation where the app already knows
+ * least, it also quietly stopped letting anyone fix a mark after four weeks.
+ *
+ * The better floor is the student's own timetable: a session from before a
+ * course was added is not theirs to mark. That tracks both of the things that
+ * should actually end an edit window, without needing a calendar to announce
+ * either — a new term re-picks courses, so the floor moves forward with it,
+ * and a dropped course takes its row with it, so it generates no sessions at
+ * all.
+ *
+ * Rows with no usable `created_at` fall back to the rolling window, since a
+ * floor that cannot be read is worse than a conservative one.
+ */
+function timetableFloor(classes, now, fallbackDays) {
+  const stamps = classes
+    .map((c) => Date.parse(c.created_at))
+    // A timestamp in the future is a clock disagreeing with itself, not a
+    // fact about when the course was picked.
+    .filter((t) => Number.isFinite(t) && t <= now.getTime());
+
+  if (!stamps.length) {
+    return isoDate(new Date(now.getTime() - fallbackDays * DAY_MS));
+  }
+  const earliest = Math.min(...stamps);
+  const ceiling = now.getTime() - MAX_UNSCOPED_DAYS * DAY_MS;
+  return isoDate(new Date(Math.max(earliest, ceiling)));
+}
+
+/**
+ * Every session a student is allowed to mark, newest first, each carrying the
+ * mark it already has (or null).
+ *
+ * The cut-off is whether the class has *begun*. A class you are sitting in is
+ * markable — that is when people actually reach for the app — but one that
+ * has not started yet is not: attendance for it is not a fact yet, and a
+ * screen that invites you to record one is inviting a guess.
  *
  * Scope is the term calendar: everything from the first day of term up to
- * now. It used to be a rolling 28 days, which quietly made an unmarked class
- * unfixable once it aged out — no other screen can write attendance for a
- * past date, so a gap older than four weeks could never be closed. That was
- * invisible until Attendance breakdown started reporting the whole term, at
- * which point the app was showing people a problem and offering no button
- * for it.
+ * now. It used to be a rolling 28 days, which quietly made a session
+ * uneditable once it aged out — no other screen can write attendance for a
+ * past date, so anything older than four weeks could never be corrected.
  *
- * `fallbackDays` only applies when there is no term calendar to scope by. It
- * is not the normal path — a rolling window is a guess, and guessing is only
- * better than nothing when nothing is the alternative.
+ * With no term calendar the scope comes from the timetable instead — see
+ * `timetableFloor`. `fallbackDays` is the last resort under that, for rows
+ * carrying no usable timestamp.
  */
-export function unmarkedSessions(classes, attendance, term, now = new Date(), fallbackDays = 28, overrides = []) {
+export function markableSessions(classes, attendance, term, now = new Date(), fallbackDays = 28, overrides = []) {
   if (!classes.length) return [];
 
-  const marked = new Set(
-    attendance.map((a) => attendanceKey(a.subject, a.class_date, a.start_time)),
+  const status = new Map(
+    attendance.map((a) => [attendanceKey(a.subject, a.class_date, a.start_time), a.status]),
   );
 
   const to = isoDate(now);
-  const from = term?.term_start
-    ? term.term_start
-    : isoDate(new Date(now.getTime() - fallbackDays * DAY_MS));
+  const from = term?.term_start ?? timetableFloor(classes, now, fallbackDays);
 
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const today = isoDate(now);
 
   return expectedSessions(classes, term, { from, to }, overrides)
-    .filter(({ cls, date }) => {
-      // Today's classes only count once they've actually finished.
-      if (date === today && toMinutes(hhmm(cls.end_time)) > nowMinutes) return false;
-      return !marked.has(attendanceKey(cls.subject, date, cls.start_time));
-    })
+    // Nothing after today is generated at all, so only today needs the clock.
+    .filter(({ cls, date }) =>
+      !(date === today && toMinutes(hhmm(cls.start_time)) > nowMinutes))
+    .map((o) => ({
+      ...o,
+      status: status.get(attendanceKey(o.cls.subject, o.date, o.cls.start_time)) ?? null,
+    }))
     .sort((a, b) =>
       a.date === b.date
         ? toMinutes(hhmm(a.cls.start_time)) - toMinutes(hhmm(b.cls.start_time))
         : b.date.localeCompare(a.date),
     );
+}
+
+/**
+ * Past sessions with no attendance mark, newest first — the count behind the
+ * tab badge.
+ *
+ * Narrower than `markableSessions` on purpose: a class still running has not
+ * been forgotten yet, so badging it as missed would nag about something the
+ * student is in the middle of. It becomes countable once it ends.
+ */
+export function unmarkedSessions(classes, attendance, term, now = new Date(), fallbackDays = 28, overrides = []) {
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const today = isoDate(now);
+
+  return markableSessions(classes, attendance, term, now, fallbackDays, overrides)
+    .filter(({ cls, date, status }) =>
+      status === null &&
+      !(date === today && toMinutes(hhmm(cls.end_time)) > nowMinutes));
 }
 
 /**
@@ -649,7 +709,7 @@ export function attendanceBreakdown(
         date,
         start_time: hhmm(cls.start_time),
         status: mark,
-        // Kept for the same reason CatchUp keeps it: a class pushed onto a
+        // Kept for the same reason Edit attendance keeps it: a class pushed onto a
         // date it already meets would otherwise be indistinguishable from
         // the session that was always there.
         movedFrom: movedFrom ?? null,

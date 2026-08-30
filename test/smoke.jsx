@@ -10,7 +10,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import Today from "../src/screens/Today";
 import Timetable from "../src/screens/Timetable";
-import CatchUp from "../src/screens/CatchUp";
+import EditAttendance from "../src/screens/EditAttendance";
 import Stats from "../src/screens/Stats";
 import Profile from "../src/screens/Profile";
 import Reschedule from "../src/screens/Reschedule";
@@ -84,16 +84,16 @@ const cases = [
   ["Timetable", <Timetable key="tt" classes={classes} now={now} term={term} overrides={overrides} onShowCalendar={noop} onReschedule={noop} />],
   ["Timetable / all four actions", <Timetable key="tta" classes={classes} now={now} term={term}
       overrides={overrides} onShowCalendar={noop} onReschedule={noop} onShowBreakdown={noop}
-      onShowCatchUp={noop} pendingCount={3} />],
+      onShowAttendance={noop} pendingCount={3} />],
   ["Timetable / empty", <Timetable key="tte" classes={[]} now={now} term={term} />],
   ["Timetable / during a break", <Timetable key="ttb" classes={classes} now={new Date("2026-10-21T10:00:00")} term={term} overrides={[]} />],
-  ["CatchUp", <CatchUp key="cu" classes={classes} attendance={attendance} term={term} overrides={overrides} now={now} onMark={noop} />],
-  ["CatchUp / no classes", <CatchUp key="cue" classes={[]} attendance={[]} term={term} now={now} onMark={noop} />],
+  ["EditAttendance", <EditAttendance key="cu" classes={classes} attendance={attendance} term={term} overrides={overrides} now={now} onMark={noop} />],
+  ["EditAttendance / no classes", <EditAttendance key="cue" classes={[]} attendance={[]} term={term} now={now} onMark={noop} />],
   // All three of its return paths render the back button now that it is a
   // sub-screen; the empty ones are the easy ones to forget.
-  ["CatchUp / with a way back", <CatchUp key="cub" classes={classes} attendance={attendance}
+  ["EditAttendance / with a way back", <EditAttendance key="cub" classes={classes} attendance={attendance}
       term={term} overrides={overrides} now={now} onMark={noop} onBack={noop} />],
-  ["CatchUp / nothing outstanding", <CatchUp key="cun" classes={classes}
+  ["EditAttendance / nothing outstanding", <EditAttendance key="cun" classes={classes}
       attendance={occurrencesOn(classes, term, isoDate(now), overrides).map(({ cls, date }) => ({
         subject: cls.subject, class_date: date, start_time: cls.start_time, status: "present",
       }))} term={term} overrides={overrides} now={new Date("2026-08-24T09:00:00")}

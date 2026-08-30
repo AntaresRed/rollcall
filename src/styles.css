@@ -793,10 +793,10 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 
 .tag.quiet { background: var(--rule); color: var(--slate); }
 
-/* ---------- catch up ---------- */
+/* ---------- sessions grouped by day (Edit attendance, Reschedule) ---------- */
 
-.catchup-day { margin-bottom: 20px; }
-.catchup-date {
+.daylist { margin-bottom: 20px; }
+.daylist-date {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -809,15 +809,15 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   padding-bottom: 6px;
   margin-bottom: 10px;
 }
-.catchup-date span { color: var(--mute); letter-spacing: 0.04em; }
+.daylist-date span { color: var(--mute); letter-spacing: 0.04em; }
 
-.catchup-row {
+.daylist-row {
   display: grid;
   grid-template-columns: var(--gutter) 1fr;
   gap: 12px;
   padding: 10px 0;
 }
-.catchup-time {
+.daylist-time {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--slate);

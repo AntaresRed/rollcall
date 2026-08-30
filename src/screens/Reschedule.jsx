@@ -124,8 +124,8 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
   );
 
   const renderDay = ([date, items]) => (
-    <div key={date} className="catchup-day">
-      <div className="catchup-date">
+    <div key={date} className="daylist">
+      <div className="daylist-date">
         {date === today ? "Today" : DAY_LONG[weekdayOf(new Date(`${date}T00:00:00`))]}
         <span>{fmtDate(date)}</span>
       </div>
@@ -135,8 +135,8 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
         const key = `day:${cls.id}|${originalDate}`;
 
         return (
-          <div className="catchup-row" key={key}>
-            <div className="catchup-time">
+          <div className="daylist-row" key={key}>
+            <div className="daylist-time">
               {pretty(cls.start_time).replace(" ", "")}
             </div>
             <div style={{ minWidth: 0 }}>

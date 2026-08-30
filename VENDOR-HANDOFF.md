@@ -41,11 +41,18 @@ it:
   one that already happened (for entering a change after the fact).
 - **Term calendar** — term dates, the pre-mid/post-mid teaching windows, and
   break weeks (exams, placements, Puja vacation).
-- **Missed attendances** — every session this term that was never marked,
-  each with Present / Absent / Cancelled buttons, so a forgetful week doesn't
-  quietly wreck the percentage. Scoped by the term calendar rather than a
-  rolling window, because no other screen can write attendance for a past
-  date: anything that fell off this list could never be corrected. The count appears both on the button
+- **Edit attendance** — every class this term that has already begun, with
+  its current mark shown. Present / Absent / Cancelled sets or changes it;
+  tapping the mark it already has clears it. A class still in session is
+  included, since that is when people actually reach for the app; one that has
+  not started is not, because attendance for it is not a fact yet. Scoped by
+  the term calendar rather than a rolling window — no other screen can write
+  attendance for a past date, so anything that fell off this list could never
+  be corrected. If no term calendar is published, the scope falls back to the
+  student's own timetable (everything since they picked their courses), which
+  keeps the same two natural endings: re-picking for a new term moves the floor
+  forward, and dropping a course removes its sessions entirely. The tab badge counts only the *unmarked* ones, and only once
+  they have ended, so it never nags about a class the student is sitting in. The count appears both on the button
   and as a badge on the tab itself, which is what actually prompts a student
   to open it.
 - **Attendance breakdown** — every course split into Present / Absent / Did

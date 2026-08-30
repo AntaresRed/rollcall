@@ -18,7 +18,7 @@ const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 import Today from "./screens/Today";
 const Timetable = lazy(() => import("./screens/Timetable"));
 const Profile = lazy(() => import("./screens/Profile"));
-const CatchUp = lazy(() => import("./screens/CatchUp"));
+const EditAttendance = lazy(() => import("./screens/EditAttendance"));
 const TermCalendar = lazy(() => import("./screens/TermCalendar"));
 const Reschedule = lazy(() => import("./screens/Reschedule"));
 const Faculty = lazy(() => import("./screens/Faculty"));
@@ -35,7 +35,7 @@ const SUB_SCREEN_BACK = {
   calendar: "Back to timetable",
   reschedule: "Back to timetable",
   breakdown: "Back to timetable",
-  catchup: "Back to timetable",
+  attendance: "Back to timetable",
   faculty: "Back to utils",
   por: "Back to utils",
   export: "Back to utils",
@@ -428,8 +428,8 @@ export default function App() {
             onBack={() => setSubScreen(null)}
           />
         )}
-        {tab === "timetable" && subScreen === "catchup" && (
-          <CatchUp
+        {tab === "timetable" && subScreen === "attendance" && (
+          <EditAttendance
             classes={classes}
             attendance={attendance}
             term={term}
@@ -476,7 +476,7 @@ export default function App() {
             onShowCalendar={() => setSubScreen("calendar")}
             onReschedule={() => setSubScreen("reschedule")}
             onShowBreakdown={() => setSubScreen("breakdown")}
-            onShowCatchUp={() => setSubScreen("catchup")}
+            onShowAttendance={() => setSubScreen("attendance")}
             pendingCount={pendingCount}
           />
         )}

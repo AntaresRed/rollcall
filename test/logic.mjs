@@ -2,7 +2,7 @@
 import {
   toMinutes, hhmm, pretty, inSession, breakOn, skipBudget, courseStats,
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
-  catalogueDrift, currentSlotOf, attendanceBreakdown,
+  catalogueDrift, currentSlotOf, attendanceBreakdown, markableSessions,
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
@@ -120,6 +120,103 @@ check("an old session that was marked is not asked about again",
 const noTerm = unmarkedSessions(cls, [], null, new Date("2026-10-20T23:00:00"), 28, []);
 check("with no term the fallback window still applies",
   noTerm.every(o => o.date >= "2026-09-22"));
+
+console.log("\neditable sessions");
+survives("no classes", () => markableSessions([], [], term, new Date("2026-09-10")));
+survives("null term", () => markableSessions(cls, [], null, new Date("2026-09-10")));
+
+// "W" runs Mondays 10:15-11:30. Monday 7 Sep, checked at three moments.
+const beforeIt = markableSessions(cls, [], term, new Date("2026-09-07T09:00:00"), 28, []);
+const during   = markableSessions(cls, [], term, new Date("2026-09-07T10:45:00"), 28, []);
+const afterIt  = markableSessions(cls, [], term, new Date("2026-09-07T12:00:00"), 28, []);
+const onDate = (rows) => rows.filter(o => o.date === "2026-09-07").length;
+
+check("a class that has not started cannot be marked", onDate(beforeIt) === 0);
+check("a class in session can be marked", onDate(during) === 1);
+check("a finished class can be marked", onDate(afterIt) === 1);
+
+// The badge is narrower: it must not nag about a class you are sitting in.
+check("the badge ignores a class still running",
+  unmarkedSessions(cls, [], term, new Date("2026-09-07T10:45:00"), 28, [])
+    .filter(o => o.date === "2026-09-07").length === 0);
+check("and counts it once it has ended",
+  unmarkedSessions(cls, [], term, new Date("2026-09-07T12:00:00"), 28, [])
+    .filter(o => o.date === "2026-09-07").length === 1);
+
+// Nothing beyond today, whatever the clock says.
+const upToNow = markableSessions(cls, [], term, new Date("2026-09-10T23:00:00"), 28, []);
+check("never lists a future date", upToNow.every(o => o.date <= "2026-09-10"));
+check("spans the term, not a window", upToNow.some(o => o.date === "2026-08-24"));
+
+// Existing marks come back on the session, which is what lets the screen show
+// the current state and offer to change it.
+const marks = [
+  { subject: "W", class_date: "2026-08-24", start_time: "10:15", status: "present" },
+  { subject: "W", class_date: "2026-08-31", start_time: "10:15", status: "cancelled" },
+];
+const withMarks = markableSessions(cls, marks, term, new Date("2026-09-10T23:00:00"), 28, []);
+const at = (d) => withMarks.find(o => o.date === d);
+check("a marked session carries its mark", at("2026-08-24").status === "present");
+check("cancelled is carried through too", at("2026-08-31").status === "cancelled");
+check("an unmarked session reports null", at("2026-09-07").status === null);
+check("marked sessions are still listed, not filtered out",
+  withMarks.length === upToNow.length);
+check("newest first",
+  withMarks.every((x, i, a) => i === 0 || a[i - 1].date >= x.date));
+
+// The badge is the subset of these with no mark.
+const badge = unmarkedSessions(cls, marks, term, new Date("2026-09-10T23:00:00"), 28, []);
+check("the badge counts exactly the unmarked ones",
+  badge.length === withMarks.filter(o => o.status === null).length);
+check("and every one it counts really is unmarked",
+  badge.every(o => o.status === null));
+
+// With no term calendar the scope comes from the timetable instead of a
+// rolling window: the old 28-day cut-off meant that in the one situation where
+// the app knows least, it also stopped anyone fixing a mark after four weeks.
+{
+  const picked = (created_at) => [{ id: "w2", subject: "W", day_of_week: 1,
+    start_time: "10:15", end_time: "11:30", term_phase: "full", created_at }];
+  const seesFirstDay = (when, classes) =>
+    markableSessions(classes, [], null, new Date(when), 28, [])
+      .some(o => o.date === "2026-08-24");
+
+  const onTime = picked("2026-08-24T08:00:00Z");
+  check("no calendar: still editable well past four weeks",
+    seesFirstDay("2026-09-23T12:00:00", onTime));
+  check("no calendar: still editable months later",
+    seesFirstDay("2026-12-22T12:00:00", onTime));
+  check("no calendar: never reaches before the course was picked",
+    markableSessions(onTime, [], null, new Date("2026-12-22T12:00:00"), 28, [])
+      .every(o => o.date >= "2026-08-24"));
+
+  // Re-picking courses for a new term moves the floor with them, which is what
+  // stands in for a term boundary when there is no calendar to declare one.
+  check("no calendar: a re-picked timetable drops the old term",
+    !seesFirstDay("2027-01-15T12:00:00", picked("2026-12-07T08:00:00Z")));
+
+  // A dropped course generates no sessions, so there is nothing to edit.
+  check("no calendar: a dropped course has nothing to edit",
+    markableSessions([], [], null, new Date("2026-10-23T12:00:00"), 28, []).length === 0);
+
+  // A floor that cannot be read is worse than a conservative one.
+  for (const bad of [undefined, null, "", "not-a-date"]) {
+    check(`no calendar: ${JSON.stringify(bad)} created_at falls back to the window`,
+      seesFirstDay("2026-09-13T12:00:00", picked(bad)) &&
+      !seesFirstDay("2026-09-23T12:00:00", picked(bad)));
+  }
+  // A timestamp in the future is a clock disagreeing with itself.
+  check("no calendar: a future created_at is ignored",
+    seesFirstDay("2026-09-13T12:00:00", picked("2099-01-01T00:00:00Z")) &&
+    !seesFirstDay("2026-09-23T12:00:00", picked("2099-01-01T00:00:00Z")));
+
+  // And a corrupt one must not become a walk over twenty thousand days.
+  const epoch = markableSessions(picked("1970-01-01T00:00:00Z"), [], null,
+    new Date("2026-10-23T12:00:00"), 28, []);
+  check("no calendar: an epoch created_at is clamped, not walked",
+    epoch.length > 0 && epoch.length < 100 &&
+    epoch.every(o => o.date >= "2025-09-18"));
+}
 
 console.log("\nattendance breakdown");
 survives("empty", () => attendanceBreakdown([], [], term, new Date("2026-09-10")));

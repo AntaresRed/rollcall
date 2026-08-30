@@ -14,7 +14,7 @@ import {
  */
 export default function Timetable({
   classes, now, term, overrides = [], onShowCalendar, onReschedule,
-  onShowBreakdown, onShowCatchUp, pendingCount = 0,
+  onShowBreakdown, onShowAttendance, pendingCount = 0,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -180,9 +180,9 @@ export default function Timetable({
             Attendance breakdown
           </button>
         )}
-        {onShowCatchUp && (
-          <button className="btn ghost" onClick={onShowCatchUp}>
-            Missed attendances
+        {onShowAttendance && (
+          <button className="btn ghost" onClick={onShowAttendance}>
+            Edit attendance
             {pendingCount > 0 && (
               <span className="tag signal" style={{ marginLeft: 6 }}>{pendingCount}</span>
             )}

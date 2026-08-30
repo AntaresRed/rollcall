@@ -77,7 +77,8 @@ export default function AttendanceBreakdown({
       ))}
 
       <p className="ab-foot">
-        "Did not mark" is a gap in your record, not an absence.
+        "Did not mark" is a gap in your record, not an absence. Edit attendance
+        fills them in.
       </p>
 
       {onBack && (
