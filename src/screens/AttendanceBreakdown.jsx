@@ -71,7 +71,7 @@ export default function AttendanceBreakdown({
         </div>
       )}
 
-      {total && <TotalBar total={total} />}
+      {total && <TotalCard total={total} />}
 
       {rows.map((r) => (
         <CourseRow key={r.subject} row={r} />
@@ -93,7 +93,7 @@ export default function AttendanceBreakdown({
 }
 
 /** The batch's own line at the top: the same three buckets, summed. */
-function TotalBar({ total }) {
+function TotalCard({ total }) {
   return (
     <div className="ab-total">
       <div className="ab-total-head">
@@ -103,8 +103,7 @@ function TotalBar({ total }) {
           {total.cancelled > 0 && ` · ${total.cancelled} cancelled`}
         </span>
       </div>
-      <SplitBar present={total.present} absent={total.absent} unmarked={total.unmarked} />
-      <Legend present={total.present} absent={total.absent} unmarked={total.unmarked} />
+      <Counts present={total.present} absent={total.absent} unmarked={total.unmarked} />
     </div>
   );
 }
@@ -137,8 +136,7 @@ function CourseRow({ row: r }) {
         {r.cancelled > 0 && ` · ${r.cancelled} cancelled`}
       </div>
 
-      <SplitBar present={r.present} absent={r.absent} unmarked={r.unmarked} />
-      <Legend present={r.present} absent={r.absent} unmarked={r.unmarked} />
+      <Counts present={r.present} absent={r.absent} unmarked={r.unmarked} />
     </>
   );
 
@@ -150,7 +148,7 @@ function CourseRow({ row: r }) {
         {summary}
         <span className="ab-more">
           <ChevronIcon />
-          Date by date
+          Date-wise Breakdown
         </span>
       </summary>
 
@@ -201,27 +199,17 @@ function ChevronIcon() {
 }
 
 /**
- * The three buckets as one bar.
+ * The three buckets as counts.
  *
- * Given widths in percent so the segments stay proportional at any card
- * width, and hidden from assistive technology because the counts underneath
- * say the same thing in words — a screen reader announcing three unlabelled
- * percentages is noise, not information.
+ * These carried a proportional bar above them until it was cut: with four or
+ * five courses on screen the bars invited comparison between courses that do
+ * not have the same number of sessions, which is a comparison that means
+ * nothing. The numbers say the same thing and say it exactly.
+ *
+ * The colour squares stay: they tie each bucket to the matching chip in the
+ * date-wise list below, so a count and a row read as the same fact.
  */
-function SplitBar({ present, absent, unmarked }) {
-  const sum = present + absent + (unmarked ?? 0);
-  if (!sum) return <div className="ab-bar empty" aria-hidden="true" />;
-  const pc = (n) => `${(n / sum) * 100}%`;
-  return (
-    <div className="ab-bar" aria-hidden="true">
-      {present > 0 && <span className="ab-seg present" style={{ width: pc(present) }} />}
-      {absent > 0 && <span className="ab-seg absent" style={{ width: pc(absent) }} />}
-      {unmarked > 0 && <span className="ab-seg unmarked" style={{ width: pc(unmarked) }} />}
-    </div>
-  );
-}
-
-function Legend({ present, absent, unmarked }) {
+function Counts({ present, absent, unmarked }) {
   return (
     <div className="ab-legend">
       <span className="ab-key present"><i />Present <b>{present}</b></span>

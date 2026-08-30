@@ -1414,7 +1414,6 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   font-variant-numeric: tabular-nums;
 }
 .ab-total .ab-legend { color: #C6CCD3; }
-.ab-total .ab-bar { background: #333A44; }
 
 .ab-card {
   background: var(--card);
@@ -1451,26 +1450,11 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   margin-top: 3px;
 }
 
-.ab-bar {
-  display: flex;
-  height: 9px;
-  margin: 11px 0 9px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: var(--rule);
-}
-/* A course with nothing behind it yet still draws the track, so the cards
-   keep a common baseline rather than one silently collapsing. */
-.ab-bar.empty { background: var(--rule); }
-.ab-seg { display: block; height: 100%; }
-.ab-seg.present { background: var(--present); }
-.ab-seg.absent { background: var(--absent); }
-.ab-seg.unmarked { background: var(--rule-strong); }
-
 .ab-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 14px;
+  margin-top: 11px;   /* the space the bar used to occupy */
   font-size: 12px;
   color: var(--slate);
 }
@@ -1502,19 +1486,27 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 .ab-summary::-webkit-details-marker { display: none; }
 .ab-summary:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
 
-/* The affordance. Small, at the foot of the card, and rotating rather than
-   swapping glyphs so the direction of travel is obvious. */
+/* The affordance, drawn as a pill rather than a caption: it is the only
+   thing on the card you can act on, and as grey small-caps it read as a
+   label about the card instead of a way into it. Sentence case on purpose —
+   every other mono label here is uppercase, so this one is set apart by not
+   being. The chevron rotates rather than swapping glyphs, so the direction
+   of travel is obvious. */
 .ab-more {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-top: 10px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--mute);
+  gap: 6px;
+  margin-top: 12px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--signal-wash);
+  border: 1px solid var(--signal);
+  color: var(--signal-deep);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
+.ab-summary:hover .ab-more { background: var(--signal); color: #fff; }
 .ab-more svg { transition: transform 0.16s; }
 details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 
