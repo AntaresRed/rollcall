@@ -65,8 +65,13 @@ From **Utils**, four more:
 - **Add to Google / Apple calendar** — downloads a `.ics` file of the
   student's whole term, with on-screen steps for importing it. It's a
   one-time snapshot, not a live sync — see §6.
-- **Student contacts** — the batch by name, registration number and phone,
-  searchable, with tap-to-call and WhatsApp links.
+- **Student contacts** — opens the institute's own student directory at
+  <https://student.iimcal.ac.in/jd/#/> in a new tab. It is a link, not a
+  screen: the app used to bundle its own copy of the batch's names, roll
+  numbers and phone numbers, which went stale on its own and shipped four
+  hundred people's numbers inside the JavaScript. The institute publishes and
+  maintains the real thing, so the app defers to it. If that address ever
+  changes, it is one constant at the top of `src/screens/Utils.jsx`.
 - **POR details** — positions of responsibility, drilled down through the
   student council, CDPO, cultural bodies and the sports council.
 

@@ -24,7 +24,6 @@ const Reschedule = lazy(() => import("./screens/Reschedule"));
 const Faculty = lazy(() => import("./screens/Faculty"));
 const CalendarExport = lazy(() => import("./screens/CalendarExport"));
 const ScheduleAdmin = lazy(() => import("./screens/ScheduleAdmin"));
-const StudentContacts = lazy(() => import("./screens/StudentContacts"));
 const PorDetails = lazy(() => import("./screens/PorDetails"));
 const Utils = lazy(() => import("./screens/Utils"));
 const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
@@ -38,7 +37,6 @@ const SUB_SCREEN_BACK = {
   breakdown: "Back to timetable",
   catchup: "Back to timetable",
   faculty: "Back to utils",
-  students: "Back to utils",
   por: "Back to utils",
   export: "Back to utils",
   admin: "Back to profile",
@@ -456,9 +454,6 @@ export default function App() {
         )}
         {tab === "utils" && subScreen === "faculty" && (
           <Faculty classes={classes} onBack={() => setSubScreen(null)} />
-        )}
-        {tab === "utils" && subScreen === "students" && (
-          <StudentContacts onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "por" && (
           <PorDetails onBack={() => setSubScreen(null)} />

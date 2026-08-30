@@ -117,11 +117,10 @@ src/
                       Profile, Reschedule, TermCalendar, CoursePicker,
                       AttendanceBreakdown,
                       Utils (the hub) and what it opens — Faculty,
-                      CalendarExport, StudentContacts, PorDetails —
+                      CalendarExport, PorDetails —
                       plus ScheduleAdmin, reached from Profile
   data/catalogue.json generated — do not edit by hand
   data/directory.json generated — do not edit by hand
-  data/students.json  generated — do not edit by hand
   data/por.json       generated — do not edit by hand
 
 public/               manifest, service worker, icons
@@ -132,7 +131,6 @@ scripts/
   build_catalogue.py  rebuilds the catalogue from the spreadsheet
   build_faculty.py    matches course instructors to directory emails
   build_directory.py  rebuilds src/data/directory.json from FacultyDirectory.tsv
-  build_students.py   rebuilds src/data/students.json from the contacts CSV
   build_por.py        rebuilds src/data/por.json from the POR workbook
   build_repair_sql.py emits the SQL that realigns saved class rows with a
                       corrected catalogue (see RUNBOOK 8e). Run automatically
@@ -168,20 +166,6 @@ python scripts/build_directory.py data/FacultyDirectory.tsv src/data/directory.j
 `build_faculty.py` is a separate step and answers a different question — which
 directory entry each course instructor is — so run it too if the course sheet
 changed, then rebuild the catalogue to attach the result.
-
-## When the student contact list changes
-
-The Student contacts screen reads `src/data/students.json`, built from the
-cohort's collected contact CSV (Name, RegistrationNumber, Phone):
-
-```powershell
-python scripts/build_students.py data/SplitContacts62.csv src/data/students.json
-```
-
-The script refuses to guess at a number it can't trust — anything that isn't
-ten digits starting 6-9 is left blank and reported, rather than published as
-fact. It also prints any registration number claimed by two people. Both are
-worth reading; both mean the source CSV needs a fix, not the JSON.
 
 ## When the POR contact sheet changes
 

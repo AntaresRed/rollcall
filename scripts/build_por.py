@@ -53,6 +53,32 @@ CORRECTIONS = [
      "one digit adrift from the roll"),
 ]
 
+# ------------------------------------------------------------------ additions
+#
+# People the workbook lists on one sheet who should also appear on another.
+# The Placement Representatives are on the Student Council in their own right,
+# but the council's own sheet does not carry them, so without this they show up
+# only under CDPO and someone reading the council list would conclude the post
+# is vacant.
+#
+# Name and number are copied from the source sheet rather than repeated here:
+# there is one place a rep's number is written down, so the two lists cannot
+# drift apart. Like CORRECTIONS, this is verified on every run — a name that
+# has left the source sheet, or that the target sheet has since started
+# carrying itself, fails the build rather than being silently skipped.
+#
+# Full names, deliberately: "Abhishek Kumar" is also a SIG head with a
+# different number, and picking the wrong one would be invisible.
+ADDITIONS = [
+    # (source sheet, name, target sheet, role to give them there)
+    ("Placement Representatives", "Hetav Hiten Shah", "Student Council", "Placement Representative"),
+    ("Placement Representatives", "Nikhil Yadav", "Student Council", "Placement Representative"),
+    ("Placement Representatives", "Naveen Yadav", "Student Council", "Placement Representative"),
+    ("Placement Representatives", "Thoutam Mahonnath", "Student Council", "Placement Representative"),
+    ("Placement Representatives", "Abhishek Kumar", "Student Council", "Placement Representative"),
+    ("Placement Representatives", "Amit Prasad", "Student Council", "Placement Representative"),
+]
+
 # ---------------------------------------------------------------- sheet shapes
 #
 # `group` is the column carrying a club/SIG/chapter name, filled only on the
@@ -180,6 +206,39 @@ def apply_corrections(by_sheet):
     return applied, stale
 
 
+def apply_additions(by_sheet):
+    """Copy the cross-listed people onto their second sheet.
+
+    Runs after the corrections, so a number repaired above is the one that gets
+    copied — not the raw cell it was repaired from.
+    """
+    applied, problems = [], []
+    for source, name, target, role in ADDITIONS:
+        matches = [r for r in by_sheet.get(source, [])
+                   if r["name"].strip().lower() == name.strip().lower()]
+        if len(matches) != 1:
+            problems.append(
+                f"{name!r}: expected exactly one on the {source} sheet, found {len(matches)}")
+            continue
+        if any(r["name"].strip().lower() == name.strip().lower()
+               and (r["role"] or "").strip().lower() == role.strip().lower()
+               for r in by_sheet.get(target, [])):
+            problems.append(
+                f"{name!r}: the {target} sheet now lists them as {role} itself — "
+                f"drop this entry from ADDITIONS")
+            continue
+        src = matches[0]
+        by_sheet[target].append({
+            "section": None,
+            "role": role,
+            "name": src["name"],
+            "phone": src["phone"],
+            "email": src["email"],
+        })
+        applied.append((source, name, target, role))
+    return applied, problems
+
+
 def sectioned(rows, kind=None, first_label=None):
     """Group flat rows into the sections the screen renders, order preserved.
 
@@ -213,6 +272,12 @@ def build(path):
         warnings += warn
 
     applied, stale = apply_corrections(by_sheet)
+
+    added, add_problems = apply_additions(by_sheet)
+    if add_problems:
+        raise SystemExit(
+            "ADDITIONS no longer describe the workbook:\n  "
+            + "\n  ".join(add_problems))
 
     # Reported only now: a number the corrections above have already repaired
     # is not something anyone needs to go and look at.
@@ -256,20 +321,25 @@ def build(path):
             "sections": sectioned(by_sheet["Sports Council"], first_label="Sports Council"),
         },
     }
-    return datasets, warnings, applied, stale
+    return datasets, warnings, applied, stale, added
 
 
 if __name__ == "__main__":
     src = sys.argv[1] if len(sys.argv) > 1 else "data/POR Contacts Sheet.xlsx"
     dest = sys.argv[2] if len(sys.argv) > 2 else "src/data/por.json"
 
-    datasets, warnings, applied, stale = build(src)
+    datasets, warnings, applied, stale, added = build(src)
 
     with open(dest, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(datasets, fh, indent=2, ensure_ascii=False)
 
     total = sum(len(p["people"]) for d in datasets.values() for p in d["sections"])
     print(f"{len(datasets)} lists, {total} people -> {dest}")
+
+    if added:
+        print(f"\n{len(added)} cross-listed onto a second sheet:")
+        for source, name, target, role in added:
+            print(f"   {name} — {source} -> {target} as {role}")
     for key, d in datasets.items():
         n = sum(len(s["people"]) for s in d["sections"])
         print(f"   {d['label']:<28} {n:>3} people in {len(d['sections'])} section(s)")

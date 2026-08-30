@@ -18,7 +18,6 @@ import TermCalendar from "../src/screens/TermCalendar";
 import Faculty from "../src/screens/Faculty";
 import CalendarExport from "../src/screens/CalendarExport";
 import ScheduleAdmin from "../src/screens/ScheduleAdmin";
-import StudentContacts from "../src/screens/StudentContacts";
 import PorDetails from "../src/screens/PorDetails";
 import Utils from "../src/screens/Utils";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
@@ -134,8 +133,6 @@ const cases = [
   ["CalendarExport / no courses", <CalendarExport key="cen" classes={[]} term={term} overrides={[]} onBack={noop} />],
   ["CalendarExport / no term", <CalendarExport key="cet" classes={classes} term={null} overrides={[]} onBack={noop} />],
   ["ScheduleAdmin", <ScheduleAdmin key="sa" onBack={noop} />],
-  ["StudentContacts", <StudentContacts key="sc" onBack={noop} />],
-  ["StudentContacts / no back button", <StudentContacts key="scn" />],
   ["PorDetails", <PorDetails key="por" onBack={noop} />],
   ["PorDetails / no back button", <PorDetails key="porn" />],
   ["Utils", <Utils key="u" onOpen={noop} />],

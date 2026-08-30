@@ -2,8 +2,9 @@
  * Formatting and links for an Indian mobile number.
  *
  * Its own module so both contact screens can use it without either one
- * dragging the other's data along: importing these from students.js would
- * have pulled four hundred students' numbers into the POR chunk, which is
+ * dragging the other's data along: importing these from the student
+ * directory that used to live here would have pulled four hundred numbers
+ * into the POR chunk, which is
  * lazily loaded precisely so that doesn't happen.
  *
  * Numbers are stored as ten bare digits everywhere. The country code belongs

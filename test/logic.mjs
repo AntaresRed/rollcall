@@ -8,9 +8,9 @@ import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
 import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
-import { searchStudents, studentCount, studentsMissingPhone, prettyPhone, telHref, whatsAppHref } from "../src/lib/students.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
+import porJson from "../src/data/por.json";
 
 let fail = 0;
 const check = (name, cond) => {
@@ -598,73 +598,39 @@ console.log("swapping the live schedule");
 }
 
 console.log("");
-console.log("student contacts");
+console.log("POR details");
 {
-  const all = searchStudents("");
-  check("an empty query returns the whole batch", all.length === studentCount);
-  survives("no argument", () => searchStudents());
-  survives("junk query", () => searchStudents("((("));
-  check("junk matches nobody", searchStudents("(((").length === 0);
+  // The six placement reps are listed twice on purpose — under CDPO, and
+  // again on the Student Council where they also sit. Two copies of a phone
+  // number is exactly the thing that drifts, so it is asserted rather than
+  // trusted: same name, same number, both places.
+  const groups = JSON.parse(JSON.stringify(porJson));
+  const people = (id) => groups[id].sections.flatMap((s) => s.people);
 
-  // Every entry has to be reachable, or somebody is simply missing from the
-  // list with nothing to show it.
-  check("everyone has a name", all.every((p) => p.name && p.name.trim().length > 0));
-  check("no name still carries its registration number",
-    all.every((p) => !/\d{3,4}\/\d{2}/.test(p.name)));
-  check("every phone on file is ten digits",
-    all.every((p) => p.phone === null || /^[6-9]\d{9}$/.test(p.phone)));
-  check("the roll is sorted by name",
-    all.every((p, i) => i === 0 || all[i - 1].name.toLowerCase() <= p.name.toLowerCase()));
+  const reps = people("placement-representatives");
+  const council = people("student-council");
+  const crossListed = council.filter((p) => p.role === "Placement Representative");
 
-  // Both source-data faults are now fixed at source: Excel had destroyed one
-  // number into scientific notation, and one registration number was claimed
-  // by two people. These assert the corrected state, so a regression in the
-  // CSV or the build script shows up here rather than in the app.
-  check("every student now has a usable number", studentsMissingPhone === 0);
-  check("the re-collected number is in place",
-    searchStudents("Raksha Agrawal")[0]?.phone === "9407459099");
-  check("no registration number is claimed twice", (() => {
-    const regs = searchStudents("").map((p) => p.reg).filter(Boolean);
-    return new Set(regs).size === regs.length;
-  })());
-
-  // Searching by the three things a person actually half-remembers.
-  check("finds by name", searchStudents("pranjal").some((p) => p.name === "Pranjal Chakraborty"));
-  check("name search ignores case", searchStudents("PRANJAL").length === searchStudents("pranjal").length);
-  check("finds by registration number", searchStudents("0446/62").length === 1);
-  check("finds a registration number typed without its slash",
-    searchStudents("044662").length === 1);
-  check("finds by a partial registration number", searchStudents("0446").length >= 1);
-  check("finds by phone number", searchStudents("9038112791").length === 1);
-  check("finds a phone typed with the spaces it is displayed with",
-    searchStudents("90381 12791").length === 1);
-
-  check("every token has to match", searchStudents("pranjal zzzznotathing").length === 0);
-  check("an unmatched query is empty, not everybody",
-    searchStudents("zzzznotathing").length === 0);
-
-  // The pair that used to share 0429/62 now resolve to one person each.
-  check("0429/62 is Khushpreet Singh alone", (() => {
-    const hits = searchStudents("0429/62");
-    return hits.length === 1 && hits[0].name === "Khushpreet Singh";
-  })());
-  check("0459/62 is Hetav Hiten Shah alone", (() => {
-    const hits = searchStudents("0459/62");
-    return hits.length === 1 && hits[0].name === "Hetav Hiten Shah";
-  })());
-
-  check("phone numbers display in 5+5 groups", prettyPhone("9038112791") === "90381 12791");
-  survives("formatting a missing number", () => prettyPhone(null));
-  check("a missing number formats to nothing", prettyPhone(null) === "");
-  // Both links need the country code the stored number never carries.
-  check("call links carry the country code", telHref("9038112791") === "tel:+919038112791");
-  check("whatsapp links carry it too", whatsAppHref("9038112791") === "https://wa.me/919038112791");
-  check("no link is offered for a missing number",
-    telHref(null) === null && whatsAppHref(null) === null);
+  check("the placement reps list is intact", reps.length === 12);
+  check("six of them are cross-listed on the Student Council",
+    crossListed.length === 6);
+  check("every cross-listed rep is a real placement rep",
+    crossListed.every((c) => reps.some((r) => r.name === c.name)));
+  check("and carries the same number in both places",
+    crossListed.every((c) => {
+      const match = reps.filter((r) => r.name === c.name);
+      return match.length === 1 && match[0].phone === c.phone;
+    }));
+  check("nobody is cross-listed twice",
+    new Set(crossListed.map((c) => c.name)).size === crossListed.length);
+  check("every cross-listed rep has a usable number",
+    crossListed.every((c) => /^[6-9]\d{9}$/.test(c.phone ?? "")));
+  // "Abhishek Kumar" is also a SIG head on a different number; the one on the
+  // council must be the placement rep's.
+  check("the right Abhishek Kumar was cross-listed",
+    crossListed.find((c) => c.name === "Abhishek Kumar")?.phone === "7605026267");
 }
 
-console.log("");
-console.log("POR details");
 {
   // The menu is the hierarchy the council describes, not the workbook's tabs.
   check("four options at the top", POR_MENU.length === 4);

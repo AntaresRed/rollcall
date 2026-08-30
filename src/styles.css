@@ -1564,6 +1564,10 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   gap: 12px;
   width: 100%;
   text-align: left;
+  /* One of these is an anchor out to the institute's directory. It should
+     look identical to the buttons beside it — the external-link icon is what
+     says it leaves the app, not a stray underline. */
+  text-decoration: none;
   padding: 14px;
   background: var(--card);
   border: 1px solid var(--rule);
@@ -1940,45 +1944,6 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   color: var(--ink);
 }
 
-
-/* ---------- student contacts ---------- */
-
-.stu-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--rule);
-  padding: 12px 0;
-}
-.stu-head {
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-  min-width: 0;
-  flex-wrap: wrap;
-}
-.stu-name {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-/* The registration number is an identifier, not prose — mono keeps the digits
-   aligned down the list so a half-remembered one can be scanned for. */
-.stu-reg {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--mute);
-  font-variant-numeric: tabular-nums;
-}
-
-.stu-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-}
 
 .contact-phone {
   display: inline-flex;
