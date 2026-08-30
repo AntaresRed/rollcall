@@ -574,6 +574,11 @@ export function unmarkedSessions(classes, attendance, term, now = new Date(), lo
  * not happen, so it is neither attended, missed, nor forgotten, and folding it
  * into any of the three would misstate all of them.
  *
+ * Each row also carries the sessions it was counted from, newest first, so the
+ * screen can show which day was which without recomputing the same walk. They
+ * are the evidence for the totals rather than a second query against them —
+ * the counts and the list can't disagree.
+ *
  * Without a term calendar the sessions cannot be enumerated — `inSession`
  * deliberately fails closed there — so `unmarked` and `expected` come back
  * null and the caller is expected to say so rather than print a zero it
@@ -594,6 +599,7 @@ export function attendanceBreakdown(
       cancelled: 0,
       unmarked: 0,
       expected: 0,
+      sessions: [],
     });
   }
   if (!rows.size) return [];
@@ -616,7 +622,7 @@ export function attendanceBreakdown(
     const today = isoDate(now);
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-    for (const { cls, date } of expectedSessions(
+    for (const { cls, date, movedFrom } of expectedSessions(
       classes, term, { from: term.term_start, to: today }, overrides,
     )) {
       // Today's classes join the count only once they have actually ended,
@@ -625,7 +631,17 @@ export function attendanceBreakdown(
       const row = rows.get(cls.subject);
       if (!row) continue;
       row.expected += 1;
-      bump(cls.subject, status.get(attendanceKey(cls.subject, date, cls.start_time)));
+      const mark = status.get(attendanceKey(cls.subject, date, cls.start_time)) ?? null;
+      row.sessions.push({
+        date,
+        start_time: hhmm(cls.start_time),
+        status: mark,
+        // Kept for the same reason CatchUp keeps it: a class pushed onto a
+        // date it already meets would otherwise be indistinguishable from
+        // the session that was always there.
+        movedFrom: movedFrom ?? null,
+      });
+      bump(cls.subject, mark);
     }
   } else {
     // No calendar: the marks are still true, the gap between them is not
@@ -634,13 +650,23 @@ export function attendanceBreakdown(
     for (const row of rows.values()) {
       row.unmarked = null;
       row.expected = null;
+      row.sessions = null;
     }
   }
 
   return [...rows.values()]
     .map((r) => {
       const marked = r.present + r.absent;
-      return { ...r, marked, pct: marked ? Math.round((r.present / marked) * 100) : null };
+      return {
+        ...r,
+        marked,
+        pct: marked ? Math.round((r.present / marked) * 100) : null,
+        // Newest first, as on the catch-up screen: the recent gap is the one
+        // still worth doing something about.
+        sessions: r.sessions && [...r.sessions].sort((a, b) =>
+          b.date.localeCompare(a.date) ||
+          toMinutes(b.start_time) - toMinutes(a.start_time)),
+      };
     })
     // Worst first, the same order Profile's budget list uses — a breakdown
     // that buries the course in trouble halfway down is a table, not a

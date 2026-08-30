@@ -52,7 +52,8 @@ it:
   only as the gap between the sessions the timetable says were held and the
   marks recorded against them. Cancelled sessions are reported alongside but
   kept out of the split, since they did not happen. Courses are listed worst
-  first.
+  first, and tapping one opens the dates behind its totals — which day was
+  attended, missed, cancelled or never marked, newest first.
 
 From **Utils**, four more:
 

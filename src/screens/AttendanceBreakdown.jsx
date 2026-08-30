@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { attendanceBreakdown } from "../lib/api";
+import { attendanceBreakdown, pretty, DAYS, weekdayOf } from "../lib/api";
 
 /**
  * Where every session of every course went: attended, missed, or never marked.
@@ -109,9 +109,21 @@ function TotalBar({ total }) {
   );
 }
 
+/**
+ * One course, opening onto the dates behind its totals.
+ *
+ * A `<details>` rather than a button and a piece of state, because that is
+ * exactly what this is: a disclosure, and the element already handles the
+ * keyboard, the ARIA and the open/closed semantics that hand-rolling it would
+ * have to reimplement and get subtly wrong. `<summary>` takes flow content,
+ * so the whole card — bar and legend included — is the hit target.
+ *
+ * Without a term calendar there are no sessions to list, so the card stays a
+ * plain div: a disclosure that opens onto nothing is worse than none.
+ */
 function CourseRow({ row: r }) {
-  return (
-    <div className="ab-card">
+  const summary = (
+    <>
       <div className="ab-head">
         <div className="ab-name">{r.subject}</div>
         {r.pct !== null && (
@@ -127,7 +139,64 @@ function CourseRow({ row: r }) {
 
       <SplitBar present={r.present} absent={r.absent} unmarked={r.unmarked} />
       <Legend present={r.present} absent={r.absent} unmarked={r.unmarked} />
-    </div>
+    </>
+  );
+
+  if (!r.sessions?.length) return <div className="ab-card">{summary}</div>;
+
+  return (
+    <details className="ab-card">
+      <summary className="ab-summary">
+        {summary}
+        <span className="ab-more">
+          <ChevronIcon />
+          Date by date
+        </span>
+      </summary>
+
+      <div className="ab-sessions">
+        {r.sessions.map((s) => (
+          <div
+            className="ab-session"
+            key={`${s.date}|${s.start_time}|${s.movedFrom ?? ""}`}
+          >
+            <span className="ab-when">
+              <b>{DAYS[weekdayOf(new Date(`${s.date}T00:00:00`)) - 1]}</b>
+              {" "}
+              {new Date(`${s.date}T00:00:00`).toLocaleDateString(undefined, {
+                day: "numeric", month: "short",
+              })}
+              {s.movedFrom && <span className="tag signal">moved</span>}
+            </span>
+            <span className="ab-at">{pretty(s.start_time).replace(" ", "")}</span>
+            <span className={`ab-status ${s.status ?? "unmarked"}`}>
+              {LABEL[s.status ?? "unmarked"]}
+            </span>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
+const LABEL = {
+  present: "Present",
+  absent: "Absent",
+  cancelled: "Cancelled",
+  unmarked: "Did not mark",
+};
+
+function ChevronIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path
+        d="M4.5 7 9 11.5 13.5 7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

@@ -1490,6 +1490,74 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   font-variant-numeric: tabular-nums;
 }
 
+/* The card is a <details>; the padding moves onto the parts so the open
+   panel can sit flush against the summary above it. */
+.ab-card { padding: 0; }
+.ab-summary {
+  padding: 14px;
+  cursor: pointer;
+  list-style: none;          /* Firefox's marker */
+  border-radius: var(--r);
+}
+.ab-summary::-webkit-details-marker { display: none; }
+.ab-summary:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
+
+/* The affordance. Small, at the foot of the card, and rotating rather than
+   swapping glyphs so the direction of travel is obvious. */
+.ab-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.ab-more svg { transition: transform 0.16s; }
+details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
+
+.ab-sessions {
+  border-top: 1px solid var(--rule);
+  padding: 4px 14px 12px;
+}
+.ab-session {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.ab-session:last-child { border-bottom: 0; }
+.ab-when { flex: 1; min-width: 0; color: var(--slate); }
+.ab-when b { color: var(--ink); font-weight: 600; }
+.ab-when .tag { margin-left: 6px; }
+.ab-at {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+/* The verdict, as a chip in the same three colours as the bar above it, so
+   a row and a segment are recognisably the same fact. */
+.ab-status {
+  flex: 0 0 auto;
+  min-width: 88px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+.ab-status.present { background: var(--present-wash); color: var(--present); }
+.ab-status.absent { background: var(--absent-wash); color: var(--absent); }
+.ab-status.cancelled { background: var(--warn-wash); color: var(--warn-ink); }
+.ab-status.unmarked { background: var(--paper); color: var(--mute); border: 1px solid var(--rule-strong); }
+
 .ab-foot {
   font-size: 12.5px;
   line-height: 1.5;

@@ -151,6 +151,30 @@ check("no term still counts the marks",
 check("no term reports unmarked as unknown, not zero",
   bdNoTerm.every(r => r.unmarked === null && r.expected === null));
 
+// The per-session list is the evidence for the counts, so it has to agree
+// with them rather than be a second walk that can drift.
+check("sessions are listed", Array.isArray(bdW.sessions) && bdW.sessions.length === 3);
+check("one session per counted meeting", bdW.sessions.length === bdW.expected);
+check("session statuses match the buckets",
+  bdW.sessions.filter(x => x.status === "present").length === bdW.present &&
+  bdW.sessions.filter(x => x.status === "absent").length === bdW.absent &&
+  bdW.sessions.filter(x => x.status === null).length === bdW.unmarked);
+check("an unmarked session is null, not undefined or a string",
+  bdW.sessions.some(x => x.status === null));
+check("sessions are newest first",
+  bdW.sessions.every((x, i, a) => i === 0 || a[i - 1].date >= x.date));
+check("every session carries a usable date and time",
+  bdW.sessions.every(x => /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x.date) &&
+    !Number.isNaN(toMinutes(x.start_time))));
+check("the cancelled session appears in the list as cancelled",
+  bdC.sessions.filter(x => x.status === "cancelled").length === 1);
+check("a moved session is flagged as moved",
+  attendanceBreakdown(cls, [], term, bdNow,
+    [{ class_id: "w", original_date: "2026-08-31", new_date: "2026-09-14", new_start: "10:15" }])
+    .find(r => r.subject === "W").sessions.every(x => x.date !== "2026-08-31"));
+check("no term means no session list to show",
+  bdNoTerm.every(r => r.sessions === null));
+
 console.log("\nkeys");
 check("attendanceKey normalises seconds",
   attendanceKey("X", "2026-09-10", "16:15:00") === attendanceKey("X", "2026-09-10", "16:15"));
