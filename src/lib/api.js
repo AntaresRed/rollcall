@@ -522,8 +522,22 @@ export function occurrencesOn(classes, term, date, overrides = []) {
     .sort((a, b) => toMinutes(hhmm(a.cls.start_time)) - toMinutes(hhmm(b.cls.start_time)));
 }
 
-/** Past sessions with no attendance mark, newest first. */
-export function unmarkedSessions(classes, attendance, term, now = new Date(), lookbackDays = 28, overrides = []) {
+/**
+ * Past sessions with no attendance mark, newest first.
+ *
+ * Scope is the term calendar: everything from the first day of term up to
+ * now. It used to be a rolling 28 days, which quietly made an unmarked class
+ * unfixable once it aged out — no other screen can write attendance for a
+ * past date, so a gap older than four weeks could never be closed. That was
+ * invisible until Attendance breakdown started reporting the whole term, at
+ * which point the app was showing people a problem and offering no button
+ * for it.
+ *
+ * `fallbackDays` only applies when there is no term calendar to scope by. It
+ * is not the normal path — a rolling window is a guess, and guessing is only
+ * better than nothing when nothing is the alternative.
+ */
+export function unmarkedSessions(classes, attendance, term, now = new Date(), fallbackDays = 28, overrides = []) {
   if (!classes.length) return [];
 
   const marked = new Set(
@@ -531,10 +545,9 @@ export function unmarkedSessions(classes, attendance, term, now = new Date(), lo
   );
 
   const to = isoDate(now);
-  const fromDate = new Date(now.getTime() - lookbackDays * DAY_MS);
-  const from = term?.term_start && term.term_start > isoDate(fromDate)
+  const from = term?.term_start
     ? term.term_start
-    : isoDate(fromDate);
+    : isoDate(new Date(now.getTime() - fallbackDays * DAY_MS));
 
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const today = isoDate(now);

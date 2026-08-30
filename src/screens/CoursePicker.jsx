@@ -171,8 +171,7 @@ export default function CoursePicker({ existing = [], onSaved, onDirtyChange }) 
         Pick your courses
       </h1>
       <p style={{ color: "var(--slate)", margin: "0 0 16px", fontSize: 14 }}>
-        {catalogue.term} · {catalogue.courses.length} courses. Days and times come
-        straight from the official grid, so there's nothing to type.
+        {catalogue.term} · {catalogue.courses.length} courses.
       </p>
 
       <input

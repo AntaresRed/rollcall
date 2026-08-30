@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal,
+  POR_MENU, nodeAt, trailOf, countUnder, searchPor,
 } from "../lib/por";
 import { prettyPhone, telHref, whatsAppHref } from "../lib/phone";
 
@@ -53,7 +53,7 @@ export default function PorDetails({ onBack }) {
 
       {leafId
         ? <ContactList datasetId={leafId} query={query} onQuery={setQuery} />
-        : <Menu items={level ?? POR_MENU} atRoot={path.length === 0} onPick={go} />}
+        : <Menu items={level ?? POR_MENU} onPick={go} />}
 
       <button
         className="btn ghost block"
@@ -66,14 +66,9 @@ export default function PorDetails({ onBack }) {
   );
 }
 
-function Menu({ items, atRoot, onPick }) {
+function Menu({ items, onPick }) {
   return (
     <>
-      {atRoot && (
-        <p className="screen-note">
-          Who holds which post across the batch — {porTotal} people in all.
-        </p>
-      )}
       <div className="por-menu">
         {items.map((item) => (
           <button className="por-item" key={item.id} onClick={() => onPick(item.id)}>

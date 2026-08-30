@@ -21,11 +21,6 @@ export default function Utils({ onOpen }) {
   return (
     <>
       <div className="eyebrow">Utils</div>
-      <p className="screen-note">
-        Directories and exports. Nothing here changes your timetable or your
-        attendance.
-      </p>
-
       <div className="util-menu">
         {ITEMS.map(([id, label, desc]) => (
           <button className="util-item" key={id} onClick={() => onOpen(id)}>

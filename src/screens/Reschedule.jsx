@@ -183,9 +183,8 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
     <>
       <div className="eyebrow">Reschedule</div>
       <p className="screen-note">
-        Moving a class changes that one meeting only — the rest of the term
-        carries on as published. Alerts follow the class to its new slot, and a
-        class whose date has already passed can still be moved.
+        Changes that one class only — the rest of the term carries on as
+        published.
       </p>
 
       {changed.length > 0 && (
@@ -251,8 +250,7 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
           {showPast && (
             <>
               <p className="screen-note" style={{ marginTop: 10 }}>
-                The last three weeks. Move one of these if it was held on a
-                different day from the published one.
+                The last three weeks.
               </p>
               {pastByDate.map(renderDay)}
             </>

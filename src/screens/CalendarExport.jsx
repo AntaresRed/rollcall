@@ -72,10 +72,6 @@ export default function CalendarExport({ classes, term, overrides = [], onBack }
         </div>
         <div className="export-detail">
           <div>{fmtDate(built.from)} — {fmtDate(built.to)}</div>
-          <div className="export-sub">
-            Break weeks and the mid-term gap are already left out, and any class
-            you've moved appears on the day you moved it to.
-          </div>
         </div>
       </div>
 
@@ -109,10 +105,8 @@ export default function CalendarExport({ classes, term, overrides = [], onBack }
       </ol>
 
       <p className="fineprint">
-        This is a snapshot, not a live subscription. If you reschedule a class
-        later, export again and import the same way — each class keeps the same
-        identity in the file, so the second import moves the event you already
-        have rather than adding a second copy of it.
+        A snapshot, not a live subscription. Re-export after a reschedule and
+        import again — it moves the event rather than duplicating it.
       </p>
 
       {onBack && (

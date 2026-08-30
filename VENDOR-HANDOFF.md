@@ -41,9 +41,11 @@ it:
   one that already happened (for entering a change after the fact).
 - **Term calendar** — term dates, the pre-mid/post-mid teaching windows, and
   break weeks (exams, placements, Puja vacation).
-- **Missed attendances** — sessions from the last 4 weeks that were never
-  marked, each with Present / Absent / Cancelled buttons, so a forgetful week
-  doesn't quietly wreck the percentage. The count appears both on the button
+- **Missed attendances** — every session this term that was never marked,
+  each with Present / Absent / Cancelled buttons, so a forgetful week doesn't
+  quietly wreck the percentage. Scoped by the term calendar rather than a
+  rolling window, because no other screen can write attendance for a past
+  date: anything that fell off this list could never be corrected. The count appears both on the button
   and as a badge on the tab itself, which is what actually prompts a student
   to open it.
 - **Attendance breakdown** — every course split into Present / Absent / Did

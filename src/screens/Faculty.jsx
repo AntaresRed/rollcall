@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { facultyDirectory, facultyCount } from "../lib/directory";
+import { facultyDirectory } from "../lib/directory";
 
 /**
  * The institute faculty directory — every name, room, extension, direct line
@@ -30,17 +30,12 @@ export default function Faculty({ classes = [], onBack }) {
   return (
     <>
       <div className="eyebrow">Faculty directory</div>
-      <p className="screen-note">
-        All {facultyCount} faculty on the institute directory. Search by name,
-        room, extension or email.
-      </p>
-
       <div className="dir-search">
         <SearchIcon />
         <input
           type="search"
           value={query}
-          placeholder="Search faculty…"
+          placeholder="Search name, room, extension, email"
           aria-label="Search the faculty directory"
           autoComplete="off"
           onChange={(e) => setQuery(e.target.value)}

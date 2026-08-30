@@ -91,6 +91,36 @@ survives("attendance with missing fields", () =>
 const um = unmarkedSessions(cls, [], term, new Date("2026-09-10T23:00:00"), 28, []);
 check("catch-up entries are occurrences", um.every(o => o.cls && o.date));
 
+// Scope is the term calendar, not a rolling window. On 20 Oct the 28-day
+// window would start 22 Sep, so everything in August is the part that used to
+// be silently unreachable — and unfixable, since nothing else in the app can
+// write attendance for a past date.
+const wholeTerm = unmarkedSessions(cls, [], term, new Date("2026-10-20T23:00:00"), 28, []);
+check("catch-up reaches back to the first day of term",
+  wholeTerm.some(o => o.date === "2026-08-24"));
+check("catch-up spans the whole term, not four weeks",
+  wholeTerm.filter(o => o.date < "2026-09-22").length === 6);
+check("catch-up still excludes the mid-term gap",
+  !wholeTerm.some(o => o.date === "2026-09-28"));
+check("catch-up still excludes break weeks",
+  !wholeTerm.some(o => o.date === "2026-10-19"));
+check("catch-up never reaches before the term began",
+  wholeTerm.every(o => o.date >= term.term_start));
+
+// A marked session stays out of the list however old it is.
+const oldMarked = unmarkedSessions(cls,
+  [{ subject: "W", class_date: "2026-08-24", start_time: "10:15", status: "present" }],
+  term, new Date("2026-10-20T23:00:00"), 28, []);
+check("an old session that was marked is not asked about again",
+  !oldMarked.some(o => o.date === "2026-08-24") &&
+  oldMarked.length === wholeTerm.length - 1);
+
+// Without a calendar there is no term to scope by, so the rolling window is
+// still the fallback — and it must stay bounded.
+const noTerm = unmarkedSessions(cls, [], null, new Date("2026-10-20T23:00:00"), 28, []);
+check("with no term the fallback window still applies",
+  noTerm.every(o => o.date >= "2026-09-22"));
+
 console.log("\nattendance breakdown");
 survives("empty", () => attendanceBreakdown([], [], term, new Date("2026-09-10")));
 survives("null term", () => attendanceBreakdown(cls, [], null, new Date("2026-09-10")));

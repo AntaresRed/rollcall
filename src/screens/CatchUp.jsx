@@ -51,7 +51,7 @@ export default function CatchUp({
       <>
         <div className="eyebrow">Catch up</div>
         <div className="empty">
-          Nothing outstanding — every class in the last four weeks is marked.
+          Nothing outstanding — every class this term is marked.
         </div>
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
@@ -76,9 +76,8 @@ export default function CatchUp({
     <>
       <div className="eyebrow">Catch up</div>
       <p style={{ color: "var(--slate)", fontSize: 14, margin: "0 0 14px" }}>
-        {pending.length} {pending.length === 1 ? "session" : "sessions"} from the last
-        four weeks with no mark. Unmarked classes count as neither attended nor
-        missed, so your budget is only as accurate as this list is empty.
+        {pending.length} {pending.length === 1 ? "session" : "sessions"} this term
+        with no mark.
       </p>
 
       {byDate.map(([date, items]) => (

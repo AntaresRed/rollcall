@@ -57,8 +57,7 @@ export default function AttendanceBreakdown({
     <>
       <div className="eyebrow">Attendance breakdown</div>
       <p className="screen-note">
-        Every session so far this term, by course. Classes still to come aren't
-        counted, and neither is today's until it has finished.
+        Every session so far this term, by course.
       </p>
 
       {!term && (
@@ -78,9 +77,7 @@ export default function AttendanceBreakdown({
       ))}
 
       <p className="ab-foot">
-        "Did not mark" is a gap in your own record, not an absence — the
-        institute's register is separate. Missed Attendances lets you fill
-        them in.
+        "Did not mark" is a gap in your record, not an absence.
       </p>
 
       {onBack && (

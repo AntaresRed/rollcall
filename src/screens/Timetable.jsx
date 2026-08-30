@@ -156,10 +156,6 @@ export default function Timetable({
         </div>
       </div>
 
-      <p className="tt-hint">
-        Weekly view — rescheduled sessions keep their original slot here.
-      </p>
-
       {/* Only what concerns this week's schedule: the two that change or
           explain it, then the two about what was recorded against it. The
           directories and the calendar export are reference material rather

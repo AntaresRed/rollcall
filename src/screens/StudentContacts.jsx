@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  searchStudents, studentCount, studentsMissingPhone,
+  searchStudents, studentsMissingPhone,
   prettyPhone, telHref, whatsAppHref,
 } from "../lib/students";
 
@@ -31,17 +31,12 @@ export default function StudentContacts({ onBack }) {
   return (
     <>
       <div className="eyebrow">Student contacts</div>
-      <p className="screen-note">
-        All {studentCount} students in the batch. Search by name, registration
-        number or phone.
-      </p>
-
       <div className="dir-search">
         <SearchIcon />
         <input
           type="search"
           value={query}
-          placeholder="Search students…"
+          placeholder="Search name, registration number, phone"
           aria-label="Search student contacts"
           autoComplete="off"
           onChange={(e) => { setQuery(e.target.value); setShowAll(false); }}

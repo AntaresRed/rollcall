@@ -90,10 +90,6 @@ export default function TermCalendar({ term, now, onBack }) {
         );
       })}
 
-      <p style={{ fontSize: 12.5, color: "var(--mute)", marginTop: 16 }}>
-        Fixed-date courses publish their own session list and are unaffected by
-        these windows — their dates already work around them.
-      </p>
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>

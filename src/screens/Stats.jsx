@@ -107,9 +107,8 @@ export default function Stats({ classes, attendance, onToggleMute }) {
       })}
 
       <p style={{ fontSize: 12.5, color: "var(--mute)", marginTop: 14 }}>
-        Skips are counted against the classes you've marked absent. Cancelled
-        classes don't count. This is your own record — the institute keeps its
-        own, and theirs is the one that decides.
+        This is your own record. The institute keeps its own, and theirs is
+        the one that decides.
       </p>
     </>
   );

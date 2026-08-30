@@ -946,16 +946,6 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 .tt-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
 .tt-tags .tag { font-size: 9px; padding: 1px 4px; }
 
-.tt-hint {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--mute);
-  margin: 8px 0 0;
-  text-align: right;
-}
-
 /* ---------- term calendar ---------- */
 
 .cal-row {
@@ -1804,14 +1794,6 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   font-size: 12.5px;
   color: var(--ink);
 }
-.export-sub {
-  margin-top: 4px;
-  font-family: var(--sans);
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--slate);
-}
-
 /* Numbered because these are steps taken in order in another app, where
    getting the sequence wrong means starting again. */
 .steps {
