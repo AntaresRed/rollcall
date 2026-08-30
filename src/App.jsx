@@ -13,7 +13,7 @@ import {
 
 import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
-import { TodayIcon, TimetableIcon, CatchUpIcon, UtilsIcon, ProfileIcon } from "./screens/TabIcons";
+import { TodayIcon, TimetableIcon, UtilsIcon, ProfileIcon } from "./screens/TabIcons";
 const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 import Today from "./screens/Today";
 const Timetable = lazy(() => import("./screens/Timetable"));
@@ -27,6 +27,7 @@ const ScheduleAdmin = lazy(() => import("./screens/ScheduleAdmin"));
 const StudentContacts = lazy(() => import("./screens/StudentContacts"));
 const PorDetails = lazy(() => import("./screens/PorDetails"));
 const Utils = lazy(() => import("./screens/Utils"));
+const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -34,6 +35,8 @@ const Utils = lazy(() => import("./screens/Utils"));
 const SUB_SCREEN_BACK = {
   calendar: "Back to timetable",
   reschedule: "Back to timetable",
+  breakdown: "Back to timetable",
+  catchup: "Back to timetable",
   faculty: "Back to utils",
   students: "Back to utils",
   por: "Back to utils",
@@ -44,7 +47,6 @@ const SUB_SCREEN_BACK = {
 const TABS = [
   ["today", "Today's classes", TodayIcon],
   ["timetable", "Week's Timetable", TimetableIcon],
-  ["catchup", "Missed Attendances", CatchUpIcon],
   ["utils", "Utils", UtilsIcon],
   ["profile", "Profile", ProfileIcon],
 ];
@@ -428,6 +430,27 @@ export default function App() {
             onBack={() => setSubScreen(null)}
           />
         )}
+        {tab === "timetable" && subScreen === "catchup" && (
+          <CatchUp
+            classes={classes}
+            attendance={attendance}
+            term={term}
+            overrides={overrides}
+            now={now}
+            onMark={mark}
+            onBack={() => setSubScreen(null)}
+          />
+        )}
+        {tab === "timetable" && subScreen === "breakdown" && (
+          <AttendanceBreakdown
+            classes={classes}
+            attendance={attendance}
+            term={term}
+            now={now}
+            overrides={overrides}
+            onBack={() => setSubScreen(null)}
+          />
+        )}
         {tab === "profile" && subScreen === "admin" && isAdmin && (
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
         )}
@@ -457,16 +480,9 @@ export default function App() {
             overrides={overrides}
             onShowCalendar={() => setSubScreen("calendar")}
             onReschedule={() => setSubScreen("reschedule")}
-          />
-        )}
-        {tab === "catchup" && (
-          <CatchUp
-            classes={classes}
-            attendance={attendance}
-            term={term}
-            overrides={overrides}
-            now={now}
-            onMark={mark}
+            onShowBreakdown={() => setSubScreen("breakdown")}
+            onShowCatchUp={() => setSubScreen("catchup")}
+            pendingCount={pendingCount}
           />
         )}
         {tab === "profile" && !subScreen && (
@@ -495,7 +511,7 @@ export default function App() {
           >
             <span className="tab-icon">
               <Icon />
-              {key === "catchup" && pendingCount > 0 && (
+              {key === "timetable" && pendingCount > 0 && (
                 <span className="tab-badge">{pendingCount > 9 ? "9+" : pendingCount}</span>
               )}
             </span>

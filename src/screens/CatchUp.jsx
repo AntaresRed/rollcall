@@ -7,8 +7,16 @@ import { unmarkedSessions, pretty, DAY_LONG, weekdayOf } from "../lib/api";
  * Without this the attendance number quietly rots: forget one day and it's
  * unrecoverable, so after a few weeks the percentage reflects diligence at
  * tapping buttons rather than actual attendance.
+ *
+ * Reached from the timetable rather than from a tab of its own. What it lists
+ * is a property of the week that has just gone, so it sits with the other
+ * screens about the schedule; the count that used to justify the tab now
+ * rides on the timetable's own badge, which is what actually gets a student
+ * to open it.
  */
-export default function CatchUp({ classes, attendance, term, overrides = [], now, onMark }) {
+export default function CatchUp({
+  classes, attendance, term, overrides = [], now, onMark, onBack,
+}) {
   const pending = useMemo(
     () => unmarkedSessions(classes, attendance, term, now, 28, overrides),
     [classes, attendance, term, now, overrides],
@@ -29,6 +37,11 @@ export default function CatchUp({ classes, attendance, term, overrides = [], now
       <>
         <div className="eyebrow">Catch up</div>
         <div className="empty">Pick your courses first.</div>
+      {onBack && (
+        <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
+          Back to timetable
+        </button>
+      )}
       </>
     );
   }
@@ -40,6 +53,11 @@ export default function CatchUp({ classes, attendance, term, overrides = [], now
         <div className="empty">
           Nothing outstanding — every class in the last four weeks is marked.
         </div>
+      {onBack && (
+        <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
+          Back to timetable
+        </button>
+      )}
       </>
     );
   }
@@ -99,6 +117,11 @@ export default function CatchUp({ classes, attendance, term, overrides = [], now
           ))}
         </div>
       ))}
+      {onBack && (
+        <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
+          Back to timetable
+        </button>
+      )}
     </>
   );
 }

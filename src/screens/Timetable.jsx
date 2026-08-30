@@ -14,6 +14,7 @@ import {
  */
 export default function Timetable({
   classes, now, term, overrides = [], onShowCalendar, onReschedule,
+  onShowBreakdown, onShowCatchUp, pendingCount = 0,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -159,10 +160,11 @@ export default function Timetable({
         Weekly view — rescheduled sessions keep their original slot here.
       </p>
 
-      {/* Only what concerns this week's schedule. The directories and the
-          calendar export are reference material rather than changes to the
-          week, so they live under Utils; choosing courses is an account-level
-          decision and lives on Profile. */}
+      {/* Only what concerns this week's schedule: the two that change or
+          explain it, then the two about what was recorded against it. The
+          directories and the calendar export are reference material rather
+          than the week itself, so they live under Utils; choosing courses is
+          an account-level decision and lives on Profile. */}
       <div className="tt-actions">
         {onReschedule && (
           <button className="btn ghost" onClick={onReschedule}>
@@ -175,6 +177,19 @@ export default function Timetable({
         {onShowCalendar && (
           <button className="btn ghost" onClick={onShowCalendar}>
             Term calendar
+          </button>
+        )}
+        {onShowBreakdown && (
+          <button className="btn ghost" onClick={onShowBreakdown}>
+            Attendance breakdown
+          </button>
+        )}
+        {onShowCatchUp && (
+          <button className="btn ghost" onClick={onShowCatchUp}>
+            Missed attendances
+            {pendingCount > 0 && (
+              <span className="tag signal" style={{ marginLeft: 6 }}>{pendingCount}</span>
+            )}
           </button>
         )}
       </div>

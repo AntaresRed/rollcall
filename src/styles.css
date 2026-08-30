@@ -502,9 +502,7 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 }
 
 /* Icon over label. Names of this length are unreadable as text alone on a
-   phone, so the icon carries recognition and the label confirms it. Five
-   tabs leave roughly 70px each on a small phone, which the two-line clamp
-   below is what makes survivable. */
+   phone, so the icon carries recognition and the label confirms it. */
 .tab {
   flex: 1 1 0;
   min-width: 0;
@@ -533,8 +531,9 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   text-transform: uppercase;
   line-height: 1.25;
   text-align: center;
-  /* Two lines at most — "Missed Attendances" needs them; a third would
-     start pushing the bar taller than the content deserves. */
+  /* Two lines at most — "Week's Timetable" and "Today's classes" both wrap
+     on a narrow phone; a third line would start pushing the bar taller than
+     the content deserves. */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1379,9 +1378,124 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   gap: 8px;
   margin-top: 16px;
 }
-/* Two buttons side by side. The grid rather than a flex row so they stay
-   equal width whatever their labels say. */
+/* A two-column grid rather than a flex row, so the buttons stay equal width
+   whatever their labels say. An odd one out spans the pair instead of
+   leaving a gap beside it. */
 .tt-actions .btn { width: 100%; }
+.tt-actions .btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+
+/* ---------- attendance breakdown ---------- */
+
+/* Three buckets as one bar. Green and red already mean attended and missed
+   everywhere else in the app, so the third has to be neither: grey reads as
+   "no record", which is what it is — a gap in the student's own marking, not
+   a verdict against them. */
+.ab-total {
+  background: var(--board);
+  color: #fff;
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.ab-total-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ab-total-count {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: #A8B0BA;
+  font-variant-numeric: tabular-nums;
+}
+.ab-total .ab-legend { color: #C6CCD3; }
+.ab-total .ab-bar { background: #333A44; }
+
+.ab-card {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.ab-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ab-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  min-width: 0;
+}
+.ab-pct {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--present);
+}
+.ab-pct.low { color: var(--absent); }
+.ab-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--mute);
+  margin-top: 3px;
+}
+
+.ab-bar {
+  display: flex;
+  height: 9px;
+  margin: 11px 0 9px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--rule);
+}
+/* A course with nothing behind it yet still draws the track, so the cards
+   keep a common baseline rather than one silently collapsing. */
+.ab-bar.empty { background: var(--rule); }
+.ab-seg { display: block; height: 100%; }
+.ab-seg.present { background: var(--present); }
+.ab-seg.absent { background: var(--absent); }
+.ab-seg.unmarked { background: var(--rule-strong); }
+
+.ab-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12px;
+  color: var(--slate);
+}
+.ab-key { display: inline-flex; align-items: center; gap: 5px; }
+.ab-key i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.ab-key.present i { background: var(--present); }
+.ab-key.absent i { background: var(--absent); }
+.ab-key.unmarked i { background: var(--rule-strong); }
+.ab-key b {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ab-foot {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+  margin-top: 14px;
+}
 
 
 /* ---------- utils hub ---------- */

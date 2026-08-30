@@ -21,6 +21,7 @@ import ScheduleAdmin from "../src/screens/ScheduleAdmin";
 import StudentContacts from "../src/screens/StudentContacts";
 import PorDetails from "../src/screens/PorDetails";
 import Utils from "../src/screens/Utils";
+import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
 import CoursePicker from "../src/screens/CoursePicker";
 import SignIn from "../src/screens/SignIn";
 import Splash from "../src/screens/Splash";
@@ -82,10 +83,22 @@ const cases = [
   ["Today", <Today key="t" occurrences={occ} attendance={attendance} now={now} onMark={noop} />],
   ["Today / empty", <Today key="te" occurrences={[]} attendance={[]} now={now} onMark={noop} />],
   ["Timetable", <Timetable key="tt" classes={classes} now={now} term={term} overrides={overrides} onShowCalendar={noop} onReschedule={noop} />],
+  ["Timetable / all four actions", <Timetable key="tta" classes={classes} now={now} term={term}
+      overrides={overrides} onShowCalendar={noop} onReschedule={noop} onShowBreakdown={noop}
+      onShowCatchUp={noop} pendingCount={3} />],
   ["Timetable / empty", <Timetable key="tte" classes={[]} now={now} term={term} />],
   ["Timetable / during a break", <Timetable key="ttb" classes={classes} now={new Date("2026-10-21T10:00:00")} term={term} overrides={[]} />],
   ["CatchUp", <CatchUp key="cu" classes={classes} attendance={attendance} term={term} overrides={overrides} now={now} onMark={noop} />],
   ["CatchUp / no classes", <CatchUp key="cue" classes={[]} attendance={[]} term={term} now={now} onMark={noop} />],
+  // All three of its return paths render the back button now that it is a
+  // sub-screen; the empty ones are the easy ones to forget.
+  ["CatchUp / with a way back", <CatchUp key="cub" classes={classes} attendance={attendance}
+      term={term} overrides={overrides} now={now} onMark={noop} onBack={noop} />],
+  ["CatchUp / nothing outstanding", <CatchUp key="cun" classes={classes}
+      attendance={occurrencesOn(classes, term, isoDate(now), overrides).map(({ cls, date }) => ({
+        subject: cls.subject, class_date: date, start_time: cls.start_time, status: "present",
+      }))} term={term} overrides={overrides} now={new Date("2026-08-24T09:00:00")}
+      onMark={noop} onBack={noop} />],
   ["Stats", <Stats key="st" classes={classes} attendance={attendance} onToggleMute={noop} />],
   ["Stats / nothing marked", <Stats key="ste" classes={classes} attendance={[]} onToggleMute={noop} />],
   ["Stats / over budget", <Stats key="sto" classes={classes} attendance={
@@ -126,6 +139,16 @@ const cases = [
   ["PorDetails", <PorDetails key="por" onBack={noop} />],
   ["PorDetails / no back button", <PorDetails key="porn" />],
   ["Utils", <Utils key="u" onOpen={noop} />],
+  ["AttendanceBreakdown", <AttendanceBreakdown key="ab" classes={classes} attendance={attendance}
+      term={term} now={now} overrides={overrides} onBack={noop} />],
+  ["AttendanceBreakdown / no courses", <AttendanceBreakdown key="abe" classes={[]} attendance={[]}
+      term={term} now={now} overrides={[]} onBack={noop} />],
+  // No calendar means the sessions can't be enumerated, so the third bucket
+  // is unknowable rather than zero — the screen has to say so, not print 0.
+  ["AttendanceBreakdown / no term", <AttendanceBreakdown key="abt" classes={classes} attendance={attendance}
+      term={null} now={now} overrides={[]} onBack={noop} />],
+  ["AttendanceBreakdown / nothing marked yet", <AttendanceBreakdown key="abn" classes={classes}
+      attendance={[]} term={term} now={now} overrides={overrides} onBack={noop} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
   ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],

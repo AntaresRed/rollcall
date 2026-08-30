@@ -552,6 +552,104 @@ export function unmarkedSessions(classes, attendance, term, now = new Date(), lo
     );
 }
 
+/**
+ * Per-course Present / Absent / Did not mark, over the term so far.
+ *
+ * Derived from the sessions rather than from the attendance table, which is
+ * the only direction that can answer the third bucket at all: an unmarked
+ * class leaves no row behind, so "did not mark" only exists as the gap
+ * between what the timetable says should have happened and what was recorded
+ * against it. `courseStats` counts rows and therefore cannot see it.
+ *
+ * Working from the session list also settles a subtler case correctly. A mark
+ * left on a session that was later moved or cancelled no longer belongs to
+ * any real meeting; joining marks onto sessions drops it, where counting rows
+ * would keep crediting it.
+ *
+ * Only finished sessions count. A class later today is not yet unmarked, and
+ * showing it as a gap would have every student open the app to a red bar each
+ * morning.
+ *
+ * `cancelled` is reported but kept out of the three-way split: the session did
+ * not happen, so it is neither attended, missed, nor forgotten, and folding it
+ * into any of the three would misstate all of them.
+ *
+ * Without a term calendar the sessions cannot be enumerated — `inSession`
+ * deliberately fails closed there — so `unmarked` and `expected` come back
+ * null and the caller is expected to say so rather than print a zero it
+ * cannot stand behind.
+ */
+export function attendanceBreakdown(
+  classes, attendance, term, now = new Date(), overrides = [],
+) {
+  const rows = new Map();
+  for (const c of classes) {
+    if (rows.has(c.subject)) continue;
+    rows.set(c.subject, {
+      subject: c.subject,
+      course_code: c.course_code ?? null,
+      credits: Number(c.credits ?? 3),
+      present: 0,
+      absent: 0,
+      cancelled: 0,
+      unmarked: 0,
+      expected: 0,
+    });
+  }
+  if (!rows.size) return [];
+
+  const bump = (subject, status) => {
+    const row = rows.get(subject);
+    if (!row) return;
+    if (status === "present") row.present += 1;
+    else if (status === "absent") row.absent += 1;
+    else if (status === "cancelled") row.cancelled += 1;
+    else row.unmarked += 1;
+  };
+
+  if (term?.term_start) {
+    const status = new Map(
+      attendance.map((a) => [
+        attendanceKey(a.subject, a.class_date, a.start_time), a.status,
+      ]),
+    );
+    const today = isoDate(now);
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    for (const { cls, date } of expectedSessions(
+      classes, term, { from: term.term_start, to: today }, overrides,
+    )) {
+      // Today's classes join the count only once they have actually ended,
+      // matching how unmarkedSessions decides the same question.
+      if (date === today && toMinutes(hhmm(cls.end_time)) > nowMinutes) continue;
+      const row = rows.get(cls.subject);
+      if (!row) continue;
+      row.expected += 1;
+      bump(cls.subject, status.get(attendanceKey(cls.subject, date, cls.start_time)));
+    }
+  } else {
+    // No calendar: the marks are still true, the gap between them is not
+    // knowable. Count what was recorded and admit to the rest.
+    for (const a of attendance) bump(a.subject, a.status);
+    for (const row of rows.values()) {
+      row.unmarked = null;
+      row.expected = null;
+    }
+  }
+
+  return [...rows.values()]
+    .map((r) => {
+      const marked = r.present + r.absent;
+      return { ...r, marked, pct: marked ? Math.round((r.present / marked) * 100) : null };
+    })
+    // Worst first, the same order Profile's budget list uses — a breakdown
+    // that buries the course in trouble halfway down is a table, not a
+    // warning. Courses with nothing marked yet sort last: they are unstarted,
+    // not failing. Alphabetical within a tie, so the order is stable.
+    .sort((a, b) =>
+      (a.pct ?? 101) - (b.pct ?? 101) || a.subject.localeCompare(b.subject));
+}
+
 export async function markAttendance(cls, date, status) {
   const { data: { user } } = await supabase.auth.getUser();
   const { data, error } = await supabase

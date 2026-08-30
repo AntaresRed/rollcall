@@ -39,16 +39,6 @@ export function TimetableIcon() {
   );
 }
 
-/** Something left undone. */
-export function CatchUpIcon() {
-  return (
-    <svg {...base}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7.5v5l3 2" />
-    </svg>
-  );
-}
-
 /** A drawer of reference material — the directories and the export. */
 export function UtilsIcon() {
   return (

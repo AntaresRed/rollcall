@@ -115,6 +115,7 @@ src/
     push.js           subscription, permissions, test notification
   screens/            Splash, SignIn, Today, Timetable, CatchUp, Stats,
                       Profile, Reschedule, TermCalendar, CoursePicker,
+                      AttendanceBreakdown,
                       Utils (the hub) and what it opens — Faculty,
                       CalendarExport, StudentContacts, PorDetails —
                       plus ScheduleAdmin, reached from Profile

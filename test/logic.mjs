@@ -2,7 +2,7 @@
 import {
   toMinutes, hhmm, pretty, inSession, breakOn, skipBudget, courseStats,
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
-  catalogueDrift, currentSlotOf,
+  catalogueDrift, currentSlotOf, attendanceBreakdown,
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
@@ -90,6 +90,66 @@ survives("attendance with missing fields", () =>
   unmarkedSessions(cls, [{ subject: null, class_date: null, start_time: null }], term, new Date("2026-09-10")));
 const um = unmarkedSessions(cls, [], term, new Date("2026-09-10T23:00:00"), 28, []);
 check("catch-up entries are occurrences", um.every(o => o.cls && o.date));
+
+console.log("\nattendance breakdown");
+survives("empty", () => attendanceBreakdown([], [], term, new Date("2026-09-10")));
+survives("null term", () => attendanceBreakdown(cls, [], null, new Date("2026-09-10")));
+survives("attendance with missing fields", () =>
+  attendanceBreakdown(cls, [{ subject: null, class_date: null, start_time: null }],
+    term, new Date("2026-09-10")));
+
+// Mondays from term_start to 2026-09-10: Aug 24/31, Sep 7 -> three "W"
+// sessions. "D" is a fixed-date course on Sep 10 at 16:15, and the clock
+// below is 23:00, so it has finished and counts too.
+const bdNow = new Date("2026-09-10T23:00:00");
+const bd = attendanceBreakdown(cls, [
+  { subject: "W", class_date: "2026-08-24", start_time: "10:15", status: "present" },
+  { subject: "W", class_date: "2026-08-31", start_time: "10:15", status: "absent" },
+  { subject: "D", class_date: "2026-09-10", start_time: "16:15", status: "present" },
+], term, bdNow, []);
+const bdW = bd.find(r => r.subject === "W");
+const bdD = bd.find(r => r.subject === "D");
+check("every chosen course appears", bd.length === 2);
+check("present counted", bdW.present === 1);
+check("absent counted", bdW.absent === 1);
+check("the unmarked session is the remainder", bdW.unmarked === 1);
+check("buckets sum to the sessions held",
+  bdW.present + bdW.absent + bdW.unmarked === bdW.expected);
+check("percentage is of what was marked", bdW.pct === 50);
+check("fixed-date course counted once", bdD.expected === 1 && bdD.present === 1);
+check("worst first", bd[0].subject === "W");
+
+// A class still to come today must not be reported as unmarked - at 09:00 the
+// 10:15 Monday session has not happened yet.
+const bdEarly = attendanceBreakdown(cls, [], term, new Date("2026-09-07T09:00:00"), []);
+check("today's later class is not yet unmarked",
+  bdEarly.find(r => r.subject === "W").expected === 2);
+
+// A mark left behind on a session that was moved away belongs to no meeting.
+const bdMoved = attendanceBreakdown(cls, [
+  { subject: "W", class_date: "2026-08-31", start_time: "10:15", status: "present" },
+], term, bdNow,
+  [{ class_id: "w", original_date: "2026-08-31", new_date: "2026-09-14", new_start: "10:15" }]);
+check("a mark on a vacated date is not counted",
+  bdMoved.find(r => r.subject === "W").present === 0);
+
+// Cancelled is reported, but stays out of the three-way split.
+const bdCancelled = attendanceBreakdown(cls, [
+  { subject: "W", class_date: "2026-08-24", start_time: "10:15", status: "cancelled" },
+], term, bdNow, []);
+const bdC = bdCancelled.find(r => r.subject === "W");
+check("cancelled is reported", bdC.cancelled === 1);
+check("cancelled is not an absence", bdC.absent === 0);
+check("cancelled is not an unmarked session", bdC.unmarked === 2);
+
+// Without a calendar the gap is unknowable, and must not be printed as zero.
+const bdNoTerm = attendanceBreakdown(cls, [
+  { subject: "W", class_date: "2026-08-24", start_time: "10:15", status: "present" },
+], null, bdNow, []);
+check("no term still counts the marks",
+  bdNoTerm.find(r => r.subject === "W").present === 1);
+check("no term reports unmarked as unknown, not zero",
+  bdNoTerm.every(r => r.unmarked === null && r.expected === null));
 
 console.log("\nkeys");
 check("attendanceKey normalises seconds",

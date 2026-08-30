@@ -24,23 +24,35 @@ it cannot be bypassed by calling the API directly.
 
 ## 2. What a student sees
 
-Five tabs, always visible at the bottom of the screen:
+Four tabs, always visible at the bottom of the screen:
 
 | Tab | What it does |
 | --- | --- |
 | **Today's classes** | Today's sessions in order, with Present / Absent / Cancelled buttons and a live marker on whichever class is happening right now. |
-| **Week's Timetable** | The whole week as a grid — time down the side, days across. On a laptop-width screen every day fits side by side; on a phone it scrolls sideways with the time column pinned. |
-| **Missed Attendances** | Sessions from the last 4 weeks that were never marked, so a forgetful week doesn't quietly wreck the attendance percentage. |
+| **Week's Timetable** | The whole week as a grid — time down the side, days across. On a laptop-width screen every day fits side by side; on a phone it scrolls sideways with the time column pinned. Carries a badge when sessions are waiting to be marked. |
 | **Utils** | Reference material — the three directories and the calendar export. Nothing here changes a timetable or an attendance record. |
 | **Profile** | Account info, a per-course "skips left" budget, changing picked courses, sign out. The admin-only **Schedule admin** screen (§4a) opens from here too. |
 
-From **Week's Timetable**, two more screens open — the two that change or
-explain the week in front of you:
+From **Week's Timetable**, four more screens open — the ones that change or
+explain the week in front of you, and the two about what was recorded against
+it:
 
 - **Reschedule** — move or cancel a single occurrence of a class, including
   one that already happened (for entering a change after the fact).
 - **Term calendar** — term dates, the pre-mid/post-mid teaching windows, and
   break weeks (exams, placements, Puja vacation).
+- **Missed attendances** — sessions from the last 4 weeks that were never
+  marked, each with Present / Absent / Cancelled buttons, so a forgetful week
+  doesn't quietly wreck the percentage. The count appears both on the button
+  and as a badge on the tab itself, which is what actually prompts a student
+  to open it.
+- **Attendance breakdown** — every course split into Present / Absent / Did
+  not mark, over the term so far. The third figure is the one no other screen
+  can show: an unmarked class writes nothing to the database, so it exists
+  only as the gap between the sessions the timetable says were held and the
+  marks recorded against them. Cancelled sessions are reported alongside but
+  kept out of the split, since they did not happen. Courses are listed worst
+  first.
 
 From **Utils**, four more:
 
