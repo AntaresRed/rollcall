@@ -372,7 +372,15 @@ check("every noted venue resolves", NOTED_VENUES.every((v) => venueNote(v)));
 check("punctuation and case don't matter",
   venueNote("l4") === venueNote("L-4") &&
   venueNote("AMPHI EAST 150") === venueNote("Amphi (East-150)"));
-check("similar room numbers stay distinct", venueNote("L-51") === null && venueNote("L-4") !== null);
+check("similar room numbers stay distinct",
+  venueNote("L-4") !== venueNote("L-51") && venueNote("L-5") === null);
+// Deliberately shared — the two rooms are the same climb. Asserted so that
+// editing one of them later can't silently leave the pair disagreeing.
+check("L-51 and L-52 share their directions",
+  venueNote("L-51") !== null && venueNote("L-51") === venueNote("L-52"));
+check("both amphis are noted, and separately",
+  venueNote("Amphi (West-100)") !== null &&
+  venueNote("Amphi (West-100)") !== venueNote("Amphi (East-150)"));
 // A note pointing at a room no course meets in is a note nobody will ever
 // see — most likely the catalogue renamed the venue underneath it.
 {

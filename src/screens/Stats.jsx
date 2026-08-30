@@ -3,9 +3,16 @@ import { courseStats } from "../lib/api";
 import VenueChip from "./VenueChip";
 
 /**
- * "Prof. X · x@iimcal.ac.in" for the course coordinator, plus any other
- * listed instructor by name (visiting faculty rarely have an institute
- * email, so that's shown as a role tag rather than a broken mailto).
+ * The course coordinator first, then any other listed instructor, by name.
+ *
+ * Each name used to carry its email. That was the longest thing on the card
+ * and the Faculty directory already holds the same addresses — searchable,
+ * beside the room and extension — so this line names who teaches the course
+ * and the directory answers how to reach them.
+ *
+ * The role suffix went with the email rather than staying behind: it only
+ * ever appeared on instructors who had no address to show, so keeping it
+ * would make two names differ on screen because of a field that isn't on it.
  *
  * Returns null when there's nothing to show, which is the caller's signal
  * to fall back to the credit/class/percent line instead of leaving the
@@ -15,13 +22,8 @@ function formatInstructors(list) {
   if (!list || list.length === 0) return null;
   const cc = list.find((i) => i.role === "CC");
   const ordered = cc ? [cc, ...list.filter((i) => i !== cc)] : list;
-  return ordered
-    .map((i) =>
-      i.email
-        ? `${i.name} · ${i.email}`
-        : `${i.name}${i.role ? ` (${i.role})` : ""}`,
-    )
-    .join("  ·  ");
+  const names = ordered.map((i) => i.name).filter(Boolean);
+  return names.length ? names.join("  ·  ") : null;
 }
 
 /**
