@@ -275,7 +275,8 @@ export const attendanceKey = (subject, date, startTime) =>
  *   3 credits  -> 20 classes at 75% -> attend 15, may miss 5
  *   1.5 credits-> 10 classes at 80% -> attend  8, may miss 2
  *
- * Cancelled sessions are not absences, so they never eat into the budget.
+ * Only what the student marked counts: a session with no mark is outside the
+ * percentage entirely, neither attended nor missed.
  */
 export function skipBudget({ total_classes = 20, min_pct = 75 } = {}) {
   const total = Number(total_classes) || 0;
@@ -302,7 +303,6 @@ export function courseStats(classes, attendance) {
       ...skipBudget(c),
       present: 0,
       absent: 0,
-      cancelled: 0,
       muted: Boolean(c.muted),
     });
   }
@@ -312,7 +312,6 @@ export function courseStats(classes, attendance) {
     if (!row) continue;
     if (a.status === "present") row.present += 1;
     else if (a.status === "absent") row.absent += 1;
-    else if (a.status === "cancelled") row.cancelled += 1;
   }
 
   return [...bySubject.values()]
@@ -643,10 +642,7 @@ export function unmarkedSessions(classes, attendance, term, now = new Date(), fa
  * showing it as a gap would have every student open the app to a red bar each
  * morning.
  *
- * `cancelled` is reported but kept out of the three-way split: the session did
- * not happen, so it is neither attended, missed, nor forgotten, and folding it
- * into any of the three would misstate all of them.
- *
+
  * Each row also carries the sessions it was counted from, newest first, so the
  * screen can show which day was which without recomputing the same walk. They
  * are the evidence for the totals rather than a second query against them —
@@ -669,7 +665,6 @@ export function attendanceBreakdown(
       credits: Number(c.credits ?? 3),
       present: 0,
       absent: 0,
-      cancelled: 0,
       unmarked: 0,
       expected: 0,
       sessions: [],
@@ -682,7 +677,8 @@ export function attendanceBreakdown(
     if (!row) return;
     if (status === "present") row.present += 1;
     else if (status === "absent") row.absent += 1;
-    else if (status === "cancelled") row.cancelled += 1;
+    // Anything else — no mark, or the retired "cancelled" status on a row
+    // predating its removal — reads as a gap the student can still fill.
     else row.unmarked += 1;
   };
 

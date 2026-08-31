@@ -269,7 +269,18 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 
 /* ---------- attendance controls ---------- */
 
-.marks { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.marks { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+/* The attendance choice. With three options the row filled itself; with two,
+   left-aligned pills left a hole on the right and read as unfinished. These
+   split the row instead, which also makes each a bigger tap target — this is
+   the control students use most, often in a hurry on the way into class. */
+.marks.choice { gap: 10px; }
+.marks.choice .mark {
+  flex: 1 1 0;
+  padding: 9px 12px;
+  text-align: center;
+}
 
 .mark {
   border: 1px solid var(--rule);
@@ -286,9 +297,6 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 }
 .mark[aria-pressed="true"].absent {
   background: var(--absent); border-color: var(--absent); color: #fff;
-}
-.mark[aria-pressed="true"].cancelled {
-  background: var(--ink); border-color: var(--ink); color: #fff;
 }
 
 /* ---------- week grid ---------- */
@@ -1537,7 +1545,6 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .ab-status.present { background: var(--present-wash); color: var(--present); }
 .ab-status.absent { background: var(--absent-wash); color: var(--absent); }
-.ab-status.cancelled { background: var(--warn-wash); color: var(--warn-ink); }
 .ab-status.unmarked { background: var(--paper); color: var(--mute); border: 1px solid var(--rule-strong); }
 
 .ab-foot {

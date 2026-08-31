@@ -265,9 +265,12 @@ const bdCancelled = attendanceBreakdown(cls, [
   { subject: "W", class_date: "2026-08-24", start_time: "10:15", status: "cancelled" },
 ], term, bdNow, []);
 const bdC = bdCancelled.find(r => r.subject === "W");
-check("cancelled is reported", bdC.cancelled === 1);
-check("cancelled is not an absence", bdC.absent === 0);
-check("cancelled is not an unmarked session", bdC.unmarked === 2);
+// "cancelled" can no longer be set, but a row written before it was retired
+// can still arrive. It must read as a gap the student can fill — never as an
+// absence, which would cost them a class they did attend or never had.
+check("a retired cancelled row is not an absence", bdC.absent === 0);
+check("a retired cancelled row is not counted as attended", bdC.present === 0);
+check("a retired cancelled row reads as did-not-mark", bdC.unmarked === 3);
 
 // Without a calendar the gap is unknowable, and must not be printed as zero.
 const bdNoTerm = attendanceBreakdown(cls, [

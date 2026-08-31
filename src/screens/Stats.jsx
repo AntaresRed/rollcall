@@ -82,7 +82,6 @@ export default function Stats({ classes, attendance, onToggleMute }) {
             <div className="budget-foot">
               <span>
                 {r.present} attended · {r.absent} missed
-                {r.cancelled ? ` · ${r.cancelled} cancelled` : ""}
               </span>
               {r.pct !== null && <span>{r.pct}% so far</span>}
             </div>

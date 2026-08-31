@@ -86,7 +86,7 @@ export default function Today({ occurrences, attendance, now, onMark }) {
                       one. Rows already carrying that status still display and
                       still sit outside the attendance percentage — see
                       courseStats — it simply cannot be set any more. */}
-                  <div className="marks">
+                  <div className="marks choice">
                     {[
                       ["present", "Present"],
                       ["absent", "Absent"],

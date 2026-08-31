@@ -18,7 +18,12 @@ const fmtDate = (iso) =>
   });
 
 /**
- * Move or cancel a single occurrence of a class.
+ * Move a single occurrence of a class to another slot.
+ *
+ * Cancelling outright is deliberately not offered: classes here are
+ * rescheduled rather than called off, so the only honest action is to say
+ * where the session went. Sessions cancelled before that decision keep their
+ * tag below so they can still be found and undone.
  *
  * Weekly courses have no row per occurrence — they're generated from the
  * pattern — so a change here is stored as an exception against the date the
@@ -102,16 +107,6 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
     }
   };
 
-  const cancel = async (cls, originalDate) => {
-    setBusy(true);
-    try {
-      await onMove(cls, originalDate, { newDate: null });
-      setEditing(null);
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const formFor = (cls, originalDate) => (
     <MoveForm
       form={form}
@@ -155,9 +150,6 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
                     onClick={() => open("day", cls, originalDate, { date, start: cls.start_time })}
                   >
                     Move
-                  </button>
-                  <button className="mark" onClick={() => cancel(cls, originalDate)}>
-                    Cancelled
                   </button>
                 </div>
               ) : (

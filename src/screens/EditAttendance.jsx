@@ -7,8 +7,8 @@ import { markableSessions, pretty, toMinutes, hhmm, DAY_LONG, weekdayOf, isoDate
  * This began as a catch-up list: only the sessions with no mark, so a
  * forgotten week could be filled in. That answered half the problem. The other
  * half is a mark that is simply wrong — marked present in a hurry, or absent
- * for a class that turned out to be cancelled — and nothing in the app could
- * change one once the day had passed. So the list is now every session, with
+ * for a class that was actually missed — and nothing in the app could change
+ * one once the day had passed. So the list is now every session, with
  * its current mark shown, and the buttons set or change it.
  *
  * A class still running is included: that is when people actually reach for
@@ -125,7 +125,7 @@ export default function EditAttendance({
                     {movedFrom && <span className="tag signal">rescheduled</span>}
                   </div>
                 )}
-                <div className="marks">
+                <div className="marks choice">
                   {[
                     ["present", "Present"],
                     ["absent", "Absent"],

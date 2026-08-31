@@ -29,13 +29,11 @@ export default function AttendanceBreakdown({
         present: acc.present + r.present,
         absent: acc.absent + r.absent,
         unmarked: acc.unmarked + r.unmarked,
-        // Carried so the headline session count matches what the cards add
-        // up to. Summing only the three buckets would quietly report fewer
-        // sessions than the term actually held.
-        cancelled: acc.cancelled + r.cancelled,
+        // Carried so the headline session count matches what the cards add up
+        // to, rather than being re-derived from the buckets.
         expected: acc.expected + r.expected,
       }),
-      { present: 0, absent: 0, unmarked: 0, cancelled: 0, expected: 0 },
+      { present: 0, absent: 0, unmarked: 0, expected: 0 },
     );
   }, [rows]);
 
@@ -98,7 +96,6 @@ function TotalCard({ total }) {
         <span>All courses</span>
         <span className="ab-total-count">
           {total.expected} {total.expected === 1 ? "session" : "sessions"}
-          {total.cancelled > 0 && ` · ${total.cancelled} cancelled`}
         </span>
       </div>
       <Counts present={total.present} absent={total.absent} unmarked={total.unmarked} />
@@ -131,7 +128,6 @@ function CourseRow({ row: r }) {
         {r.expected === null
           ? `${r.marked} marked`
           : `${r.expected} ${r.expected === 1 ? "session" : "sessions"} so far`}
-        {r.cancelled > 0 && ` · ${r.cancelled} cancelled`}
       </div>
 
       <Counts present={r.present} absent={r.absent} unmarked={r.unmarked} />
@@ -165,8 +161,8 @@ function CourseRow({ row: r }) {
               {s.movedFrom && <span className="tag signal">moved</span>}
             </span>
             <span className="ab-at">{pretty(s.start_time).replace(" ", "")}</span>
-            <span className={`ab-status ${s.status ?? "unmarked"}`}>
-              {LABEL[s.status ?? "unmarked"]}
+            <span className={`ab-status ${shownStatus(s.status)}`}>
+              {LABEL[shownStatus(s.status)]}
             </span>
           </div>
         ))}
@@ -178,9 +174,16 @@ function CourseRow({ row: r }) {
 const LABEL = {
   present: "Present",
   absent: "Absent",
-  cancelled: "Cancelled",
   unmarked: "Did not mark",
 };
+
+/**
+ * Only two statuses can be set now. A row written before "cancelled" was
+ * retired still reports it, so it is folded into the gap rather than left to
+ * look up a label that no longer exists and render an empty chip.
+ */
+const shownStatus = (status) =>
+  status === "present" || status === "absent" ? status : "unmarked";
 
 function ChevronIcon() {
   return (
