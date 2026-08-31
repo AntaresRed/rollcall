@@ -28,7 +28,7 @@ Four tabs, always visible at the bottom of the screen:
 
 | Tab | What it does |
 | --- | --- |
-| **Today's classes** | Today's sessions in order, with Present / Absent / Cancelled buttons and a live marker on whichever class is happening right now. |
+| **Today's classes** | Today's sessions in order, with Present / Absent buttons and a live marker on whichever class is happening right now. |
 | **Week's Timetable** | The whole week as a grid — time down the side, days across. On a laptop-width screen every day fits side by side; on a phone it scrolls sideways with the time column pinned. Carries a badge when sessions are waiting to be marked. |
 | **Utils** | Reference material — the three directories and the calendar export. Nothing here changes a timetable or an attendance record. |
 | **Profile** | Account info, a per-course "skips left" budget, changing picked courses, sign out. The admin-only **Schedule admin** screen (§4a) opens from here too. |
@@ -42,7 +42,7 @@ it:
 - **Term calendar** — term dates, the pre-mid/post-mid teaching windows, and
   break weeks (exams, placements, Puja vacation).
 - **Edit attendance** — every class this term that has already begun, with
-  its current mark shown. Present / Absent / Cancelled sets or changes it;
+  its current mark shown. Present / Absent sets or changes it;
   tapping the mark it already has clears it. A class still in session is
   included, since that is when people actually reach for the app; one that has
   not started is not, because attendance for it is not a fact yet. Scoped by
@@ -59,8 +59,10 @@ it:
   not mark, over the term so far. The third figure is the one no other screen
   can show: an unmarked class writes nothing to the database, so it exists
   only as the gap between the sessions the timetable says were held and the
-  marks recorded against them. Cancelled sessions are reported alongside but
-  kept out of the split, since they did not happen. Courses are listed worst
+  marks recorded against them. A third status, `cancelled`, is still read and
+  reported alongside — kept out of the split, since those sessions did not
+  happen — but it can no longer be set: classes here are rescheduled rather
+  than called off. Rows carrying it predate that change. Courses are listed worst
   first, and tapping one opens the dates behind its totals — which day was
   attended, missed, cancelled or never marked, newest first.
 

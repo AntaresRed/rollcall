@@ -80,11 +80,16 @@ export default function Today({ occurrences, attendance, now, onMark }) {
                     {movedFrom && <span className="tag signal">rescheduled</span>}
                   </div>
 
+                  {/* Present and Absent only. "Cancelled" was removed as a
+                      choice: classes here are rescheduled rather than called
+                      off, so it offered a wrong answer more often than a right
+                      one. Rows already carrying that status still display and
+                      still sit outside the attendance percentage — see
+                      courseStats — it simply cannot be set any more. */}
                   <div className="marks">
                     {[
                       ["present", "Present"],
                       ["absent", "Absent"],
-                      ["cancelled", "Cancelled"],
                     ].map(([key, label]) => (
                       <button
                         key={key}

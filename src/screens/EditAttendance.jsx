@@ -129,7 +129,6 @@ export default function EditAttendance({
                   {[
                     ["present", "Present"],
                     ["absent", "Absent"],
-                    ["cancelled", "Cancelled"],
                   ].map(([key, text]) => (
                     <button
                       key={key}
