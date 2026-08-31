@@ -4,7 +4,7 @@
     "after publishing and never reissues the file, so corrections live here and",
     "are reapplied on every rebuild.",
     "",
-    "Ops: move / add / remove / credits / set_dates / add_course.",
+    "Ops: move / add / remove / credits / venue / set_dates / add_course.",
     "Target a course by \"name\" (durable) rather than \"code\" (derived).",
     "Everything is declarative and idempotent: running the build twice is a no-op,",
     "and an override that no longer matches the sheet fails loudly."
@@ -119,6 +119,18 @@
             "end": "11:45"
           }
         ]
+      }
+    },
+    {
+      "op": "venue",
+      "name": "Consumption Culture & Markets",
+      "note": "moved to Amphi (West-100); the published grid still says L-4",
+      "since": "2026-08-31",
+      "from": {
+        "venue": "L-4"
+      },
+      "to": {
+        "venue": "Amphi (West-100)"
       }
     }
   ]

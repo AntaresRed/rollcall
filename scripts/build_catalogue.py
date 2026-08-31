@@ -596,6 +596,28 @@ def apply_overrides(catalogue, overrides_path):
                            f"{ov.get('note', 'set_dates')} ({len(sessions)} sessions)")
             continue
 
+        if op == "venue":
+            want = ov["to"]["venue"]
+            had = ov.get("from", {}).get("venue")
+            if course["venue"] == want:
+                applied.append(f"{course['code']}: venue already {want}")
+                continue
+            # Same discipline as the meeting overrides: an amendment that no
+            # longer describes the sheet is a question, not something to apply
+            # anyway. If the institute reissues the grid with a third room,
+            # silently overwriting it would hide the change.
+            if had is not None and course["venue"] != had:
+                raise SystemExit(
+                    f"venue override for {course['code']} expects the sheet to say "
+                    f"{had!r}, but it says {course['venue']!r}. The grid may have "
+                    "been reissued — recheck it before reapplying."
+                )
+            course["venue"] = want
+            applied.append(
+                f"{course['code']}: {ov.get('note', 'venue')} "
+                f"({had or course['venue']} -> {want})")
+            continue
+
         if op == "credits":
             credits = float(ov["to"]["credits"])
             course["credits"] = credits
