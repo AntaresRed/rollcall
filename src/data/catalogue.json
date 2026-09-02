@@ -1520,5 +1520,7 @@
         }
       ]
     }
-  ]
+  ],
+  "cohort_year": 2027,
+  "kind": "electives"
 }

@@ -36,6 +36,25 @@ export const activeCatalogue = () => active;
 export const usingBundledCatalogue = () => !fromDatabase;
 
 /**
+ * Which graduating year this schedule is for.
+ *
+ * Null for a catalogue built before cohorts existed, which the caller should
+ * read as "cannot tell" rather than "mine" — serving a first year the second
+ * years' electives is worse than serving them nothing.
+ */
+export const catalogueCohort = () => active.cohort_year ?? null;
+
+/**
+ * How courses are chosen on this schedule.
+ *
+ * "electives" means the student picks courses and their sections; "sections"
+ * means they pick one section and the whole timetable follows, which is how
+ * the first-year core curriculum works. Absent means electives, because every
+ * catalogue built before first years existed is one.
+ */
+export const catalogueKind = () => active.kind ?? "electives";
+
+/**
  * Swap in a published schedule. Called once during boot, before the first
  * screen renders — these lookups are plain module state, so nothing would
  * re-render if it were swapped later.
@@ -50,8 +69,42 @@ export function setActiveCatalogue(next) {
   return active;
 }
 
-export const instructorsFor = (code) => instructorsByCode.get(code) ?? [];
-export const venueForCode = (code) => venueByCode.get(code) ?? null;
+/**
+ * Who teaches a course — and, given a section, who teaches *that* section.
+ *
+ * On the first-year grid a course is taught by three professors to six
+ * sections, so listing all three tells a student almost nothing. Entries carry
+ * the sections they cover, and naming one narrows to it.
+ *
+ * Entries with no sections apply to everybody: that is every elective, and
+ * also the first-year courses whose teaching splits by session range rather
+ * than by section. Those still list all names, because that is the truth.
+ */
+export function instructorsFor(code, section = null) {
+  const all = instructorsByCode.get(code) ?? [];
+  if (!section) return all;
+  const mine = all.filter(
+    (i) => !i.sections?.length || i.sections.includes(section),
+  );
+  // A section nobody claims is a data fault, not a reason to show an empty
+  // line — fall back to the whole list rather than pretending it has no staff.
+  return mine.length ? mine : all;
+}
+
+/**
+ * Where a course meets. On the first-year grid the room follows the section
+ * rather than the course, so it lives on each meeting and the course-level
+ * venue is empty; naming a section finds it.
+ */
+export function venueForCode(code, section = null) {
+  const course = (active.courses ?? []).find((c) => c.code === code);
+  if (!course) return null;
+  if (section) {
+    const meeting = (course.sections?.[section] ?? []).find((m) => m.room);
+    if (meeting) return meeting.room;
+  }
+  return venueByCode.get(code) ?? null;
+}
 
 // ---------- validation ----------
 

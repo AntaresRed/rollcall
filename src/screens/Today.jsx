@@ -7,7 +7,7 @@ import VenueChip from "./VenueChip";
  * and any rescheduling applied, each carrying its effective time. This screen
  * only has to render them.
  */
-export default function Today({ occurrences, attendance, now, onMark }) {
+export default function Today({ occurrences, attendance, now, onMark, readOnly = false }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
   const nowMins = now.getHours() * 60 + now.getMinutes();
@@ -95,6 +95,10 @@ export default function Today({ occurrences, attendance, now, onMark }) {
                         key={key}
                         className={`mark ${key}`}
                         aria-pressed={status === key}
+                        // Genuinely disabled in the admin preview, not merely
+                        // wired to nothing: a stray tap must not be able to
+                        // record attendance against the admin's own account.
+                        disabled={readOnly}
                         onClick={() => onMark(c, date, status === key ? null : key)}
                       >
                         {label}

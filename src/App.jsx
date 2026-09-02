@@ -4,9 +4,9 @@ import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
   attendanceKey, isoDate, setCourseMuted, unmarkedSessions,
   loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
-  loadPublishedCatalogue, loadProfile,
+  loadPublishedCatalogue, loadProfile, cohortOf,
 } from "./lib/api";
-import { setActiveCatalogue } from "./lib/catalogue";
+import { setActiveCatalogue, catalogueKind, catalogueCohort } from "./lib/catalogue";
 import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
 } from "./lib/push";
@@ -27,6 +27,7 @@ const ScheduleAdmin = lazy(() => import("./screens/ScheduleAdmin"));
 const PorDetails = lazy(() => import("./screens/PorDetails"));
 const Utils = lazy(() => import("./screens/Utils"));
 const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
+const SectionPicker = lazy(() => import("./screens/SectionPicker"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -66,6 +67,10 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authError, setAuthError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  // Null once boot has finished means no schedule is published for this
+  // student's year — see the boot block for why that is a screen of its own.
+  const [cohort, setCohort] = useState(null);
+  const [noSchedule, setNoSchedule] = useState(false);
   // Set by CoursePicker while its selection differs from what's saved, so
   // backing out of it can warn — and stay silent when there's nothing to lose.
   const pickerDirty = useRef(false);
@@ -99,16 +104,37 @@ export default function App() {
           .then(setAlerts)
           .catch(() => setAlerts(false));
 
+        // Which year the student is in has to be settled before the term or
+        // the schedule can be fetched, because both are published per cohort
+        // and the two years run on different dates. So this is two round trips
+        // rather than one — the profile, then everything that depends on it.
+        //
+        // The address is the fallback for the stored value: it is the same
+        // rule the database uses, so the two cannot disagree, and it keeps a
+        // student working if their profile row is missing.
+        const profile = await loadProfile().catch(() => null);
+        const mine = profile?.cohort_year ?? cohortOf(current.user?.email);
+        setIsAdmin(Boolean(profile?.is_admin));
+        setCohort(mine);
+
+        const [c, a, t, o, published] = await Promise.all([
+          loadClasses(), loadAttendance(), loadTerm(mine), loadOverrides(),
+          loadPublishedCatalogue(mine),
+        ]);
+
         // The published schedule has to be in place before the first screen
         // renders: the catalogue lookups are module state, so swapping them
         // later would leave already-rendered screens on the old one.
-        const [c, a, t, o, published, profile] = await Promise.all([
-          loadClasses(), loadAttendance(), loadTerm(), loadOverrides(),
-          loadPublishedCatalogue(),
-          loadProfile().catch(() => null),
-        ]);
         if (published?.payload) setActiveCatalogue(published.payload);
-        setIsAdmin(Boolean(profile?.is_admin));
+
+        // Falling back to the bundled copy is right only when it belongs to
+        // this student. It is the second years' grid, so serving it to a first
+        // year would hand them somebody else's electives — worse than saying
+        // nothing is ready. Same for an address carrying no year at all.
+        if (!published?.payload && (!mine || mine !== catalogueCohort())) {
+          setNoSchedule(true);
+        }
+
         setClasses(c);
         setAttendance(a);
         setTerm(t);
@@ -343,6 +369,29 @@ export default function App() {
   if (!session) return <SignIn error={authError} />;
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
 
+  // A student whose year has no schedule yet. Deliberately ahead of the
+  // course picker: with no catalogue of their own there is nothing to pick,
+  // and the bundled fallback belongs to the other year.
+  if (noSchedule && !classes.length) {
+    return (
+      <div className="shell">
+        <Masthead now={now} />
+        <div className="no-schedule">
+          <h2>No timetable published for your year yet</h2>
+          <p>
+            You're signed in as <code>{session.user?.email}</code>
+            {cohort ? <> — the class of <strong>{cohort}</strong>.</> : "."}
+          </p>
+          <p>
+            {cohort
+              ? "Your batch's schedule hasn't been published to the app yet. It will appear here as soon as it is — nothing for you to do."
+              : "That address doesn't carry a batch year, so there's no way to tell which timetable is yours. If you're a student, sign in with your institute address."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // ---- onboarding ----
   if (!classes.length || editing) {
     const finish = async (saved) => {
@@ -365,11 +414,23 @@ export default function App() {
           backLabel="Back without saving"
         />
         <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
-          <CoursePicker
-            existing={classes}
-            onSaved={finish}
-            onDirtyChange={notePickerDirty}
-          />
+          {/* Which picker to show is a property of the schedule, not of the
+              student: a core curriculum is chosen by section, electives by
+              course. Asking the catalogue means neither year needs to be
+              named here, and a future programme works without a change. */}
+          {catalogueKind() === "sections" ? (
+            <SectionPicker
+              existing={classes}
+              onSaved={finish}
+              onDirtyChange={notePickerDirty}
+            />
+          ) : (
+            <CoursePicker
+              existing={classes}
+              onSaved={finish}
+              onDirtyChange={notePickerDirty}
+            />
+          )}
         </Suspense>
       </div>
     );

@@ -1555,6 +1555,156 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 
 
+/* ---------- admin: read a schedule as a student ---------- */
+
+.preview-pane {
+  margin-top: 18px;
+  border: 1px solid var(--signal);
+  border-radius: var(--r);
+  background: var(--signal-wash);
+  padding: 12px;
+}
+.preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.preview-title { font-size: 13.5px; color: var(--ink); min-width: 0; }
+.preview-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.preview-field { display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
+.preview-field span {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.preview-field select, .preview-field input {
+  font: inherit;
+  padding: 5px 8px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+}
+.preview-note { font-size: 12.5px; color: var(--slate); margin: 0 0 10px; }
+
+/* The real screens, on their own paper so it is obvious they are a preview
+   rather than the admin's own timetable. */
+.preview-screen {
+  background: var(--paper);
+  border-radius: var(--r);
+  padding: 2px 12px 14px;
+  margin-bottom: 10px;
+}
+.preview-screen:last-child { margin-bottom: 0; }
+.preview-screen .eyebrow { margin-top: 16px; }
+.preview-screen .mark[disabled] { opacity: 0.45; }
+
+
+/* ---------- section picker (first-year first run) ---------- */
+
+/* Six tiles, because six is a choice you make at a glance and a dropdown
+   would hide five of them. Each shows its room, which is how most students
+   actually recognise their section. */
+.sec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+.sec-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  color: var(--ink);
+}
+.sec-tile:hover { border-color: var(--signal); background: var(--signal-wash); }
+.sec-letter { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+.sec-room {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--mute);
+}
+
+/* Everything arrives ticked, so the DEFAULT state is the loud one and
+   unticking visibly removes a course rather than merely failing to add it. */
+.sec-course {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  margin-bottom: 8px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--rule-strong);
+  border-radius: var(--r);
+  color: var(--ink);
+  opacity: 0.55;
+}
+.sec-course.on { opacity: 1; border-left-color: var(--signal); }
+.sec-check {
+  flex: 0 0 auto;
+  width: 20px; height: 20px;
+  margin-top: 1px;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  line-height: 1;
+}
+.sec-course.on .sec-check {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+.sec-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.sec-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.sec-meta, .sec-when {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--mute);
+}
+.sec-venue { margin-top: 5px; }
+
+/* ---------- nothing published for this cohort ---------- */
+
+.no-schedule {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--warn-ink);
+  border-radius: var(--r);
+  padding: 18px;
+  margin-top: 24px;
+}
+.no-schedule h2 {
+  font-size: 17px;
+  margin: 0 0 8px;
+  letter-spacing: -0.015em;
+}
+.no-schedule p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--slate); }
+.no-schedule p:last-child { margin-bottom: 0; }
+.no-schedule code {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--paper);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+
 /* ---------- utils hub ---------- */
 
 /* Each entry gets a line explaining what it is, which the ghost buttons these

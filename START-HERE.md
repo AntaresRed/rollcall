@@ -115,11 +115,13 @@ src/
     push.js           subscription, permissions, test notification
   screens/            Splash, SignIn, Today, Timetable, EditAttendance, Stats,
                       Profile, Reschedule, TermCalendar, CoursePicker,
-                      AttendanceBreakdown,
+                      AttendanceBreakdown, SectionPicker,
+                      CataloguePreview,
                       Utils (the hub) and what it opens — Faculty,
                       CalendarExport, PorDetails —
                       plus ScheduleAdmin, reached from Profile
-  data/catalogue.json generated — do not edit by hand
+  data/catalogue.json generated — do not edit by hand (second years)
+  data/catalogue-pgp1.json  generated — do not edit by hand (first years)
   data/directory.json generated — do not edit by hand
   data/por.json       generated — do not edit by hand
 
@@ -202,12 +204,30 @@ flagged.
 Afterwards, Profile grows a **Schedule admin** button for that account only.
 The flow:
 
-1. Build the catalogue from the spreadsheet as usual:
-   `python scripts/build_catalogue.py data/Class_Schedule_Term-V_AY-2026-27.xlsx src/data/catalogue.json data/overrides.json`
+1. Build the catalogue from the spreadsheet. Second years (electives):
+
+   ```
+   python scripts/build_catalogue.py "data/Class Schedule_Term-V_AY-2026-27.xlsx" src/data/catalogue.json data/overrides.json data/faculty.json 2027
+   ```
+
+   First years (core curriculum, six sections):
+
+   ```
+   python scripts/build_pgp1_catalogue.py "data/PGP1 term 2.xlsx" src/data/catalogue-pgp1.json src/data/directory.json 2028
+   ```
+
+   The last argument is the **graduating year** the schedule serves, which is
+   what matches it to its students. Both scripts stop rather than emit a
+   half-parsed term if the workbook has changed shape.
 2. Upload the resulting `catalogue.json` on the Schedule admin screen. It is
    checked and stored as a **draft** — nothing changes for anybody.
 3. Press *What would change?* to see the difference against what is live.
-4. Press **Publish**.
+4. Press **See it as a student** to read the schedule the way somebody on it
+   will — the real Today and Timetable screens, with a section and a date you
+   choose. This works on an unpublished draft, which is the point: it is how
+   you check a parse *before* it goes live. Nothing there is saved and marking
+   is disabled.
+5. Press **Publish**.
 
 Publishing sets the term dates and break weeks for everyone and corrects the
 saved rows of students who already picked those courses — phase, venue, credit
@@ -219,7 +239,35 @@ rows are matched on day and start time, so those students keep the old slot
 until they re-pick the course. The preview calls this out before you publish.
 
 Until something is published the app runs on the copy compiled into the
-bundle, exactly as before.
+bundle — but only for the cohort that copy belongs to. The bundled schedule is
+the second years', so a first year with nothing published sees "no timetable
+published for your year yet" rather than somebody else's electives.
+
+### Two years, one app
+
+Which schedule a student gets comes from the **graduating year in their
+address** (`anuja2027@` → 2027), stored once on their profile at sign-up and
+never changed afterwards. Terms and catalogues carry the same year, and there
+is one live schedule *per cohort*.
+
+Nothing needs doing each August: publish the new term for each year and
+everyone moves up, because it is the term that moves, not the student.
+
+Run `supabase/pgp1-cohorts.sql` once to add this. It is safe on its own and
+changes nothing visible until a second cohort's catalogue is published.
+
+**Deploy in this order.** The migration first, then the app, then publish the
+first-year schedule. An app built before the migration asks for "the current
+term" without naming a cohort, so a second live term existing too early could
+hand a second year the first years' dates.
+
+The only manual lever you should ever need is for a student whose address does
+not describe them — someone repeating a year:
+
+```sql
+update public.profiles set cohort_year = 2028
+ where id = (select id from auth.users where email = 'someone2027@email.iimcal.ac.in');
+```
 
 ## Still open
 

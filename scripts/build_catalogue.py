@@ -678,6 +678,9 @@ if __name__ == "__main__":
     dest = sys.argv[2] if len(sys.argv) > 2 else "src/data/catalogue.json"
     overrides = sys.argv[3] if len(sys.argv) > 3 else "data/overrides.json"
     faculty = sys.argv[4] if len(sys.argv) > 4 else "data/faculty.json"
+    # The batch this grid belongs to, by graduating year. Second years now;
+    # bump it when the sheet you are building is for a different batch.
+    cohort = int(sys.argv[5]) if len(sys.argv) > 5 else 2027
 
     if os.path.exists(src):
         catalogue, matched = build(src)
@@ -695,6 +698,15 @@ if __name__ == "__main__":
 
     applied = apply_overrides(catalogue, overrides)
     unmatched_cat, unmatched_fac = attach_faculty(catalogue, faculty)
+
+    # Who this schedule is for, and how it is picked. Both are read by the app:
+    # a student is served the catalogue published for their graduating year,
+    # and "electives" is what makes it show the course search rather than the
+    # section picker the first-year curriculum uses.
+    #
+    # Stamped here rather than parsed from the sheet, which never says either.
+    catalogue["cohort_year"] = cohort
+    catalogue["kind"] = "electives"
 
     with open(dest, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(catalogue, fh, indent=2, ensure_ascii=False)

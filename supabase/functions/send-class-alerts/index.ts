@@ -30,7 +30,7 @@ import webpush from "npm:web-push@3.6.7";
  * bare 500 turned up and there was no way to tell a deploy artefact from a
  * real fault.
  */
-const BUILD = "2026-08-29c";
+const BUILD = "2026-08-31a";
 
 const SWEEP_MINUTES = 5; // must match the cron interval
 
@@ -239,8 +239,14 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
   const [subs, termRes] = await Promise.all([
     fetchAll<Record<string, string>>((from, to) =>
       admin.from("push_subscriptions").select("*").range(from, to)),
+    // Every current term, not one. Two years run concurrently on different
+    // dates and different exam weeks; taking whichever row came back first
+    // would apply one cohort's calendar to the other and suppress half-term
+    // courses in the wrong window — the fault that had a post-mid course
+    // alerting in August, but now impossible to spot by eye because each
+    // cohort's own schedule would look right.
     readWithRetry("terms lookup", () =>
-      admin.from("terms").select("*, term_breaks(*)").eq("is_current", true).limit(1)),
+      admin.from("terms").select("*, term_breaks(*)").eq("is_current", true)),
   ]);
 
   // The term drives every phase and break decision below, so losing it is not
@@ -253,16 +259,22 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
     console.error("no term marked is_current — phase-limited alerts are being held");
   }
 
+  // cohort year -> that cohort's term. A row with no cohort predates the
+  // split and belongs to whoever else has none, which is the state this runs
+  // in until the first cohort-tagged catalogue is published.
+  const termByCohort = new Map<string, Term>();
+  for (const raw of terms ?? []) {
+    termByCohort.set(
+      raw.cohort_year == null ? "unscoped" : String(raw.cohort_year),
+      { ...raw, breaks: raw.term_breaks ?? [] } as Term,
+    );
+  }
+
   if (!subs.length) {
     return new Response(JSON.stringify({ sent: 0, note: "no subscribers", build: BUILD }), {
       headers: { "Content-Type": "application/json" },
     });
   }
-  const raw = terms?.[0] ?? null;
-  const term: Term | null = raw
-    ? { ...raw, breaks: raw.term_breaks ?? [] }
-    : null;
-
   // Group subscriptions by user so one student with two devices gets one lookup.
   const byUser = new Map<string, typeof subs>();
   for (const s of subs) {
@@ -279,8 +291,10 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
   const subscribed = new Set(userIds);
 
   const [profiles, allClasses] = await Promise.all([
-    fetchAll<{ id: string; alert_after_mins: number; timezone: string }>((from, to) =>
-      admin.from("profiles").select("id, alert_after_mins, timezone").range(from, to)),
+    fetchAll<{ id: string; alert_after_mins: number; timezone: string;
+               cohort_year: number | null }>((from, to) =>
+      admin.from("profiles").select("id, alert_after_mins, timezone, cohort_year")
+        .range(from, to)),
     fetchAll<Record<string, string>>((from, to) =>
       admin.from("classes").select("*")
         .eq("confirmed", true)
@@ -303,6 +317,33 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
 
   const afterOf = new Map(profiles.map((p) => [p.id, p.alert_after_mins ?? 15]));
   const tzOf = new Map(profiles.map((p) => [p.id, p.timezone ?? "Asia/Kolkata"]));
+  const cohortOf = new Map(profiles.map((p) => [p.id, p.cohort_year]));
+
+  /**
+   * The term that governs one student's classes.
+   *
+   * Null when their cohort has no published term, which `inSession` treats as
+   * a reason to hold every phase-limited course rather than guess. That is the
+   * conservative direction: a first year whose schedule is not up yet gets no
+   * alerts, instead of the second years' calendar deciding which of their
+   * courses are in season.
+   *
+   * The unscoped fallback keeps a database mid-migration working: before any
+   * cohort-tagged catalogue is published there is one untagged current term,
+   * and every student should still be governed by it.
+   */
+  /** "2027,2028" — which cohorts have a live calendar this sweep. Reported so
+   *  a missing one is visible in the cron log rather than only as silence. */
+  const termSummary = () => [...termByCohort.keys()].sort().join(",") || "none";
+
+  const termFor = (userId: string): Term | null => {
+    const cohort = cohortOf.get(userId);
+    if (cohort != null) {
+      const mine = termByCohort.get(String(cohort));
+      if (mine) return mine;
+    }
+    return termByCohort.get("unscoped") ?? null;
+  };
 
   // Cache clock maths per timezone.
   const clocks = new Map<string, LocalNow>();
@@ -339,7 +380,8 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
     if (now.minutes < opens || now.minutes > opens + WINDOW_MINUTES) continue;
     // Published dates already avoid exam weeks and vacations, so a dated
     // session is authoritative and skips the phase window entirely.
-    if (!cls.session_date && !inSession(cls.term_phase, now.date, term)) continue;
+    if (!cls.session_date &&
+        !inSession(cls.term_phase, now.date, termFor(cls.user_id))) continue;
 
     if (movedFrom.has(`${cls.id}|${now.date}`)) continue;  // moved away
 
@@ -378,7 +420,7 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
 
   if (!due.length) {
     return new Response(JSON.stringify({
-      sent: 0, ms: Date.now() - started, termResolved: Boolean(term), build: BUILD,
+      sent: 0, ms: Date.now() - started, terms: termSummary(), build: BUILD,
     }));
   }
 
@@ -546,7 +588,7 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
     sent, pruned: dead.length, retrying: unclaim.length, ms: Date.now() - started,
     // Surfaced so a broken term calendar is visible in the cron logs rather
     // than only in the alerts students do or don't receive.
-    termResolved: Boolean(term),
+    terms: termSummary(),
     build: BUILD,
   }), { headers: { "Content-Type": "application/json" } });
 }

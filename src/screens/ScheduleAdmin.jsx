@@ -4,6 +4,7 @@ import {
   loadCataloguePayload,
 } from "../lib/api";
 import { activeCatalogue, validateCatalogue, diffCatalogues } from "../lib/catalogue";
+import CataloguePreview from "./CataloguePreview";
 
 const fmtWhen = (iso) =>
   iso ? new Date(iso).toLocaleString(undefined, {
@@ -32,6 +33,8 @@ export default function ScheduleAdmin({ onBack }) {
   const [staged, setStaged] = useState(null);   // { payload, name, check }
   const [preview, setPreview] = useState(null); // { id, label, diff }
   const [result, setResult] = useState(null);
+  // { payload, label } — a schedule being read as a student of its cohort.
+  const [seeAs, setSeeAs] = useState(null);
 
   const live = activeCatalogue();
 
@@ -91,6 +94,20 @@ export default function ScheduleAdmin({ onBack }) {
       await refresh();
     } catch (err) {
       setError(err.message || "Couldn't save that upload.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  /** Read an upload as a student of its cohort would — including one that
+   *  has not been published, which is when checking a parse is worth most. */
+  const openSeeAs = async (row) => {
+    setResult(null);
+    setBusy(`seeas:${row.id}`);
+    try {
+      setSeeAs({ payload: await loadCataloguePayload(row.id), label: row.label });
+    } catch (err) {
+      setError(err.message || "Couldn't read that upload.");
     } finally {
       setBusy("");
     }
@@ -250,6 +267,13 @@ export default function ScheduleAdmin({ onBack }) {
               >
                 {busy === `preview:${row.id}` ? "Reading…" : "What would change?"}
               </button>
+              <button
+                className="mark"
+                disabled={busy === `seeas:${row.id}`}
+                onClick={() => openSeeAs(row)}
+              >
+                {busy === `seeas:${row.id}` ? "Reading…" : "See it as a student"}
+              </button>
               {!row.is_published && (
                 <>
                   <button
@@ -274,6 +298,14 @@ export default function ScheduleAdmin({ onBack }) {
           </div>
         </div>
       ))}
+
+      {seeAs && (
+        <CataloguePreview
+          payload={seeAs.payload}
+          label={seeAs.label}
+          onClose={() => setSeeAs(null)}
+        />
+      )}
 
       <p className="fineprint">
         Publishing sets the term dates and break weeks for every student, and

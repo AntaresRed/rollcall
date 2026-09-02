@@ -15,7 +15,23 @@ export { instructorsFor };
 /** Where a class meets: the row's own room if it has one, else the venue the
  *  catalogue publishes for that course code. */
 export const venueOf = (cls) =>
-  cls?.room?.trim() || venueForCode(cls?.course_code) || null;
+  cls?.room?.trim() || venueForCode(cls?.course_code, cls?.section) || null;
+
+/**
+ * The graduating year in an institute address — 2027 for anuja2027@.
+ *
+ * This is what decides which term and which schedule a student is served, and
+ * it is deliberately the same rule as `public.cohort_of()` in the database, so
+ * a row written by the sign-up trigger and a value worked out here can never
+ * disagree.
+ *
+ * Anchored on the four digits immediately before the @, so a name that happens
+ * to contain digits still resolves to the year rather than to part of a name.
+ * Null for an address carrying no year at all — a role account, say — which
+ * the app treats as "no schedule for you" rather than guessing.
+ */
+export const cohortOf = (email) =>
+  Number(String(email ?? "").toLowerCase().match(/(20\d{2})@/)?.[1]) || null;
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const DAY_LONG = {
@@ -206,14 +222,20 @@ export async function clearTimetable() {
 
 // ---------- term ----------
 
-export async function loadTerm() {
+export async function loadTerm(cohortYear = null) {
   // Breaks come back embedded rather than as a second round trip — the term
   // is on the critical path for first paint.
-  const { data } = await supabase
+  //
+  // Scoped by cohort: two years run concurrently on different dates and
+  // different exam weeks, and handing one the other's calendar would suppress
+  // half-term courses in the wrong window — the exact fault that had alerts
+  // firing for a post-mid course in August.
+  let query = supabase
     .from("terms")
     .select("*, term_breaks(*)")
-    .eq("is_current", true)
-    .limit(1);
+    .eq("is_current", true);
+  if (cohortYear) query = query.eq("cohort_year", cohortYear);
+  const { data } = await query.limit(1);
 
   const term = data?.[0] ?? null;
   if (!term) return null;
@@ -298,7 +320,7 @@ export function courseStats(classes, attendance) {
       // distinct from an empty array (looked up, genuinely no instructor on
       // file) — the Profile screen falls back to the credit line only in
       // the first case, not the second.
-      instructors: c.course_code ? instructorsFor(c.course_code) : undefined,
+      instructors: c.course_code ? instructorsFor(c.course_code, c.section) : undefined,
       venue: venueOf(c),
       ...skipBudget(c),
       present: 0,
@@ -805,13 +827,13 @@ export async function loadProfile() {
  * student who can't reach this table should still get their timetable, not a
  * blank screen.
  */
-export async function loadPublishedCatalogue() {
-  const { data, error } = await supabase
+export async function loadPublishedCatalogue(cohortYear = null) {
+  let query = supabase
     .from("catalogues")
-    .select("id, payload, label, published_at")
-    .eq("is_published", true)
-    .limit(1)
-    .maybeSingle();
+    .select("id, payload, label, published_at, cohort_year")
+    .eq("is_published", true);
+  if (cohortYear) query = query.eq("cohort_year", cohortYear);
+  const { data, error } = await query.limit(1).maybeSingle();
   if (error) {
     console.warn("could not load the published schedule; using the bundled one", error.message);
     return null;

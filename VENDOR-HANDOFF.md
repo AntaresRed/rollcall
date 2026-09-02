@@ -22,6 +22,27 @@ Students sign in with **Google**, restricted to `@email.iimcal.ac.in`
 addresses — enforced by the database itself, not just the sign-in screen, so
 it cannot be bypassed by calling the API directly.
 
+**Both years at once.** First years (PGP1) and second years (PGP2) run
+different schedules, on different term dates, with different exam weeks. The
+app tells them apart from the **graduating year already in the address** —
+`anuja2027@` is the class of 2027 — and serves whichever schedule is published
+for that year.
+
+That is worth understanding because of what it means for you: **nothing has to
+be done each August.** A person's graduating year never changes, so nobody is
+ever promoted from one year to the other. What changes is which term is
+published for each cohort. Publish next year's schedules and every student
+moves up on their own.
+
+|  | graduating year | in 2026-27 |
+| --- | --- | --- |
+| Second years | 2027 | Term V |
+| First years | 2028 | Term II |
+| Next intake | 2029 | publish when their schedule exists |
+
+An address with no year in it — a shared role account, say — is shown "no
+timetable published for your year" rather than being guessed at.
+
 ## 2. What a student sees
 
 Four tabs, always visible at the bottom of the screen:
@@ -84,9 +105,18 @@ From **Utils**, four more:
 - **POR details** — positions of responsibility, drilled down through the
   student council, CDPO, cultural bodies and the sports council.
 
-**First run:** a student who hasn't picked courses yet lands on a searchable
-course picker instead of these tabs. It warns if two picked courses would
-clash, and section-picks a course that has more than one section.
+**First run** depends on which schedule they are on, because the two years
+choose courses in genuinely different ways:
+
+- **Second years** get a searchable **course picker** — they take electives,
+  so they choose each course and its section. It warns if two would clash.
+- **First years** get a **section picker**: six tiles, one per section, each
+  showing its room. The first-year curriculum is core, so choosing a section
+  determines the entire timetable. The courses then appear already ticked, and
+  they untick only what they aren't taking (an exemption, a repeat, an audit).
+
+Which one appears is decided by the schedule itself, not by the student, so a
+future programme needs no code change.
 
 ## 3. Where it actually lives
 
@@ -110,6 +140,11 @@ phone. A code deploy on Vercel cannot lose or change anyone's data.
 Four recurring tasks, roughly in order of how often each comes up.
 
 ### 4a. Publish a new term's schedule
+
+> **Two schedules now.** Each year has its own, built by its own script and
+> published separately. Publishing one never touches the other — the database
+> keeps one live schedule *per cohort*, not one overall. Steps below are the
+> same either way; only the script and the cohort year differ.
 
 > **Before you start:** this is the one task in this whole document that
 > needs a command line and Python, not just a web page. Everything else here

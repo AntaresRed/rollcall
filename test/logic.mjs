@@ -11,6 +11,7 @@ import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue 
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
+import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
 
 let fail = 0;
 const check = (name, cond) => {
@@ -484,7 +485,18 @@ check("both amphis are noted, and separately",
 // A note pointing at a room no course meets in is a note nobody will ever
 // see — most likely the catalogue renamed the venue underneath it.
 {
-  const published = new Set(catalogue.courses.map((c) => c.venue).filter(Boolean));
+  // Both catalogues: the first-year rooms are on its grid, not the second
+  // years'. A room is published either as a course-level venue (electives) or
+  // on a meeting (sections, where the room follows the section).
+  const published = new Set();
+  for (const cat of [catalogue, cataloguePgp1]) {
+    for (const c of cat.courses) {
+      if (c.venue) published.add(c.venue);
+      for (const list of Object.values(c.sections ?? {})) {
+        for (const m of list ?? []) if (m.room) published.add(m.room);
+      }
+    }
+  }
   const orphans = NOTED_VENUES.filter((v) => ![...published].some((p) => venueNote(p) === venueNote(v)));
   if (orphans.length) console.log("       orphaned: " + orphans.join(", "));
   check("every noted venue is one the catalogue actually uses", orphans.length === 0);

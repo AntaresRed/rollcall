@@ -16,7 +16,14 @@
 /** "Amphi (East-150)" and "amphi east 150" both reduce to "amphieast150". */
 const key = (venue) => String(venue ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
-/** L-51 and L-52 are the same climb, so the directions are written once. */
+// Rooms that share a landing share their directions, written once so a pair
+// cannot drift apart. The first-year sections live in these six.
+const NAB_FIRST_LEFT =
+  "NAB first floor, on your left when you climb up the stairs, right if you come from lift.";
+const NAB_SECOND_LEFT =
+  "NAB second floor, on your left when you climb up the stairs, right if you come from lift.";
+const NAB_SECOND_RIGHT =
+  "NAB second floor, on your right when you climb up the stairs, left if you come from lift.";
 const NAB_FOURTH =
   "NAB 4th floor, on your left when you climb up the stairs, right if you come up by the lift.";
 
@@ -27,6 +34,12 @@ const NOTES = new Map([
   ["Amphi (East-150)", "NAB Ground floor, first Amphi towards the side of Auditorium."],
   ["Amphi (West-100)", "NAB second floor, towards the side of the Auditorium."],
   ["N-22", "NAB first floor, on your right when you climb up the stairs, left if you come from lift."],
+  ["L-21", NAB_FIRST_LEFT],
+  ["L-22", NAB_FIRST_LEFT],
+  ["L-31", NAB_SECOND_LEFT],
+  ["L-32", NAB_SECOND_LEFT],
+  ["N-31", NAB_SECOND_RIGHT],
+  ["N-32", NAB_SECOND_RIGHT],
   ["L-51", NAB_FOURTH],
   ["L-52", NAB_FOURTH],
   // OAB
@@ -37,7 +50,9 @@ const NOTES = new Map([
 /** The venues these directions were written for, as written — for the test
  *  that checks each one still matches something the catalogue publishes. */
 export const NOTED_VENUES = [
-  "Amphi (East-150)", "Amphi (West-100)", "N-22", "L-51", "L-52", "L-4", "L-2",
+  "Amphi (East-150)", "Amphi (West-100)", "N-22",
+  "L-21", "L-22", "L-31", "L-32", "N-31", "N-32",
+  "L-51", "L-52", "L-4", "L-2",
 ];
 
 /**

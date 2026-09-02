@@ -1,0 +1,1228 @@
+{
+  "term": "TERM-II: AY 2026-2027",
+  "cohort_year": 2028,
+  "kind": "sections",
+  "slots": [
+    "08:30",
+    "10:15",
+    "12:00",
+    "14:30",
+    "16:15"
+  ],
+  "calendar": {
+    "term_start": "2026-09-07",
+    "pre_mid_end": "2026-10-09",
+    "post_mid_start": "2026-11-02",
+    "term_end": "2026-12-04",
+    "breaks": [
+      {
+        "label": "Summer placement",
+        "from": "2026-10-08",
+        "to": "2026-10-16",
+        "note": "October 08 - October 16, 2026 (No Class)"
+      },
+      {
+        "label": "Puja vacation",
+        "from": "2026-10-19",
+        "to": "2026-10-25",
+        "note": "October 19 - October 25, 2026 (No Class)"
+      },
+      {
+        "label": "Mid-term exams",
+        "from": "2026-10-26",
+        "to": "2026-10-30",
+        "note": "October 26 - October 30, 2026 (No class)"
+      },
+      {
+        "label": "End-term exams",
+        "from": "2026-12-07",
+        "to": "2026-12-11",
+        "note": "December 07 - December 11, 2026 (No class)"
+      }
+    ]
+  },
+  "courses": [
+    {
+      "code": "BC-105",
+      "name": "Managerial Communication-II",
+      "phase": "post_mid",
+      "credits": 1.5,
+      "total_classes": 10,
+      "min_pct": 80,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "D": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-32"
+          },
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-32"
+          }
+        ],
+        "F": [
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-32"
+          },
+          {
+            "day": 3,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-32"
+          }
+        ],
+        "A": [
+          {
+            "day": 3,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-21"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-21"
+          }
+        ],
+        "B": [
+          {
+            "day": 3,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-22"
+          },
+          {
+            "day": 5,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-22"
+          }
+        ],
+        "C": [
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-31"
+          },
+          {
+            "day": 4,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-31"
+          }
+        ],
+        "E": [
+          {
+            "day": 3,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-31"
+          },
+          {
+            "day": 5,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-31"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "Nandita Roy",
+          "role": "CC",
+          "sections": [
+            "A",
+            "C"
+          ],
+          "email": "nandita@iimcal.ac.in"
+        },
+        {
+          "name": "Pragyan Rath",
+          "role": null,
+          "sections": [
+            "D",
+            "F"
+          ],
+          "email": "pragyan@iimcal.ac.in"
+        },
+        {
+          "name": "Apoorva Bharadwaj",
+          "role": null,
+          "sections": [
+            "B",
+            "E"
+          ],
+          "email": "apoorva@iimcal.ac.in"
+        }
+      ]
+    },
+    {
+      "code": "EC-102",
+      "name": "Macroeconomics",
+      "phase": "full",
+      "credits": 3.0,
+      "total_classes": 20,
+      "min_pct": 75,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "C": [
+          {
+            "day": 1,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-31"
+          },
+          {
+            "day": 3,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-31",
+            "phase": "pre_mid"
+          },
+          {
+            "day": 3,
+            "start": "16:15",
+            "end": "17:45",
+            "room": "L-31",
+            "phase": "post_mid"
+          }
+        ],
+        "D": [
+          {
+            "day": 2,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-32"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-32"
+          }
+        ],
+        "A": [
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-21"
+          },
+          {
+            "day": 5,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-21"
+          }
+        ],
+        "B": [
+          {
+            "day": 3,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-22"
+          },
+          {
+            "day": 5,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-22"
+          }
+        ],
+        "E": [
+          {
+            "day": 3,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-31"
+          },
+          {
+            "day": 5,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-31"
+          }
+        ],
+        "F": [
+          {
+            "day": 3,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-32"
+          },
+          {
+            "day": 5,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-32"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "S Sikdar - VF",
+          "role": null,
+          "sections": [
+            "A",
+            "F"
+          ],
+          "email": null
+        },
+        {
+          "name": "Ankit Kumar",
+          "role": "CC",
+          "sections": [
+            "B",
+            "E"
+          ],
+          "email": "ankitk@iimcal.ac.in"
+        },
+        {
+          "name": "Parthapratim Pal",
+          "role": null,
+          "sections": [
+            "C",
+            "D"
+          ],
+          "email": "parthapal@iimcal.ac.in"
+        }
+      ]
+    },
+    {
+      "code": "FI-102",
+      "name": "Cost Management",
+      "phase": "post_mid",
+      "credits": 1.5,
+      "total_classes": 10,
+      "min_pct": 80,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "B": [
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-22"
+          },
+          {
+            "day": 3,
+            "start": "16:15",
+            "end": "17:45",
+            "room": "L-22"
+          }
+        ],
+        "F": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-32"
+          },
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-32"
+          }
+        ],
+        "A": [
+          {
+            "day": 2,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-21"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-21"
+          }
+        ],
+        "C": [
+          {
+            "day": 2,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-31"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-31"
+          }
+        ],
+        "D": [
+          {
+            "day": 3,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-32"
+          },
+          {
+            "day": 5,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-32"
+          }
+        ],
+        "E": [
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-31"
+          },
+          {
+            "day": 5,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-31"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "Sudhir Jaiswall",
+          "role": null,
+          "sections": [
+            "A",
+            "C"
+          ],
+          "email": "sudhir@iimcal.ac.in"
+        },
+        {
+          "name": "Samit Paul",
+          "role": "CC",
+          "sections": [
+            "D",
+            "E"
+          ],
+          "email": "samit@iimcal.ac.in"
+        },
+        {
+          "name": "Arpita Ghosh",
+          "role": null,
+          "sections": [
+            "B",
+            "F"
+          ],
+          "email": "arpitag@iimcal.ac.in"
+        }
+      ]
+    },
+    {
+      "code": "MI-129",
+      "name": "Managerial Decision Modelling",
+      "phase": "pre_mid",
+      "credits": 1.5,
+      "total_classes": 10,
+      "min_pct": 80,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "A": [
+          {
+            "day": 2,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-21"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-21"
+          }
+        ],
+        "B": [
+          {
+            "day": 2,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-22"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-22"
+          }
+        ],
+        "C": [
+          {
+            "day": 2,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-31"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-31"
+          }
+        ],
+        "D": [
+          {
+            "day": 2,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-32"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-32"
+          }
+        ],
+        "E": [
+          {
+            "day": 2,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-31"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-31"
+          }
+        ],
+        "F": [
+          {
+            "day": 2,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-32"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-32"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "Rahul Kumar",
+          "role": null,
+          "sections": [
+            "A",
+            "B"
+          ],
+          "email": null
+        },
+        {
+          "name": "Soumyakanti Chakraborty",
+          "role": "CC",
+          "sections": [
+            "C",
+            "D"
+          ],
+          "email": "soumyakc@iimcal.ac.in"
+        },
+        {
+          "name": "Anik Mukherjee",
+          "role": null,
+          "sections": [
+            "E",
+            "F"
+          ],
+          "email": "anik.mukherjee@iimcal.ac.in"
+        }
+      ]
+    },
+    {
+      "code": "MI-130",
+      "name": "Transformative Digital Technologies",
+      "phase": "post_mid",
+      "credits": 1.5,
+      "total_classes": 10,
+      "min_pct": 80,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "A": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-21"
+          },
+          {
+            "day": 4,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-21"
+          }
+        ],
+        "B": [
+          {
+            "day": 1,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-22"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-22"
+          }
+        ],
+        "C": [
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-31"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-31"
+          }
+        ],
+        "D": [
+          {
+            "day": 2,
+            "start": "08:30",
+            "end": "10:00",
+            "room": "L-32"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-32"
+          }
+        ],
+        "E": [
+          {
+            "day": 2,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-31"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-31"
+          }
+        ],
+        "F": [
+          {
+            "day": 2,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-32"
+          },
+          {
+            "day": 4,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-32"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "Vimal Kumar M",
+          "role": null,
+          "sections": [
+            "A",
+            "B",
+            "C"
+          ],
+          "email": "vimal@iimcal.ac.in"
+        },
+        {
+          "name": "Abhipsa Pal",
+          "role": null,
+          "sections": [
+            "D",
+            "E",
+            "F"
+          ],
+          "email": "abhipsapal@iimcal.ac.in"
+        }
+      ]
+    },
+    {
+      "code": "MK-104",
+      "name": "Research for Marketing Decisions",
+      "phase": "pre_mid",
+      "credits": 1.5,
+      "total_classes": 10,
+      "min_pct": 80,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "A": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-21"
+          },
+          {
+            "day": 3,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-21"
+          }
+        ],
+        "B": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-22"
+          },
+          {
+            "day": 3,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-22"
+          }
+        ],
+        "D": [
+          {
+            "day": 1,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-32"
+          },
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-32"
+          }
+        ],
+        "E": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-31"
+          },
+          {
+            "day": 3,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-31"
+          }
+        ],
+        "F": [
+          {
+            "day": 1,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-32"
+          },
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-32"
+          }
+        ],
+        "C": [
+          {
+            "day": 2,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-31"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-31"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "Rashmi Kumari",
+          "role": null,
+          "sections": [
+            "A",
+            "D"
+          ],
+          "email": "rashmik@iimcal.ac.in"
+        },
+        {
+          "name": "Ramendra Singh",
+          "role": null,
+          "sections": [
+            "B"
+          ],
+          "email": "ramendra@iimcal.ac.in"
+        },
+        {
+          "name": "Avinash Kumar",
+          "role": null,
+          "sections": [
+            "C"
+          ],
+          "email": "avinash@iimcal.ac.in"
+        },
+        {
+          "name": "Suren Sista",
+          "role": null,
+          "sections": [
+            "E",
+            "F"
+          ],
+          "email": "suren@iimcal.ac.in"
+        }
+      ]
+    },
+    {
+      "code": "OB-102",
+      "name": "Organizational Behaviour-II",
+      "phase": "pre_mid",
+      "credits": 1.5,
+      "total_classes": 10,
+      "min_pct": 80,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "A": [
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-21"
+          },
+          {
+            "day": 3,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-21"
+          }
+        ],
+        "B": [
+          {
+            "day": 1,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-22"
+          },
+          {
+            "day": 3,
+            "start": "16:15",
+            "end": "17:45",
+            "room": "L-22"
+          }
+        ],
+        "C": [
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-31"
+          },
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-31"
+          }
+        ],
+        "D": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-32"
+          },
+          {
+            "day": 4,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-32"
+          }
+        ],
+        "E": [
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-31"
+          },
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-31"
+          }
+        ],
+        "F": [
+          {
+            "day": 1,
+            "start": "16:15",
+            "end": "17:45",
+            "room": "N-32"
+          },
+          {
+            "day": 3,
+            "start": "16:15",
+            "end": "17:45",
+            "room": "N-32"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "Vidyanand Jha",
+          "role": null,
+          "sections": [
+            "A",
+            "B"
+          ],
+          "email": "vjha@iimcal.ac.in"
+        },
+        {
+          "name": "Rajiv Kumar",
+          "role": null,
+          "sections": [
+            "D"
+          ],
+          "email": "rajiv@iimcal.ac.in"
+        },
+        {
+          "name": "Devi Vijay",
+          "role": null,
+          "sections": [
+            "C"
+          ],
+          "email": "devivijay@iimcal.ac.in"
+        },
+        {
+          "name": "Anupama Kondayya",
+          "role": null,
+          "sections": [
+            "E",
+            "F"
+          ],
+          "email": "akondayya@iimcal.ac.in"
+        }
+      ]
+    },
+    {
+      "code": "OM-103",
+      "name": "Operations Research",
+      "phase": "full",
+      "credits": 3.0,
+      "total_classes": 20,
+      "min_pct": 75,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "A": [
+          {
+            "day": 1,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-21"
+          },
+          {
+            "day": 3,
+            "start": "08:30",
+            "end": "10:00",
+            "room": "L-21",
+            "phase": "post_mid"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-21",
+            "phase": "pre_mid"
+          }
+        ],
+        "B": [
+          {
+            "day": 1,
+            "start": "08:30",
+            "end": "10:00",
+            "room": "L-22",
+            "phase": "post_mid"
+          },
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-22",
+            "phase": "pre_mid"
+          },
+          {
+            "day": 3,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-22"
+          }
+        ],
+        "C": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-31"
+          },
+          {
+            "day": 3,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-31",
+            "phase": "pre_mid"
+          },
+          {
+            "day": 3,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-31",
+            "phase": "post_mid"
+          }
+        ],
+        "F": [
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-32",
+            "phase": "pre_mid"
+          },
+          {
+            "day": 2,
+            "start": "08:30",
+            "end": "10:00",
+            "room": "N-32",
+            "phase": "post_mid"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-32",
+            "phase": "post_mid"
+          },
+          {
+            "day": 5,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-32",
+            "phase": "pre_mid"
+          }
+        ],
+        "D": [
+          {
+            "day": 2,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-32"
+          },
+          {
+            "day": 4,
+            "start": "08:30",
+            "end": "10:00",
+            "room": "L-32",
+            "phase": "post_mid"
+          },
+          {
+            "day": 5,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-32",
+            "phase": "pre_mid"
+          }
+        ],
+        "E": [
+          {
+            "day": 2,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-31"
+          },
+          {
+            "day": 4,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-31"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "Subrata Mitra",
+          "role": null,
+          "sections": [],
+          "email": "subrata@iimcal.ac.in"
+        },
+        {
+          "name": "Sumanta Basu",
+          "role": null,
+          "sections": [],
+          "email": "sumanta@iimcal.ac.in"
+        },
+        {
+          "name": "Ayesha Arora",
+          "role": null,
+          "sections": [],
+          "email": null
+        },
+        {
+          "name": "Umang Varshney",
+          "role": "CC",
+          "sections": [],
+          "email": null
+        },
+        {
+          "name": "Megha Sharma",
+          "role": null,
+          "sections": [],
+          "email": "megha@iimcal.ac.in"
+        }
+      ]
+    },
+    {
+      "code": "OM-107",
+      "name": "Quantitative Methods for Managing Risk",
+      "phase": "post_mid",
+      "credits": 1.5,
+      "total_classes": 10,
+      "min_pct": 80,
+      "venue": "",
+      "schedule_type": "weekly",
+      "sections": {
+        "D": [
+          {
+            "day": 1,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-32"
+          },
+          {
+            "day": 4,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-32"
+          }
+        ],
+        "E": [
+          {
+            "day": 1,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-31"
+          },
+          {
+            "day": 4,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "N-31"
+          }
+        ],
+        "F": [
+          {
+            "day": 1,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "N-32"
+          },
+          {
+            "day": 4,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "N-32"
+          }
+        ],
+        "A": [
+          {
+            "day": 2,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-21"
+          },
+          {
+            "day": 5,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-21"
+          }
+        ],
+        "B": [
+          {
+            "day": 2,
+            "start": "14:30",
+            "end": "16:00",
+            "room": "L-22"
+          },
+          {
+            "day": 5,
+            "start": "12:00",
+            "end": "13:30",
+            "room": "L-22"
+          }
+        ],
+        "C": [
+          {
+            "day": 2,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-31"
+          },
+          {
+            "day": 5,
+            "start": "10:15",
+            "end": "11:45",
+            "room": "L-31"
+          }
+        ]
+      },
+      "instructors": [
+        {
+          "name": "Vishal Bansal",
+          "role": null,
+          "sections": [],
+          "email": "vishalb@iimcal.ac.in"
+        },
+        {
+          "name": "Sumanta Basu",
+          "role": null,
+          "sections": [],
+          "email": "sumanta@iimcal.ac.in"
+        },
+        {
+          "name": "Megha Sharma",
+          "role": "CC",
+          "sections": [],
+          "email": "megha@iimcal.ac.in"
+        }
+      ]
+    }
+  ]
+}

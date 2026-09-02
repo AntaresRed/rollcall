@@ -22,6 +22,10 @@ import PorDetails from "../src/screens/PorDetails";
 import Utils from "../src/screens/Utils";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
 import CoursePicker from "../src/screens/CoursePicker";
+import SectionPicker from "../src/screens/SectionPicker";
+import CataloguePreview from "../src/screens/CataloguePreview";
+import pgp1 from "../src/data/catalogue-pgp1.json";
+import pgp2 from "../src/data/catalogue.json";
 import SignIn from "../src/screens/SignIn";
 import Splash from "../src/screens/Splash";
 
@@ -133,6 +137,14 @@ const cases = [
   ["CalendarExport / no courses", <CalendarExport key="cen" classes={[]} term={term} overrides={[]} onBack={noop} />],
   ["CalendarExport / no term", <CalendarExport key="cet" classes={classes} term={null} overrides={[]} onBack={noop} />],
   ["ScheduleAdmin", <ScheduleAdmin key="sa" onBack={noop} />],
+  // The admin preview renders the real Today and Timetable from a payload the
+  // admin is not enrolled in — a section-shaped one, and an elective one.
+  ["CataloguePreview / sections", <CataloguePreview key="cpv" payload={pgp1}
+      label="Term II" onClose={noop} />],
+  ["CataloguePreview / electives", <CataloguePreview key="cpe" payload={pgp2}
+      label="Term V" onClose={noop} />],
+  ["CataloguePreview / no calendar", <CataloguePreview key="cpn"
+      payload={{ ...pgp1, calendar: null }} label="broken" onClose={noop} />],
   ["PorDetails", <PorDetails key="por" onBack={noop} />],
   ["PorDetails / no back button", <PorDetails key="porn" />],
   ["Utils", <Utils key="u" onOpen={noop} />],
@@ -149,6 +161,15 @@ const cases = [
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
   ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],
+  // The PGP1 first run. setActiveCatalogue is swapped in below so the picker
+  // has a section-shaped schedule to read; both of its steps are rendered.
+  ["SectionPicker / choose a section", <SectionPicker key="sp" existing={[]} catalogue={pgp1} onSaved={noop} />],
+  ["SectionPicker / already in one", <SectionPicker key="spa"
+      existing={[{ subject: "Macroeconomics", course_code: "EC-102", section: "C",
+                   day_of_week: 3, start_time: "12:00", end_time: "13:30" }]}
+      catalogue={pgp1} onSaved={noop} onDirtyChange={noop} />],
+  ["SectionPicker / read-only preview", <SectionPicker key="spr" existing={[]}
+      catalogue={pgp1} readOnly onSaved={noop} />],
   ["CoursePicker / reports dirtiness", <CoursePicker key="cpd" existing={classes} onSaved={noop} onDirtyChange={noop} />],
   ["CoursePicker / fresh", <CoursePicker key="cpf" existing={[]} onSaved={noop} />],
 
