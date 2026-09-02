@@ -292,6 +292,15 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   color: var(--slate);
   transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
+/* A disabled mark must look it. Reached from three places now — the admin
+   reading another year's app, the preview pane, and Schedule admin's busy
+   states — and a button that silently ignores a tap is worse than one that
+   is visibly off. */
+.mark[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .mark[aria-pressed="true"].present {
   background: var(--present); border-color: var(--present); color: #fff;
 }
@@ -1555,6 +1564,59 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 
 
+/* ---------- admin: the whole app as another year ---------- */
+
+/* The offer, shown only to an admin and only when a second schedule exists. */
+.viewas-offer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r);
+  font-size: 12.5px;
+  color: var(--slate);
+}
+
+/* Loud on purpose, and on every tab. Reading somebody else's timetable with
+   an empty attendance record is exactly the state you must never mistake for
+   your own. */
+.viewas-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  background: var(--board);
+  color: #fff;
+  border-radius: var(--r);
+}
+.viewas-what { font-size: 13.5px; min-width: 0; }
+.viewas-note {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #A8B0BA;
+}
+.viewas-controls { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.viewas-controls select {
+  font: inherit;
+  font-size: 12.5px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid #3A424D;
+  background: var(--board-soft);
+  color: #fff;
+}
+.viewas-bar .mark { background: transparent; color: #fff; border-color: #4A525D; }
+.viewas-bar .mark:hover { background: var(--board-soft); }
+
+
 /* ---------- admin: read a schedule as a student ---------- */
 
 .preview-pane {
@@ -1601,7 +1663,6 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .preview-screen:last-child { margin-bottom: 0; }
 .preview-screen .eyebrow { margin-top: 16px; }
-.preview-screen .mark[disabled] { opacity: 0.45; }
 
 
 /* ---------- section picker (first-year first run) ---------- */

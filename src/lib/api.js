@@ -841,6 +841,26 @@ export async function loadPublishedCatalogue(cohortYear = null) {
   return data ?? null;
 }
 
+/**
+ * The cohorts with a live schedule, for the admin's "view as" switcher.
+ *
+ * Read-only and failure-tolerant: a student's request comes back with just
+ * their own cohort or nothing, and an error here should cost the admin a
+ * switcher, not their timetable.
+ */
+export async function loadPublishedCohorts() {
+  const { data, error } = await supabase
+    .from("catalogues")
+    .select("id, label, cohort_year")
+    .eq("is_published", true)
+    .order("cohort_year");
+  if (error) {
+    console.warn("could not list published schedules", error.message);
+    return [];
+  }
+  return (data ?? []).filter((r) => r.cohort_year != null);
+}
+
 /** Every upload, newest first. Admin-only by policy — a student's request
  *  comes back with just the published row, or nothing. */
 export async function loadCatalogues() {

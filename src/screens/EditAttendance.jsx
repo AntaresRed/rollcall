@@ -22,7 +22,7 @@ import { markableSessions, pretty, toMinutes, hhmm, DAY_LONG, weekdayOf, isoDate
 const FIRST_DAYS = 10;
 
 export default function EditAttendance({
-  classes, attendance, term, overrides = [], now, onMark, onBack,
+  classes, attendance, term, overrides = [], now, onMark, onBack, readOnly = false,
 }) {
   const [showAll, setShowAll] = useState(false);
 
@@ -134,6 +134,9 @@ export default function EditAttendance({
                       key={key}
                       className={`mark ${key}`}
                       aria-pressed={status === key}
+                      // Off while an admin is reading another year's app:
+                      // these rows are synthesised and own no attendance.
+                      disabled={readOnly}
                       onClick={() => onMark(cls, date, status === key ? null : key)}
                     >
                       {text}

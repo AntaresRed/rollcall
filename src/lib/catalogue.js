@@ -106,6 +106,69 @@ export function venueForCode(code, section = null) {
   return venueByCode.get(code) ?? null;
 }
 
+/**
+ * Class rows for one section of a schedule, exactly as the picker would save
+ * them — same fields, same phase and room resolution.
+ *
+ * Nothing here is written. The ids are `preview-` prefixed and exist in no
+ * table, which is what lets the admin walk another cohort's app without a
+ * single row of theirs being touched. Pass no section on an elective
+ * schedule, where every section is shown.
+ */
+export function classesFromCatalogue(payload, section = null) {
+  const out = [];
+  for (const c of payload?.courses ?? []) {
+    const letters = section ? [section] : Object.keys(c.sections ?? {});
+    for (const letter of letters) {
+      (c.sections?.[letter] ?? []).forEach((m, i) => {
+        out.push({
+          id: `preview-${c.code}-${letter}-${i}`,
+          subject: c.name,
+          course_code: c.code,
+          section: letter,
+          day_of_week: m.day,
+          session_date: m.date ?? null,
+          start_time: m.start,
+          end_time: m.end,
+          room: m.room ?? c.venue ?? null,
+          term_phase: m.phase ?? c.phase ?? "full",
+          credits: c.credits,
+          total_classes: c.total_classes,
+          min_pct: c.min_pct,
+          muted: false,
+          confirmed: true,
+        });
+      });
+    }
+  }
+  return out;
+}
+
+/** The term a catalogue describes, in the shape the screens expect. */
+export function termFromCatalogue(payload) {
+  const cal = payload?.calendar;
+  if (!cal) return null;
+  return {
+    label: payload.term,
+    term_start: cal.term_start,
+    pre_mid_end: cal.pre_mid_end,
+    post_mid_start: cal.post_mid_start,
+    term_end: cal.term_end,
+    breaks: (cal.breaks ?? []).map((b) => ({
+      label: b.label, from_date: b.from, to_date: b.to,
+    })),
+  };
+}
+
+/** Section letters a schedule offers, in order. */
+export function sectionsOf(payload) {
+  const found = new Set();
+  for (const c of payload?.courses ?? []) {
+    for (const letter of Object.keys(c.sections ?? {})) found.add(letter);
+  }
+  return [...found].sort();
+}
+
 // ---------- validation ----------
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;

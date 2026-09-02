@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { occurrencesOn, isoDate } from "../lib/api";
+import { classesFromCatalogue, termFromCatalogue, sectionsOf } from "../lib/catalogue";
 import Today from "./Today";
 import Timetable from "./Timetable";
 
@@ -21,32 +22,13 @@ import Timetable from "./Timetable";
  * goes live is the entire point.
  */
 export default function CataloguePreview({ payload, label, onClose }) {
-  const sections = useMemo(() => {
-    const found = new Set();
-    for (const c of payload.courses ?? []) {
-      for (const letter of Object.keys(c.sections ?? {})) found.add(letter);
-    }
-    return [...found].sort();
-  }, [payload]);
+  const sections = useMemo(() => sectionsOf(payload), [payload]);
 
   const bySection = (payload.kind ?? "electives") === "sections";
   const [section, setSection] = useState(sections[0] ?? null);
 
   // The term this schedule describes, in the shape the screens expect.
-  const term = useMemo(() => {
-    const cal = payload.calendar;
-    if (!cal) return null;
-    return {
-      label: payload.term,
-      term_start: cal.term_start,
-      pre_mid_end: cal.pre_mid_end,
-      post_mid_start: cal.post_mid_start,
-      term_end: cal.term_end,
-      breaks: (cal.breaks ?? []).map((b) => ({
-        label: b.label, from_date: b.from, to_date: b.to,
-      })),
-    };
-  }, [payload]);
+  const term = useMemo(() => termFromCatalogue(payload), [payload]);
 
   // Start on the first teaching day rather than today: a term being checked in
   // advance has not begun, and an empty grid tells you nothing.
@@ -59,34 +41,10 @@ export default function CataloguePreview({ payload, label, onClose }) {
 
   // Class rows exactly as the picker would save them — same fields, same
   // phase and room resolution — so what is rendered is what a student gets.
-  const classes = useMemo(() => {
-    const out = [];
-    for (const c of payload.courses ?? []) {
-      const letters = bySection ? (section ? [section] : []) : Object.keys(c.sections ?? {});
-      for (const letter of letters) {
-        (c.sections?.[letter] ?? []).forEach((m, i) => {
-          out.push({
-            id: `preview-${c.code}-${letter}-${i}`,
-            subject: c.name,
-            course_code: c.code,
-            section: letter,
-            day_of_week: m.day,
-            session_date: m.date ?? null,
-            start_time: m.start,
-            end_time: m.end,
-            room: m.room ?? c.venue ?? null,
-            term_phase: m.phase ?? c.phase ?? "full",
-            credits: c.credits,
-            total_classes: c.total_classes,
-            min_pct: c.min_pct,
-            muted: false,
-            confirmed: true,
-          });
-        });
-      }
-    }
-    return out;
-  }, [payload, section, bySection]);
+  const classes = useMemo(
+    () => classesFromCatalogue(payload, bySection ? section : null),
+    [payload, section, bySection],
+  );
 
   const now = useMemo(() => {
     // Noon on the chosen day: far enough into it that nothing reads as "not

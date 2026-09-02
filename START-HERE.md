@@ -243,6 +243,23 @@ bundle — but only for the cohort that copy belongs to. The bundled schedule is
 the second years', so a first year with nothing published sees "no timetable
 published for your year yet" rather than somebody else's electives.
 
+### Seeing the app as the other year
+
+An admin with more than one live schedule gets an offer at the top of the app:
+**see it as another year**. Taking it re-renders the whole app — Today, the
+timetable, Utils, Profile — as a student of that cohort, with a section
+selector and an obvious dark bar saying so.
+
+It is strictly read-only. The timetable is synthesised from that cohort's
+published catalogue and never saved: the rows carry ids that exist in no
+table, every write callback returns early, and marking, rescheduling, muting,
+course-changing and Schedule admin are all switched off while it is on.
+"Back to mine" restores your own timetable and catalogue.
+
+This is for checking a parse and walking a first year's app without a first
+year's account. It cannot mark attendance — if you need to exercise the write
+path, sign in with a real `…2028@` account.
+
 ### Two years, one app
 
 Which schedule a student gets comes from the **graduating year in their

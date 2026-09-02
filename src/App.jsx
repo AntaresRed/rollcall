@@ -5,8 +5,12 @@ import {
   attendanceKey, isoDate, setCourseMuted, unmarkedSessions,
   loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
   loadPublishedCatalogue, loadProfile, cohortOf,
+  loadPublishedCohorts, loadCataloguePayload,
 } from "./lib/api";
-import { setActiveCatalogue, catalogueKind, catalogueCohort } from "./lib/catalogue";
+import {
+  setActiveCatalogue, catalogueKind, catalogueCohort,
+  classesFromCatalogue, termFromCatalogue, sectionsOf,
+} from "./lib/catalogue";
 import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
 } from "./lib/push";
@@ -50,6 +54,9 @@ const TABS = [
   ["profile", "Profile", ProfileIcon],
 ];
 
+/** Stable empty array: a fresh [] on every render would re-run every memo. */
+const EMPTY = [];
+
 export default function App() {
   const [ready, setReady] = useState(false);
   const [classes, setClasses] = useState([]);
@@ -71,6 +78,18 @@ export default function App() {
   // student's year — see the boot block for why that is a screen of its own.
   const [cohort, setCohort] = useState(null);
   const [noSchedule, setNoSchedule] = useState(false);
+  // Admin only. When set, the whole app renders as a student of another
+  // cohort: { cohort, label, payload, section }. Everything that writes is
+  // switched off while it is — see `readOnly` below.
+  const [viewAs, setViewAs] = useState(null);
+  const [cohorts, setCohorts] = useState([]);
+  // What to put back on exit. The live catalogue is module state, so leaving
+  // has to restore it explicitly or every lookup stays on the other year's.
+  const real = useRef(null);
+  // Read by the write callbacks, which are memoised with empty deps and so
+  // cannot see `viewAs` directly. The buttons are disabled too; this is the
+  // guard that does not depend on every screen remembering to pass the flag.
+  const readOnlyRef = useRef(false);
   // Set by CoursePicker while its selection differs from what's saved, so
   // backing out of it can warn — and stay silent when there's nothing to lose.
   const pickerDirty = useRef(false);
@@ -126,6 +145,11 @@ export default function App() {
         // renders: the catalogue lookups are module state, so swapping them
         // later would leave already-rendered screens on the old one.
         if (published?.payload) setActiveCatalogue(published.payload);
+        real.current = { catalogue: published?.payload ?? null };
+
+        if (profile?.is_admin) {
+          loadPublishedCohorts().then(setCohorts).catch(() => setCohorts([]));
+        }
 
         // Falling back to the bundled copy is right only when it belongs to
         // this student. It is the second years' grid, so serving it to a first
@@ -211,6 +235,7 @@ export default function App() {
   }, []);
 
   const mark = useCallback(async (cls, date, status) => {
+    if (readOnlyRef.current) return;
     const k = attendanceKey(cls.subject, date, cls.start_time);
     // optimistic — marking attendance should never feel like a network round trip
     setAttendance((prev) => {
@@ -287,6 +312,7 @@ export default function App() {
   };
 
   const toggleMute = useCallback(async (subject, muted) => {
+    if (readOnlyRef.current) return;
     setClasses((prev) =>
       prev.map((c) => (c.subject === subject ? { ...c, muted } : c)));
     try {
@@ -299,6 +325,7 @@ export default function App() {
   }, []);
 
   const moveSession = useCallback(async (cls, originalDate, change) => {
+    if (readOnlyRef.current) return;
     try {
       await rescheduleSession(cls, originalDate, change);
       const [o, a] = await Promise.all([loadOverrides(), loadAttendance()]);
@@ -319,6 +346,55 @@ export default function App() {
       say("Couldn't undo that. Try again.");
     }
   }, []);
+
+  /**
+   * Render the app as a student of another year.
+   *
+   * Nothing is fetched for the admin themselves and nothing is written. The
+   * timetable is synthesised from that cohort's published catalogue, so it is
+   * the same rows a real student of theirs would have — but with ids that
+   * exist in no table, so no attendance or reschedule could attach to them
+   * even if a write slipped through.
+   */
+  const enterViewAs = async (entry) => {
+    try {
+      const payload = await loadCataloguePayload(entry.id);
+      if (!payload?.courses?.length) {
+        say("That schedule has no courses in it");
+        return;
+      }
+      real.current = {
+        ...real.current,
+        classes, attendance, term, overrides,
+      };
+      readOnlyRef.current = true;
+      setActiveCatalogue(payload);
+      setViewAs({
+        cohort: entry.cohort_year,
+        label: entry.label,
+        payload,
+        section: sectionsOf(payload)[0] ?? null,
+      });
+      setTab("today");
+      setSubScreen(null);
+      say(`Viewing as the class of ${entry.cohort_year}`);
+    } catch {
+      say("Couldn't load that schedule");
+    }
+  };
+
+  const exitViewAs = () => {
+    const saved = real.current ?? {};
+    readOnlyRef.current = false;
+    setActiveCatalogue(saved.catalogue ?? null);
+    setClasses(saved.classes ?? []);
+    setAttendance(saved.attendance ?? []);
+    setTerm(saved.term ?? null);
+    setOverrides(saved.overrides ?? []);
+    setViewAs(null);
+    setTab("today");
+    setSubScreen(null);
+  };
 
   const startOver = () => {
     // Remember where the edit was launched from, so saving returns there
@@ -354,14 +430,28 @@ export default function App() {
   // they are worth memoising — but only from up here.
   const iosNeedsInstall = useMemo(() => isIOS() && !isStandalone(), []);
 
+  // While viewing as another cohort every screen reads synthesised data
+  // instead of the admin's own. Kept as one substitution here rather than a
+  // condition inside each screen, so no screen has to know the mode exists.
+  const viewClasses = useMemo(
+    () => (viewAs ? classesFromCatalogue(viewAs.payload, viewAs.section) : classes),
+    [viewAs, classes],
+  );
+  const viewTerm = viewAs ? termFromCatalogue(viewAs.payload) : term;
+  const viewAttendance = viewAs ? EMPTY : attendance;
+  const viewOverrides = viewAs ? EMPTY : overrides;
+  const readOnly = Boolean(viewAs);
+
   const pendingCount = useMemo(
-    () => unmarkedSessions(classes, attendance, term, now, 28, overrides).length,
-    [classes, attendance, term, now, overrides],
+    () => (readOnly
+      ? 0
+      : unmarkedSessions(viewClasses, viewAttendance, viewTerm, now, 28, viewOverrides).length),
+    [readOnly, viewClasses, viewAttendance, viewTerm, now, viewOverrides],
   );
 
   const todaysOccurrences = useMemo(
-    () => occurrencesOn(classes, term, isoDate(now), overrides),
-    [classes, term, now, overrides],
+    () => occurrencesOn(viewClasses, viewTerm, isoDate(now), viewOverrides),
+    [viewClasses, viewTerm, now, viewOverrides],
   );
 
   // ---- everything below this line may return early ----
@@ -372,7 +462,7 @@ export default function App() {
   // A student whose year has no schedule yet. Deliberately ahead of the
   // course picker: with no catalogue of their own there is nothing to pick,
   // and the bundled fallback belongs to the other year.
-  if (noSchedule && !classes.length) {
+  if (noSchedule && !classes.length && !viewAs) {
     return (
       <div className="shell">
         <Masthead now={now} />
@@ -393,7 +483,7 @@ export default function App() {
   }
 
   // ---- onboarding ----
-  if (!classes.length || editing) {
+  if (!viewAs && (!classes.length || editing)) {
     const finish = async (saved) => {
       setClasses(saved);
       pickerDirty.current = false;
@@ -450,6 +540,16 @@ export default function App() {
           list and is better off at the narrow column width it already has;
           stretching those to a 27" monitor would just make the lines long. */}
       <div className={`shell${tab === "timetable" && !subScreen ? " shell-grid" : ""}`}>
+        {viewAs && (
+          <ViewAsBar
+            viewAs={viewAs}
+            onSection={(letter) => setViewAs((v) => ({ ...v, section: letter }))}
+            onExit={exitViewAs}
+          />
+        )}
+        {!viewAs && isAdmin && cohorts.length > 1 && (
+          <ViewAsPicker mine={cohort} cohorts={cohorts} onPick={enterViewAs} />
+        )}
         {!alerts && pushSupported() && (
           <div className={`banner${iosNeedsInstall ? " warn" : ""}`}>
             {iosNeedsInstall ? (
@@ -470,13 +570,14 @@ export default function App() {
         {tab === "today" && (
           <Today
             occurrences={todaysOccurrences}
-            attendance={attendance}
+            attendance={viewAttendance}
             now={now}
             onMark={mark}
+            readOnly={readOnly}
           />
         )}
         {tab === "timetable" && subScreen === "calendar" && (
-          <TermCalendar term={term} now={now} onBack={() => setSubScreen(null)} />
+          <TermCalendar term={viewTerm} now={now} onBack={() => setSubScreen(null)} />
         )}
         {tab === "timetable" && subScreen === "reschedule" && (
           <Reschedule
@@ -491,22 +592,23 @@ export default function App() {
         )}
         {tab === "timetable" && subScreen === "attendance" && (
           <EditAttendance
-            classes={classes}
-            attendance={attendance}
-            term={term}
-            overrides={overrides}
+            classes={viewClasses}
+            attendance={viewAttendance}
+            term={viewTerm}
+            overrides={viewOverrides}
             now={now}
             onMark={mark}
+            readOnly={readOnly}
             onBack={() => setSubScreen(null)}
           />
         )}
         {tab === "timetable" && subScreen === "breakdown" && (
           <AttendanceBreakdown
-            classes={classes}
-            attendance={attendance}
-            term={term}
+            classes={viewClasses}
+            attendance={viewAttendance}
+            term={viewTerm}
             now={now}
-            overrides={overrides}
+            overrides={viewOverrides}
             onBack={() => setSubScreen(null)}
           />
         )}
@@ -514,28 +616,29 @@ export default function App() {
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "faculty" && (
-          <Faculty classes={classes} onBack={() => setSubScreen(null)} />
+          <Faculty classes={viewClasses} onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "por" && (
           <PorDetails onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "export" && (
           <CalendarExport
-            classes={classes}
-            term={term}
-            overrides={overrides}
+            classes={viewClasses}
+            term={viewTerm}
+            overrides={viewOverrides}
             onBack={() => setSubScreen(null)}
           />
         )}
         {tab === "utils" && !subScreen && <Utils onOpen={setSubScreen} />}
         {tab === "timetable" && !subScreen && (
           <Timetable
-            classes={classes}
+            classes={viewClasses}
             now={now}
-            term={term}
-            overrides={overrides}
+            term={viewTerm}
+            overrides={viewOverrides}
             onShowCalendar={() => setSubScreen("calendar")}
-            onReschedule={() => setSubScreen("reschedule")}
+            // Rescheduling writes, so it is not offered while viewing.
+            onReschedule={readOnly ? null : () => setSubScreen("reschedule")}
             onShowBreakdown={() => setSubScreen("breakdown")}
             onShowAttendance={() => setSubScreen("attendance")}
             pendingCount={pendingCount}
@@ -544,12 +647,12 @@ export default function App() {
         {tab === "profile" && !subScreen && (
           <Profile
             session={session}
-            classes={classes}
-            attendance={attendance}
-            onToggleMute={toggleMute}
-            onChangeCourses={startOver}
+            classes={viewClasses}
+            attendance={viewAttendance}
+            onToggleMute={readOnly ? null : toggleMute}
+            onChangeCourses={readOnly ? null : startOver}
             onSignOut={handleSignOut}
-            onScheduleAdmin={isAdmin ? () => setSubScreen("admin") : null}
+            onScheduleAdmin={isAdmin && !readOnly ? () => setSubScreen("admin") : null}
           />
         )}
         </Suspense>
@@ -578,6 +681,59 @@ export default function App() {
 
       {toast && <div className="toast" role="status">{toast}</div>}
     </>
+  );
+}
+
+/**
+ * Offered to admins only, and only when there is more than one live schedule.
+ * Switching is for looking at another year's app, which is worth nothing if
+ * there is only one year to look at.
+ */
+function ViewAsPicker({ mine, cohorts, onPick }) {
+  const others = cohorts.filter((c) => c.cohort_year !== mine);
+  if (!others.length) return null;
+  return (
+    <div className="viewas-offer">
+      <span>Admin — see the app as another year:</span>
+      {others.map((c) => (
+        <button key={c.id} className="mark" onClick={() => onPick(c)}>
+          Class of {c.cohort_year}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Deliberately loud and always on screen. Someone reading a timetable that is
+ * not theirs, with attendance that is empty because it does not exist, needs
+ * to be told so on every tab — not just on the one where they switched.
+ */
+function ViewAsBar({ viewAs, onSection, onExit }) {
+  const letters = sectionsOf(viewAs.payload);
+  return (
+    <div className="viewas-bar">
+      <div className="viewas-what">
+        Viewing as the <strong>class of {viewAs.cohort}</strong>
+        {viewAs.section ? <> · section {viewAs.section}</> : null}
+        <span className="viewas-note">
+          Nothing is saved and marking is off. Attendance shows empty because
+          none exists for this timetable.
+        </span>
+      </div>
+      <div className="viewas-controls">
+        {letters.length > 1 && (
+          <select
+            aria-label="Section"
+            value={viewAs.section ?? ""}
+            onChange={(e) => onSection(e.target.value)}
+          >
+            {letters.map((l) => <option key={l} value={l}>Section {l}</option>)}
+          </select>
+        )}
+        <button className="mark" onClick={onExit}>Back to mine</button>
+      </div>
+    </div>
   );
 }
 
