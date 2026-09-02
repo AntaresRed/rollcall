@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
   DAYS, SLOT_STARTS, SLOT_ENDS, PHASE_LABEL,
-  pretty, toMinutes, weekdayOf, isoDate, inSession, breakOn,
+  pretty, toMinutes, weekdayOf, isoDate, phaseActive, breakOn,
 } from "../lib/api";
 
 /**
@@ -118,14 +118,15 @@ export default function Timetable({
 
                   return (
                     <div className={`tt-cell${isNow ? " now" : ""}`} key={`${d}|${slot}`}>
-                      {items.map((c) => {
-                        const running = inSession(c.term_phase, date, term);
+                      {/* Only the half of the term that is running. These
+                          used to all be drawn, with the other half dimmed —
+                          readable when a slot rarely held two courses, but the
+                          first-year grid runs both halves through the same five
+                          slots, so every cell showed two courses and one of
+                          them was always wrong for today. */}
+                      {items.filter((c) => phaseActive(c.term_phase, date, term)).map((c) => {
                         return (
-                          <div
-                            className="tt-block"
-                            key={c.id}
-                            style={running ? undefined : { opacity: 0.42 }}
-                          >
+                          <div className="tt-block" key={c.id}>
                             <div className="tt-name">{c.subject}</div>
                             <div className="tt-meta">
                               {c.room || "—"}

@@ -287,6 +287,29 @@ export async function loadAttendance(sinceDate) {
   return data.map((r) => ({ ...r, start_time: hhmm(r.start_time) }));
 }
 
+/**
+ * Is this course's half of the term the one we are in?
+ *
+ * Deliberately not `inSession`, which also answers "is there a class today"
+ * and so goes false during every exam week and vacation. This is the coarser
+ * question the weekly grid asks — which half of the term is running — so the
+ * timetable does not blank out for the whole of Puja.
+ *
+ * The changeover is `post_mid_start`, not `pre_mid_end`. Between the two there
+ * is a gap of up to three weeks, and going by `pre_mid_end` would leave the
+ * grid empty through all of it. So the first half stays on screen until the
+ * second actually begins, and then replaces it.
+ *
+ * Fails closed with no term, matching inSession: a phase-limited course is
+ * held rather than guessed at.
+ */
+export function phaseActive(phase, date, term) {
+  if (!term) return phase !== "pre_mid" && phase !== "post_mid";
+  if (phase === "pre_mid") return date < term.post_mid_start;
+  if (phase === "post_mid") return date >= term.post_mid_start;
+  return true;
+}
+
 /** Identity of one attendance mark: subject + date + slot. */
 export const attendanceKey = (subject, date, startTime) =>
   `${subject}|${date}|${hhmm(startTime)}`;
