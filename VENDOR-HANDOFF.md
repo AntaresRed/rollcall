@@ -117,6 +117,11 @@ From **Utils**, four more:
   dot and appears under every filter; it is never assumed vegetarian. LVH has
   no night canteen listed.
 
+  **See the original menu** shows the photographed menu the prices were typed
+  up from. It is there because the typed list is a transcription, and prices
+  change without anyone telling the app — the photograph is what the canteen
+  actually charges.
+
 **First run** depends on which schedule they are on, because the two years
 choose courses in genuinely different ways:
 

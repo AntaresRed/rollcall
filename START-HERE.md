@@ -197,6 +197,15 @@ times a vegetarian eats meat. Anything left blank or marked `?` is carried
 through as *unconfirmed*: shown under every filter, marked with a hollow dot,
 never silently called vegetarian. Twelve items are in that state today.
 
+Each canteen also keeps a photograph of the menu it was transcribed from, in
+`public/menu/night/` as `<tag>-<n>.jpg` — `wh-1.jpg`, `wh-2.jpg` and so on.
+The build discovers them by filename, so adding a page is dropping a file next
+to the others; no spreadsheet column to remember. They live in `public/`, so
+they are copied into the build rather than bundled into the JavaScript and are
+only downloaded when a student taps "See the original menu". Around 180 KB a
+page, and the transcription is what can go stale, so the photograph is the
+thing worth keeping one tap away.
+
 The hostel is read off the front of each sheet name, so a fifth mess is a new
 sheet rather than a code change. The build fails rather than emitting blanks
 if a sheet is missing a meal column or a weekday, and it reports any hostels

@@ -770,6 +770,20 @@ console.log("night canteen");
   check("no empty category is ever returned",
     filterMenu(first, { query: "paneer" }).every(c => c.items.length > 0));
 
+  // Every canteen keeps a photograph of the menu it was transcribed from,
+  // because the transcription is the thing that can be wrong.
+  check("every canteen has scanned pages",
+    CANTEENS.every(c => Array.isArray(c.pages) && c.pages.length > 0));
+  check("pages are served from the public folder",
+    CANTEENS.every(c => c.pages.every(p => p.startsWith("/menu/night/"))));
+  check("pages are numbered in order",
+    CANTEENS.every(c => {
+      const ns = c.pages.map(p => Number(p.match(/-(\d+)\.jpg$/)[1]));
+      return ns.every((n, i) => i === 0 || n > ns[i - 1]);
+    }));
+  check("each canteen's pages are its own",
+    CANTEENS.every(c => c.pages.every(p => p.includes(`/${c.id}-`))));
+
   check("an unknown canteen falls back", canteenById("nope") === CANTEENS[0]);
   survives("no canteen at all", () => filterMenu(null, { diet: "veg" }));
   check("three diet filters offered", DIET_FILTERS.length === 3);

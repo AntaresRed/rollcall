@@ -16,6 +16,7 @@ export default function NightMessMenu() {
   const [id, setId] = useState(CANTEENS[0]?.id ?? null);
   const [diet, setDiet] = useState("all");
   const [query, setQuery] = useState("");
+  const [showScan, setShowScan] = useState(false);
 
   const canteen = useMemo(() => canteenById(id), [id]);
   const shown = useMemo(
@@ -42,7 +43,7 @@ export default function NightMessMenu() {
             className="mess-tab"
             role="tab"
             aria-selected={c.id === id}
-            onClick={() => setId(c.id)}
+            onClick={() => { setId(c.id); setShowScan(false); }}
           >
             {c.name}
           </button>
@@ -62,6 +63,43 @@ export default function NightMessMenu() {
             {canteen.room_service && <span>Room service ₹{canteen.room_service}</span>}
           </div>
         </div>
+      )}
+
+      {/* The typed-up list is easier to search and filter, but it is a
+          transcription, and a transcription can be wrong or go stale before
+          anybody notices. The photographed menu is what the canteen actually
+          charges, so it stays one tap away rather than being replaced. */}
+      {canteen?.pages?.length > 0 && (
+        <>
+          <button
+            className="btn ghost block scan-toggle"
+            aria-expanded={showScan}
+            onClick={() => setShowScan((v) => !v)}
+          >
+            {showScan
+              ? "Hide the original menu"
+              : `See the original menu (${canteen.pages.length} page${canteen.pages.length === 1 ? "" : "s"})`}
+          </button>
+
+          {showScan && (
+            <div className="scan-pages">
+              <p className="scan-note">
+                Photographed from the menu on the wall. Tap a page to open it
+                full size, where it can be zoomed.
+              </p>
+              {canteen.pages.map((src, i) => (
+                <a key={src} href={src} target="_blank" rel="noopener noreferrer">
+                  <img
+                    className="scan-page"
+                    src={src}
+                    alt={`${canteen.canteen}, page ${i + 1} of ${canteen.pages.length}`}
+                    loading="lazy"
+                  />
+                </a>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <div className="diet-row" role="group" aria-label="Diet">

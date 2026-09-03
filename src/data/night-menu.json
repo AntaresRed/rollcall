@@ -7,6 +7,11 @@
       "phone": "9038103742",
       "hours": "",
       "room_service": "5",
+      "pages": [
+        "/menu/night/nh-1.jpg",
+        "/menu/night/nh-2.jpg",
+        "/menu/night/nh-3.jpg"
+      ],
       "categories": [
         {
           "name": "Milk Shake",
@@ -982,6 +987,11 @@
       "phone": "9874886704 / 7687917536",
       "hours": "",
       "room_service": "5",
+      "pages": [
+        "/menu/night/oh-1.jpg",
+        "/menu/night/oh-2.jpg",
+        "/menu/night/oh-3.jpg"
+      ],
       "categories": [
         {
           "name": "Maggi",
@@ -2192,6 +2202,12 @@
       "phone": "9875555920",
       "hours": "11:00 PM - 4:00 AM",
       "room_service": "5",
+      "pages": [
+        "/menu/night/wh-1.jpg",
+        "/menu/night/wh-2.jpg",
+        "/menu/night/wh-3.jpg",
+        "/menu/night/wh-4.jpg"
+      ],
       "categories": [
         {
           "name": "Rice",

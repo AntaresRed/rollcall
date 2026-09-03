@@ -21,7 +21,9 @@ meat. So the spreadsheet decides, a human can correct it, and anything left
 unresolved is carried through as unknown rather than quietly called veg.
 """
 
+import glob
 import json
+import os
 import re
 import sys
 
@@ -118,7 +120,26 @@ def read_menu(ws):
     return [{"name": c, "items": cats[c]} for c in order], unknown
 
 
-def build(path):
+def scans(pages_dir, tag):
+    """The scanned pages for one canteen, in order.
+
+    Discovered from the directory rather than listed in the spreadsheet:
+    adding a page is then dropping `wh-5.jpg` next to the others, which is a
+    thing somebody can do without being told a convention twice.
+    """
+    found = glob.glob(os.path.join(pages_dir, f"{tag.lower()}-*.jpg"))
+
+    def page_no(p):
+        m = re.search(r"-(\d+)\.jpg$", os.path.basename(p))
+        return int(m.group(1)) if m else 0
+
+    # Served from /menu/night/, which is public/ and so is copied verbatim
+    # into the build rather than bundled into the JavaScript. The pages are
+    # only fetched when somebody actually asks to see one.
+    return [f"/menu/night/{os.path.basename(p)}" for p in sorted(found, key=page_no)]
+
+
+def build(path, pages_dir="public/menu/night"):
     wb = openpyxl.load_workbook(path, data_only=True)
     if "Info" not in wb.sheetnames:
         die("workbook has no Info sheet")
@@ -133,7 +154,12 @@ def build(path):
         meta = info.get(tag)
         if meta is None:
             die(f"'{name}' has no matching row in the Info sheet (looked for {tag})")
-        hostels.append({"id": tag.lower(), "name": tag, **meta, "categories": cats})
+        pages = scans(pages_dir, tag)
+        if not pages:
+            warnings.append(f"{tag}: no scanned pages in {pages_dir} — "
+                            f"the 'see the original' button will not appear")
+        hostels.append({"id": tag.lower(), "name": tag, **meta,
+                        "pages": pages, "categories": cats})
         warnings += [f"{tag}: {u}" for u in unknown]
 
     if not hostels:
@@ -144,8 +170,9 @@ def build(path):
 if __name__ == "__main__":
     src = sys.argv[1] if len(sys.argv) > 1 else "data/Night Mess Menu.xlsx"
     dest = sys.argv[2] if len(sys.argv) > 2 else "src/data/night-menu.json"
+    pages_dir = sys.argv[3] if len(sys.argv) > 3 else "public/menu/night"
 
-    menu, warnings = build(src)
+    menu, warnings = build(src, pages_dir)
     with open(dest, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(menu, fh, indent=2, ensure_ascii=False)
 
@@ -160,7 +187,8 @@ if __name__ == "__main__":
         split = "  ".join(f"{k} {v}" for k, v in sorted(by.items()))
         print(f"   {h['name']:<4} {n:>4} items, {len(h['categories']):>2} categories   {split}")
         print(f"        {h['canteen']} · {h['phone']}"
-              + (f" · {h['hours']}" if h["hours"] else ""))
+              + (f" · {h['hours']}" if h["hours"] else "")
+              + f" · {len(h['pages'])} scanned page(s)")
 
     if warnings:
         print(f"\n{len(warnings)} item(s) with no usable Diet — shown to everyone "
