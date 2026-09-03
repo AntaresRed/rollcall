@@ -22,7 +22,7 @@ import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 
 const STORE = "iimpresent.night.cart";
 
-/** Stable empty basket, so the memo above does not churn. */
+/** Stable empty basket, so the memo below does not churn. */
 const EMPTY = [];
 
 /** One cart, belonging to one canteen. Kept across a reload, because losing a
@@ -30,12 +30,19 @@ const EMPTY = [];
 function loadCart() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE) || "null");
-    if (raw && Array.isArray(raw.lines)) return raw;
+    if (raw && Array.isArray(raw.lines)) {
+      // `where` was one free-text line before the room and registration
+      // numbers were split apart. Whatever was typed there was the room, so
+      // it carries over rather than being dropped on the upgrade.
+      return { ...raw, reg: raw.reg ?? "", room: raw.room ?? raw.where ?? "" };
+    }
   } catch {
     /* a private window, or site data cleared */
   }
-  return { canteen: null, lines: [], where: "" };
+  return { canteen: null, lines: [], reg: "", room: "" };
 }
+
+const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export default function NightMessMenu() {
   const [id, setId] = useState(CANTEENS[0]?.id ?? null);
@@ -53,6 +60,11 @@ export default function NightMessMenu() {
   const shown = useMemo(() => filterMenu(canteen, { diet, query }), [canteen, diet, query]);
   const total = useMemo(() => countItems(canteen?.categories ?? []), [canteen]);
   const showing = countItems(shown);
+  const terms = useMemo(
+    () => query.toLowerCase().split(/\s+/).filter(Boolean),
+    [query],
+  );
+  const narrowed = terms.length > 0 || diet !== "all";
 
   // The basket only ever belongs to the canteen on screen. Memoised because
   // the empty case would otherwise hand back a fresh array every render and
@@ -63,6 +75,15 @@ export default function NightMessMenu() {
   );
   const bill = useMemo(() => billFor(canteen, lines), [canteen, lines]);
   const qtyOf = (name) => lines.find((l) => l.name === name)?.qty ?? 0;
+
+  // Escape closes the basket, which is what a dialog is expected to do and the
+  // only way out for anybody not using a mouse.
+  useEffect(() => {
+    if (!showCart) return undefined;
+    const onKey = (e) => { if (e.key === "Escape") setShowCart(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showCart]);
 
   const change = (item, by) => {
     setCart((prev) => {
@@ -76,7 +97,7 @@ export default function NightMessMenu() {
         if (qty <= 0) next.splice(at, 1);
         else next[at] = { ...next[at], qty };
       }
-      return { canteen: canteen.id, lines: next, where: prev.where ?? "" };
+      return { ...prev, canteen: canteen.id, lines: next };
     });
   };
 
@@ -89,7 +110,7 @@ export default function NightMessMenu() {
     setId(next);
     setShowScan(false);
     setShowCart(false);
-    if (lines.length) setCart((p) => ({ canteen: next, lines: [], where: p.where }));
+    if (lines.length) setCart((p) => ({ ...p, canteen: next, lines: [] }));
   };
 
   if (!CANTEENS.length) {
@@ -97,7 +118,7 @@ export default function NightMessMenu() {
   }
 
   const firstNumber = canteen?.phone?.split("/")[0].replace(/\D/g, "") ?? "";
-  const message = orderText(canteen, bill.items, cart.where ?? "");
+  const message = orderText(canteen, bill.items, { reg: cart.reg, room: cart.room });
 
   return (
     <>
@@ -169,43 +190,60 @@ export default function NightMessMenu() {
         </>
       )}
 
-      <div className="diet-row" role="group" aria-label="Diet">
-        {DIET_FILTERS.map((f) => (
+      {/* Search, diet and the count read as one control rather than three
+          stacked rows. The count belongs here: on a list this long it is the
+          only feedback that a filter did anything, and it is what you check
+          before concluding the kitchen simply has no paneer. */}
+      <div className="night-find">
+        <div className="dir-search">
+          <SearchIcon />
+          <input
+            type="search"
+            value={query}
+            placeholder={`Search ${total} items…`}
+            aria-label="Search the night menu"
+            autoComplete="off"
+            enterKeyHint="search"
+            onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <button className="dir-clear" aria-label="Clear search" onClick={() => setQuery("")}>
+              ×
+            </button>
+          )}
+        </div>
+
+        <div className="night-filters">
+          <div className="diet-row" role="group" aria-label="Diet">
+            {DIET_FILTERS.map((f) => (
+              <button
+                key={f.id}
+                className={`diet-chip${diet === f.id ? " on" : ""}`}
+                aria-pressed={diet === f.id}
+                onClick={() => setDiet(f.id)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <span className="night-count" role="status">
+            {narrowed ? `${showing} of ${total}` : `${total} items`}
+          </span>
+        </div>
+      </div>
+
+      {!shown.length && (
+        <div className="night-none">
+          <p>Nothing on this menu matches that.</p>
           <button
-            key={f.id}
-            className={`diet-chip${diet === f.id ? " on" : ""}`}
-            aria-pressed={diet === f.id}
-            onClick={() => setDiet(f.id)}
+            className="btn ghost"
+            onClick={() => { setQuery(""); setDiet("all"); }}
           >
-            {f.label}
+            Show the whole menu
           </button>
-        ))}
-      </div>
-
-      <div className="dir-search">
-        <SearchIcon />
-        <input
-          type="search"
-          value={query}
-          placeholder="Search the menu…"
-          aria-label="Search the night menu"
-          autoComplete="off"
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        {query && (
-          <button className="dir-clear" aria-label="Clear search" onClick={() => setQuery("")}>
-            ×
-          </button>
-        )}
-      </div>
-
-      <div className="dir-bar">
-        <span className="dir-count">
-          {showing === total ? `${total} items` : `${showing} of ${total}`}
-        </span>
-      </div>
-
-      {!shown.length && <div className="empty">Nothing on this menu matches that.</div>}
+        </div>
+      )}
 
       {shown.map((cat) => (
         <div className="night-cat" key={cat.name}>
@@ -218,23 +256,30 @@ export default function NightMessMenu() {
             return (
               <div className={`night-row${qty ? " in-cart" : ""}`} key={item.name}>
                 <span className={`diet-dot ${item.diet}`} title={DIET_LABEL[item.diet]} />
-                <span className="night-item">{item.name}</span>
+                <span className="night-item">
+                  <Hit text={item.name} terms={terms} />
+                </span>
                 <span className="night-price">₹{item.price}</span>
-                {qty ? (
-                  <span className="qty">
-                    <button aria-label={`One fewer ${item.name}`} onClick={() => change(item, -1)}>−</button>
-                    <b>{qty}</b>
-                    <button aria-label={`One more ${item.name}`} onClick={() => change(item, 1)}>+</button>
-                  </span>
-                ) : (
-                  <button
-                    className="night-add"
-                    aria-label={`Add ${item.name}`}
-                    onClick={() => change(item, 1)}
-                  >
-                    +
-                  </button>
-                )}
+                {/* Fixed-width, whether it holds a plus or a stepper. The two
+                    are different sizes, and letting the column breathe put
+                    every price at a different distance from the edge. */}
+                <span className="night-act">
+                  {qty ? (
+                    <span className="qty">
+                      <button aria-label={`One fewer ${item.name}`} onClick={() => change(item, -1)}>−</button>
+                      <b>{qty}</b>
+                      <button aria-label={`One more ${item.name}`} onClick={() => change(item, 1)}>+</button>
+                    </span>
+                  ) : (
+                    <button
+                      className="night-add"
+                      aria-label={`Add ${item.name}`}
+                      onClick={() => change(item, 1)}
+                    >
+                      +
+                    </button>
+                  )}
+                </span>
               </div>
             );
           })}
@@ -249,68 +294,108 @@ export default function NightMessMenu() {
         </p>
       )}
 
+      {/* A dialog rather than a panel further down the page. The basket is a
+          thing you finish and leave, and it asks for two things to type; both
+          go badly with two hundred menu rows still scrolling underneath. */}
       {showCart && bill.count > 0 && (
-        <div className="cart-sheet">
-          <div className="cart-head">
-            Your basket · {canteen.name}
-            <button
-              className="mark"
-              onClick={() => setCart({ canteen: null, lines: [], where: cart.where })}
-            >
-              Empty it
-            </button>
-          </div>
-
-          {bill.items.map((i) => (
-            <div className="cart-line" key={i.name}>
-              <span className="qty">
-                <button aria-label={`One fewer ${i.name}`} onClick={() => change(i, -1)}>−</button>
-                <b>{i.qty}</b>
-                <button aria-label={`One more ${i.name}`} onClick={() => change(i, 1)}>+</button>
-              </span>
-              <span className="cart-name">{i.name}</span>
-              <span className="night-price">₹{i.total}</span>
+        <div
+          className="modal-back"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowCart(false); }}
+        >
+          <div className="modal cart-modal" role="dialog" aria-modal="true" aria-label="Your basket">
+            <div className="modal-head">
+              <span>Your basket · {canteen.name}</span>
+              <button className="modal-x" aria-label="Close basket" onClick={() => setShowCart(false)}>
+                ×
+              </button>
             </div>
-          ))}
 
-          <div className="cart-sum">
-            <div><span>Subtotal</span><span>₹{bill.subtotal}</span></div>
-            {bill.delivery > 0 && (
-              <div><span>Room service</span><span>₹{bill.delivery}</span></div>
-            )}
-            <div className="cart-grand"><span>Total</span><span>₹{bill.total}</span></div>
+            <div className="modal-body">
+              {bill.items.map((i) => (
+                <div className="cart-line" key={i.name}>
+                  <span className="qty">
+                    <button aria-label={`One fewer ${i.name}`} onClick={() => change(i, -1)}>−</button>
+                    <b>{i.qty}</b>
+                    <button aria-label={`One more ${i.name}`} onClick={() => change(i, 1)}>+</button>
+                  </span>
+                  <span className="cart-name">{i.name}</span>
+                  <span className="night-price">₹{i.total}</span>
+                </div>
+              ))}
+
+              <div className="cart-sum">
+                <div><span>Subtotal</span><span>₹{bill.subtotal}</span></div>
+                {bill.delivery > 0 && (
+                  <div><span>Room service</span><span>₹{bill.delivery}</span></div>
+                )}
+                <div className="cart-grand"><span>Total</span><span>₹{bill.total}</span></div>
+              </div>
+
+              {/* Two fields rather than one line of free text: the counter
+                  reads the room to walk to and the registration number to
+                  write in the book, and those get muddled when they arrive
+                  as one string somebody typed in a hurry. */}
+              <div className="cart-who">
+                <label>
+                  <span>Room number</span>
+                  <input
+                    type="text"
+                    value={cart.room ?? ""}
+                    placeholder="e.g. 214"
+                    autoComplete="off"
+                    onChange={(e) => setCart((p) => ({ ...p, room: e.target.value }))}
+                  />
+                </label>
+                <label>
+                  <span>Reg. number</span>
+                  <input
+                    type="text"
+                    value={cart.reg ?? ""}
+                    placeholder="e.g. 0446/62"
+                    autoComplete="off"
+                    onChange={(e) => setCart((p) => ({ ...p, reg: e.target.value }))}
+                  />
+                </label>
+              </div>
+
+              {!String(cart.room ?? "").trim() && (
+                <p className="cart-warn">
+                  Without a room number they have nowhere to deliver it.
+                </p>
+              )}
+
+              <a
+                className="btn block cart-order"
+                href={whatsAppHref(firstNumber, message)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Order on WhatsApp
+              </a>
+              <a className="btn ghost block" href={telHref(firstNumber)}>
+                Call {prettyPhone(firstNumber)} instead
+              </a>
+
+              {/* Said plainly, because the button looks like it places an order
+                  and it does not: WhatsApp opens with the order written out
+                  and the student presses send. */}
+              <p className="cart-note">
+                This opens WhatsApp with your order written out — you still press
+                send. The app can't tell whether the counter has seen it, so call
+                if nobody replies.
+              </p>
+
+              <button
+                className="btn ghost block cart-empty"
+                onClick={() => {
+                  setCart((p) => ({ ...p, canteen: null, lines: [] }));
+                  setShowCart(false);
+                }}
+              >
+                Empty the basket
+              </button>
+            </div>
           </div>
-
-          <label className="cart-where">
-            <span>Where to deliver</span>
-            <input
-              type="text"
-              value={cart.where ?? ""}
-              placeholder="Room number and hostel"
-              onChange={(e) => setCart((p) => ({ ...p, where: e.target.value }))}
-            />
-          </label>
-
-          <a
-            className="btn block cart-order"
-            href={whatsAppHref(firstNumber, message)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Order on WhatsApp
-          </a>
-          <a className="btn ghost block" href={telHref(firstNumber)}>
-            Call {prettyPhone(firstNumber)} instead
-          </a>
-
-          {/* Said plainly, because the button looks like it places an order and
-              it does not: WhatsApp opens with the order written out and the
-              student presses send. */}
-          <p className="cart-note">
-            This opens WhatsApp with your order written out — you still press
-            send. The app can't tell whether the counter has seen it, so call
-            if nobody replies.
-          </p>
         </div>
       )}
 
@@ -320,9 +405,9 @@ export default function NightMessMenu() {
         <>
           <div className="cart-spacer" aria-hidden="true" />
           <div className="cart-dock">
-            <button className="cart-open" onClick={() => setShowCart((v) => !v)}>
+            <button className="cart-open" onClick={() => setShowCart(true)}>
               <span className="cart-count">{bill.count}</span>
-              {showCart ? "Hide basket" : "View basket"}
+              View basket
               <span className="cart-total">₹{bill.total}</span>
             </button>
           </div>
@@ -330,6 +415,19 @@ export default function NightMessMenu() {
       )}
     </>
   );
+}
+
+/**
+ * An item name with the searched words marked.
+ *
+ * On a list this long "roll" matches a dozen things across four categories;
+ * marking the hit is what lets you skim the results instead of reading them.
+ */
+function Hit({ text, terms }) {
+  if (!terms.length) return text;
+  const parts = text.split(new RegExp(`(${terms.map(escape).join("|")})`, "ig"));
+  return parts.map((p, i) =>
+    (terms.includes(p.toLowerCase()) ? <mark key={i}>{p}</mark> : p));
 }
 
 function SearchIcon() {

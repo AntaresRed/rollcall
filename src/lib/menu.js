@@ -22,18 +22,18 @@ export const hostelById = (id) =>
 export const todayName = (now = new Date()) => ORDER[(now.getDay() + 6) % 7];
 
 /**
- * One hostel's week, Monday to Sunday.
+ * One hostel's week, starting from today and wrapping round.
  *
- * This used to start on today and wrap, on the reasoning that a menu answers
- * "what is there now". It read badly: opening it on a Wednesday put Monday
- * and Tuesday at the very bottom, so the page looked like a week with a
- * strange beginning rather than a week. A menu is also something people scan
- * ahead in — "what is Friday dinner" — and that wants the calendar order
- * everyone already holds in their head.
- *
- * Today is marked instead, which finds it without reordering anything.
+ * All seven days are always there — the week reads forwards from today rather
+ * than being trimmed — but the day you are actually standing in comes first,
+ * because the question this screen answers most often is "what is there
+ * tonight". Today is also marked, so it is findable at a glance once you have
+ * scrolled past it.
  */
-export function weekOf(hostel) {
-  const days = hostel?.days ?? [];
-  return ORDER.map((name) => days.find((d) => d.day === name)).filter(Boolean);
+export function weekOf(hostel, now = new Date()) {
+  const days = ORDER.map((name) => (hostel?.days ?? []).find((d) => d.day === name))
+    .filter(Boolean);
+  const start = days.findIndex((d) => d.day === todayName(now));
+  if (start <= 0) return days;
+  return [...days.slice(start), ...days.slice(0, start)];
 }

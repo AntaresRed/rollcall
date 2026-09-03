@@ -806,14 +806,29 @@ console.log("night canteen");
   check("a two-size price does not break the total",
     Number.isFinite(odd.total) && odd.subtotal === 44);
 
-  // The message a human at the counter reads.
-  const text = orderText(wh, b.items, "Room 214, Tagore");
-  check("the order names the canteen", text.includes(wh.canteen));
+  // The message a human at the counter reads: what to cook, and for whom.
+  const text = orderText(wh, b.items, { room: "214", reg: "0446/62" });
   check("quantities lead each line", text.includes("2 x Veg Roll"));
-  check("the total is stated", text.includes("Total: Rs 196"));
-  check("the delivery address is carried", text.includes("Room 214, Tagore"));
-  check("no address means no empty address line",
-    !orderText(wh, b.items, "   ").includes("Deliver to"));
+  check("every basket line is in the message", text.includes("1 x Chicken Momo"));
+  check("the room number is carried", text.includes("Room: 214"));
+  check("the registration number is carried", text.includes("Reg. No: 0446/62"));
+
+  // Prices were removed deliberately. A figure sent from here is a second
+  // source of truth that goes stale the moment the canteen reprints its
+  // menu, and it is the counter's number to state, not this app's.
+  check("no line prices", !/Rs|₹/.test(text));
+  check("no total", !/Total/i.test(text));
+  check("no canteen header", !text.includes(wh.canteen));
+  check("the item lines come first",
+    text.indexOf("2 x Veg Roll") < text.indexOf("Room:"));
+
+  const bare = orderText(wh, b.items);
+  check("nothing typed means no empty identity lines",
+    !bare.includes("Room:") && !bare.includes("Reg. No:") && bare.includes("2 x Veg Roll"));
+  check("blank fields are treated as nothing, not as a blank line",
+    !orderText(wh, b.items, { room: "  ", reg: " " }).includes("Room:"));
+  check("one field on its own still goes",
+    orderText(wh, b.items, { room: "214" }).includes("Room: 214"));
 
   check("an unknown canteen falls back", canteenById("nope") === CANTEENS[0]);
   survives("no canteen at all", () => filterMenu(null, { diet: "veg" }));
@@ -832,25 +847,41 @@ console.log("day mess menu");
   check("hostel ids are unique",
     new Set(HOSTELS.map(h => h.id)).size === HOSTELS.length);
 
-  // A plain Monday-to-Sunday week, whatever day it is read on. Today is
-  // marked rather than moved, so the order never surprises anybody.
+  // The week starts on today and wraps. All seven days are always there —
+  // the week is rotated, never trimmed — so nothing is ever unreachable.
   const sunday = new Date("2026-09-13T12:00:00");
   const wed = new Date("2026-09-09T12:00:00");
   check("today is the weekday it says", todayName(sunday) === "Sunday");
   check("Sunday is a Sunday", todayName(new Date("2026-09-13T23:59:00")) === "Sunday");
-  const wk = weekOf(HOSTELS[0]);
-  check("the week starts on Monday", wk[0].day === "Monday");
-  check("and ends on Sunday", wk[6].day === "Sunday");
+
+  const wk = weekOf(HOSTELS[0], wed);
+  check("today comes first", wk[0].day === "Wednesday");
+  check("and the rest follow in order",
+    wk.map(d => d.day).join() ===
+    "Wednesday,Thursday,Friday,Saturday,Sunday,Monday,Tuesday");
   check("seven days, none lost or repeated",
     wk.length === 7 && new Set(wk.map(d => d.day)).size === 7);
-  check("the order does not depend on when it is read",
-    JSON.stringify(weekOf(HOSTELS[0])) === JSON.stringify(wk));
-  check("every hostel lists the same seven days in the same order",
-    HOSTELS.every(h => weekOf(h).map(d => d.day).join() === wk.map(d => d.day).join()));
+
+  // Sunday is the edge that a naive rotation drops: it is last in the stored
+  // order, so slicing from it must still leave the whole week behind it.
+  const sun = weekOf(HOSTELS[0], sunday);
+  check("read on a Sunday, Sunday leads and Monday follows",
+    sun[0].day === "Sunday" && sun[1].day === "Monday" && sun.length === 7);
+
+  // Monday leads at index 0 already; the early return for that case must not
+  // be mistaken for "not found" and leave the week unrotated by accident.
+  const mon = weekOf(HOSTELS[0], new Date("2026-09-07T12:00:00"));
+  check("read on a Monday, the week is unchanged",
+    mon[0].day === "Monday" && mon[6].day === "Sunday");
+
+  check("every hostel rotates the same way",
+    HOSTELS.every(h => weekOf(h, wed).map(d => d.day).join() === wk.map(d => d.day).join()));
+  check("today is in the week that marks it",
+    wk.some(d => d.day === todayName(wed)));
 
   check("an unknown hostel falls back rather than throwing",
     hostelById("nope") === HOSTELS[0]);
-  survives("no hostel at all", () => weekOf(null));
+  survives("no hostel at all", () => weekOf(null, wed));
 
   // OH publishes items served regardless of the day; losing them would
   // understate every one of its meals.

@@ -85,19 +85,21 @@ export function billFor(canteen, lines) {
 /**
  * The order, written out for a human to read.
  *
- * Plain text on purpose: it lands in a WhatsApp thread where somebody at the
- * counter reads it off a phone at 1am. Quantities lead each line because that
- * is what they are counting.
+ * Deliberately short: quantities and names, then who and where. No prices —
+ * the counter has its own, and a figure sent from here would be a second
+ * source of truth that goes stale the moment the menu changes, inviting an
+ * argument about what was quoted. No greeting line either; it lands in a
+ * WhatsApp thread that already says who it is from.
+ *
+ * The bill still exists for the basket on screen. What a student is deciding
+ * to spend and what the kitchen needs to read are different questions.
  */
-export function orderText(canteen, lines, where = "") {
-  const bill = billFor(canteen, lines);
-  const out = [`Order — ${canteen?.canteen ?? "night canteen"}`, ""];
-  for (const i of bill.items) out.push(`${i.qty} x ${i.name} — Rs ${i.total}`);
-  out.push("", `Subtotal: Rs ${bill.subtotal}`);
-  if (bill.delivery) out.push(`Room service: Rs ${bill.delivery}`);
-  out.push(`Total: Rs ${bill.total}`);
-  if (where.trim()) out.push("", `Deliver to: ${where.trim()}`);
-  return out.join("\n");
+export function orderText(canteen, lines, { reg = "", room = "" } = {}) {
+  const out = billFor(canteen, lines).items.map((i) => `${i.qty} x ${i.name}`);
+  const who = [];
+  if (room.trim()) who.push(`Room: ${room.trim()}`);
+  if (reg.trim()) who.push(`Reg. No: ${reg.trim()}`);
+  return who.length ? [...out, "", ...who].join("\n") : out.join("\n");
 }
 
 /** How many items a filter would show, for the count line. */

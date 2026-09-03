@@ -9,15 +9,16 @@ import { HOSTELS, MEALS, hostelById, weekOf, todayName } from "../lib/menu";
  * dropdown: four options, and the one you want is the same one every time, so
  * it should be reachable without opening anything.
  *
- * The week runs Monday to Sunday, with today marked. An earlier version
- * started on today and wrapped, which put the beginning of the week at the
- * bottom of the page and read as a mistake rather than a convenience.
+ * The week starts on today and wraps round, so the day you are standing in is
+ * the first thing you see. All seven are still there and still in order — the
+ * week just begins where you are — and today carries a marker so it stays
+ * findable once you have scrolled.
  */
 export default function DayMessMenu({ onBack, now = new Date(), embedded = false }) {
   const [id, setId] = useState(HOSTELS[0]?.id ?? null);
 
   const hostel = useMemo(() => hostelById(id), [id]);
-  const week = useMemo(() => weekOf(hostel), [hostel]);
+  const week = useMemo(() => weekOf(hostel, now), [hostel, now]);
   const today = todayName(now);
 
   if (!HOSTELS.length) {
