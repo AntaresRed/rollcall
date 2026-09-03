@@ -21,6 +21,8 @@ import ScheduleAdmin from "../src/screens/ScheduleAdmin";
 import PorDetails from "../src/screens/PorDetails";
 import Utils from "../src/screens/Utils";
 import DayMessMenu from "../src/screens/DayMessMenu";
+import NightMessMenu from "../src/screens/NightMessMenu";
+import MessMenu from "../src/screens/MessMenu";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
 import CoursePicker from "../src/screens/CoursePicker";
 import SectionPicker from "../src/screens/SectionPicker";
@@ -154,6 +156,9 @@ const cases = [
   ["DayMessMenu / on a Sunday", <DayMessMenu key="dms" onBack={noop}
       now={new Date("2026-09-13T12:00:00")} />],
   ["DayMessMenu / no back button", <DayMessMenu key="dmn" now={now} />],
+  ["DayMessMenu / embedded", <DayMessMenu key="dme" now={now} embedded />],
+  ["NightMessMenu", <NightMessMenu key="nm" />],
+  ["MessMenu", <MessMenu key="mm" onBack={noop} now={now} />],
   ["AttendanceBreakdown", <AttendanceBreakdown key="ab" classes={classes} attendance={attendance}
       term={term} now={now} overrides={overrides} onBack={noop} />],
   ["AttendanceBreakdown / no courses", <AttendanceBreakdown key="abe" classes={[]} attendance={[]}

@@ -116,13 +116,14 @@ src/
   screens/            Splash, SignIn, Today, Timetable, EditAttendance, Stats,
                       Profile, Reschedule, TermCalendar, CoursePicker,
                       AttendanceBreakdown, SectionPicker,
-                      CataloguePreview, DayMessMenu,
+                      CataloguePreview, MessMenu (Day + Night),
                       Utils (the hub) and what it opens — Faculty,
                       CalendarExport, PorDetails —
                       plus ScheduleAdmin, reached from Profile
   data/catalogue.json generated — do not edit by hand (second years)
   data/catalogue-pgp1.json  generated — do not edit by hand (first years)
-  data/menu.json      generated — do not edit by hand
+  data/menu.json      generated — do not edit by hand (day mess)
+  data/night-menu.json generated — do not edit by hand (night canteens)
   data/directory.json generated — do not edit by hand
   data/por.json       generated — do not edit by hand
 
@@ -178,6 +179,23 @@ with one sheet per hostel (`NH Day Mess menu`, `OH Day Mess Menu`, and so on):
 ```powershell
 python scripts/build_menu.py "data/Day Mess Menu.xlsx" src/data/menu.json
 ```
+
+The night canteens are a separate workbook and a separate script, because
+they are a different kind of thing — a priced list per hostel rather than a
+week of meals:
+
+```powershell
+python scripts/build_night_menu.py "data/Night Mess Menu.xlsx" src/data/night-menu.json
+```
+
+That workbook has an `Info` sheet (canteen name, phone, hours, room service)
+and one `<TAG> Night Menu` sheet per hostel with **Category, Item, Price,
+Diet**. `Diet` is `veg`, `egg` or `non-veg` and is what the app's veg filter
+reads — it is a column rather than something guessed from the item name,
+because guessing is right most of the time and the times it is wrong are the
+times a vegetarian eats meat. Anything left blank or marked `?` is carried
+through as *unconfirmed*: shown under every filter, marked with a hollow dot,
+never silently called vegetarian. Twelve items are in that state today.
 
 The hostel is read off the front of each sheet name, so a fifth mess is a new
 sheet rather than a code change. The build fails rather than emitting blanks

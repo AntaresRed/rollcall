@@ -13,7 +13,7 @@ import { HOSTELS, MEALS, hostelById, weekOf, todayName } from "../lib/menu";
  * started on today and wrapped, which put the beginning of the week at the
  * bottom of the page and read as a mistake rather than a convenience.
  */
-export default function DayMessMenu({ onBack, now = new Date() }) {
+export default function DayMessMenu({ onBack, now = new Date(), embedded = false }) {
   const [id, setId] = useState(HOSTELS[0]?.id ?? null);
 
   const hostel = useMemo(() => hostelById(id), [id]);
@@ -23,7 +23,7 @@ export default function DayMessMenu({ onBack, now = new Date() }) {
   if (!HOSTELS.length) {
     return (
       <>
-        <div className="eyebrow">Day mess menu</div>
+        {!embedded && <div className="eyebrow">Day mess menu</div>}
         <div className="empty">No menu has been added yet.</div>
         {onBack && <BackButton onBack={onBack} />}
       </>
@@ -32,7 +32,7 @@ export default function DayMessMenu({ onBack, now = new Date() }) {
 
   return (
     <>
-      <div className="eyebrow">Day mess menu</div>
+      {!embedded && <div className="eyebrow">Day mess menu</div>}
 
       <div className="mess-tabs" role="tablist" aria-label="Hostel">
         {HOSTELS.map((h) => (

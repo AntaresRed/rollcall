@@ -1665,6 +1665,113 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .preview-screen .eyebrow { margin-top: 16px; }
 
 
+/* ---------- day / night switch, and the night canteen ---------- */
+
+.daynight { display: flex; gap: 8px; margin: 4px 0 16px; }
+.daynight-tab {
+  flex: 1 1 0;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  border-radius: var(--r);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--slate);
+}
+.daynight-tab[aria-selected="true"] {
+  background: var(--signal-wash);
+  border-color: var(--signal);
+  color: var(--signal-deep);
+}
+
+/* Ordering at 1am is a phone call, so the number is the first thing here. */
+.canteen-head {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--r);
+  padding: 11px 13px;
+  margin-bottom: 14px;
+}
+.canteen-name { font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; }
+.canteen-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+}
+.canteen-call { color: var(--signal-deep); text-decoration: none; font-weight: 600; }
+
+.diet-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.diet-chip {
+  padding: 7px 13px;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--slate);
+}
+.diet-chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* The Indian convention: a filled green square is vegetarian, brown is meat.
+   Egg gets its own amber because the two words mean different things to
+   different people, and a hollow dot means nobody has checked. */
+.diet-dot {
+  flex: 0 0 auto;
+  width: 11px; height: 11px;
+  margin-top: 4px;
+  border-radius: 3px;
+  border: 1.5px solid currentColor;
+}
+.diet-dot.veg { color: var(--present); background: currentColor; }
+.diet-dot.egg { color: var(--warn-ink); background: currentColor; }
+.diet-dot.non-veg { color: var(--absent); background: currentColor; }
+.diet-dot.unknown { color: var(--rule-strong); background: transparent; }
+
+.night-cat { margin-bottom: 16px; }
+.night-cat-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.night-cat-head span { font-variant-numeric: tabular-nums; }
+
+.night-row {
+  display: grid;
+  grid-template-columns: 11px 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.night-item { font-size: 13.5px; line-height: 1.35; min-width: 0; }
+.night-price {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.night-note {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+  margin-top: 14px;
+}
+
+
 /* ---------- day mess menu ---------- */
 
 /* Four hostels as a tab strip, not a dropdown: the choice is the same every

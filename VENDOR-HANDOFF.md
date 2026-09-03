@@ -104,10 +104,18 @@ From **Utils**, four more:
   changes, it is one constant at the top of `src/screens/Utils.jsx`.
 - **POR details** — positions of responsibility, drilled down through the
   student council, CDPO, cultural bodies and the sports council.
-- **Day mess menu** — the week's food for each hostel (NH, OH, LVH, WH), as a
-  tab per mess. Monday to Sunday, with today marked. OH also publishes items
-  served every day, shown above its week rather than repeated in it. Available
-  to both years — it depends on no timetable, term or catalogue.
+- **Day and Night Mess menu** — two tabs, because they are different things.
+  **Day mess** is the week's meals for each hostel (NH, OH, LVH, WH), Monday to
+  Sunday with today marked; OH also publishes items served every day, shown
+  above its week rather than repeated in it. **Night canteen** is the priced
+  à-la-carte list for NH, OH and WH — around 660 items — with the canteen's
+  phone number, a search box, and a veg filter. Available to both years: it
+  depends on no timetable, term or catalogue.
+
+  The veg filter has three settings — everything, veg only (no egg), and no
+  meat (egg allowed). A dish whose diet nobody has confirmed shows a hollow
+  dot and appears under every filter; it is never assumed vegetarian. LVH has
+  no night canteen listed.
 
 **First run** depends on which schedule they are on, because the two years
 choose courses in genuinely different ways:

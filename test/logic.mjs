@@ -9,6 +9,7 @@ import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.j
 import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
 import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
+import { CANTEENS, canteenById, filterMenu, countItems, DIET_FILTERS } from "../src/lib/nightmenu.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -708,6 +709,70 @@ console.log("swapping the live schedule");
   check("a real payload takes effect", activeCatalogue().term === "Term VI");
   setActiveCatalogue(null);   // leave the module as we found it
   check("and can be put back", activeCatalogue().term === catalogue.term);
+}
+
+console.log("");
+console.log("night canteen");
+{
+  const all = (c) => c.categories.flatMap(x => x.items);
+  check("every canteen has items",
+    CANTEENS.length > 0 && CANTEENS.every(c => all(c).length > 0));
+  check("every item has a name and a price",
+    CANTEENS.every(c => all(c).every(i => i.name && i.price !== "")));
+  check("every item carries a known diet",
+    CANTEENS.every(c => all(c).every(i =>
+      ["veg", "egg", "non-veg", "unknown"].includes(i.diet))));
+  check("every canteen has a phone number",
+    CANTEENS.every(c => /[0-9]{6}/.test(c.phone)));
+
+  // The filter that matters. "Veg only" must never let meat or egg through:
+  // this is the one bug in the whole screen that would actually harm someone.
+  const veg = (c) => filterMenu(c, { diet: "veg" }).flatMap(x => x.items);
+  check("Veg only shows no meat",
+    CANTEENS.every(c => veg(c).every(i => i.diet !== "non-veg")));
+  check("Veg only shows no egg either",
+    CANTEENS.every(c => veg(c).every(i => i.diet !== "egg")));
+  check("Veg only is not empty",
+    CANTEENS.every(c => veg(c).length > 20));
+
+  // An unconfirmed item is shown rather than hidden, and marked. Hiding it
+  // would lose it; calling it veg would be asserting something unchecked.
+  const anyUnknown = CANTEENS.some(c => all(c).some(i => i.diet === "unknown"));
+  check("there are unconfirmed items to reason about", anyUnknown);
+  check("an unconfirmed item survives the veg filter",
+    CANTEENS.every(c => {
+      const want = all(c).filter(i => i.diet === "unknown").length;
+      return veg(c).filter(i => i.diet === "unknown").length === want;
+    }));
+
+  const nomeat = (c) => filterMenu(c, { diet: "nomeat" }).flatMap(x => x.items);
+  check("No meat allows egg but not meat",
+    CANTEENS.every(c => nomeat(c).every(i => i.diet !== "non-veg")) &&
+    CANTEENS.some(c => nomeat(c).some(i => i.diet === "egg")));
+  check("No meat is a superset of Veg only",
+    CANTEENS.every(c => nomeat(c).length >= veg(c).length));
+
+  // Search
+  const first = CANTEENS[0];
+  check("search narrows", countItems(filterMenu(first, { query: "paneer" })) > 0);
+  check("search is case-insensitive",
+    countItems(filterMenu(first, { query: "PANEER" })) ===
+    countItems(filterMenu(first, { query: "paneer" })));
+  check("every token must match",
+    countItems(filterMenu(first, { query: "paneer zzzznope" })) === 0);
+  check("an unmatched search is empty, not everything",
+    countItems(filterMenu(first, { query: "zzzznope" })) === 0);
+  check("a blank search shows everything",
+    countItems(filterMenu(first, { query: "   " })) === countItems(first.categories));
+  check("filters compose",
+    filterMenu(first, { diet: "veg", query: "paneer" })
+      .flatMap(x => x.items).every(i => i.diet !== "non-veg"));
+  check("no empty category is ever returned",
+    filterMenu(first, { query: "paneer" }).every(c => c.items.length > 0));
+
+  check("an unknown canteen falls back", canteenById("nope") === CANTEENS[0]);
+  survives("no canteen at all", () => filterMenu(null, { diet: "veg" }));
+  check("three diet filters offered", DIET_FILTERS.length === 3);
 }
 
 console.log("");
