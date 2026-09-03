@@ -8,6 +8,7 @@ import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
 import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
+import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -707,6 +708,47 @@ console.log("swapping the live schedule");
   check("a real payload takes effect", activeCatalogue().term === "Term VI");
   setActiveCatalogue(null);   // leave the module as we found it
   check("and can be put back", activeCatalogue().term === catalogue.term);
+}
+
+console.log("");
+console.log("day mess menu");
+{
+  check("every hostel has a full week",
+    HOSTELS.length > 0 && HOSTELS.every(h => h.days.length === 7));
+  check("every day names every meal",
+    HOSTELS.every(h => h.days.every(d => MEALS.every(m => m in d.meals))));
+  check("no meal is blank",
+    HOSTELS.every(h => h.days.every(d => MEALS.every(m => d.meals[m].length > 0))));
+  check("hostel ids are unique",
+    new Set(HOSTELS.map(h => h.id)).size === HOSTELS.length);
+
+  // A plain Monday-to-Sunday week, whatever day it is read on. Today is
+  // marked rather than moved, so the order never surprises anybody.
+  const sunday = new Date("2026-09-13T12:00:00");
+  const wed = new Date("2026-09-09T12:00:00");
+  check("today is the weekday it says", todayName(sunday) === "Sunday");
+  check("Sunday is a Sunday", todayName(new Date("2026-09-13T23:59:00")) === "Sunday");
+  const wk = weekOf(HOSTELS[0]);
+  check("the week starts on Monday", wk[0].day === "Monday");
+  check("and ends on Sunday", wk[6].day === "Sunday");
+  check("seven days, none lost or repeated",
+    wk.length === 7 && new Set(wk.map(d => d.day)).size === 7);
+  check("the order does not depend on when it is read",
+    JSON.stringify(weekOf(HOSTELS[0])) === JSON.stringify(wk));
+  check("every hostel lists the same seven days in the same order",
+    HOSTELS.every(h => weekOf(h).map(d => d.day).join() === wk.map(d => d.day).join()));
+
+  check("an unknown hostel falls back rather than throwing",
+    hostelById("nope") === HOSTELS[0]);
+  survives("no hostel at all", () => weekOf(null));
+
+  // OH publishes items served regardless of the day; losing them would
+  // understate every one of its meals.
+  const oh = HOSTELS.find(h => h.id === "oh");
+  check("OH keeps its everyday offering",
+    Boolean(oh) && Object.keys(oh.everyday).length === 4 && !oh.everyday._all);
+  check("and the others do not invent one",
+    HOSTELS.filter(h => h.id !== "oh").every(h => Object.keys(h.everyday).length === 0));
 }
 
 console.log("");

@@ -104,6 +104,10 @@ From **Utils**, four more:
   changes, it is one constant at the top of `src/screens/Utils.jsx`.
 - **POR details** — positions of responsibility, drilled down through the
   student council, CDPO, cultural bodies and the sports council.
+- **Day mess menu** — the week's food for each hostel (NH, OH, LVH, WH), as a
+  tab per mess. Monday to Sunday, with today marked. OH also publishes items
+  served every day, shown above its week rather than repeated in it. Available
+  to both years — it depends on no timetable, term or catalogue.
 
 **First run** depends on which schedule they are on, because the two years
 choose courses in genuinely different ways:

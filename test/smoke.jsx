@@ -20,6 +20,7 @@ import CalendarExport from "../src/screens/CalendarExport";
 import ScheduleAdmin from "../src/screens/ScheduleAdmin";
 import PorDetails from "../src/screens/PorDetails";
 import Utils from "../src/screens/Utils";
+import DayMessMenu from "../src/screens/DayMessMenu";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
 import CoursePicker from "../src/screens/CoursePicker";
 import SectionPicker from "../src/screens/SectionPicker";
@@ -148,6 +149,11 @@ const cases = [
   ["PorDetails", <PorDetails key="por" onBack={noop} />],
   ["PorDetails / no back button", <PorDetails key="porn" />],
   ["Utils", <Utils key="u" onOpen={noop} />],
+  ["DayMessMenu", <DayMessMenu key="dm" onBack={noop} now={now} />],
+  // Sunday is the rotation's edge case — the week must wrap, not truncate.
+  ["DayMessMenu / on a Sunday", <DayMessMenu key="dms" onBack={noop}
+      now={new Date("2026-09-13T12:00:00")} />],
+  ["DayMessMenu / no back button", <DayMessMenu key="dmn" now={now} />],
   ["AttendanceBreakdown", <AttendanceBreakdown key="ab" classes={classes} attendance={attendance}
       term={term} now={now} overrides={overrides} onBack={noop} />],
   ["AttendanceBreakdown / no courses", <AttendanceBreakdown key="abe" classes={[]} attendance={[]}

@@ -1665,6 +1665,94 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .preview-screen .eyebrow { margin-top: 16px; }
 
 
+/* ---------- day mess menu ---------- */
+
+/* Four hostels as a tab strip, not a dropdown: the choice is the same every
+   time you open this, so it should not cost a tap to reveal. */
+.mess-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.mess-tab {
+  flex: 1 1 0;
+  min-width: 64px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--slate);
+}
+.mess-tab[aria-selected="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+/* Served regardless of the day, so it sits above the week instead of being
+   repeated inside all seven cards. */
+.mess-everyday {
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r);
+  padding: 11px 13px;
+  margin-bottom: 16px;
+}
+.mess-everyday-head {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 6px;
+}
+.mess-everyday p { margin: 0 0 4px; font-size: 13px; line-height: 1.45; color: var(--slate); }
+.mess-everyday p:last-child { margin-bottom: 0; }
+
+.mess-day {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.mess-day.today { border-color: var(--signal); }
+.mess-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Label beside items on a phone-width column: the meal names are short and
+   fixed, so a gutter reads faster than a heading above each list. */
+.mess-row {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 10px;
+  padding: 5px 0;
+}
+.mess-meal {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-top: 2px;
+}
+.mess-everyday .mess-meal { display: inline; margin-right: 6px; }
+.mess-items { font-size: 13.5px; line-height: 1.5; }
+
+
 /* ---------- section picker (first-year first run) ---------- */
 
 /* Six tiles, because six is a choice you make at a glance and a dropdown

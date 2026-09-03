@@ -116,12 +116,13 @@ src/
   screens/            Splash, SignIn, Today, Timetable, EditAttendance, Stats,
                       Profile, Reschedule, TermCalendar, CoursePicker,
                       AttendanceBreakdown, SectionPicker,
-                      CataloguePreview,
+                      CataloguePreview, DayMessMenu,
                       Utils (the hub) and what it opens — Faculty,
                       CalendarExport, PorDetails —
                       plus ScheduleAdmin, reached from Profile
   data/catalogue.json generated — do not edit by hand (second years)
   data/catalogue-pgp1.json  generated — do not edit by hand (first years)
+  data/menu.json      generated — do not edit by hand
   data/directory.json generated — do not edit by hand
   data/por.json       generated — do not edit by hand
 
@@ -168,6 +169,21 @@ python scripts/build_directory.py data/FacultyDirectory.tsv src/data/directory.j
 `build_faculty.py` is a separate step and answers a different question — which
 directory entry each course instructor is — so run it too if the course sheet
 changed, then rebuild the catalogue to attach the result.
+
+## When the mess menu changes
+
+The Day mess menu screen reads `src/data/menu.json`, built from a workbook
+with one sheet per hostel (`NH Day Mess menu`, `OH Day Mess Menu`, and so on):
+
+```powershell
+python scripts/build_menu.py "data/Day Mess Menu.xlsx" src/data/menu.json
+```
+
+The hostel is read off the front of each sheet name, so a fifth mess is a new
+sheet rather than a code change. The build fails rather than emitting blanks
+if a sheet is missing a meal column or a weekday, and it reports any hostels
+whose menus are identical — LVH and WH are, today — so a copy-pasted sheet is
+noticed instead of shipped as fact.
 
 ## When the POR contact sheet changes
 
