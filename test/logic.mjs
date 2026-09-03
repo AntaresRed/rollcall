@@ -9,7 +9,7 @@ import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.j
 import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
 import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
-import { CANTEENS, canteenById, filterMenu, countItems, DIET_FILTERS } from "../src/lib/nightmenu.js";
+import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS } from "../src/lib/nightmenu.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -783,6 +783,37 @@ console.log("night canteen");
     }));
   check("each canteen's pages are its own",
     CANTEENS.every(c => c.pages.every(p => p.includes(`/${c.id}-`))));
+
+  // ---- the basket ----
+  // Arithmetic somebody pays for, so it is checked rather than eyeballed.
+  const wh = CANTEENS.find(c => c.id === "wh");
+  const b = billFor(wh, [
+    { name: "Veg Roll", price: 43, qty: 2 },
+    { name: "Chicken Momo", price: 105, qty: 1 },
+  ]);
+  check("line totals multiply", b.items[0].total === 86 && b.items[1].total === 105);
+  check("subtotal adds up", b.subtotal === 191);
+  check("room service is added once, not per item", b.delivery === 5 && b.total === 196);
+  check("the count is items, not lines", b.count === 3);
+
+  const empty = billFor(wh, []);
+  check("an empty basket costs nothing, not the delivery fee",
+    empty.subtotal === 0 && empty.total === 0);
+
+  // "22/25" is a real printed price for two sizes. It must not become NaN and
+  // silently poison the total.
+  const odd = billFor(wh, [{ name: "Apple", price: "22/25", qty: 2 }]);
+  check("a two-size price does not break the total",
+    Number.isFinite(odd.total) && odd.subtotal === 44);
+
+  // The message a human at the counter reads.
+  const text = orderText(wh, b.items, "Room 214, Tagore");
+  check("the order names the canteen", text.includes(wh.canteen));
+  check("quantities lead each line", text.includes("2 x Veg Roll"));
+  check("the total is stated", text.includes("Total: Rs 196"));
+  check("the delivery address is carried", text.includes("Room 214, Tagore"));
+  check("no address means no empty address line",
+    !orderText(wh, b.items, "   ").includes("Deliver to"));
 
   check("an unknown canteen falls back", canteenById("nope") === CANTEENS[0]);
   survives("no canteen at all", () => filterMenu(null, { diet: "veg" }));

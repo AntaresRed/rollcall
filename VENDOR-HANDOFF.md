@@ -117,10 +117,18 @@ From **Utils**, four more:
   dot and appears under every filter; it is never assumed vegetarian. LVH has
   no night canteen listed.
 
-  **See the original menu** shows the photographed menu the prices were typed
-  up from. It is there because the typed list is a transcription, and prices
-  change without anyone telling the app — the photograph is what the canteen
-  actually charges.
+  **See Original <hostel> Mess Menu** shows the photographed menu the prices
+  were typed up from. It is there because the typed list is a transcription,
+  and prices change without anyone telling the app — the photograph is what
+  the canteen actually charges.
+
+  Items can be added to a **basket**, which totals the order and adds the
+  hostel's room-service charge. **Order on WhatsApp** opens WhatsApp with the
+  order written out and addressed to the canteen's number — the student still
+  presses send. The app does not place orders and cannot tell whether the
+  counter saw the message, which the screen says plainly; a "call instead"
+  button sits next to it. The basket belongs to one canteen and survives a
+  reload, and switching canteen asks before emptying it.
 
 **First run** depends on which schedule they are on, because the two years
 choose courses in genuinely different ways:

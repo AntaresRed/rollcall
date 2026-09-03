@@ -58,6 +58,48 @@ export function filterMenu(canteen, { diet = "all", query = "" } = {}) {
   return out;
 }
 
+// ---------- the cart ----------
+
+/**
+ * A cart belongs to one canteen. You cannot order half from Tagore and half
+ * from Ramanujan, so switching canteen with something in the basket has to
+ * ask rather than quietly merge two menus into one order.
+ */
+
+const money = (p) => (typeof p === "number" ? p : Number(String(p).split("/")[0]) || 0);
+
+/** Line totals and the bill, with the room-service charge the canteens add. */
+export function billFor(canteen, lines) {
+  const items = lines.map((l) => ({ ...l, total: money(l.price) * l.qty }));
+  const subtotal = items.reduce((n, i) => n + i.total, 0);
+  const delivery = Number(canteen?.room_service) || 0;
+  return {
+    items,
+    count: items.reduce((n, i) => n + i.qty, 0),
+    subtotal,
+    delivery,
+    total: subtotal + (subtotal > 0 ? delivery : 0),
+  };
+}
+
+/**
+ * The order, written out for a human to read.
+ *
+ * Plain text on purpose: it lands in a WhatsApp thread where somebody at the
+ * counter reads it off a phone at 1am. Quantities lead each line because that
+ * is what they are counting.
+ */
+export function orderText(canteen, lines, where = "") {
+  const bill = billFor(canteen, lines);
+  const out = [`Order — ${canteen?.canteen ?? "night canteen"}`, ""];
+  for (const i of bill.items) out.push(`${i.qty} x ${i.name} — Rs ${i.total}`);
+  out.push("", `Subtotal: Rs ${bill.subtotal}`);
+  if (bill.delivery) out.push(`Room service: Rs ${bill.delivery}`);
+  out.push(`Total: Rs ${bill.total}`);
+  if (where.trim()) out.push("", `Deliver to: ${where.trim()}`);
+  return out.join("\n");
+}
+
 /** How many items a filter would show, for the count line. */
 export const countItems = (categories) =>
   categories.reduce((n, c) => n + c.items.length, 0);

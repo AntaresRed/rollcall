@@ -19,4 +19,15 @@ export const prettyPhone = (phone) => {
 };
 
 export const telHref = (phone) => (phone ? `tel:+91${phone}` : null);
-export const whatsAppHref = (phone) => (phone ? `https://wa.me/91${phone}` : null);
+/**
+ * A WhatsApp link, optionally carrying a message already written.
+ *
+ * The message is only *prefilled* — WhatsApp opens with it typed out and the
+ * person still presses send. Nothing here can deliver anything on somebody's
+ * behalf, which is the honest behaviour for an order: the student sees exactly
+ * what goes out and to whom.
+ */
+export const whatsAppHref = (phone, text = "") =>
+  (phone
+    ? `https://wa.me/91${phone}${text ? `?text=${encodeURIComponent(text)}` : ""}`
+    : null);
