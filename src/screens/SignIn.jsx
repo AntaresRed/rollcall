@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { signInWithGoogle, EXPECTED_DOMAIN } from "../lib/supabase";
 import { Mark } from "./Splash";
+import InstallBanner from "../InstallBanner";
 
 /**
  * Sign-in gate.
@@ -70,6 +71,11 @@ export default function SignIn({ error, onRetry }) {
           Something went wrong — try again
         </button>
       )}
+
+      {/* Before sign-in as well as after: somebody who installs now lands in
+          the app properly from the first launch, rather than signing in in a
+          browser tab and again in the installed copy. */}
+      <InstallBanner compact />
 
       <p className="made-by">Made by Anuj Kapse</p>
     </div>

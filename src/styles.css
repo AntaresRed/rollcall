@@ -530,6 +530,42 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 .banner.warn { background: var(--warn-wash); border-color: #ecd9b4; }
 .banner p { margin: 0; }
 
+/* The install banner carries a dismiss, which the alerts banner does not:
+   alerts being off is a state to fix, but choosing not to install is a
+   perfectly good answer and has to be sayable. */
+.banner-acts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.banner-x {
+  border: 0;
+  background: none;
+  color: var(--slate);
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.banner-x:hover { color: var(--ink); }
+.banner-how {
+  flex: 1 1 100%;
+  margin: 2px 0 0 !important;
+  padding-top: 9px;
+  border-top: 1px solid #F6CFE2;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--slate);
+}
+.banner-how strong { color: var(--ink); }
+
+/* On the sign-in screen, where everything else is centred prose. */
+.banner.compact {
+  text-align: left;
+  margin: 18px 0 0;
+  font-size: 13px;
+}
+
 .notice {
   background: var(--absent-wash);
   border: 1px solid #edcdcb;

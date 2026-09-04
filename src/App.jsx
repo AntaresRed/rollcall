@@ -17,6 +17,7 @@ import {
 
 import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
+import InstallBanner from "./InstallBanner";
 import { TodayIcon, TimetableIcon, UtilsIcon, ProfileIcon } from "./screens/TabIcons";
 const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 import Today from "./screens/Today";
@@ -552,6 +553,11 @@ export default function App() {
         {!viewAs && isAdmin && cohorts.length > 1 && (
           <ViewAsPicker mine={cohort} cohorts={cohorts} onPick={enterViewAs} />
         )}
+        {/* Only one banner may say "add this to your home screen". The alerts
+            banner already does when that is why alerts are off, and two of
+            them stacked reads as a bug rather than as emphasis. */}
+        {!(!alerts && pushSupported() && iosNeedsInstall) && <InstallBanner />}
+
         {!alerts && pushSupported() && (
           <div className={`banner${iosNeedsInstall ? " warn" : ""}`}>
             {iosNeedsInstall ? (

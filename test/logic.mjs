@@ -11,6 +11,7 @@ import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue 
 import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
 import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
+import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -876,6 +877,55 @@ console.log("night canteen");
   check("an unknown canteen falls back", canteenById("nope") === CANTEENS[0]);
   survives("no canteen at all", () => filterMenu(null, { diet: "veg" }));
   check("three diet filters offered", DIET_FILTERS.length === 3);
+}
+
+console.log("");
+console.log("install banner");
+{
+  // Which true thing the button can say depends entirely on the platform, so
+  // the routing is the part worth pinning down.
+  check("a stashed event means the OS sheet is reachable",
+    installRoute({ deferred: {}, ios: false, standalone: false }) === "prompt");
+  check("iPhone gets instructions, because there is no sheet to open",
+    installRoute({ deferred: null, ios: true, standalone: false }) === "ios");
+  check("an iPhone's stashed event would still win, if one ever arrived",
+    installRoute({ deferred: {}, ios: true, standalone: false }) === "prompt");
+  check("anything else is pointed at the browser menu",
+    installRoute({ deferred: null, ios: false, standalone: false }) === "manual");
+
+  // The one case that must never show a banner: it is already installed.
+  check("already on the home screen, nothing is offered",
+    installRoute({ deferred: null, ios: true, standalone: true }) === null);
+  check("even with an event in hand",
+    installRoute({ deferred: {}, ios: false, standalone: true }) === null);
+  check("and once it has just been installed",
+    installRoute({ deferred: {}, installed: true, ios: false, standalone: false }) === null);
+
+  // These run where there is no window; a default parameter reaching for one
+  // took out the sign-in screen before the smoke test caught it.
+  survives("no arguments at all", () => installRoute());
+  survives("an empty object", () => installRoute({}));
+
+  // "Not now" lasts a day, so it clears the screen you are on and asks again
+  // tomorrow rather than going quiet for a month.
+  const noon = new Date("2026-09-04T12:00:00");
+  const hoursAgo = (h) => new Date(noon.getTime() - h * 3600000).getTime();
+  check("a dismissal lasts one day", QUIET_DAYS === 1);
+  check("dismissed a minute ago is still quiet", stillQuiet(hoursAgo(0.02), noon));
+  check("and eight hours later, still quiet", stillQuiet(hoursAgo(8), noon));
+  check("but a day later it is offered again", !stillQuiet(hoursAgo(25), noon));
+  check("never dismissed is not quiet", !stillQuiet(0, noon));
+  check("a nonsense stamp is not quiet", !stillQuiet(null, noon));
+  check("a stamp from the future is treated as spent",
+    !stillQuiet(noon.getTime() + 86400000, noon));
+
+  check("Chrome is named", browserHint("Mozilla/5.0 Chrome/120").includes("Chrome"));
+  check("Edge is not mistaken for Chrome",
+    browserHint("Mozilla/5.0 Chrome/120 Edg/120").includes("Edge"));
+  check("Firefox is named", browserHint("Mozilla/5.0 Firefox/121").includes("Firefox"));
+  check("an unknown browser still gets a sentence",
+    browserHint("something else").length > 0);
+  check("no user agent at all still gets a sentence", browserHint("").length > 0);
 }
 
 console.log("");

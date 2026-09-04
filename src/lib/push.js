@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { isIOS, isStandalone } from "./platform";
 
 const VAPID_PUBLIC = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -6,18 +7,10 @@ export function pushSupported() {
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
-/** iOS only delivers push to PWAs launched from the home screen. */
-export function isStandalone() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true
-  );
-}
-
-export function isIOS() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-}
+// Live in platform.js, which imports nothing. Re-exported here because push
+// is where most callers already look for them, and iOS only delivers push to
+// a PWA launched from the home screen.
+export { isStandalone, isIOS } from "./platform";
 
 function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
