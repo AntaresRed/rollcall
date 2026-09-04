@@ -18,6 +18,7 @@ import {
 import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
 import InstallBanner from "./InstallBanner";
+import NoSchedule from "./screens/NoSchedule";
 import { TodayIcon, TimetableIcon, UtilsIcon, ProfileIcon } from "./screens/TabIcons";
 const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 import Today from "./screens/Today";
@@ -469,18 +470,11 @@ export default function App() {
     return (
       <div className="shell">
         <Masthead now={now} />
-        <div className="no-schedule">
-          <h2>No timetable published for your year yet</h2>
-          <p>
-            You're signed in as <code>{session.user?.email}</code>
-            {cohort ? <> — the class of <strong>{cohort}</strong>.</> : "."}
-          </p>
-          <p>
-            {cohort
-              ? "Your batch's schedule hasn't been published to the app yet. It will appear here as soon as it is — nothing for you to do."
-              : "That address doesn't carry a batch year, so there's no way to tell which timetable is yours. If you're a student, sign in with your institute address."}
-          </p>
-        </div>
+        <NoSchedule
+          email={session.user?.email}
+          cohort={cohort}
+          onSignOut={handleSignOut}
+        />
       </div>
     );
   }

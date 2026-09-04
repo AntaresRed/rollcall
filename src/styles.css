@@ -2143,22 +2143,71 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .cart-empty { margin-top: 14px; }
 
 
-.night-cat { margin-bottom: 16px; }
+/* Closed, the categories are a contents page: nineteen lines you can read in
+   one look, instead of two hundred and fifty rows you scroll past to find out
+   what the canteen even does. */
+.night-cat { margin-bottom: 6px; }
+.night-cat.open { margin-bottom: 16px; }
+
 .night-cat-head {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--mute);
-  padding-bottom: 6px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid var(--rule-strong);
+  padding: 9px 2px;
+  margin-bottom: 0;
 }
-.night-cat-head span { font-variant-numeric: tabular-nums; }
+.night-cat.open > .night-cat-head {
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.night-cat-head:hover { color: var(--ink); }
+/* The suggestions block borrows the heading but is not a control. */
+.night-cat-head.static { cursor: default; }
+.night-cat-name { flex: 1 1 auto; min-width: 0; }
+.night-cat-n {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--mute);
+}
+.night-chev {
+  flex: 0 0 auto;
+  color: var(--rule-strong);
+  transition: transform 120ms ease;
+}
+.night-cat-head:hover .night-chev { color: var(--signal); }
+.night-chev.open { transform: rotate(90deg); color: var(--signal); }
+@media (prefers-reduced-motion: reduce) { .night-chev { transition: none; } }
+
+/* Guesses, and marked as such — the heading alone would read as more menu. */
+.night-similar { margin-top: 20px; }
+.night-similar > .night-cat-head { border-bottom-color: var(--signal); color: var(--signal-deep); }
+.night-similar-note {
+  margin: 8px 0 6px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+/* Which section the suggestion came from: without it a dish arrives with no
+   context at all, several categories away from where it lives. */
+.night-from {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-top: 2px;
+}
 
 .night-row {
   display: grid;
@@ -2406,6 +2455,12 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .no-schedule p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--slate); }
 .no-schedule p:last-child { margin-bottom: 0; }
+/* Separated from the explanation above it: this is the only thing on the
+   screen anybody can act on, and it should not read as another paragraph. */
+.no-schedule-out {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
 .no-schedule code {
   font-family: var(--mono);
   font-size: 12.5px;

@@ -223,6 +223,11 @@ export async function clearTimetable() {
 // ---------- term ----------
 
 export async function loadTerm(cohortYear = null) {
+  // No cohort means no term. Falling through to an unfiltered query would
+  // return whichever year the database answered with first — which is how an
+  // address carrying no batch year ended up running on another batch's
+  // calendar instead of being told there is nothing for it.
+  if (cohortYear == null) return null;
   // Breaks come back embedded rather than as a second round trip — the term
   // is on the critical path for first paint.
   //
@@ -851,6 +856,10 @@ export async function loadProfile() {
  * blank screen.
  */
 export async function loadPublishedCatalogue(cohortYear = null) {
+  // As in loadTerm: unknown is not the same as unfiltered. Without this, a
+  // yearless address was handed an arbitrary published catalogue and walked
+  // into a course picker for a batch it does not belong to.
+  if (cohortYear == null) return null;
   let query = supabase
     .from("catalogues")
     .select("id, payload, label, published_at, cohort_year")

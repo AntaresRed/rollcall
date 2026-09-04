@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   CANTEENS, canteenById, filterMenu, countItems, billFor, orderText,
-  DIET_FILTERS, DIET_LABEL,
+  similarItems, DIET_FILTERS, DIET_LABEL,
 } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { recordOrder } from "../lib/nightorders";
@@ -22,6 +22,14 @@ import { recordOrder } from "../lib/nightorders";
  */
 
 const STORE = "iimpresent.night.cart";
+
+/**
+ * Suggest only when the exact hits are this thin.
+ *
+ * Twelve good matches and a list of near misses underneath is clutter; none
+ * at all, on a menu that does have the dish, is the failure worth fixing.
+ */
+const SUGGEST_UNDER = 5;
 
 /** Stable empty basket, so the memo below does not churn. */
 const EMPTY = [];
@@ -57,6 +65,10 @@ export default function NightMessMenu() {
   const [showScan, setShowScan] = useState(false);
   const [cart, setCart] = useState(loadCart);
   const [showCart, setShowCart] = useState(false);
+  // Which categories the student has opened. Empty to begin with: nineteen
+  // headings you can read at a glance beats two hundred and fifty rows you
+  // have to scroll past to learn what is on the card at all.
+  const [open, setOpen] = useState(() => new Set());
 
   useEffect(() => {
     try { localStorage.setItem(STORE, JSON.stringify(cart)); } catch { /* ignore */ }
@@ -71,6 +83,20 @@ export default function NightMessMenu() {
     [query],
   );
   const narrowed = terms.length > 0 || diet !== "all";
+  const searching = terms.length > 0;
+
+  /**
+   * Near misses, for a search that did not quite land.
+   *
+   * Only when the exact hits are thin. Under a full list of matches these are
+   * noise — you have already found the thing — and the whole point of the
+   * section is to answer "the menu has no chicken?" when it plainly does.
+   */
+  const suggestions = useMemo(() => {
+    if (!searching || showing >= SUGGEST_UNDER) return EMPTY;
+    const already = shown.flatMap((c) => c.items.map((i) => i.name));
+    return similarItems(canteen, query, { diet, exclude: already });
+  }, [searching, showing, shown, canteen, query, diet]);
 
   // The basket only ever belongs to the canteen on screen. Memoised because
   // the empty case would otherwise hand back a fresh array every render and
@@ -243,23 +269,43 @@ export default function NightMessMenu() {
 
       {!shown.length && (
         <div className="night-none">
-          <p>Nothing on this menu matches that.</p>
-          <button
-            className="btn ghost"
-            onClick={() => { setQuery(""); setDiet("all"); }}
-          >
-            Show the whole menu
-          </button>
+          <p>
+            Nothing on this menu matches that
+            {suggestions.length ? " exactly." : "."}
+          </p>
+          {!suggestions.length && (
+            <button
+              className="btn ghost"
+              onClick={() => { setQuery(""); setDiet("all"); }}
+            >
+              Show the whole menu
+            </button>
+          )}
         </div>
       )}
 
-      {shown.map((cat) => (
-        <div className="night-cat" key={cat.name}>
-          <div className="night-cat-head">
-            {cat.name}
-            <span>{cat.items.length}</span>
-          </div>
-          {cat.items.map((item) => {
+      {shown.map((cat) => {
+        // A search opens whatever it found. Leaving results folded away
+        // behind a closed heading would make the menu look like it has
+        // nothing, which is the exact thing the search is there to disprove.
+        const isOpen = searching || open.has(cat.name);
+        return (
+        <div className={`night-cat${isOpen ? " open" : ""}`} key={cat.name}>
+          <button
+            className="night-cat-head"
+            aria-expanded={isOpen}
+            onClick={() => setOpen((prev) => {
+              const next = new Set(prev);
+              if (next.has(cat.name)) next.delete(cat.name);
+              else next.add(cat.name);
+              return next;
+            })}
+          >
+            <Chevron open={isOpen} />
+            <span className="night-cat-name">{cat.name}</span>
+            <span className="night-cat-n">{cat.items.length}</span>
+          </button>
+          {isOpen && cat.items.map((item) => {
             const qty = qtyOf(item.name);
             return (
               <div className={`night-row${qty ? " in-cart" : ""}`} key={item.name}>
@@ -292,7 +338,54 @@ export default function NightMessMenu() {
             );
           })}
         </div>
-      ))}
+        );
+      })}
+
+      {/* Below the exact results, and clearly labelled as guesses. Somebody
+          who typed "chiken" wants the chicken; somebody who typed a dish this
+          canteen genuinely does not do should not be quietly handed a
+          different one and left to notice. */}
+      {suggestions.length > 0 && (
+        <div className="night-cat open night-similar">
+          <div className="night-cat-head static">
+            <span className="night-cat-name">Similar results</span>
+            <span className="night-cat-n">{suggestions.length}</span>
+          </div>
+          <p className="night-similar-note">
+            Nothing matched “{query.trim()}” exactly. These are close in name.
+          </p>
+          {suggestions.map((item) => {
+            const qty = qtyOf(item.name);
+            return (
+              <div className={`night-row${qty ? " in-cart" : ""}`} key={item.name}>
+                <span className={`diet-dot ${item.diet}`} title={DIET_LABEL[item.diet]} />
+                <span className="night-item">
+                  {item.name}
+                  <span className="night-from">{item.category}</span>
+                </span>
+                <span className="night-price">₹{item.price}</span>
+                <span className="night-act">
+                  {qty ? (
+                    <span className="qty">
+                      <button aria-label={`One fewer ${item.name}`} onClick={() => change(item, -1)}>−</button>
+                      <b>{qty}</b>
+                      <button aria-label={`One more ${item.name}`} onClick={() => change(item, 1)}>+</button>
+                    </span>
+                  ) : (
+                    <button
+                      className="night-add"
+                      aria-label={`Add ${item.name}`}
+                      onClick={() => change(item, 1)}
+                    >
+                      +
+                    </button>
+                  )}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {shown.some((c) => c.items.some((i) => i.diet === "unknown")) && (
         <p className="night-note">
@@ -456,6 +549,18 @@ function Hit({ text, terms }) {
   const parts = text.split(new RegExp(`(${terms.map(escape).join("|")})`, "ig"));
   return parts.map((p, i) =>
     (terms.includes(p.toLowerCase()) ? <mark key={i}>{p}</mark> : p));
+}
+
+function Chevron({ open }) {
+  return (
+    <svg
+      className={`night-chev${open ? " open" : ""}`}
+      width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"
+    >
+      <path d="M5 3.5 9.5 7 5 10.5" stroke="currentColor" strokeWidth="1.8"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 function SearchIcon() {

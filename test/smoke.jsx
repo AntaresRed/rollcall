@@ -24,6 +24,7 @@ import DayMessMenu from "../src/screens/DayMessMenu";
 import NightMessMenu from "../src/screens/NightMessMenu";
 import MessMenu from "../src/screens/MessMenu";
 import OrderHistory from "../src/screens/OrderHistory";
+import NoSchedule from "../src/screens/NoSchedule";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
 import CoursePicker from "../src/screens/CoursePicker";
 import SectionPicker from "../src/screens/SectionPicker";
@@ -162,6 +163,12 @@ const cases = [
   ["MessMenu", <MessMenu key="mm" onBack={noop} now={now} />],
   ["OrderHistory / nothing sent yet", <OrderHistory key="oh" onBack={noop} now={now} />],
   ["OrderHistory / no back button", <OrderHistory key="ohn" now={now} />],
+  ["NoSchedule / year not published", <NoSchedule key="ns1"
+    email="abc2029@email.iimcal.ac.in" cohort={2029} onSignOut={noop} />],
+  ["NoSchedule / address carries no year", <NoSchedule key="ns2"
+    email="armageddon@email.iimcal.ac.in" cohort={null} onSignOut={noop} />],
+  ["NoSchedule / no way out offered", <NoSchedule key="ns3"
+    email="rsharma@email.iimcal.ac.in" cohort={null} />],
   ["AttendanceBreakdown", <AttendanceBreakdown key="ab" classes={classes} attendance={attendance}
       term={term} now={now} overrides={overrides} onBack={noop} />],
   ["AttendanceBreakdown / no courses", <AttendanceBreakdown key="abe" classes={[]} attendance={[]}

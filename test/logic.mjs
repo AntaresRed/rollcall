@@ -9,7 +9,8 @@ import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.j
 import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
 import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
-import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS } from "../src/lib/nightmenu.js";
+import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS,
+  similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
@@ -877,6 +878,71 @@ console.log("night canteen");
   check("an unknown canteen falls back", canteenById("nope") === CANTEENS[0]);
   survives("no canteen at all", () => filterMenu(null, { diet: "veg" }));
   check("three diet filters offered", DIET_FILTERS.length === 3);
+}
+
+console.log("");
+console.log("similar results");
+{
+  const wh = CANTEENS.find(c => c.id === "wh");
+  const names = (list) => list.map(i => i.name);
+  const near = (q, opts) => {
+    const shown = filterMenu(wh, { query: q, ...opts }).flatMap(c => c.items).map(i => i.name);
+    return similarItems(wh, q, { ...opts, exclude: shown });
+  };
+
+  // ---- the score ----
+  check("a substring is a whole match", similarity("roll", "Veg Roll") === 1);
+  check("case does not matter", similarity("VEG ROLL", "veg roll") === 1);
+  check("a typo still scores well", similarity("chiken", "Chicken 65") > SIMILAR_ENOUGH);
+  check("a missing letter too", similarity("panner", "Kadai Paneer") > SIMILAR_ENOUGH);
+  check("an unrelated dish does not",
+    similarity("chicken", "Cold Coffee") < SIMILAR_ENOUGH);
+  check("nothing matches nothing", similarity("", "Veg Roll") === 0);
+  check("and nothing is matched by nothing", similarity("roll", "") === 0);
+
+  // A long name is mostly words you did not type; comparing whole strings
+  // buried the one word that mattered.
+  check("one near-miss word inside a long name still counts",
+    similarity("cofee", "Special Cold Coffee") > SIMILAR_ENOUGH);
+
+  // The lone "C" in "Chicken S/C Soup" used to hand a prefix bonus to every
+  // query starting with c, which floated that soup above the real answer.
+  check("a one-letter word in the name grants no bonus",
+    similarity("buttar chiken", "Butter Chicken") >
+    similarity("buttar chiken", "Chicken S/C Soup"));
+
+  // ---- the suggestions ----
+  const typo = near("chiken");
+  check("a typo is rescued", typo.length > 0);
+  check("and every suggestion is a chicken dish",
+    typo.every(i => /chicken/i.test(i.name)));
+  check("each says which section it came from",
+    typo.every(i => typeof i.category === "string" && i.category.length > 0));
+  check("suggestions are capped", near("chiken", { limit: 3 }).length <= 6);
+  check("ranked, best first",
+    typo.every((i, n) => n === 0 || typo[n - 1].score >= i.score));
+
+  // The one that must never break: a suggestion is still the app putting a
+  // dish in front of somebody.
+  check("the veg filter applies to suggestions too",
+    near("chiken", { diet: "veg" }).length === 0);
+  check("no meat, no meat suggestions",
+    near("chiken", { diet: "nomeat" }).every(i => i.diet !== "non-veg"));
+
+  // A dish the canteen genuinely does not sell must come back empty rather
+  // than reaching for the least-bad thing on the card.
+  check("a dish that is not on the menu suggests nothing", near("biriyani").length === 0);
+  check("gibberish suggests nothing", near("xyzzyqwe").length === 0);
+
+  check("nothing already on screen is repeated",
+    similarItems(wh, "chiken", { exclude: ["Chicken 65"] })
+      .every(i => i.name !== "Chicken 65"));
+  check("a one or two letter search suggests nothing",
+    similarItems(wh, "ch").length === 0 && similarItems(wh, "c").length === 0);
+
+  survives("no canteen", () => similarItems(null, "chiken"));
+  survives("no query", () => similarItems(wh, ""));
+  survives("punctuation only", () => similarItems(wh, "!!!"));
 }
 
 console.log("");
