@@ -34,12 +34,17 @@ function loadCart() {
       // `where` was one free-text line before the room and registration
       // numbers were split apart. Whatever was typed there was the room, so
       // it carries over rather than being dropped on the upgrade.
-      return { ...raw, reg: raw.reg ?? "", room: raw.room ?? raw.where ?? "" };
+      return {
+        ...raw,
+        reg: raw.reg ?? "",
+        room: raw.room ?? raw.where ?? "",
+        notes: raw.notes ?? "",
+      };
     }
   } catch {
     /* a private window, or site data cleared */
   }
-  return { canteen: null, lines: [], reg: "", room: "" };
+  return { canteen: null, lines: [], reg: "", room: "", notes: "" };
 }
 
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -118,7 +123,9 @@ export default function NightMessMenu() {
   }
 
   const firstNumber = canteen?.phone?.split("/")[0].replace(/\D/g, "") ?? "";
-  const message = orderText(canteen, bill.items, { reg: cart.reg, room: cart.room });
+  const message = orderText(canteen, bill.items, {
+    reg: cart.reg, room: cart.room, notes: cart.notes,
+  });
 
   return (
     <>
@@ -363,6 +370,21 @@ export default function NightMessMenu() {
                   Without a room number they have nowhere to deliver it.
                 </p>
               )}
+
+              {/* Free text, because this is the half of an order no menu can
+                  hold — less spicy, no onion, extra plates, leave it at the
+                  door. It goes into the message under its own label so the
+                  counter does not read it as another dish. */}
+              <label className="cart-notes">
+                <span>Order instructions</span>
+                <textarea
+                  rows={2}
+                  value={cart.notes ?? ""}
+                  placeholder="Less spicy, no onion, extra plates…"
+                  onChange={(e) => setCart((p) => ({ ...p, notes: e.target.value }))}
+                />
+                <em>Optional. Anything the kitchen should know.</em>
+              </label>
 
               <a
                 className="btn block cart-order"

@@ -94,12 +94,17 @@ export function billFor(canteen, lines) {
  * The bill still exists for the basket on screen. What a student is deciding
  * to spend and what the kitchen needs to read are different questions.
  */
-export function orderText(canteen, lines, { reg = "", room = "" } = {}) {
+export function orderText(canteen, lines, { reg = "", room = "", notes = "" } = {}) {
   const out = billFor(canteen, lines).items.map((i) => `${i.qty} x ${i.name}`);
+  const blocks = [out.join("\n")];
+  // Above the address, because it is about the food: whoever is cooking reads
+  // to the end of the dishes and straight on into how to cook them.
+  if (notes.trim()) blocks.push(`Instructions: ${notes.trim()}`);
   const who = [];
   if (room.trim()) who.push(`Room: ${room.trim()}`);
   if (reg.trim()) who.push(`Reg. No: ${reg.trim()}`);
-  return who.length ? [...out, "", ...who].join("\n") : out.join("\n");
+  if (who.length) blocks.push(who.join("\n"));
+  return blocks.join("\n\n");
 }
 
 /** How many items a filter would show, for the count line. */

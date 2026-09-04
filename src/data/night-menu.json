@@ -2196,6 +2196,1407 @@
       ]
     },
     {
+      "id": "lvh",
+      "name": "LVH",
+      "canteen": "L.V.H Night Cafeteria",
+      "phone": "9330797259",
+      "hours": "11:00 PM - 4:00 AM",
+      "room_service": "5",
+      "pages": [],
+      "categories": [
+        {
+          "name": "Rice",
+          "items": [
+            {
+              "name": "Veg Fried Rice",
+              "price": 78,
+              "diet": "veg"
+            },
+            {
+              "name": "Plain Rice",
+              "price": 70,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Schezwan F. Rice",
+              "price": 83,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Singapore F. Rice",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Hong Kong F. Rice",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Jeera Rice",
+              "price": 78,
+              "diet": "veg"
+            },
+            {
+              "name": "Garlic Butter Rice",
+              "price": 83,
+              "diet": "veg"
+            },
+            {
+              "name": "Kaju Rice",
+              "price": 87,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Fried Rice",
+              "price": 86,
+              "diet": "egg"
+            },
+            {
+              "name": "Egg Schezwan F. Rice",
+              "price": 93,
+              "diet": "egg"
+            },
+            {
+              "name": "Egg Singapore F. Rice",
+              "price": 88,
+              "diet": "egg"
+            },
+            {
+              "name": "Egg Hong Kong F. Rice",
+              "price": 88,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Fried Rice",
+              "price": 94,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Schezwan F. Rice",
+              "price": 99,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Singapore F. Rice",
+              "price": 96,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Hong Kong F. Rice",
+              "price": 96,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Fried Rice",
+              "price": 100,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Schezwan F. Rice",
+              "price": 115,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Singapore F. Rice",
+              "price": 103,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Hong Kong F. Rice",
+              "price": 103,
+              "diet": "non-veg"
+            },
+            {
+              "name": "W.W.R Fried Rice",
+              "price": 108,
+              "diet": "unknown"
+            },
+            {
+              "name": "Triple Fried Rice",
+              "price": 115,
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Indian Curry Items",
+          "items": [
+            {
+              "name": "Butter Chicken",
+              "price": 145,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Tikka Masala",
+              "price": 150,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Kadai Chicken",
+              "price": 145,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Afghani",
+              "price": 145,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Hyderabadi",
+              "price": 145,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Masala",
+              "price": 145,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Dopiazaa",
+              "price": 145,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Kolhapuri",
+              "price": 145,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Keema Masala",
+              "price": 145,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Paneer Butter Masala",
+              "price": 145,
+              "diet": "veg"
+            },
+            {
+              "name": "Kaju Paneer",
+              "price": 145,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Masala",
+              "price": 145,
+              "diet": "veg"
+            },
+            {
+              "name": "Kadai Paneer",
+              "price": 145,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Curry",
+              "price": 115,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Mughlai",
+              "price": 145,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Noodles",
+          "items": [
+            {
+              "name": "Veg Noodles",
+              "price": 64,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Singapore Noodles",
+              "price": 66,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Schezwan Noodles",
+              "price": 74,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Hong Kong Noodles",
+              "price": 66,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Hakka Noodles",
+              "price": 74,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Noodles",
+              "price": 82,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Chili Garlic Noodles",
+              "price": 74,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Noodles",
+              "price": 69,
+              "diet": "egg"
+            },
+            {
+              "name": "Egg Singapore Noodles",
+              "price": 73,
+              "diet": "egg"
+            },
+            {
+              "name": "Egg Schezwan Noodles",
+              "price": 79,
+              "diet": "egg"
+            },
+            {
+              "name": "Egg Hakka Noodles",
+              "price": 79,
+              "diet": "egg"
+            },
+            {
+              "name": "Egg Hong Kong Noodles",
+              "price": 73,
+              "diet": "egg"
+            },
+            {
+              "name": "Egg Chili Garlic Noodles",
+              "price": 79,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Noodles",
+              "price": 82,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Singapore Noodles",
+              "price": 84,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Schezwan Noodles",
+              "price": 89,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Hakka Noodles",
+              "price": 89,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Hong Kong Noodles",
+              "price": 84,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Chili Garlic Noodles",
+              "price": 90,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Noodles",
+              "price": 90,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Singapore Noodles",
+              "price": 92,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Schezwan Noodles",
+              "price": 95,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Hong Kong Noodles",
+              "price": 92,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Chili Garlic Noodles",
+              "price": 95,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Momos",
+          "items": [
+            {
+              "name": "Veg Cheese Steam Momo",
+              "price": 110,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Cheese Fried Momo",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Chicken Steam Momo",
+              "price": 100,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Fried Momo",
+              "price": 105,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Mushroom",
+          "items": [
+            {
+              "name": "Chili Mushroom",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Garlic Mushroom",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Pepper Mushroom",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Mushroom Manchurian",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Mushroom 65",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Red Hot Mushroom",
+              "price": 120,
+              "diet": "veg"
+            },
+            {
+              "name": "Schezwan Mushroom",
+              "price": 125,
+              "diet": "veg"
+            },
+            {
+              "name": "Mushroom Chatpata",
+              "price": 120,
+              "diet": "veg"
+            },
+            {
+              "name": "Lemon Mushroom",
+              "price": 115,
+              "diet": "veg"
+            }
+          ]
+        },
+        {
+          "name": "Chicken Starter (B/L)",
+          "items": [
+            {
+              "name": "Chicken Pakoda",
+              "price": 100,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chili Chicken",
+              "price": 105,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Garlic Chicken",
+              "price": 105,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Ginger Chicken",
+              "price": 105,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Manchurian",
+              "price": 105,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Pepper Chicken",
+              "price": 105,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken 65",
+              "price": 105,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Chatpatta",
+              "price": 115,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Lemon Chicken",
+              "price": 110,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Crispy Chicken",
+              "price": 130,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Schezwan Chicken",
+              "price": 120,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Dragon Chicken",
+              "price": 115,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Red Hot Chicken",
+              "price": 110,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Cashew Chicken",
+              "price": 125,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken 99",
+              "price": 110,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Tikka",
+              "price": 105,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Hong Kong Chicken",
+              "price": 110,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Majestic Chicken",
+              "price": 125,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Lollipop",
+              "price": 110,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Nuggets",
+              "price": 125,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Wings",
+              "price": 120,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Veg Starter",
+          "items": [
+            {
+              "name": "Paneer Pakoda",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Peri Peri Fries",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "French Fries",
+              "price": 65,
+              "diet": "veg"
+            },
+            {
+              "name": "Chili Potato",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Honey Chili Potato",
+              "price": 87,
+              "diet": "veg"
+            },
+            {
+              "name": "Gobi 65",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Chili Gobi",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Gobi Manchurian",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Gobi Chatpatta",
+              "price": 85,
+              "diet": "veg"
+            },
+            {
+              "name": "Crispy Corn",
+              "price": 85,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer 65",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Manchurian",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Chatpatta",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Dragon Paneer",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Schezwan Paneer",
+              "price": 120,
+              "diet": "veg"
+            },
+            {
+              "name": "Pepper Paneer",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Chili Paneer",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Onion Ring",
+              "price": 95,
+              "diet": "veg"
+            }
+          ]
+        },
+        {
+          "name": "Maggi",
+          "items": [
+            {
+              "name": "Plain Maggi",
+              "price": 40,
+              "diet": "veg"
+            },
+            {
+              "name": "Double Masala",
+              "price": 52,
+              "diet": "unknown"
+            },
+            {
+              "name": "Schezwan Maggi",
+              "price": 57,
+              "diet": "veg"
+            },
+            {
+              "name": "Peri Peri Maggi",
+              "price": 53,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Maggi",
+              "price": 49,
+              "diet": "veg"
+            },
+            {
+              "name": "Atta Maggi",
+              "price": 58,
+              "diet": "veg"
+            },
+            {
+              "name": "Cheese Maggi",
+              "price": 62,
+              "diet": "veg"
+            },
+            {
+              "name": "Butter Maggi",
+              "price": 54,
+              "diet": "veg"
+            },
+            {
+              "name": "Spicy Maggi",
+              "price": 52,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Maggi",
+              "price": 54,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Maggi",
+              "price": 63,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Veg F.d Maggi",
+              "price": 52,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Cheese F.d Maggi",
+              "price": 67,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg F.d Maggi",
+              "price": 58,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken F.d Maggi",
+              "price": 68,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken F.d Maggi",
+              "price": 73,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Cheese F.d Maggi",
+              "price": 84,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Top Ramen Curry",
+              "price": 58,
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Korean Maggi",
+          "items": [
+            {
+              "name": "Veg Korean Maggi",
+              "price": 75,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Cheese Korean Maggi",
+              "price": 90,
+              "diet": "veg"
+            },
+            {
+              "name": "Chicken Korean Maggi",
+              "price": 80,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Cheese Korean Maggi",
+              "price": 95,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Paratha",
+          "items": [
+            {
+              "name": "Plain Roti",
+              "price": 15,
+              "diet": "veg"
+            },
+            {
+              "name": "Plain Roti with Butter",
+              "price": 18,
+              "diet": "veg"
+            },
+            {
+              "name": "Plain Paratha",
+              "price": 20,
+              "diet": "veg"
+            },
+            {
+              "name": "Alu Paratha",
+              "price": 42,
+              "diet": "veg"
+            },
+            {
+              "name": "Gobi Paratha",
+              "price": 46,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Paratha",
+              "price": 57,
+              "diet": "veg"
+            },
+            {
+              "name": "Onion Paratha",
+              "price": 42,
+              "diet": "veg"
+            },
+            {
+              "name": "Alu Onion Paratha",
+              "price": 52,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Paratha",
+              "price": 52,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Paratha",
+              "price": 58,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Cheese Paratha",
+              "price": 52,
+              "diet": "veg"
+            },
+            {
+              "name": "Chicken Cheese Paratha",
+              "price": 74,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Mix Veg Paratha",
+              "price": 62,
+              "diet": "veg"
+            }
+          ]
+        },
+        {
+          "name": "Combos",
+          "items": [
+            {
+              "name": "Veg Meera",
+              "price": 68,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Meera",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Meera",
+              "price": 78,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Meera",
+              "price": 82,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Veg Cheese Meera",
+              "price": 82,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Cheese Meera",
+              "price": 103,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Cheese Meera",
+              "price": 93,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Cheese Meera",
+              "price": 104,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Roll",
+          "items": [
+            {
+              "name": "Veg Roll",
+              "price": 43,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Roll",
+              "price": 57,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Roll",
+              "price": 52,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Roll",
+              "price": 58,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Roll",
+              "price": 67,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Cheese Roll",
+              "price": 73,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Cheese Roll",
+              "price": 62,
+              "diet": "egg"
+            },
+            {
+              "name": "Veg Cheese Roll",
+              "price": 57,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Chicken Cheese Roll",
+              "price": 83,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Tikka Roll",
+              "price": 80,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Sandwich",
+          "items": [
+            {
+              "name": "Veg Sandwich",
+              "price": 37,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Corn Sandwich",
+              "price": 40,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Cheese Corn Sandwich",
+              "price": 58,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Sandwich",
+              "price": 42,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Sandwich",
+              "price": 52,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Malai Sandwich",
+              "price": 38,
+              "diet": "veg"
+            },
+            {
+              "name": "Cheese Sandwich",
+              "price": 46,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Sandwich",
+              "price": 52,
+              "diet": "veg"
+            },
+            {
+              "name": "Paneer Cheese Sandwich",
+              "price": 65,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Cheese Sandwich",
+              "price": 52,
+              "diet": "veg"
+            },
+            {
+              "name": "Chicken Cheese Sandwich",
+              "price": 65,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Cheese Sandwich",
+              "price": 78,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Omlette Sandwich",
+              "price": 42,
+              "diet": "egg"
+            },
+            {
+              "name": "Bread Butter Toast",
+              "price": 25,
+              "diet": "veg"
+            },
+            {
+              "name": "French Toast (Sweet/Salt)",
+              "price": 46,
+              "diet": "veg"
+            },
+            {
+              "name": "Butter Cheese Toast",
+              "price": 52,
+              "diet": "veg"
+            },
+            {
+              "name": "Chili Cheese Toast",
+              "price": 50,
+              "diet": "veg"
+            }
+          ]
+        },
+        {
+          "name": "Appetizers",
+          "items": [
+            {
+              "name": "Cheese Pizza Triangles (4 pcs)",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Cheese Jalapeno Triangles (4 pcs)",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Potato Cheese Shotz (6 pcs)",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Chicken Salami Sandwich",
+              "price": 60,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Cheese Salami Sandwich",
+              "price": 75,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Honey Chilli Chicken",
+              "price": 115,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Drink & Fruits",
+          "items": [
+            {
+              "name": "Big Lemon Water",
+              "price": 30,
+              "diet": "veg"
+            },
+            {
+              "name": "Masala Jaljeera",
+              "price": 40,
+              "diet": "veg"
+            },
+            {
+              "name": "Water Melon Juice",
+              "price": 55,
+              "diet": "veg"
+            },
+            {
+              "name": "Plain Milk (Hot/Cold)",
+              "price": 27,
+              "diet": "veg"
+            },
+            {
+              "name": "Hot Haldi Milk",
+              "price": 32,
+              "diet": "veg"
+            },
+            {
+              "name": "Hot Bournvita",
+              "price": 43,
+              "diet": "veg"
+            },
+            {
+              "name": "Hot Horlicks",
+              "price": 45,
+              "diet": "veg"
+            },
+            {
+              "name": "Hot Coffee",
+              "price": 40,
+              "diet": "veg"
+            },
+            {
+              "name": "Big Ice Tea",
+              "price": 65,
+              "diet": "veg"
+            },
+            {
+              "name": "Banana (1 pc)",
+              "price": "8/9",
+              "diet": "veg"
+            },
+            {
+              "name": "Tea",
+              "price": 15,
+              "diet": "veg"
+            },
+            {
+              "name": "Big Tea",
+              "price": 25,
+              "diet": "veg"
+            },
+            {
+              "name": "Hot Chocolate",
+              "price": 55,
+              "diet": "veg"
+            },
+            {
+              "name": "Masala Cold Drink",
+              "price": 45,
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Misc",
+          "items": [
+            {
+              "name": "Chips Chat",
+              "price": 40,
+              "diet": "veg"
+            },
+            {
+              "name": "Peanut Chat",
+              "price": 48,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Chat (2 Eggs)",
+              "price": 47,
+              "diet": "egg"
+            },
+            {
+              "name": "Kurkure Chat",
+              "price": 40,
+              "diet": "veg"
+            },
+            {
+              "name": "Cheese Pasta",
+              "price": 75,
+              "diet": "veg"
+            },
+            {
+              "name": "Tomato Pasta",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Chicken Masala Pasta",
+              "price": 80,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Peri Peri Popcorn",
+              "price": 47,
+              "diet": "veg"
+            },
+            {
+              "name": "Masala Papad",
+              "price": 45,
+              "diet": "veg"
+            },
+            {
+              "name": "Popcorn",
+              "price": 36,
+              "diet": "veg"
+            }
+          ]
+        },
+        {
+          "name": "Soup",
+          "items": [
+            {
+              "name": "Veg S/C Soup",
+              "price": 47,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg H/S Soup",
+              "price": 47,
+              "diet": "veg"
+            },
+            {
+              "name": "Tomato Soup",
+              "price": 47,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Clear Soup",
+              "price": 47,
+              "diet": "veg"
+            },
+            {
+              "name": "Veg Manchow Soup",
+              "price": 49,
+              "diet": "veg"
+            },
+            {
+              "name": "Chicken S/C Soup",
+              "price": 57,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken H/S Soup",
+              "price": 57,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Manchow Soup",
+              "price": 59,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Chicken Clear Soup",
+              "price": 57,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Omelettes",
+          "items": [
+            {
+              "name": "Omlette",
+              "price": 42,
+              "diet": "egg"
+            },
+            {
+              "name": "Bread Omlette",
+              "price": 57,
+              "diet": "egg"
+            },
+            {
+              "name": "Russian Omlette",
+              "price": 88,
+              "diet": "egg"
+            },
+            {
+              "name": "Cheese Omlette",
+              "price": 67,
+              "diet": "egg"
+            },
+            {
+              "name": "Half Fry",
+              "price": 33,
+              "diet": "egg"
+            },
+            {
+              "name": "Full Fry",
+              "price": 33,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Omelette",
+              "price": 74,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Bhurji",
+              "price": 42,
+              "diet": "egg"
+            },
+            {
+              "name": "Boiled Egg",
+              "price": 13,
+              "diet": "egg"
+            },
+            {
+              "name": "Masala Boiled Egg",
+              "price": 45,
+              "diet": "egg"
+            },
+            {
+              "name": "Veg Bread Bhurji",
+              "price": 55,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Bread Bhurji",
+              "price": 60,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Bread Bhurji",
+              "price": 67,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Bread Bhurji",
+              "price": 72,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Veg Cheese Bread Bhurji",
+              "price": 67,
+              "diet": "veg"
+            },
+            {
+              "name": "Egg Cheese Bread Bhurji",
+              "price": 72,
+              "diet": "egg"
+            },
+            {
+              "name": "Chicken Cheese Bread Bhurji",
+              "price": 77,
+              "diet": "non-veg"
+            },
+            {
+              "name": "Egg Chicken Cheese Bread Bhurji",
+              "price": 83,
+              "diet": "non-veg"
+            }
+          ]
+        },
+        {
+          "name": "Beverages",
+          "items": [
+            {
+              "name": "Cold Chocolate",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Peanut Butter Chocolate Shake",
+              "price": 120,
+              "diet": "veg"
+            },
+            {
+              "name": "Cold Horlicks",
+              "price": 78,
+              "diet": "veg"
+            },
+            {
+              "name": "Coke Float",
+              "price": 55,
+              "diet": "veg"
+            },
+            {
+              "name": "Vanilla Shake",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Butterscotch Shake",
+              "price": 85,
+              "diet": "veg"
+            },
+            {
+              "name": "Chocolate Shake",
+              "price": 85,
+              "diet": "veg"
+            },
+            {
+              "name": "Oreo Shake",
+              "price": 85,
+              "diet": "veg"
+            },
+            {
+              "name": "Kitkat Shake",
+              "price": 90,
+              "diet": "veg"
+            },
+            {
+              "name": "Strawberry Shake",
+              "price": 85,
+              "diet": "veg"
+            },
+            {
+              "name": "Banana Shake",
+              "price": 70,
+              "diet": "veg"
+            },
+            {
+              "name": "Mango Shake",
+              "price": 80,
+              "diet": "veg"
+            },
+            {
+              "name": "Double Oreo Shake",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Special Kitkat Shake",
+              "price": 115,
+              "diet": "veg"
+            },
+            {
+              "name": "Peanut Butter Shake",
+              "price": 100,
+              "diet": "veg"
+            },
+            {
+              "name": "Special Cold Coffee",
+              "price": 75,
+              "diet": "veg"
+            },
+            {
+              "name": "Bournvita Shake",
+              "price": 75,
+              "diet": "veg"
+            },
+            {
+              "name": "Apple Shake",
+              "price": 85,
+              "diet": "veg"
+            },
+            {
+              "name": "Add Extra Ice Cream",
+              "price": 15,
+              "diet": "veg"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "wh",
       "name": "WH",
       "canteen": "W.H Night Cafeteria (Tagore)",

@@ -725,6 +725,17 @@ console.log("night canteen");
   check("every canteen has a phone number",
     CANTEENS.every(c => /[0-9]{6}/.test(c.phone)));
 
+  // LVH's list was copied from WH's, and the phone came along with it for a
+  // while. A shared number is silent — the screen looks right and the order
+  // walks to the wrong hostel — so it is checked rather than eyeballed.
+  {
+    const first = CANTEENS.map(c => c.phone.split("/")[0].replace(/\D/g, ""));
+    check("no two canteens ring the same counter",
+      new Set(first).size === first.length);
+    check("and every number is a ten-digit mobile",
+      first.every(n => /^[0-9]{10}$/.test(n)));
+  }
+
   // The filter that matters. "Veg only" must never let meat or egg through:
   // this is the one bug in the whole screen that would actually harm someone.
   const veg = (c) => filterMenu(c, { diet: "veg" }).flatMap(x => x.items);
@@ -770,10 +781,15 @@ console.log("night canteen");
   check("no empty category is ever returned",
     filterMenu(first, { query: "paneer" }).every(c => c.items.length > 0));
 
-  // Every canteen keeps a photograph of the menu it was transcribed from,
-  // because the transcription is the thing that can be wrong.
-  check("every canteen has scanned pages",
-    CANTEENS.every(c => Array.isArray(c.pages) && c.pages.length > 0));
+  // A photograph of the menu each list was transcribed from, because the
+  // transcription is the thing that can be wrong. Not every canteen has one
+  // yet — LVH is transcribed from WH's list and has no wall of its own
+  // photographed — so this checks the shape and that the ones with pages
+  // point at real, correctly named files.
+  check("pages are always a list, even when empty",
+    CANTEENS.every(c => Array.isArray(c.pages)));
+  check("most canteens do have their menu photographed",
+    CANTEENS.filter(c => c.pages.length > 0).length >= CANTEENS.length - 1);
   check("pages are served from the public folder",
     CANTEENS.every(c => c.pages.every(p => p.startsWith("/menu/night/"))));
   check("pages are numbered in order",
@@ -783,6 +799,24 @@ console.log("night canteen");
     }));
   check("each canteen's pages are its own",
     CANTEENS.every(c => c.pages.every(p => p.includes(`/${c.id}-`))));
+
+  // LVH is WH's menu plus one item. Worth pinning: a copied list is the kind
+  // of thing that silently drifts or silently doubles.
+  const lvh = CANTEENS.find(c => c.id === "lvh");
+  const whm = CANTEENS.find(c => c.id === "wh");
+  check("LVH exists", Boolean(lvh));
+  check("LVH carries the wings", countItems(filterMenu(lvh, { query: "chicken wings" })) === 1);
+  check("at the price asked for",
+    lvh.categories.flatMap(c => c.items).find(i => i.name === "Chicken Wings").price === 120);
+  check("and nowhere else has them",
+    CANTEENS.filter(c => countItems(filterMenu(c, { query: "chicken wings" })) > 0).length === 1);
+  check("LVH is WH plus exactly that one item",
+    countItems(lvh.categories) === countItems(whm.categories) + 1);
+  check("no item is duplicated by the copy",
+    CANTEENS.every(c => {
+      const names = c.categories.flatMap(x => x.items.map(i => i.name));
+      return new Set(names).size === names.length;
+    }));
 
   // ---- the basket ----
   // Arithmetic somebody pays for, so it is checked rather than eyeballed.
@@ -821,6 +855,14 @@ console.log("night canteen");
   check("no canteen header", !text.includes(wh.canteen));
   check("the item lines come first",
     text.indexOf("2 x Veg Roll") < text.indexOf("Room:"));
+
+  const noted = orderText(wh, b.items, { room: "214", notes: "less spicy, no onion" });
+  check("the instructions are carried", noted.includes("less spicy, no onion"));
+  check("and are labelled, not left as a loose line", noted.includes("Instructions:"));
+  check("instructions sit with the food, above the address",
+    noted.indexOf("Instructions:") < noted.indexOf("Room:"));
+  check("no instructions means no empty label",
+    !orderText(wh, b.items, { room: "214", notes: "   " }).includes("Instructions"));
 
   const bare = orderText(wh, b.items);
   check("nothing typed means no empty identity lines",

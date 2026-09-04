@@ -1930,7 +1930,8 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 @media (max-width: 339px) { .cart-who { grid-template-columns: 1fr; } }
 .cart-who label { display: block; min-width: 0; }
-.cart-who span {
+.cart-who span,
+.cart-notes span {
   display: block;
   font-family: var(--mono);
   font-size: 10.5px;
@@ -1939,6 +1940,29 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   color: var(--mute);
   margin-bottom: 5px;
 }
+.cart-notes { display: block; margin: 0 0 12px; }
+.cart-notes textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  resize: vertical;
+  min-height: 58px;
+}
+.cart-notes textarea:focus { outline: none; border-color: var(--signal); }
+.cart-notes em {
+  display: block;
+  margin-top: 5px;
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--mute);
+}
+
 .cart-who input {
   width: 100%;
   font: inherit;
