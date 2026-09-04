@@ -4,6 +4,7 @@ import {
   DIET_FILTERS, DIET_LABEL,
 } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
+import { recordOrder } from "../lib/nightorders";
 
 /**
  * The night canteens — a priced list per hostel, with a basket.
@@ -386,11 +387,16 @@ export default function NightMessMenu() {
                 <em>Optional. Anything the kitchen should know.</em>
               </label>
 
+              {/* Recorded here, on the way out, because this is the last
+                  moment the app knows anything. What happens in WhatsApp is
+                  none of its business and none of its knowledge — the history
+                  screen says so in as many words. */}
               <a
                 className="btn block cart-order"
                 href={whatsAppHref(firstNumber, message)}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => recordOrder(canteen, bill.items)}
               >
                 Order on WhatsApp
               </a>

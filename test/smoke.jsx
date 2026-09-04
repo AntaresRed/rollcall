@@ -23,6 +23,7 @@ import Utils from "../src/screens/Utils";
 import DayMessMenu from "../src/screens/DayMessMenu";
 import NightMessMenu from "../src/screens/NightMessMenu";
 import MessMenu from "../src/screens/MessMenu";
+import OrderHistory from "../src/screens/OrderHistory";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
 import CoursePicker from "../src/screens/CoursePicker";
 import SectionPicker from "../src/screens/SectionPicker";
@@ -159,6 +160,8 @@ const cases = [
   ["DayMessMenu / embedded", <DayMessMenu key="dme" now={now} embedded />],
   ["NightMessMenu", <NightMessMenu key="nm" />],
   ["MessMenu", <MessMenu key="mm" onBack={noop} now={now} />],
+  ["OrderHistory / nothing sent yet", <OrderHistory key="oh" onBack={noop} now={now} />],
+  ["OrderHistory / no back button", <OrderHistory key="ohn" now={now} />],
   ["AttendanceBreakdown", <AttendanceBreakdown key="ab" classes={classes} attendance={attendance}
       term={term} now={now} overrides={overrides} onBack={noop} />],
   ["AttendanceBreakdown / no courses", <AttendanceBreakdown key="abe" classes={[]} attendance={[]}

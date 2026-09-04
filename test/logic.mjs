@@ -10,6 +10,7 @@ import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
 import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
 import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS } from "../src/lib/nightmenu.js";
+import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -875,6 +876,100 @@ console.log("night canteen");
   check("an unknown canteen falls back", canteenById("nope") === CANTEENS[0]);
   survives("no canteen at all", () => filterMenu(null, { diet: "veg" }));
   check("three diet filters offered", DIET_FILTERS.length === 3);
+}
+
+console.log("");
+console.log("night order history");
+{
+  const wh = CANTEENS.find(c => c.id === "wh");
+  const at = (mins) => new Date(Date.parse("2026-09-04T23:30:00") + mins * 60000);
+  const basket = [
+    { name: "Veg Roll", price: 43, qty: 2 },
+    { name: "Chicken Momo", price: 105, qty: 1 },
+  ];
+
+  const one = entryFor(wh, basket, at(0));
+  check("the canteen is recorded", one.canteen === "wh" && one.where === wh.name);
+  check("quantities are kept", one.items[0].qty === 2);
+  check("names are kept", one.items.map(i => i.name).join() === "Veg Roll,Chicken Momo");
+  check("the time is recorded", one.at === at(0).toISOString());
+
+  // The point of the whole feature: a price written down tonight is wrong the
+  // day the canteen reprints, and a stale figure in a history reads as fact.
+  check("no price reaches the record",
+    one.items.every(i => !("price" in i)));
+  check("nor anything else off the cart line",
+    one.items.every(i => Object.keys(i).sort().join() === "name,qty"));
+  check("and none survives a round trip through storage",
+    !JSON.stringify(one).match(/43|105|price/));
+
+  // ---- the list ----
+  let h = appendOrder([], one);
+  check("the first order is kept", h.length === 1);
+  check("an empty basket is not an order", appendOrder(h, entryFor(wh, [], at(1))).length === 1);
+  check("nor is a basket of nameless lines",
+    appendOrder(h, entryFor(wh, [{ qty: 2 }], at(1))).length === 1);
+
+  // Opening WhatsApp, coming back and tapping again is one order sent once.
+  h = appendOrder(h, entryFor(wh, basket, at(1)));
+  check("a second tap on the same basket does not double it", h.length === 1);
+  check("but it moves the clock on", h[0].at === at(1).toISOString());
+
+  // Twenty minutes later is somebody genuinely ordering twice, which happens.
+  h = appendOrder(h, entryFor(wh, basket, at(21)));
+  check("the same basket much later is a second order", h.length === 2);
+
+  const nh = CANTEENS.find(c => c.id === "nh");
+  h = appendOrder(h, entryFor(nh, basket, at(22)));
+  check("the same basket at another canteen is its own order", h.length === 3);
+  check("newest first", h[0].canteen === "nh");
+
+  // Different items a minute apart are two orders, not one collapsed.
+  const other = appendOrder(
+    appendOrder([], entryFor(wh, basket, at(0))),
+    entryFor(wh, [{ name: "Veg Roll", price: 43, qty: 3 }], at(1)),
+  );
+  check("a changed quantity is not the same order", other.length === 2);
+
+  // ---- the cap ----
+  let many = [];
+  for (let i = 0; i < CAP + 8; i += 1) {
+    many = appendOrder(many, entryFor(wh, [{ name: `Item ${i}`, qty: 1 }], at(i * 30)));
+  }
+  check("the history is capped", many.length === CAP);
+  check("and it is the oldest that falls off", many[0].items[0].name === `Item ${CAP + 7}`);
+
+  check("items are counted, not lines", itemCount(one) === 3);
+  check("an empty entry counts zero", itemCount(null) === 0);
+
+  // ---- reading it back ----
+  const now = new Date("2026-09-04T23:59:00");
+  check("today is Today", dayLabel("2026-09-04T23:30:00", now) === "Today");
+  check("an order at 1am is yesterday's, and says so",
+    dayLabel("2026-09-04T01:00:00", new Date("2026-09-05T12:00:00")) === "Yesterday");
+  check("earlier in the week is named by its day",
+    dayLabel("2026-09-01T22:00:00", now) === "Tuesday");
+  check("older than a week is dated",
+    dayLabel("2026-08-20T22:00:00", now) === "20 Aug");
+  check("a broken date does not throw a label", dayLabel("not a date", now) === "");
+
+  check("midnight reads as 12, not 0", clockOf("2026-09-05T00:14:00") === "12:14 am");
+  check("noon reads as 12 pm", clockOf("2026-09-04T12:05:00") === "12:05 pm");
+  check("late evening is pm", clockOf("2026-09-04T23:30:00") === "11:30 pm");
+  check("a broken date has no clock", clockOf("nope") === "");
+
+  const days = byDay([
+    entryFor(wh, basket, new Date("2026-09-04T23:30:00")),
+    entryFor(wh, basket, new Date("2026-09-04T21:00:00")),
+    entryFor(wh, basket, new Date("2026-09-03T23:00:00")),
+  ], now);
+  check("orders group by day", days.length === 2);
+  check("two orders on the first day", days[0].orders.length === 2);
+  check("and the day is labelled once", days[0].label === "Today");
+
+  survives("no history at all", () => byDay(null, now));
+  survives("a garbled entry", () => byDay([{ at: "x", items: [] }], now));
+  survives("no canteen", () => entryFor(null, basket, now));
 }
 
 console.log("");

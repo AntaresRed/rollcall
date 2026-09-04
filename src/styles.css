@@ -166,6 +166,121 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   background: var(--rule);
 }
 
+/* Ordered after the rule, so the row reads label — hairline — button rather
+   than crowding the button against the words. */
+.eyebrow-act {
+  order: 1;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  margin: -6px 0;
+  border: 1px solid var(--rule-strong);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--slate);
+}
+.eyebrow-act:hover { border-color: var(--signal); color: var(--signal); }
+
+/* ---------- night order history ---------- */
+
+/* The first thing on the screen, and framed as a limit rather than a tip:
+   everything below is what was sent, and the app stops being able to see an
+   order the moment it leaves for WhatsApp. */
+.history-warn {
+  background: var(--warn-wash);
+  /* No warn border token exists; the ink at low opacity keeps the edge in the
+     same family as the fill instead of inventing a fifth amber. */
+  border: 1px solid rgba(138, 90, 18, 0.22);
+  border-radius: var(--r);
+  padding: 11px 13px;
+  margin: 0 0 18px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--warn-ink);
+}
+.history-warn b { color: var(--warn-ink); }
+
+.history-day { margin-bottom: 18px; }
+.history-day-head {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.history-card {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px 13px;
+  margin-bottom: 8px;
+}
+.history-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.history-where { font-size: 13.5px; font-weight: 600; min-width: 0; }
+.history-when {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.history-items { list-style: none; margin: 0; padding: 0; }
+.history-items li {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  padding: 3px 0;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+.history-qty {
+  flex: 0 0 auto;
+  min-width: 20px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--signal-wash);
+  color: var(--signal-deep);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.history-foot {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+}
+.history-none {
+  text-align: center;
+  padding: 30px 16px;
+  color: var(--slate);
+  font-size: 14px;
+}
+.history-none p { margin: 0; }
+.history-none-sub { margin-top: 7px !important; font-size: 12.5px; color: var(--mute); }
+.history-clear { margin-top: 6px; }
+.history-note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--mute);
+  margin: 14px 0 0;
+}
+
 /* ---------- the spine: time gutter + class rows ---------- */
 
 .day {
