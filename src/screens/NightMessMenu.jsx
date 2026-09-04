@@ -267,22 +267,23 @@ export default function NightMessMenu() {
         </div>
       </div>
 
-      {!shown.length && (
+      {/* One line when there is something to show underneath — the section
+          below explains itself, and two paragraphs saying "no exact match"
+          stacked on top of each other was mostly empty box. The full stop
+          only earns its space when the screen is otherwise blank. */}
+      {!shown.length && (suggestions.length ? (
+        <p className="night-none tight">No exact match for “{query.trim()}”.</p>
+      ) : (
         <div className="night-none">
-          <p>
-            Nothing on this menu matches that
-            {suggestions.length ? " exactly." : "."}
-          </p>
-          {!suggestions.length && (
-            <button
-              className="btn ghost"
-              onClick={() => { setQuery(""); setDiet("all"); }}
-            >
-              Show the whole menu
-            </button>
-          )}
+          <p>Nothing on this menu matches that.</p>
+          <button
+            className="btn ghost"
+            onClick={() => { setQuery(""); setDiet("all"); }}
+          >
+            Show the whole menu
+          </button>
         </div>
-      )}
+      ))}
 
       {shown.map((cat) => {
         // A search opens whatever it found. Leaving results folded away
@@ -351,9 +352,6 @@ export default function NightMessMenu() {
             <span className="night-cat-name">Similar results</span>
             <span className="night-cat-n">{suggestions.length}</span>
           </div>
-          <p className="night-similar-note">
-            Nothing matched “{query.trim()}” exactly. These are close in name.
-          </p>
           {suggestions.map((item) => {
             const qty = qtyOf(item.name);
             return (

@@ -2189,14 +2189,8 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .night-chev { transition: none; } }
 
 /* Guesses, and marked as such — the heading alone would read as more menu. */
-.night-similar { margin-top: 20px; }
+.night-similar { margin-top: 10px; }
 .night-similar > .night-cat-head { border-bottom-color: var(--signal); color: var(--signal-deep); }
-.night-similar-note {
-  margin: 8px 0 6px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--mute);
-}
 /* Which section the suggestion came from: without it a dish arrives with no
    context at all, several categories away from where it lives. */
 .night-from {
@@ -2262,11 +2256,19 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .night-none {
   text-align: center;
-  padding: 26px 16px;
+  padding: 20px 16px;
   color: var(--mute);
   font-size: 13.5px;
 }
 .night-none p { margin: 0 0 12px; }
+/* The variant that sits directly above the suggestions: a caption, not a
+   panel. Nothing is lost — the section under it names itself. */
+.night-none.tight {
+  padding: 12px 0 2px;
+  margin: 0;
+  text-align: left;
+  font-size: 13px;
+}
 .night-note {
   font-size: 12.5px;
   line-height: 1.5;
