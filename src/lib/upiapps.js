@@ -1,0 +1,87 @@
+/**
+ * Which UPI app to hand an iPhone's payment to.
+ *
+ * Android needs none of this — `upi://` opens the system chooser, which lists
+ * whatever is installed and remembers the pick itself. iOS has no such
+ * mechanism: it never registered `upi://` system-wide, and a web page cannot
+ * ask it which apps exist. So the choosing has to happen in the page, and the
+ * remembering with it.
+ *
+ * Every scheme below is a best effort. A browser cannot test whether a scheme
+ * has a handler — tapping either opens the app or silently does nothing — so
+ * the screen keeps the QR and the copyable address underneath, always, and
+ * offers a way to pick a different app when one turns out to be a dead end.
+ * That is the honest shape for a list nobody can verify from here.
+ */
+
+const STORE = "iimpresent.upi.app";
+
+/**
+ * The apps worth offering, most-used first.
+ *
+ * Each takes the same UPI query string; only the scheme differs.
+ *
+ * CRED is here on request and is the least certain of the four. It is a real
+ * UPI app and registers as a payment handler on Android, but it came to UPI
+ * late from credit-card bills, and whether its iOS build answers a pay intent
+ * is not something a web page can find out. Which is true of all four — the
+ * list is a set of attempts, and the screen is built so a dead one costs a
+ * tap and nothing else.
+ */
+export const UPI_APPS = [
+  { id: "gpay", name: "Google Pay", scheme: "gpay://upi/pay?" },
+  { id: "phonepe", name: "PhonePe", scheme: "phonepe://pay?" },
+  { id: "paytm", name: "Paytm", scheme: "paytmmp://pay?" },
+  { id: "cred", name: "CRED", scheme: "cred://upi/pay?" },
+];
+
+export const appById = (id) => UPI_APPS.find((a) => a.id === id) ?? null;
+
+/**
+ * Re-address a `upi://pay?…` link to one app's own scheme.
+ *
+ * The query is carried across untouched, so the payee and amount can never
+ * drift between the generic link and an app-specific one.
+ */
+export function forApp(upiLink, appId) {
+  const app = appById(appId);
+  if (!upiLink || !app) return upiLink ?? null;
+  return upiLink.replace(/^upi:\/\/pay\?/, app.scheme);
+}
+
+/**
+ * The remembered app.
+ *
+ * Kept per device rather than per shop: which UPI app somebody uses is a fact
+ * about them, not about the counter they are paying. Kept in localStorage
+ * rather than with the basket, so it outlives the order — the whole point is
+ * not being asked again.
+ *
+ * An id that is no longer offered reads as nothing, so removing an app from
+ * the list above cannot strand somebody on a button that goes nowhere.
+ */
+export function rememberedApp() {
+  try {
+    return appById(localStorage.getItem(STORE))?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function rememberApp(appId) {
+  try {
+    if (appById(appId)) localStorage.setItem(STORE, appId);
+  } catch {
+    /* a private window; they will be asked again, which is survivable */
+  }
+  return appById(appId)?.id ?? null;
+}
+
+export function forgetApp() {
+  try {
+    localStorage.removeItem(STORE);
+  } catch {
+    /* ignore */
+  }
+  return null;
+}

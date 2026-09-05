@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   SHOPS, shopById, filterItems, hasDiet, shopPhone,
-  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, paytmHref, shopQr, payNote,
+  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, shopQr, payNote,
 } from "../lib/tuck";
 import { DIET_FILTERS, DIET_LABEL } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { isAndroid, isIOS } from "../lib/platform";
 import { loadBasket, saveBasket } from "../lib/basket";
+import {
+  UPI_APPS, appById, forApp, rememberedApp, rememberApp, forgetApp,
+} from "../lib/upiapps";
 
 /**
  * The tuck shops — a price card, a basket, and a message to send.
@@ -412,6 +415,94 @@ export default function TuckShops() {
  * way to derive one from a phone number, and a plausible guess would send
  * real money to whoever happens to own it.
  */
+/**
+ * Paying on an iPhone, where the operating system will not choose for you.
+ *
+ * Android hands `upi://` to a system chooser that lists the installed apps
+ * and remembers the pick. iOS has no such thing, so the page has to do both
+ * jobs: offer the list, and remember the answer.
+ *
+ * Once an app is chosen the main button goes straight to it and the picker
+ * shrinks to a line of small print — because after the first time this is not
+ * a decision any more, it is a button. The way back is always there, since
+ * the only way to discover a scheme is dead is to tap it and watch nothing
+ * happen.
+ */
+function IosPay({ pay, total }) {
+  const [chosen, setChosen] = useState(rememberedApp);
+  const [picking, setPicking] = useState(false);
+
+  const app = appById(chosen);
+  const href = app ? forApp(pay, app.id) : pay;
+
+  const pick = (id) => {
+    setChosen(rememberApp(id));
+    setPicking(false);
+  };
+
+  return (
+    <>
+      <a className="btn block pay-btn" href={href}>
+        Pay ₹{total}{app ? ` with ${app.name}` : " with UPI"}
+      </a>
+
+      <button
+        className="pay-pick-toggle"
+        aria-expanded={picking}
+        onClick={() => setPicking((v) => !v)}
+      >
+        {app ? "Choose a different app" : "Choose UPI app to pay"}
+        <Caret open={picking} />
+      </button>
+
+      {picking && (
+        <div className="pay-pick" role="group" aria-label="UPI app">
+          {/* Above the list, not below it: it is the reason to pick carefully
+              rather than a footnote about what already happened. */}
+          <p className="pay-pick-lead">Your choice will be remembered from next time.</p>
+          {UPI_APPS.map((a) => (
+            <button
+              key={a.id}
+              className={`pay-pick-app${a.id === chosen ? " on" : ""}`}
+              aria-pressed={a.id === chosen}
+              onClick={() => pick(a.id)}
+            >
+              {a.name}
+              {a.id === chosen && <span className="pay-pick-tick">Remembered</span>}
+            </button>
+          ))}
+          {app && (
+            <button
+              className="pay-pick-app pay-pick-clear"
+              onClick={() => { setChosen(forgetApp()); setPicking(false); }}
+            >
+              Forget my choice
+            </button>
+          )}
+          <p className="pay-pick-note">
+            {/* Said plainly, because a dead scheme is indistinguishable from
+                a mis-tap: nothing happens either way. */}
+            If the app doesn&apos;t open, it may not be installed — try
+            another, or use the QR below.
+          </p>
+        </div>
+      )}
+    </>
+  );
+}
+
+function Caret({ open }) {
+  return (
+    <svg
+      className={`pay-caret${open ? " open" : ""}`}
+      width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"
+    >
+      <path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" strokeWidth="1.6"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function PayBlock({ shop, total }) {
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
@@ -423,7 +514,6 @@ function PayBlock({ shop, total }) {
   const warn = payNote(shop);
   const note = `${shop.name} order`;
   const pay = upiHref(shop, { amount: total, note });
-  const paytm = paytmHref(shop, { amount: total, note });
 
   const copy = async () => {
     try {
@@ -458,21 +548,7 @@ function PayBlock({ shop, total }) {
         </a>
       )}
 
-      {/* iPhone's best effort. Worded as an attempt because it is one: a web
-          page cannot ask iOS whether a scheme has a handler, so this either
-          opens Paytm or does nothing, and the line underneath says so before
-          it is tapped rather than after. */}
-      {isIOS() && paytm && (
-        <>
-          <a className="btn block pay-btn" href={paytm}>
-            Try Paytm · ₹{total}
-          </a>
-          <p className="pay-try">
-            iPhones can&apos;t hand payments to any UPI app reliably. If Paytm
-            doesn&apos;t open, use the QR or the ID below.
-          </p>
-        </>
-      )}
+      {isIOS() && pay && <IosPay pay={pay} total={total} />}
 
       {qr && (
         <>

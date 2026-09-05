@@ -14,8 +14,9 @@ import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
+import { UPI_APPS, appById, forApp } from "../src/lib/upiapps.js";
 import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
-  billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref, paytmHref,
+  billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
   shopQr, payNote } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
@@ -1110,18 +1111,32 @@ console.log("tuck shops");
   check("the link names no particular app",
     !/package=|intent:/.test(upiHref(withUpi, { amount: 160 })));
 
-  // iPhone's best effort: the same request, addressed to Paytm's own scheme,
-  // because iOS never registered upi:// system-wide.
-  const pt = paytmHref(withUpi, { amount: 160, note: "Mohan Da order" });
-  check("Paytm is addressed by its own scheme", pt.startsWith("paytmmp://pay?"));
-  check("it is the same request underneath",
-    pt.slice("paytmmp://pay?".length) ===
-    upiHref(withUpi, { amount: 160, note: "Mohan Da order" }).slice("upi://pay?".length));
-  check("carrying the payee and the amount",
-    pt.includes("pa=mohanda%40okaxis") && pt.includes("am=160.00"));
-  check("no address means no Paytm link either",
-    paytmHref(tagore, { amount: 160 }) === null);
-  check("and no upi:// prefix survives the swap", !pt.includes("upi://"));
+  // iPhone's best effort: the same request re-addressed to one app's own
+  // scheme, because iOS never registered upi:// system-wide.
+  const generic = upiHref(withUpi, { amount: 160, note: "Mohan Da order" });
+  const query = generic.slice("upi://pay?".length);
+
+  check("the four apps asked for are offered",
+    UPI_APPS.map((a) => a.id).join() === "gpay,phonepe,paytm,cred");
+  check("each has a name and a scheme",
+    UPI_APPS.every((a) => a.name && /^[a-z]+:\/\//.test(a.scheme)));
+  check("no two share a scheme",
+    new Set(UPI_APPS.map((a) => a.scheme)).size === UPI_APPS.length);
+
+  // The query is carried across untouched, so the payee and the amount can
+  // never drift between the generic link and an app-specific one. That is
+  // the only property here worth guarding: everything else is a guess about
+  // iOS that a test cannot settle.
+  for (const app of UPI_APPS) {
+    const link = forApp(generic, app.id);
+    check(`${app.name} keeps the request intact`,
+      link === app.scheme + query && !link.includes("upi://"));
+  }
+
+  check("an unknown app falls back to the generic link",
+    forApp(generic, "nope") === generic);
+  check("and an unknown id resolves to nothing", appById("nope") === null);
+  survives("no link to re-address", () => forApp(null, "gpay"));
 
   // The QR is the shop's own printed image, never one generated from the
   // address here: encoding a payment instruction wrongly pays the wrong

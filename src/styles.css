@@ -2412,9 +2412,68 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   line-height: 1.5;
   font-weight: 600;
 }
-.pay-try {
+/* Small print by design. Before a choice it is the only way to pick; after
+   one it is a way back that should not compete with the button above it. */
+.pay-pick-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
   margin: -4px 0 12px;
+  padding: 6px 0;
+  border: 0;
+  background: none;
   font-size: 12px;
+  color: var(--slate);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.pay-pick-toggle:hover { color: var(--signal); }
+.pay-caret { transition: transform 0.14s ease; }
+.pay-caret.open { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .pay-caret { transition: none; } }
+
+.pay-pick {
+  margin: 0 0 12px;
+  padding: 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 12px;
+  background: var(--card);
+}
+.pay-pick-lead {
+  margin: 6px 6px 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--slate);
+}
+.pay-pick-app {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-size: 14px;
+  text-align: left;
+  color: var(--ink);
+}
+.pay-pick-app:hover { background: var(--paper); }
+.pay-pick-app.on { background: var(--signal-wash); color: var(--signal-deep); font-weight: 600; }
+.pay-pick-tick {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--signal-deep);
+}
+.pay-pick-clear { color: var(--slate); font-size: 13px; }
+.pay-pick-note {
+  margin: 4px 6px 6px;
+  font-size: 11.5px;
   line-height: 1.5;
   color: var(--mute);
 }
