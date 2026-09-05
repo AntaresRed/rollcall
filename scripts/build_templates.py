@@ -222,6 +222,63 @@ def night_mess():
     save(wb, "Night Mess Menu.template.xlsx")
 
 
+# ------------------------------------------------------------- tuck shops
+
+def tuck():
+    wb = openpyxl.Workbook()
+    guide(wb, "Tuck Shops — an Info sheet plus one card per shop", [
+        "Read by: scripts/build_tuck.py    Feeds: the Tuck shops tab",
+        "",
+        "The Info sheet:",
+        "One row per shop. 'Shop' must match the first word of that shop's "
+        "menu sheet name. A shop with no phone number is fine — it is a "
+        "counter you walk to — and the screen simply shows no call button "
+        "rather than a dead one. Never borrow another shop's number.",
+        "",
+        "The menu sheets:",
+        "Named '<SHOP> Tuck'. Sl No., Item and Price must be spelled exactly. "
+        "Diet is optional; see below.",
+        "One flat list, no categories — that is how the card on the counter "
+        "reads, and inventing sections here would be a shape the shop does "
+        "not have.",
+        "",
+        "Prices, exactly as printed:",
+        "Half this card is two prices for one item — '40 / 60' for without "
+        "and with cheese, '45 (65)' the same idea in brackets. Type them as "
+        "the card does. They are shown as written and never added up; there "
+        "is no basket on this screen, so nothing has to decide which of the "
+        "two you meant.",
+        "",
+        "Sl No.:",
+        "Kept as printed, gaps and all. The card handed over skips 27, 29-31, "
+        "33-34 and 42, and renumbering would break the one thing the column "
+        "is for — matching a row against the card on the counter.",
+        "",
+        "Diet — optional, and blank today:",
+        "Fill it with veg, egg or non-veg and the Veg only / No meat filter "
+        "appears on the screen by itself. Leave it blank and every item reads "
+        "as unconfirmed and is shown to everyone, which is the honest state "
+        "when nobody has been through the card. Nothing is ever guessed from "
+        "an item's name.",
+    ], name="Tuck Shops.template.xlsx")
+
+    sheet(wb, "Info", ["Shop", "Name", "Phone", "Hours"],
+          [["MOHANDA", "Mohan Da", "8100294443", ""],
+           ["TAGORE", "Tagore Tuck Shop", "", ""]],
+          widths=[14, 26, 18, 22])
+
+    for tag in ["MOHANDA", "TAGORE"]:
+        sheet(wb, f"{tag} Tuck", ["Sl No.", "Item", "Price", "Diet"],
+              [[1, "Plain Cheese Sandwich Grilled", "40", ""],
+               [2, "Veg Cheese Sandwich Grilled", "60", ""],
+               [13, "Paneer Masala Patty / with cheese", "40 / 60", ""],
+               [22, "Double Egg Bread Omelet (Cheese)", "45 (65)", ""],
+               [44, "Masala Rice (Veg / Egg / Chicken / Paneer)",
+                "50 / 70 / 75 / 75", ""]],
+              widths=[10, 52, 20, 12])
+    save(wb, "Tuck Shops.template.xlsx")
+
+
 # --------------------------------------------------------------------- POR
 
 def por():
@@ -641,6 +698,7 @@ the builder at that.
 | `FacultyDirectory.template.tsv` | Institute directory | `build_directory.py` | Faculty directory screen |
 | `POR Contacts Sheet.template.xlsx` | Student Council | `build_por.py` | POR Details screen |
 | `Day Mess Menu.template.xlsx` | Mess secretary | `build_menu.py` | Day mess tab |
+| `Tuck Shops.template.xlsx` | Tuck shop / mess secretary | `build_tuck.py` | Tuck shops tab |
 | `Night Mess Menu.template.xlsx` | Canteen / mess secretary | `build_night_menu.py` | Night canteen tab |
 
 Every template has a `.README.md` beside it saying what each sheet and column
@@ -709,6 +767,7 @@ if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     print(f"writing templates into {OUT}/")
     day_mess()
+    tuck()
     night_mess()
     por()
     pgp2_schedule()

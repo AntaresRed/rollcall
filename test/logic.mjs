@@ -13,6 +13,9 @@ import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
+import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
+  billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref, gpayHref,
+  shopQr } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -943,6 +946,137 @@ console.log("similar results");
   survives("no canteen", () => similarItems(null, "chiken"));
   survives("no query", () => similarItems(wh, ""));
   survives("punctuation only", () => similarItems(wh, "!!!"));
+}
+
+console.log("");
+console.log("tuck shops");
+{
+  check("both shops are there", SHOPS.length === 2);
+  check("each has items", SHOPS.every((s) => s.items.length > 0));
+  check("every item has a name and a price",
+    SHOPS.every((s) => s.items.every((i) => i.name && i.price)));
+  check("no shop lists the same item twice",
+    SHOPS.every((s) => new Set(s.items.map((i) => i.name)).size === s.items.length));
+
+  const mohan = SHOPS.find((s) => s.id === "mohanda");
+  const tagore = SHOPS.find((s) => s.id === "tagore");
+  check("Mohan Da is there", Boolean(mohan) && mohan.name === "Mohan Da");
+  check("and can be called", shopPhone(mohan) === "8100294443");
+
+  // Nobody supplied Tagore's number. Borrowing Mohan Da's would look right
+  // and send somebody to the wrong counter, so it stays absent and the screen
+  // drops the call button instead of offering a dead one.
+  check("Tagore has no number", Boolean(tagore) && shopPhone(tagore) === null);
+  check("an unknown shop falls back", shopById("nope") === SHOPS[0]);
+
+  // Prices are transcribed as printed: half the card is "40 / 60", one item
+  // at two prices. Picking one to store would be inventing a fact.
+  check("two-price items are kept whole",
+    mohan.items.some((i) => /\d+\s*\/\s*\d+/.test(i.price)));
+  check("bracketed second prices survive too",
+    mohan.items.some((i) => /\(\d+\)/.test(i.price)));
+  check("the serial numbers are kept as printed, gaps and all",
+    mohan.items.some((i) => String(i.sl) === "28") &&
+    !mohan.items.some((i) => String(i.sl) === "27"));
+
+  // Nobody has diet-checked these cards, so the filter must not appear —
+  // a control that can only ever return "unconfirmed" looks broken.
+  check("no diet has been recorded yet", hasDiet(mohan) === false);
+  check("so everything reads as unconfirmed",
+    mohan.items.every((i) => i.diet === "unknown"));
+  check("and an unconfirmed item is never hidden by Veg only",
+    filterItems(mohan, { diet: "veg" }).length === mohan.items.length);
+
+  check("search narrows", filterItems(mohan, { query: "maggi" }).length > 0);
+  check("search is case-insensitive",
+    filterItems(mohan, { query: "MAGGI" }).length ===
+    filterItems(mohan, { query: "maggi" }).length);
+  check("every word has to match",
+    filterItems(mohan, { query: "korean chicken" }).length === 1);
+  check("an unmatched search is empty, not everything",
+    filterItems(mohan, { query: "biryani" }).length === 0);
+  check("a blank search shows everything",
+    filterItems(mohan, { query: "" }).length === mohan.items.length);
+
+  // ---- the basket ----
+  const priced = (name) => priceOptions(mohan.items.find((i) => i.name === name));
+  check("one price stays one choice",
+    priced("French Fries").join() === "50");
+  check("a slashed price becomes two",
+    priced("Paneer Masala Patty / with cheese").join() === "40,60");
+  check("a bracketed one does too",
+    priced("Double Egg Bread Omelet (Cheese)").join() === "45,65");
+  check("four fillings, four prices",
+    priced("Masala Rice (Veg / Egg / Chicken / Paneer)").join() === "50,70,75");
+  check("two prices that happen to be equal are one choice",
+    priced("Fried Momo (Veg / Chicken)").join() === "80");
+  check("every item offers at least one price",
+    mohan.items.every((i) => priceOptions(i).length > 0));
+  survives("no item", () => priceOptions(null));
+
+  const basket = [
+    { name: "French Fries", price: 50, qty: 2 },
+    { name: "Paneer Masala Patty / with cheese", price: 60, qty: 1 },
+  ];
+  const bill = tuckBill(basket);
+  check("line totals multiply", bill.items[0].total === 100);
+  check("the total adds up", bill.total === 160);
+  check("the count is items, not lines", bill.count === 3);
+  check("an empty basket costs nothing", tuckBill([]).total === 0);
+  survives("no lines at all", () => tuckBill(null));
+
+  const msg = tuckOrder(mohan, bill.items, { room: "214" });
+  check("quantities lead each line", msg.includes("2 x French Fries"));
+  // The price is what says WHICH one, on a card printed at two prices.
+  check("the chosen price is on the line",
+    msg.includes("Paneer Masala Patty / with cheese — Rs 60"));
+  check("the total is stated", msg.includes("Total: Rs 160"));
+  check("the room is carried", msg.includes("Room: 214"));
+  check("nothing typed means no empty lines",
+    !tuckOrder(mohan, bill.items).includes("Room:"));
+
+  // ---- paying ----
+  // A UPI address is registered, never calculated. Nothing may be derived
+  // from a phone number: a plausible guess sends real money to a stranger.
+  check("no address on file means no payment link", shopUpi(mohan) === null);
+  check("and no link is built", upiHref(mohan, { amount: 160 }) === null);
+  check("a phone number is not a UPI address",
+    shopUpi({ upi: "8100294443" }) === null);
+  check("nor is something half-typed",
+    shopUpi({ upi: "mohanda@" }) === null && shopUpi({ upi: "@ybl" }) === null);
+
+  const withUpi = { ...mohan, upi: "mohanda@okaxis" };
+  const href = upiHref(withUpi, { amount: 160, note: "Mohan Da order" });
+  check("a real address builds a UPI link", href.startsWith("upi://pay?"));
+  check("it names the payee", href.includes("pa=mohanda%40okaxis"));
+  check("it carries the amount", href.includes("am=160.00"));
+  check("in rupees", href.includes("cu=INR"));
+  check("a zero total carries no amount",
+    !upiHref(withUpi, { amount: 0 }).includes("am="));
+
+  // "Open in Google Pay" means naming the app, which only Android can do.
+  const g = gpayHref(withUpi, { amount: 160 });
+  check("Google Pay is named by package",
+    g.includes("package=com.google.android.apps.nbu.paisa.user"));
+  check("it is still a UPI request underneath",
+    g.startsWith("intent://pay?") && g.includes("scheme=upi"));
+  check("carrying the same payee and amount",
+    g.includes("pa=mohanda%40okaxis") && g.includes("am=160.00"));
+  check("and it ends the intent properly", g.endsWith(";end"));
+  check("no address means no Google Pay link either",
+    gpayHref(mohan, { amount: 160 }) === null);
+
+  // The QR is the shop's own printed image, never one generated from the
+  // address here: encoding a payment instruction wrongly pays the wrong
+  // person, and the code on the counter already works.
+  check("no QR has been added yet", shopQr(mohan) === null);
+  check("a QR is served from the public folder, not bundled",
+    shopQr({ qr: "/tuck/mohanda.png" }).startsWith("/tuck/"));
+  survives("no shop to find a QR for", () => shopQr(null));
+
+  survives("no shop at all", () => filterItems(null, { query: "x" }));
+  survives("no options", () => filterItems(mohan));
+  survives("no shop to phone", () => shopPhone(null));
 }
 
 console.log("");

@@ -25,6 +25,7 @@ import NightMessMenu from "../src/screens/NightMessMenu";
 import MessMenu from "../src/screens/MessMenu";
 import OrderHistory from "../src/screens/OrderHistory";
 import NoSchedule from "../src/screens/NoSchedule";
+import TuckShops from "../src/screens/TuckShops";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
 import CoursePicker from "../src/screens/CoursePicker";
 import SectionPicker from "../src/screens/SectionPicker";
@@ -161,6 +162,7 @@ const cases = [
   ["DayMessMenu / embedded", <DayMessMenu key="dme" now={now} embedded />],
   ["NightMessMenu", <NightMessMenu key="nm" />],
   ["MessMenu", <MessMenu key="mm" onBack={noop} now={now} />],
+  ["TuckShops", <TuckShops key="ts" />],
   ["OrderHistory / nothing sent yet", <OrderHistory key="oh" onBack={noop} now={now} />],
   ["OrderHistory / no back button", <OrderHistory key="ohn" now={now} />],
   ["NoSchedule / year not published", <NoSchedule key="ns1"

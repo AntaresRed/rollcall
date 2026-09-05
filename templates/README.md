@@ -15,6 +15,7 @@ the builder at that.
 | `FacultyDirectory.template.tsv` | Institute directory | `build_directory.py` | Faculty directory screen |
 | `POR Contacts Sheet.template.xlsx` | Student Council | `build_por.py` | POR Details screen |
 | `Day Mess Menu.template.xlsx` | Mess secretary | `build_menu.py` | Day mess tab |
+| `Tuck Shops.template.xlsx` | Tuck shop / mess secretary | `build_tuck.py` | Tuck shops tab |
 | `Night Mess Menu.template.xlsx` | Canteen / mess secretary | `build_night_menu.py` | Night canteen tab |
 
 Every template has a `.README.md` beside it saying what each sheet and column

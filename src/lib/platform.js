@@ -21,3 +21,10 @@ export function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
+
+/** Android, where a `upi://` link and an `intent://` URL both actually go
+ *  somewhere. Everywhere else they are inert, so features that depend on them
+ *  have to be able to say so rather than offering a button that does nothing. */
+export function isAndroid() {
+  return /android/i.test(navigator.userAgent);
+}

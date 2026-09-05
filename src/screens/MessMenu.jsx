@@ -2,12 +2,14 @@ import { useState } from "react";
 import DayMessMenu from "./DayMessMenu";
 import NightMessMenu from "./NightMessMenu";
 import OrderHistory from "./OrderHistory";
+import TuckShops from "./TuckShops";
 
 /**
  * Day and night mess, under one roof.
  *
- * They are genuinely different things and the screens reflect that — a week
- * of meals versus a priced list — so this is a switch rather than a merged
+ * Three genuinely different things, and the screens reflect that — a week of
+ * meals, a categorised night price list you can order from, and a flat tuck
+ * card you read before walking over. So this is a switch rather than a merged
  * view. The day screen is untouched; it simply renders embedded, without its
  * own heading and back button, which this owns instead.
  *
@@ -26,7 +28,7 @@ export default function MessMenu({ onBack, now = new Date() }) {
   return (
     <>
       <div className="eyebrow">
-        Mess menu
+        Mess &amp; tuck
         <button
           className="eyebrow-act"
           aria-label="Your night canteen order history"
@@ -37,8 +39,8 @@ export default function MessMenu({ onBack, now = new Date() }) {
         </button>
       </div>
 
-      <div className="daynight" role="tablist" aria-label="Day or night">
-        {[["day", "Day mess"], ["night", "Night canteen"]].map(([id, label]) => (
+      <div className="daynight" role="tablist" aria-label="Which menu">
+        {[["day", "Day mess"], ["night", "Night canteen"], ["tuck", "Tuck shops"]].map(([id, label]) => (
           <button
             key={id}
             className="daynight-tab"
@@ -51,7 +53,9 @@ export default function MessMenu({ onBack, now = new Date() }) {
         ))}
       </div>
 
-      {when === "day" ? <DayMessMenu now={now} embedded /> : <NightMessMenu />}
+      {when === "day" && <DayMessMenu now={now} embedded />}
+      {when === "night" && <NightMessMenu />}
+      {when === "tuck" && <TuckShops />}
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
