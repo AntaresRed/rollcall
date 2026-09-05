@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks,
+  POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind,
 } from "../lib/por";
 import { prettyPhone, telHref, whatsAppHref } from "../lib/phone";
 
@@ -126,8 +126,8 @@ function ContactList({ datasetId, query, onQuery }) {
               target="_blank"
               rel="noopener noreferrer"
             >
+              {linkKind(l.href) === "instagram" ? <InstagramIcon /> : <GlobeIcon />}
               {l.label}
-              <OutIcon />
             </a>
           ))}
         </div>
@@ -186,13 +186,26 @@ function ContactList({ datasetId, query, onQuery }) {
   );
 }
 
-function OutIcon() {
+/* Outlined to sit with the phone and search icons rather than as a pasted-in
+   colour badge — it is a link on a contact list, not a brand endorsement. */
+function InstagramIcon() {
   return (
-    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <path d="M4.5 2h5.5v5.5M10 2 5 7" stroke="currentColor" strokeWidth="1.5"
-            strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8 8.5V10H2V4h1.5" stroke="currentColor" strokeWidth="1.5"
-            strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="2" y="2" width="12" height="12" rx="3.6"
+            stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="8" cy="8" r="2.9" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="11.6" cy="4.4" r="0.95" fill="currentColor" />
+    </svg>
+  );
+}
+
+function GlobeIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M2.2 8h11.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M8 2c1.9 1.9 2.9 3.9 2.9 6S9.9 12.1 8 14C6.1 12.1 5.1 10.1 5.1 8S6.1 3.9 8 2Z"
+            stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
     </svg>
   );
 }

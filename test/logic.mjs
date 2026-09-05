@@ -13,7 +13,7 @@ import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
-import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, porTotal, porSize } from "../src/lib/por.js";
+import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -1206,6 +1206,24 @@ console.log("POR details");
       porLinks("7-lakes-fest").length === 2);
     check("and both are real absolute links",
       porLinks("7-lakes-fest").every((l) => /^https:\/\//.test(l.href) && l.label));
+    // The chip's icon is read off its own address, so a mismatch between
+    // the two is not expressible.
+    const kindOf = (label) =>
+      linkKind(porLinks("7-lakes-fest").find((l) => l.label === label).href);
+    check("the Instagram chip gets the Instagram mark",
+      kindOf("@7lakesfest_iimc") === "instagram");
+    check("the website chip gets the globe", kindOf("7lakesfest.com") === "web");
+
+    // Matched on the host, so a path cannot borrow somebody else's logo.
+    check("a subdomain still counts",
+      linkKind("https://www.instagram.com/x") === "instagram");
+    check("but only the real host does",
+      linkKind("https://7lakesfest.com/our-instagram") === "web");
+    check("and not a lookalike domain",
+      linkKind("https://instagram.com.example.net/x") === "web");
+    check("anything unparseable is just a website",
+      linkKind("not a url") === "web" && linkKind(null) === "web");
+
     check("a list with no links of its own gets an empty array",
       porLinks("student-council").length === 0);
     check("the same empty array every time, not a fresh one",

@@ -137,4 +137,27 @@ export const porLabel = (datasetId) => por[datasetId]?.label ?? "";
  */
 const NO_LINKS = [];
 export const porLinks = (datasetId) => por[datasetId]?.links ?? NO_LINKS;
+
+/**
+ * Which mark a link should wear, read off the address itself.
+ *
+ * Derived rather than stored so that adding a link is adding a link — nobody
+ * has to remember to tag it, and a tag that disagreed with its own URL would
+ * be a small lie sitting next to the truth.
+ *
+ * Matched on the host, not anywhere in the string: a path or query that
+ * happens to mention instagram should not put its logo on somebody's own
+ * website.
+ */
+export function linkKind(href) {
+  let host = "";
+  try {
+    host = new URL(String(href)).hostname.toLowerCase();
+  } catch {
+    return "web";
+  }
+  const is = (domain) => host === domain || host.endsWith(`.${domain}`);
+  if (is("instagram.com")) return "instagram";
+  return "web";
+}
 export const porSize = sizeOf;
