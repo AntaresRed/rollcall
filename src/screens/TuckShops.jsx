@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   SHOPS, shopById, filterItems, hasDiet, shopPhone,
-  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, gpayHref, shopQr,
+  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, gpayHref, shopQr, payNote,
 } from "../lib/tuck";
 import { DIET_FILTERS, DIET_LABEL } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
@@ -428,6 +428,7 @@ function PayBlock({ shop, total }) {
   const qr = shopQr(shop);
   if ((!vpa && !qr) || total <= 0) return null;
 
+  const warn = payNote(shop);
   const note = `${shop.name} order`;
   const pay = upiHref(shop, { amount: total, note });
   const gpay = gpayHref(shop, { amount: total, note });
@@ -444,6 +445,11 @@ function PayBlock({ shop, total }) {
 
   return (
     <div className="pay-block">
+      {/* First, and unmissable. Everything under it moves real money, and a
+          stand-in address is the one state where that money goes somewhere
+          nobody intended. */}
+      {warn && <p className="pay-warn">{warn}</p>}
+
       {/* Android is the only place a payment link goes anywhere. iOS has
           never registered `upi://` system-wide, so the same href opens
           nothing at all — and a dead button is worse than no button. iPhones

@@ -6,8 +6,9 @@
       "name": "Mohan Da",
       "phone": "8100294443",
       "hours": "",
-      "upi": "",
-      "qr": null,
+      "upi": "anujkapse26jan@oksbi",
+      "pay_note": "TEST ONLY — this pays Anuj Kapse, not the shop. Replace with Mohan Da's own UPI ID and QR before sharing.",
+      "qr": "/tuck/mohanda.png",
       "items": [
         {
           "sl": "1",
@@ -393,9 +394,10 @@
       "id": "tagore",
       "tag": "TAGORE",
       "name": "Tagore Tuck Shop",
-      "phone": "",
+      "phone": "7602416780",
       "hours": "",
       "upi": "",
+      "pay_note": "",
       "qr": null,
       "items": [
         {

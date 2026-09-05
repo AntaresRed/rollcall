@@ -168,3 +168,15 @@ export function gpayHref(shop, { amount = 0, note = "" } = {}) {
 
 /** The shop's own printed QR, if one has been added. */
 export const shopQr = (shop) => shop?.qr ?? null;
+
+/**
+ * A warning to show above the pay buttons.
+ *
+ * Exists for one situation: the address on file is a stand-in, and money sent
+ * to it reaches the wrong person. That is not a thing to leave implicit in a
+ * spreadsheet cell — whoever is looking at the screen is about to pay.
+ */
+export const payNote = (shop) => {
+  const note = String(shop?.pay_note ?? "").trim();
+  return note || null;
+};

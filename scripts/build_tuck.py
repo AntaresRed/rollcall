@@ -63,6 +63,7 @@ def read_info(ws):
     ci = {k: col(*n) for k, n in {
         "id": ("shop", "hostel"), "name": ("name",),
         "phone": ("phone",), "hours": ("hours",), "upi": ("upi", "vpa"),
+        "pay_note": ("payment note",),
     }.items()}
     if ci["id"] is None:
         die("Info sheet has no Shop column")
@@ -74,7 +75,8 @@ def read_info(ws):
             continue
         get = lambda k: (r[ci[k]] if ci[k] is not None and ci[k] < len(r) else "")
         out[tag] = {"name": get("name") or tag, "phone": get("phone"),
-                    "hours": get("hours"), "upi": get("upi")}
+                    "hours": get("hours"), "upi": get("upi"),
+                    "pay_note": get("pay_note")}
     return out
 
 
@@ -167,6 +169,11 @@ def build(path, qr_dir="public/tuck"):
                 f"name@bank)")
         if not upi:
             warnings.append(f"{tag}: no UPI address, so no pay button")
+        if meta.get("pay_note"):
+            # A note on a payment is only ever there because the payee is not
+            # yet the right one. Shouted, because forgetting it means real
+            # money going to the wrong person.
+            warnings.append(f"{tag}: PAYMENT NOTE IS SET — {meta['pay_note']}")
         qr = qr_for(qr_dir, tag)
         if not upi and not qr:
             warnings.append(f"{tag}: no UPI address and no QR, so no way to pay "

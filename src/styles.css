@@ -2362,6 +2362,17 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   word-break: break-all;
 }
 .pay-copy { flex: 0 0 auto; padding: 6px 12px; font-size: 12.5px; }
+.pay-warn {
+  background: var(--absent-wash);
+  border: 1px solid #edcdcb;
+  color: var(--absent);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-weight: 600;
+}
 .pay-alt { margin-bottom: 10px; text-align: center; text-decoration: none; }
 .pay-qr {
   text-align: center;

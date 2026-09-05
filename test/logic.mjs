@@ -15,7 +15,7 @@ import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from 
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
   billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref, gpayHref,
-  shopQr } from "../src/lib/tuck.js";
+  shopQr, payNote } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -963,10 +963,11 @@ console.log("tuck shops");
   check("Mohan Da is there", Boolean(mohan) && mohan.name === "Mohan Da");
   check("and can be called", shopPhone(mohan) === "8100294443");
 
-  // Nobody supplied Tagore's number. Borrowing Mohan Da's would look right
-  // and send somebody to the wrong counter, so it stays absent and the screen
-  // drops the call button instead of offering a dead one.
-  check("Tagore has no number", Boolean(tagore) && shopPhone(tagore) === null);
+  check("Tagore can be called too", shopPhone(tagore) === "7602416780");
+  // Each shop's own line. Sharing one would look right on screen and send
+  // orders to the wrong counter, which is the kind of bug nobody reports.
+  check("the two shops do not share a number",
+    shopPhone(mohan) !== shopPhone(tagore));
   check("an unknown shop falls back", shopById("nope") === SHOPS[0]);
 
   // Prices are transcribed as printed: half the card is "40 / 60", one item
@@ -1038,8 +1039,9 @@ console.log("tuck shops");
   // ---- paying ----
   // A UPI address is registered, never calculated. Nothing may be derived
   // from a phone number: a plausible guess sends real money to a stranger.
-  check("no address on file means no payment link", shopUpi(mohan) === null);
-  check("and no link is built", upiHref(mohan, { amount: 160 }) === null);
+  check("a shop with nothing on file offers no payment link",
+    shopUpi(tagore) === null && shopQr(tagore) === null);
+  check("and no link is built for it", upiHref(tagore, { amount: 160 }) === null);
   check("a phone number is not a UPI address",
     shopUpi({ upi: "8100294443" }) === null);
   check("nor is something half-typed",
@@ -1064,15 +1066,29 @@ console.log("tuck shops");
     g.includes("pa=mohanda%40okaxis") && g.includes("am=160.00"));
   check("and it ends the intent properly", g.endsWith(";end"));
   check("no address means no Google Pay link either",
-    gpayHref(mohan, { amount: 160 }) === null);
+    gpayHref(tagore, { amount: 160 }) === null);
 
   // The QR is the shop's own printed image, never one generated from the
   // address here: encoding a payment instruction wrongly pays the wrong
   // person, and the code on the counter already works.
-  check("no QR has been added yet", shopQr(mohan) === null);
   check("a QR is served from the public folder, not bundled",
-    shopQr({ qr: "/tuck/mohanda.png" }).startsWith("/tuck/"));
+    shopQr(mohan).startsWith("/tuck/"));
   survives("no shop to find a QR for", () => shopQr(null));
+
+  // ---- the stand-in payee ----
+  // Mohan Da is currently pointed at a personal address for testing. The
+  // danger is not that it is there; it is that it stops being obvious. So it
+  // has to carry a warning the screen shows above the pay buttons, and that
+  // pairing is checked rather than remembered.
+  const STANDIN = "anujkapse26jan@oksbi";
+  check("the stand-in payee is flagged wherever it appears",
+    SHOPS.every((s) => shopUpi(s) !== STANDIN || Boolean(payNote(s))));
+  check("and the warning says what it is",
+    !SHOPS.some((s) => shopUpi(s) === STANDIN) ||
+    /test/i.test(payNote(SHOPS.find((s) => shopUpi(s) === STANDIN))));
+  check("a shop with a real payee needs no warning",
+    payNote(tagore) === null);
+  survives("no shop to warn about", () => payNote(null));
 
   survives("no shop at all", () => filterItems(null, { query: "x" }));
   survives("no options", () => filterItems(mohan));
