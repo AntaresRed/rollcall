@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   SHOPS, shopById, filterItems, hasDiet, shopPhone,
-  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, gpayHref, shopQr, payNote,
+  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, shopQr, payNote,
 } from "../lib/tuck";
 import { DIET_FILTERS, DIET_LABEL } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
@@ -431,7 +431,6 @@ function PayBlock({ shop, total }) {
   const warn = payNote(shop);
   const note = `${shop.name} order`;
   const pay = upiHref(shop, { amount: total, note });
-  const gpay = gpayHref(shop, { amount: total, note });
 
   const copy = async () => {
     try {
@@ -450,19 +449,19 @@ function PayBlock({ shop, total }) {
           nobody intended. */}
       {warn && <p className="pay-warn">{warn}</p>}
 
-      {/* Android is the only place a payment link goes anywhere. iOS has
-          never registered `upi://` system-wide, so the same href opens
-          nothing at all — and a dead button is worse than no button. iPhones
-          get the QR and the address instead, which is what they would have
-          used anyway. */}
-      {isAndroid() && gpay && (
-        <a className="btn block pay-btn" href={gpay}>
-          Open in Google Pay · ₹{total}
-        </a>
-      )}
+      {/* One button, and the phone picks the app. Naming Google Pay
+          specifically was possible — Android lets a link say which app should
+          answer — but it is the wrong default: plenty of the batch pays with
+          PhonePe or Paytm, and the chooser already puts whichever they use in
+          front of them, with Google Pay among them.
+
+          Android only. iOS has never registered `upi://` system-wide, so the
+          same href opens nothing at all, and a dead button is worse than no
+          button. iPhones get the QR and the address instead, which is what
+          they would have used anyway. */}
       {isAndroid() && pay && (
-        <a className="btn ghost block pay-alt" href={pay}>
-          Any other UPI app
+        <a className="btn block pay-btn" href={pay}>
+          Pay ₹{total} with UPI
         </a>
       )}
 

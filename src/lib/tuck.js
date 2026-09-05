@@ -145,26 +145,6 @@ export function upiHref(shop, { amount = 0, note = "" } = {}) {
   return `upi://pay?${q.join("&")}`;
 }
 
-/**
- * The same request, aimed at Google Pay specifically.
- *
- * Android lets a link name the app that should answer it. `upi://` opens the
- * chooser — which is usually what you want, since plenty of the batch pays
- * with PhonePe — but "Open in Google Pay" was asked for, and this is the only
- * way to mean it.
- *
- * Android only, and the caller has to enforce that. `intent://` is a Chrome-
- * on-Android construction; on any other platform it is inert, and an inert
- * button is worse than an absent one.
- */
-const GPAY_ANDROID = "com.google.android.apps.nbu.paisa.user";
-
-export function gpayHref(shop, { amount = 0, note = "" } = {}) {
-  const link = upiHref(shop, { amount, note });
-  if (!link) return null;
-  const query = link.slice("upi://pay?".length);
-  return `intent://pay?${query}#Intent;scheme=upi;package=${GPAY_ANDROID};end`;
-}
 
 /** The shop's own printed QR, if one has been added. */
 export const shopQr = (shop) => shop?.qr ?? null;

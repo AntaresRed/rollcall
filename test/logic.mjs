@@ -14,7 +14,7 @@ import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
-  billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref, gpayHref,
+  billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
   shopQr, payNote } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
@@ -1056,17 +1056,11 @@ console.log("tuck shops");
   check("a zero total carries no amount",
     !upiHref(withUpi, { amount: 0 }).includes("am="));
 
-  // "Open in Google Pay" means naming the app, which only Android can do.
-  const g = gpayHref(withUpi, { amount: 160 });
-  check("Google Pay is named by package",
-    g.includes("package=com.google.android.apps.nbu.paisa.user"));
-  check("it is still a UPI request underneath",
-    g.startsWith("intent://pay?") && g.includes("scheme=upi"));
-  check("carrying the same payee and amount",
-    g.includes("pa=mohanda%40okaxis") && g.includes("am=160.00"));
-  check("and it ends the intent properly", g.endsWith(";end"));
-  check("no address means no Google Pay link either",
-    gpayHref(tagore, { amount: 160 }) === null);
+  // One link, and the phone offers whichever UPI apps are installed. Nothing
+  // names a particular app: the chooser already puts Google Pay in front of
+  // people who use it, and PhonePe in front of people who do not.
+  check("the link names no particular app",
+    !/package=|intent:/.test(upiHref(withUpi, { amount: 160 })));
 
   // The QR is the shop's own printed image, never one generated from the
   // address here: encoding a payment instruction wrongly pays the wrong
