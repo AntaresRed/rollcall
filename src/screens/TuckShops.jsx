@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   SHOPS, shopById, filterItems, hasDiet, shopPhone,
-  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, shopQr, payNote,
+  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, paytmHref, shopQr, payNote,
 } from "../lib/tuck";
 import { DIET_FILTERS, DIET_LABEL } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
-import { isAndroid } from "../lib/platform";
+import { isAndroid, isIOS } from "../lib/platform";
 import { loadBasket, saveBasket } from "../lib/basket";
 
 /**
@@ -423,6 +423,7 @@ function PayBlock({ shop, total }) {
   const warn = payNote(shop);
   const note = `${shop.name} order`;
   const pay = upiHref(shop, { amount: total, note });
+  const paytm = paytmHref(shop, { amount: total, note });
 
   const copy = async () => {
     try {
@@ -455,6 +456,22 @@ function PayBlock({ shop, total }) {
         <a className="btn block pay-btn" href={pay}>
           Pay ₹{total} with UPI
         </a>
+      )}
+
+      {/* iPhone's best effort. Worded as an attempt because it is one: a web
+          page cannot ask iOS whether a scheme has a handler, so this either
+          opens Paytm or does nothing, and the line underneath says so before
+          it is tapped rather than after. */}
+      {isIOS() && paytm && (
+        <>
+          <a className="btn block pay-btn" href={paytm}>
+            Try Paytm · ₹{total}
+          </a>
+          <p className="pay-try">
+            iPhones can&apos;t hand payments to any UPI app reliably. If Paytm
+            doesn&apos;t open, use the QR or the ID below.
+          </p>
+        </>
       )}
 
       {qr && (
@@ -495,7 +512,7 @@ function PayBlock({ shop, total }) {
       <p className="pay-note">
         {isAndroid()
           ? "This opens your own UPI app with the amount filled in."
-          : "iPhones can't open a payment link, so copy the ID or use the QR."}
+          : "On iPhone the QR and the ID always work, whatever the button above does."}
         {" "}The app never handles the money and can&apos;t tell whether a
         payment went through. Check the name on the screen before you approve
         it, and keep the receipt.

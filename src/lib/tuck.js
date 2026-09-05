@@ -160,3 +160,21 @@ export const payNote = (shop) => {
   const note = String(shop?.pay_note ?? "").trim();
   return note || null;
 };
+
+/**
+ * The same request, addressed to Paytm's own URL scheme.
+ *
+ * For iPhones, where `upi://` goes nowhere — iOS has never registered it
+ * system-wide — but individual apps do claim schemes of their own. If Paytm
+ * is installed and still answers `paytmmp://`, this opens it with the payment
+ * filled in. If it is not, or it no longer does, nothing happens at all.
+ *
+ * That uncertainty is the whole reason the QR and the copyable address stay
+ * on screen directly underneath, and the reason the button says "try". A web
+ * page cannot ask iOS whether a scheme has a handler, so the honest design is
+ * an attempt with the fallback already visible rather than a promise.
+ */
+export function paytmHref(shop, { amount = 0, note = "" } = {}) {
+  const link = upiHref(shop, { amount, note });
+  return link ? link.replace(/^upi:\/\/pay\?/, "paytmmp://pay?") : null;
+}

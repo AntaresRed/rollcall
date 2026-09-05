@@ -15,7 +15,7 @@ import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from 
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
 import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
-  billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
+  billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref, paytmHref,
   shopQr, payNote } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
@@ -1109,6 +1109,19 @@ console.log("tuck shops");
   // people who use it, and PhonePe in front of people who do not.
   check("the link names no particular app",
     !/package=|intent:/.test(upiHref(withUpi, { amount: 160 })));
+
+  // iPhone's best effort: the same request, addressed to Paytm's own scheme,
+  // because iOS never registered upi:// system-wide.
+  const pt = paytmHref(withUpi, { amount: 160, note: "Mohan Da order" });
+  check("Paytm is addressed by its own scheme", pt.startsWith("paytmmp://pay?"));
+  check("it is the same request underneath",
+    pt.slice("paytmmp://pay?".length) ===
+    upiHref(withUpi, { amount: 160, note: "Mohan Da order" }).slice("upi://pay?".length));
+  check("carrying the payee and the amount",
+    pt.includes("pa=mohanda%40okaxis") && pt.includes("am=160.00"));
+  check("no address means no Paytm link either",
+    paytmHref(tagore, { amount: 160 }) === null);
+  check("and no upi:// prefix survives the swap", !pt.includes("upi://"));
 
   // The QR is the shop's own printed image, never one generated from the
   // address here: encoding a payment instruction wrongly pays the wrong

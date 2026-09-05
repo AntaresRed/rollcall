@@ -2408,6 +2408,12 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   line-height: 1.5;
   font-weight: 600;
 }
+.pay-try {
+  margin: -4px 0 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--mute);
+}
 .pay-alt { margin-bottom: 10px; text-align: center; text-decoration: none; }
 .pay-qr {
   text-align: center;
