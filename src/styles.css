@@ -1969,15 +1969,36 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 
 /* Pinned above the tab bar, which is itself fixed. */
+/* Floating clear of the tab bar, not stacked on it. The bar is #171B21 and
+   the pill is #11151A, so at five pixels apart the two darks read as one
+   slab with a seam — the gap and the ring below are what separate them. */
 .cart-dock {
   position: fixed;
   left: 0; right: 0;
-  bottom: calc(64px + env(safe-area-inset-bottom));
+  bottom: calc(74px + env(safe-area-inset-bottom));
   z-index: 25;
   display: flex;
   justify-content: center;
-  padding: 0 16px;
+  padding: 0 22px;
   pointer-events: none;
+}
+
+/* The list runs underneath, so rows arrive at the pill's edge mid-word. This
+   fades them out into the page instead. */
+.cart-dock::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -20px;
+  height: 78px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(244, 245, 242, 0) 0%,
+    rgba(244, 245, 242, 0.86) 45%,
+    var(--paper) 78%
+  );
 }
 .cart-open {
   pointer-events: auto;
@@ -1985,15 +2006,28 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   align-items: center;
   gap: 10px;
   width: 100%;
-  max-width: 520px;
-  padding: 12px 16px;
+  max-width: 460px;
+  padding: 13px 18px;
   border: 0;
   border-radius: 999px;
   background: var(--ink);
   color: #fff;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  /* A ring of the page colour, then the drop shadow. The ring is what stops
+     it merging into the tab bar when the two get close on a short screen —
+     the same trick the alert badge uses to sit on top of its icon. */
+  box-shadow:
+    0 0 0 4px var(--paper),
+    0 10px 24px rgba(17, 21, 26, 0.28),
+    0 2px 6px rgba(17, 21, 26, 0.16);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.cart-open:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 0 0 4px var(--paper),
+    0 5px 14px rgba(17, 21, 26, 0.26);
 }
 .cart-count {
   min-width: 22px;
@@ -2004,8 +2038,9 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   font-size: 12px;
 }
 .cart-total { margin-left: auto; font-family: var(--mono); font-variant-numeric: tabular-nums; }
-/* So the dock never covers the last row of the menu. */
-.cart-spacer { height: 64px; }
+/* So the dock never covers the last row of the menu. Taller than the pill
+   itself: it also has to clear the ring and the fade under it. */
+.cart-spacer { height: 84px; }
 
 /* A sheet from the bottom on a phone, a centred dialog once there is room.
    Bottom-anchored on small screens because that is where the thumb already

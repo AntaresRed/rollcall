@@ -264,10 +264,15 @@ export default function CoursePicker({ existing = [], onSaved, onDirtyChange }) 
       {error && <div className="notice">{error}</div>}
 
       <div className="save-dock">
+        {/* With nothing ticked this button is disabled, and "Save courses"
+            gave no reason for that — it read as broken rather than as
+            waiting. Saying what is missing turns the dead state into an
+            instruction. */}
         <button className="btn block" onClick={save} disabled={saving || !chosen.length}>
-          {saving
-            ? "Saving…"
-            : `Save ${chosen.length || ""} course${chosen.length === 1 ? "" : "s"}`.trim()}
+          {saving && "Saving…"}
+          {!saving && !chosen.length && "Pick your courses to continue"}
+          {!saving && chosen.length > 0 &&
+            `Save ${chosen.length} course${chosen.length === 1 ? "" : "s"}`}
         </button>
       </div>
     </div>
