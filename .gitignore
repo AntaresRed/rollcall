@@ -6,3 +6,9 @@ dist
 
 # Supabase CLI local state (which project this checkout is linked to)
 supabase/.temp
+
+# Throwaway preview harness — a page and an entry point used to render one
+# screen in a browser while working on it, then deleted. Never part of the
+# app: index.html is the only real entry.
+/preview.html
+/src/_preview.jsx
