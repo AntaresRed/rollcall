@@ -6,6 +6,7 @@ import {
 import { DIET_FILTERS, DIET_LABEL } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { isAndroid } from "../lib/platform";
+import { loadBasket, saveBasket } from "../lib/basket";
 
 /**
  * The tuck shops — a price card, a basket, and a message to send.
@@ -23,20 +24,13 @@ import { isAndroid } from "../lib/platform";
  * happened.
  */
 
-const STORE = "iimpresent.tuck.cart";
+const BASKET = "tuck";
+const LEGACY = "iimpresent.tuck.cart";
+const BLANK = { shop: null, lines: [], room: "", reg: "", notes: "" };
 const EMPTY = [];
 
-function loadCart() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(STORE) || "null");
-    if (raw && Array.isArray(raw.lines)) {
-      return { ...raw, room: raw.room ?? "", reg: raw.reg ?? "", notes: raw.notes ?? "" };
-    }
-  } catch {
-    /* a private window, or site data cleared */
-  }
-  return { shop: null, lines: [], room: "", reg: "", notes: "" };
-}
+/** Cleared when the app closes; the room and registration number are not. */
+const loadCart = () => loadBasket(BASKET, BLANK, LEGACY);
 
 export default function TuckShops() {
   const [id, setId] = useState(SHOPS[0]?.id ?? null);
@@ -47,9 +41,7 @@ export default function TuckShops() {
   // The item whose price is being chosen — null unless a choice is open.
   const [choosing, setChoosing] = useState(null);
 
-  useEffect(() => {
-    try { localStorage.setItem(STORE, JSON.stringify(cart)); } catch { /* ignore */ }
-  }, [cart]);
+  useEffect(() => { saveBasket(BASKET, cart); }, [cart]);
 
   const shop = useMemo(() => shopById(id), [id]);
   const shown = useMemo(() => filterItems(shop, { diet, query }), [shop, diet, query]);

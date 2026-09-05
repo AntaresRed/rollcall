@@ -13,6 +13,7 @@ import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
+import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
 import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
   billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
   shopQr, payNote } from "../src/lib/tuck.js";
@@ -946,6 +947,53 @@ console.log("similar results");
   survives("no canteen", () => similarItems(null, "chiken"));
   survives("no query", () => similarItems(wh, ""));
   survives("punctuation only", () => similarItems(wh, "!!!"));
+}
+
+console.log("");
+console.log("baskets");
+{
+  const cart = {
+    canteen: "wh", lines: [{ name: "Veg Roll", price: 43, qty: 2 }],
+    room: "214", reg: "0446/62", notes: "less spicy",
+  };
+  const { who, order } = splitBasket(cart);
+
+  // The split IS the feature: what goes to localStorage outlives the app,
+  // what goes to sessionStorage dies with it.
+  check("the room and reg number persist",
+    who.room === "214" && who.reg === "0446/62");
+  check("and nothing else does", Object.keys(who).sort().join() === "reg,room");
+  check("the lines do not persist", !("lines" in who));
+  check("nor do the instructions — those belong to one order",
+    !("notes" in who) && order.notes === "less spicy");
+  check("the order keeps everything else",
+    order.canteen === "wh" && order.lines.length === 1);
+  check("between them they lose nothing",
+    Object.keys(who).length + Object.keys(order).length === Object.keys(cart).length);
+  check("identity is the two fields, named once", IDENTITY.join() === "room,reg");
+
+  // A fresh session: identity remembered, basket empty.
+  const BLANK = { canteen: null, lines: [], room: "", reg: "", notes: "" };
+  const reopened = mergeBasket(BLANK, who, null);
+  check("reopening keeps the room number", reopened.room === "214");
+  check("and the reg number", reopened.reg === "0446/62");
+  check("but the basket is empty", reopened.lines.length === 0);
+  check("and so are last order's instructions", reopened.notes === "");
+
+  // Same session, after a reload.
+  const reloaded = mergeBasket(BLANK, who, order);
+  check("a reload keeps the basket", reloaded.lines.length === 1);
+  check("along with who it is for",
+    reloaded.room === "214" && reloaded.notes === "less spicy");
+
+  // Anything that is not a basket is treated as no basket.
+  check("a stored order with no lines is ignored",
+    mergeBasket(BLANK, who, { canteen: "wh" }).lines.length === 0);
+  check("every field is present even from an older shape",
+    Object.keys(mergeBasket(BLANK, null, null)).sort().join() ===
+    "canteen,lines,notes,reg,room");
+  survives("nothing stored at all", () => mergeBasket(BLANK, null, null));
+  survives("no cart to split", () => splitBasket(null));
 }
 
 console.log("");

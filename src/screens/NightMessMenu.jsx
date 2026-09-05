@@ -5,6 +5,7 @@ import {
 } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { recordOrder } from "../lib/nightorders";
+import { loadBasket, saveBasket } from "../lib/basket";
 
 /**
  * The night canteens — a priced list per hostel, with a basket.
@@ -21,7 +22,11 @@ import { recordOrder } from "../lib/nightorders";
  * tell whether the counter ever saw the message.
  */
 
-const STORE = "iimpresent.night.cart";
+const BASKET = "night";
+/** The single store this replaced, kept only so a room number typed into it
+ *  survives the upgrade. See loadBasket. */
+const LEGACY = "iimpresent.night.cart";
+const BLANK = { canteen: null, lines: [], reg: "", room: "", notes: "" };
 
 /**
  * Suggest only when the exact hits are this thin.
@@ -34,27 +39,11 @@ const SUGGEST_UNDER = 5;
 /** Stable empty basket, so the memo below does not churn. */
 const EMPTY = [];
 
-/** One cart, belonging to one canteen. Kept across a reload, because losing a
- *  ten-item basket to a stray back-swipe at 1am is a bad night. */
-function loadCart() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(STORE) || "null");
-    if (raw && Array.isArray(raw.lines)) {
-      // `where` was one free-text line before the room and registration
-      // numbers were split apart. Whatever was typed there was the room, so
-      // it carries over rather than being dropped on the upgrade.
-      return {
-        ...raw,
-        reg: raw.reg ?? "",
-        room: raw.room ?? raw.where ?? "",
-        notes: raw.notes ?? "",
-      };
-    }
-  } catch {
-    /* a private window, or site data cleared */
-  }
-  return { canteen: null, lines: [], reg: "", room: "", notes: "" };
-}
+/** One cart, belonging to one canteen. It survives a reload — losing a
+ *  ten-item basket to a stray back-swipe at 1am is a bad night — but not the
+ *  app closing, because last night's basket is not tonight's order. The room
+ *  and registration number outlive both. */
+const loadCart = () => loadBasket(BASKET, BLANK, LEGACY);
 
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -70,9 +59,7 @@ export default function NightMessMenu() {
   // have to scroll past to learn what is on the card at all.
   const [open, setOpen] = useState(() => new Set());
 
-  useEffect(() => {
-    try { localStorage.setItem(STORE, JSON.stringify(cart)); } catch { /* ignore */ }
-  }, [cart]);
+  useEffect(() => { saveBasket(BASKET, cart); }, [cart]);
 
   const canteen = useMemo(() => canteenById(id), [id]);
   const shown = useMemo(() => filterMenu(canteen, { diet, query }), [canteen, diet, query]);
