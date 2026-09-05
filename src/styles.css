@@ -1975,7 +1975,11 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .cart-dock {
   position: fixed;
   left: 0; right: 0;
-  bottom: calc(74px + env(safe-area-inset-bottom));
+  /* --nav-h is the tab bar's measured height, published by App. It already
+     includes the safe-area inset the bar pads itself with, so nothing is
+     added for that here. The fallback only ever applies for the instant
+     before the first measurement lands. */
+  bottom: calc(var(--nav-h, 64px) + 16px);
   z-index: 25;
   display: flex;
   justify-content: center;
@@ -2038,9 +2042,9 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   font-size: 12px;
 }
 .cart-total { margin-left: auto; font-family: var(--mono); font-variant-numeric: tabular-nums; }
-/* So the dock never covers the last row of the menu. Taller than the pill
-   itself: it also has to clear the ring and the fade under it. */
-.cart-spacer { height: 84px; }
+/* So the dock never covers the last row of the menu. The pill, its ring, and
+   the gap it floats in — all measured rather than assumed. */
+.cart-spacer { height: calc(var(--nav-h, 64px) + 24px); }
 
 /* A sheet from the bottom on a phone, a centred dialog once there is room.
    Bottom-anchored on small screens because that is where the thumb already

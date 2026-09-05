@@ -421,6 +421,48 @@ export default function App() {
   // prop changes, and App re-renders every time the clock ticks over a minute.
   const notePickerDirty = useCallback((dirty) => { pickerDirty.current = dirty; }, []);
 
+  /**
+   * The tab bar's real height, published as a CSS variable.
+   *
+   * Anything that floats above the bar — the basket dock, so far — needs to
+   * know where its top edge is, and that is not a constant: the labels wrap
+   * to two lines on a narrow phone and one on a wide one, and the safe-area
+   * inset differs by device. A hardcoded 74px was right on the phone it was
+   * measured on and wrong by a hair everywhere else, which is exactly how
+   * something ends up looking like it is hugging the bar.
+   */
+  const navRef = useRef(null);
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return undefined;
+
+    const publish = () => {
+      document.documentElement.style.setProperty(
+        "--nav-h", `${Math.round(nav.getBoundingClientRect().height)}px`,
+      );
+    };
+    publish();
+
+    // Four triggers, because no one of them is reliable on its own. The
+    // observer is the right instrument but was measurably slow to land in
+    // testing, leaving the dock a step out of place after a rotation; resize
+    // and orientationchange cover that. `fonts.ready` matters more than it
+    // looks — the labels are set in a web font, and they wrap differently
+    // against the fallback, so the bar changes height once it swaps in.
+    const ro = typeof ResizeObserver !== "undefined"
+      ? new ResizeObserver(publish) : null;
+    ro?.observe(nav);
+    window.addEventListener("resize", publish);
+    window.addEventListener("orientationchange", publish);
+    document.fonts?.ready.then(publish).catch(() => {});
+
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", publish);
+      window.removeEventListener("orientationchange", publish);
+    };
+  });
+
   const handleSignOut = useCallback(async () => {
     if (!confirm("Sign out of IIMPresent? Your timetable and attendance stay on the server.")) return;
     await signOut();
@@ -663,7 +705,7 @@ export default function App() {
         </Suspense>
       </div>
 
-      <nav className="tabs" role="tablist">
+      <nav className="tabs" role="tablist" ref={navRef}>
         {TABS.map(([key, label, Icon]) => (
           <button
             key={key}
