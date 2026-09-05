@@ -85,6 +85,48 @@ ADDITIONS = [
 # first row of each group and blank on the rest — so it is carried downwards.
 # `skip_until_header` handles the sheets that open with a decorative title row
 # before their real header.
+# ------------------------------------------------------------ outside the book
+#
+# Bodies the workbook does not carry a sheet for. The 7 Lakes Fest team is a
+# real, separate committee whose contacts were handed over directly rather
+# than through the POR sheet, so they live here: declarative, versioned, and
+# — the point — reapplied on every rebuild, where hand-editing por.json would
+# be wiped by the next run.
+#
+# If the council ever adds a sheet for one of these, delete the entry here and
+# read it from the workbook instead. The workbook is the better home; this is
+# the honest second-best while there is no sheet to read.
+
+EXTRA_DATASETS = {
+    "7-lakes-fest": {
+        "label": "7 Lakes Fest Team",
+        "links": [
+            {"label": "7lakesfest.com", "href": "https://www.7lakesfest.com/"},
+            {"label": "@7lakesfest_iimc",
+             "href": "https://www.instagram.com/7lakesfest_iimc/?hl=en"},
+        ],
+        # (role, name, phone). No emails were given; the screen shows a call
+        # and a WhatsApp button either way, which is how anyone reaches them.
+        "people": [
+            ("Overall Coordinator", "Kritika Parashar", "9971943527"),
+            ("Overall Coordinator", "Neev Swarnakar", "98108 99709"),
+            ("Events Head", "Shraddhesh Zagade", "99601 06166"),
+            ("Events Head", "Palak Tibrewal", "6204863018"),
+            ("Events Head", "Pragya Modi", "98702 02279"),
+            ("Events Head", "Sandeep Singh", "6281431271"),
+            ("Marketing Head", "Raghvendra Pratap Singh", "89896 99029"),
+            ("Marketing Head", "Khushi Nayyar", "88263 63965"),
+            ("Logistics Head", "Puneet Mishra", "70118 72759"),
+            ("Logistics Head", "Abhishek Kumar", "88606 63132"),
+            ("Sponsorship Head", "Anjali Prabhakar", "8779411168"),
+            ("Sponsorship Head", "Khushi Agrawal", "7972784526"),
+            ("Design Head", "Diya Sairuk", "6282673731"),
+            ("Platforms Head", "Krishna Chaudhari", "8788268288"),
+        ],
+    },
+}
+
+
 SHEETS = {
     "Student Council": dict(role=0, name=1, phone=2, email=3, group=None),
     "Preparation Committee": dict(role=None, name=0, phone=1, email=None, group=None),
@@ -321,6 +363,27 @@ def build(path):
             "sections": sectioned(by_sheet["Sports Council"], first_label="Sports Council"),
         },
     }
+
+    for key, spec in EXTRA_DATASETS.items():
+        if key in datasets:
+            raise SystemExit(f"EXTRA_DATASETS['{key}'] collides with a sheet")
+        people = []
+        for role, name, raw in spec["people"]:
+            phone = phone_of(raw)
+            if phone is None:
+                # Loud, not silent: a contact list whose whole purpose is the
+                # number should not quietly ship an entry without one.
+                raise SystemExit(
+                    f"EXTRA_DATASETS['{key}']: {name} has an unusable "
+                    f"number {raw!r}")
+            people.append({"role": role, "name": name,
+                           "phone": phone, "email": None})
+        datasets[key] = {
+            "label": spec["label"],
+            "links": spec.get("links", []),
+            "sections": [{"label": None, "kind": None, "people": people}],
+        }
+
     return datasets, warnings, applied, stale, added
 
 

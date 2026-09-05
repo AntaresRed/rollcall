@@ -37,6 +37,12 @@
             "email": "sportssecy@email.iimcal.ac.in"
           },
           {
+            "role": "Cultural Secretary",
+            "name": "Gargie Basar Bhuyan",
+            "phone": "9401099567",
+            "email": "culsecy@email.iimcal.ac.in"
+          },
+          {
             "role": "Library Representative",
             "name": "Sourav",
             "phone": "6392867759",
@@ -2356,6 +2362,111 @@
             "role": "Gym Rep",
             "name": "Rachit Chaudhary",
             "phone": "6355281922",
+            "email": null
+          }
+        ]
+      }
+    ]
+  },
+  "7-lakes-fest": {
+    "label": "7 Lakes Fest Team",
+    "links": [
+      {
+        "label": "7lakesfest.com",
+        "href": "https://www.7lakesfest.com/"
+      },
+      {
+        "label": "@7lakesfest_iimc",
+        "href": "https://www.instagram.com/7lakesfest_iimc/?hl=en"
+      }
+    ],
+    "sections": [
+      {
+        "label": null,
+        "kind": null,
+        "people": [
+          {
+            "role": "Overall Coordinator",
+            "name": "Kritika Parashar",
+            "phone": "9971943527",
+            "email": null
+          },
+          {
+            "role": "Overall Coordinator",
+            "name": "Neev Swarnakar",
+            "phone": "9810899709",
+            "email": null
+          },
+          {
+            "role": "Events Head",
+            "name": "Shraddhesh Zagade",
+            "phone": "9960106166",
+            "email": null
+          },
+          {
+            "role": "Events Head",
+            "name": "Palak Tibrewal",
+            "phone": "6204863018",
+            "email": null
+          },
+          {
+            "role": "Events Head",
+            "name": "Pragya Modi",
+            "phone": "9870202279",
+            "email": null
+          },
+          {
+            "role": "Events Head",
+            "name": "Sandeep Singh",
+            "phone": "6281431271",
+            "email": null
+          },
+          {
+            "role": "Marketing Head",
+            "name": "Raghvendra Pratap Singh",
+            "phone": "8989699029",
+            "email": null
+          },
+          {
+            "role": "Marketing Head",
+            "name": "Khushi Nayyar",
+            "phone": "8826363965",
+            "email": null
+          },
+          {
+            "role": "Logistics Head",
+            "name": "Puneet Mishra",
+            "phone": "7011872759",
+            "email": null
+          },
+          {
+            "role": "Logistics Head",
+            "name": "Abhishek Kumar",
+            "phone": "8860663132",
+            "email": null
+          },
+          {
+            "role": "Sponsorship Head",
+            "name": "Anjali Prabhakar",
+            "phone": "8779411168",
+            "email": null
+          },
+          {
+            "role": "Sponsorship Head",
+            "name": "Khushi Agrawal",
+            "phone": "7972784526",
+            "email": null
+          },
+          {
+            "role": "Design Head",
+            "name": "Diya Sairuk",
+            "phone": "6282673731",
+            "email": null
+          },
+          {
+            "role": "Platforms Head",
+            "name": "Krishna Chaudhari",
+            "phone": "8788268288",
             "email": null
           }
         ]

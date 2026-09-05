@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import {
-  POR_MENU, nodeAt, trailOf, countUnder, searchPor,
+  POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks,
 } from "../lib/por";
 import { prettyPhone, telHref, whatsAppHref } from "../lib/phone";
 
 /**
- * Positions of responsibility, as a small menu over seven contact lists.
+ * Positions of responsibility, as a small menu over eight contact lists.
  *
  * The hierarchy is the point: three hundred and fifty POR holders flattened
  * into one list would be unusable, and nobody looking for their club's
@@ -89,6 +89,7 @@ function Menu({ items, onPick }) {
 function ContactList({ datasetId, query, onQuery }) {
   const sections = useMemo(() => searchPor(datasetId, query), [datasetId, query]);
   const found = sections.reduce((n, s) => n + s.people.length, 0);
+  const links = porLinks(datasetId);
 
   return (
     <>
@@ -112,6 +113,25 @@ function ContactList({ datasetId, query, onQuery }) {
       <div className="dir-bar">
         <span className="dir-count">{found} {found === 1 ? "person" : "people"}</span>
       </div>
+
+      {/* Above the names, because for a body that runs a public event the
+          site and the feed answer more questions than any one person can. */}
+      {links.length > 0 && (
+        <div className="por-links">
+          {links.map((l) => (
+            <a
+              key={l.href}
+              className="por-link"
+              href={l.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {l.label}
+              <OutIcon />
+            </a>
+          ))}
+        </div>
+      )}
 
       {found === 0 && <div className="empty">Nobody here matches that.</div>}
 
@@ -163,6 +183,17 @@ function ContactList({ datasetId, query, onQuery }) {
         </section>
       ))}
     </>
+  );
+}
+
+function OutIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M4.5 2h5.5v5.5M10 2 5 7" stroke="currentColor" strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 8.5V10H2V4h1.5" stroke="currentColor" strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 

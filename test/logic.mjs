@@ -13,7 +13,7 @@ import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
-import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porTotal, porSize } from "../src/lib/por.js";
+import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -1181,11 +1181,38 @@ console.log("POR details");
 
 {
   // The menu is the hierarchy the council describes, not the workbook's tabs.
-  check("four options at the top", POR_MENU.length === 4);
+  check("five options at the top", POR_MENU.length === 5);
   check("in the order asked for",
     POR_MENU.map((n) => n.id).join(",") ===
-    "student-council,cdpo,cultural-bodies,sports-council");
+    "student-council,cdpo,cultural-bodies,7-lakes-fest,sports-council");
   check("CDPO opens two", nodeAt(["cdpo"]).children.length === 2);
+
+  // The fest team reaches the app through EXTRA_DATASETS in build_por.py
+  // rather than through a sheet, so it is the one list a rebuild could
+  // quietly drop. Pinned here, numbers included.
+  {
+    const fest = searchPor("7-lakes-fest", "");
+    const people = fest.flatMap((s) => s.people);
+    check("the fest team is there", people.length === 14);
+    check("and everybody has a usable number",
+      people.every((p) => /^[6-9][0-9]{9}$/.test(p.phone ?? "")));
+    check("the roles are the seven given",
+      new Set(people.map((p) => p.role)).size === 7);
+    check("both coordinators are listed",
+      people.filter((p) => p.role === "Overall Coordinator").length === 2);
+    check("a number typed with a space was cleaned up",
+      people.some((p) => p.name === "Neev Swarnakar" && p.phone === "9810899709"));
+    check("the site and the feed are both linked",
+      porLinks("7-lakes-fest").length === 2);
+    check("and both are real absolute links",
+      porLinks("7-lakes-fest").every((l) => /^https:\/\//.test(l.href) && l.label));
+    check("a list with no links of its own gets an empty array",
+      porLinks("student-council").length === 0);
+    check("the same empty array every time, not a fresh one",
+      porLinks("student-council") === porLinks("clubs"));
+    check("the fest team is searchable like any other list",
+      searchPor("7-lakes-fest", "kritika").flatMap((s) => s.people).length === 1);
+  }
   check("Cultural Bodies opens three", nodeAt(["cultural-bodies"]).children.length === 3);
   // A node either opens a menu or shows people, never both — the screen picks
   // which to render on exactly that distinction.

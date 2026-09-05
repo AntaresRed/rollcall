@@ -1027,7 +1027,14 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   background: var(--rule);
   border: 1px solid var(--rule);
   border-radius: var(--r);
-  overflow: hidden;
+  /* `clip`, not `hidden`, and the difference is the whole reason the time
+     gutter stays put. `hidden` makes this element a scroll container, and a
+     sticky descendant resolves against its NEAREST scrolling ancestor — so
+     the gutter was sticking to this grid, which never scrolls, and rode off
+     the left edge with everything else. `clip` clips to the same rounded
+     corners without creating a scrollport, leaving .tt-scroll as the
+     scroller the gutter actually sticks to. */
+  overflow: clip;
   /* Forces every column to its widest unwrapped line — a long venue name,
      mainly — rather than letting it wrap. That's the point on a phone: a
      guaranteed-readable column and a horizontal scroll are a fair trade.
@@ -1046,8 +1053,17 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 .tt-time {
   position: sticky;
   left: 0;
-  z-index: 2;
+  z-index: 3;
   background: var(--paper);
+  /* Two jobs. The 1px on the right is the grid line: the grid's own gaps
+     stop working for a column that has content passing under it, so the
+     gutter carries its own edge. The wide band on the left covers the
+     scroller's horizontal padding — the gutter pins to the padding edge, not
+     the screen edge, and without this the days were visible sliding through
+     that strip beside the times. */
+  box-shadow:
+    calc(var(--pad) * -1) 0 0 var(--paper),
+    1px 0 0 var(--rule);
 }
 
 .tt-corner { min-height: 34px; }
@@ -2600,6 +2616,31 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   text-transform: uppercase;
   color: var(--mute);
 }
+
+/* A body that runs a public event has a front door of its own. Chips rather
+   than a list: there are one or two of them, and they sit in the gap between
+   the count and the first name without claiming a row. */
+.por-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 14px;
+}
+.por-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 12.5px;
+  text-decoration: none;
+}
+.por-link:hover { border-color: var(--signal); color: var(--signal); }
+.por-link svg { color: var(--mute); flex: 0 0 auto; }
+.por-link:hover svg { color: var(--signal); }
 
 .chip-toggle {
   border: 1px solid var(--rule-strong);

@@ -43,6 +43,7 @@ export const POR_MENU = [
       { id: "cultural-cell", label: "Cultural Cell", dataset: "cultural-cell" },
     ],
   },
+  { id: "7-lakes-fest", label: "7 Lakes Fest Team", dataset: "7-lakes-fest" },
   { id: "sports-council", label: "Sports Council and Captains", dataset: "sports-council" },
 ];
 
@@ -126,4 +127,14 @@ export function searchPor(datasetId, query = "") {
 }
 
 export const porLabel = (datasetId) => por[datasetId]?.label ?? "";
+
+/**
+ * A dataset's own links — a fest's website and Instagram, say.
+ *
+ * Most lists have none, so this returns the same empty array every time
+ * rather than a fresh one, which keeps it usable straight out of a render
+ * without a memo around it.
+ */
+const NO_LINKS = [];
+export const porLinks = (datasetId) => por[datasetId]?.links ?? NO_LINKS;
 export const porSize = sizeOf;
