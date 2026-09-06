@@ -25,11 +25,11 @@ const STORE = "iimpresent.upi.app";
  */
 export const UPI_APPS = [
   { id: "gpay", name: "Google Pay", scheme: "gpay://upi/pay?",
-    android: "com.google.android.apps.nbu.paisa.user" },
+    android: "com.google.android.apps.nbu.paisa.user", logo: "/upi/gpay.png" },
   { id: "phonepe", name: "PhonePe", scheme: "phonepe://pay?",
-    android: "com.phonepe.app" },
+    android: "com.phonepe.app", logo: "/upi/phonepe.png" },
   { id: "paytm", name: "Paytm", scheme: "paytmmp://pay?",
-    android: "net.one97.paytm" },
+    android: "net.one97.paytm", logo: "/upi/paytm.png" },
 ];
 
 export const appById = (id) => UPI_APPS.find((a) => a.id === id) ?? null;
@@ -95,3 +95,18 @@ export function forgetApp() {
   }
   return null;
 }
+
+/**
+ * The app's own mark, served from public/ rather than drawn here.
+ *
+ * These are other people's logos. Redrawing them from memory as SVG produces
+ * something subtly wrong — a swirl at the wrong angle, a purple half a shade
+ * out — which reads worse than no logo at all, and misrepresents a company
+ * whose name is sitting next to a payment button. So the real files are
+ * dropped into public/upi/ and referenced by name.
+ *
+ * The screen must survive them being absent: an image that fails to load is
+ * hidden and the row falls back to its name, which is what it looked like
+ * before any of this.
+ */
+export const logoFor = (appId) => appById(appId)?.logo ?? null;

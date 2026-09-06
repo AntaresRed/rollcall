@@ -2535,8 +2535,7 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .pay-pick-app {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 11px;
   width: 100%;
   padding: 11px 12px;
   border: 0;
@@ -2548,6 +2547,15 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .pay-pick-app:hover { background: var(--paper); }
 .pay-pick-app.on { background: var(--signal-wash); color: var(--signal-deep); font-weight: 600; }
+/* Square, so a logo with its own padding sits level with one without. */
+.pay-pick-logo {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 5px;
+}
+.pay-pick-name { flex: 1 1 auto; min-width: 0; }
 .pay-pick-tick {
   font-family: var(--mono);
   font-size: 10px;

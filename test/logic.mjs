@@ -15,7 +15,7 @@ import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, prune,
   toCsv, CAP, KEEP_DAYS } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
-import { UPI_APPS, appById, forApp } from "../src/lib/upiapps.js";
+import { UPI_APPS, appById, forApp, logoFor } from "../src/lib/upiapps.js";
 import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
   billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
   shopQr, payNote, LOCATIONS, deliveryFor, chargesByPlace } from "../src/lib/tuck.js";
@@ -1213,6 +1213,14 @@ console.log("tuck shops");
     check(`${app.name} carries the same request either way`,
       android.includes(query) && ios.includes(query));
   }
+
+  // Other companies' marks, served from public/ rather than drawn here — a
+  // redrawn logo is subtly wrong in a place where a company's name sits next
+  // to a payment button.
+  check("every app names a logo file",
+    UPI_APPS.every((a) => /^\/upi\/[a-z]+\.png$/.test(a.logo)));
+  check("and each has its own", new Set(UPI_APPS.map((a) => a.logo)).size === 3);
+  check("an unknown app has no logo", logoFor("nope") === null);
 
   check("no app chosen means the plain link, on either platform",
     forApp(generic, null) === generic

@@ -554,7 +554,20 @@ function AppPay({ pay, total }) {
               aria-pressed={a.id === chosen}
               onClick={() => pick(a.id)}
             >
-              {a.name}
+              {/* Hidden rather than broken if the file is not there: the row
+                  falls back to the name, which is all it ever showed. */}
+              {a.logo && (
+                <img
+                  className="pay-pick-logo"
+                  src={a.logo}
+                  alt=""
+                  width="22"
+                  height="22"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                />
+              )}
+              <span className="pay-pick-name">{a.name}</span>
               {a.id === chosen && <span className="pay-pick-tick">Remembered</span>}
             </button>
           ))}
