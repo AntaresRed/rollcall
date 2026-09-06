@@ -1188,20 +1188,35 @@ console.log("tuck shops");
 
   check("the three apps asked for are offered",
     UPI_APPS.map((a) => a.id).join() === "gpay,phonepe,paytm");
-  check("each has a name and a scheme",
-    UPI_APPS.every((a) => a.name && /^[a-z]+:\/\//.test(a.scheme)));
+  check("each has a name, a scheme and an Android package",
+    UPI_APPS.every((a) => a.name && /^[a-z]+:\/\//.test(a.scheme)
+      && /^[a-z0-9.]+$/.test(a.android)));
   check("no two share a scheme",
     new Set(UPI_APPS.map((a) => a.scheme)).size === UPI_APPS.length);
+  check("nor a package",
+    new Set(UPI_APPS.map((a) => a.android)).size === UPI_APPS.length);
 
   // The query is carried across untouched, so the payee and the amount can
   // never drift between the generic link and an app-specific one. That is
   // the only property here worth guarding: everything else is a guess about
   // iOS that a test cannot settle.
   for (const app of UPI_APPS) {
-    const link = forApp(generic, app.id);
-    check(`${app.name} keeps the request intact`,
-      link === app.scheme + query && !link.includes("upi://"));
+    const ios = forApp(generic, app.id);
+    check(`${app.name} keeps the request intact on iOS`,
+      ios === app.scheme + query && !ios.includes("upi://"));
+
+    // Android names the app to Chrome, which is what walks past a default
+    // handler — the reason a phone set to WhatsApp was swallowing payments.
+    const android = forApp(generic, app.id, { android: true });
+    check(`${app.name} is named to Android by package`,
+      android === `intent://pay?${query}#Intent;scheme=upi;package=${app.android};end`);
+    check(`${app.name} carries the same request either way`,
+      android.includes(query) && ios.includes(query));
   }
+
+  check("no app chosen means the plain link, on either platform",
+    forApp(generic, null) === generic
+    && forApp(generic, null, { android: true }) === generic);
 
   check("an unknown app falls back to the generic link",
     forApp(generic, "nope") === generic);

@@ -2820,6 +2820,20 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   color: var(--ink);
 }
 .util-item:hover { border-color: var(--signal); }
+/* The mark sits in its own tinted square so the three read as a set at a
+   glance, before any of the labels are read. */
+.util-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.util-item:hover .util-icon { background: var(--signal-wash); color: var(--signal-deep); }
 .util-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .util-label { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
 .util-desc { font-size: 12.5px; line-height: 1.4; color: var(--slate); }

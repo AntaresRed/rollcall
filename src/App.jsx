@@ -44,8 +44,11 @@ const SUB_SCREEN_BACK = {
   reschedule: "Back to timetable",
   breakdown: "Back to timetable",
   attendance: "Back to timetable",
-  faculty: "Back to utils",
-  por: "Back to utils",
+  contacts: "Back to utils",
+  // These three now live behind the contacts door, so back is one step, not
+  // two — the arrow should undo the tap that got you here.
+  faculty: "Back to contacts",
+  por: "Back to contacts",
   mess: "Back to utils",
   export: "Back to utils",
   admin: "Back to profile",
@@ -659,14 +662,17 @@ export default function App() {
         {tab === "profile" && subScreen === "admin" && isAdmin && (
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
         )}
+        {tab === "utils" && subScreen === "contacts" && (
+          <Utils onOpen={setSubScreen} group="contacts" />
+        )}
         {tab === "utils" && subScreen === "faculty" && (
-          <Faculty classes={viewClasses} onBack={() => setSubScreen(null)} />
+          <Faculty classes={viewClasses} onBack={() => setSubScreen("contacts")} />
         )}
         {tab === "utils" && subScreen === "mess" && (
           <MessMenu now={now} onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "por" && (
-          <PorDetails onBack={() => setSubScreen(null)} />
+          <PorDetails onBack={() => setSubScreen("contacts")} />
         )}
         {tab === "utils" && subScreen === "export" && (
           <CalendarExport

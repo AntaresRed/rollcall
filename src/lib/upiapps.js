@@ -24,23 +24,39 @@ const STORE = "iimpresent.upi.app";
  * so the screen is built so that a dead one costs a tap and nothing else.
  */
 export const UPI_APPS = [
-  { id: "gpay", name: "Google Pay", scheme: "gpay://upi/pay?" },
-  { id: "phonepe", name: "PhonePe", scheme: "phonepe://pay?" },
-  { id: "paytm", name: "Paytm", scheme: "paytmmp://pay?" },
+  { id: "gpay", name: "Google Pay", scheme: "gpay://upi/pay?",
+    android: "com.google.android.apps.nbu.paisa.user" },
+  { id: "phonepe", name: "PhonePe", scheme: "phonepe://pay?",
+    android: "com.phonepe.app" },
+  { id: "paytm", name: "Paytm", scheme: "paytmmp://pay?",
+    android: "net.one97.paytm" },
 ];
 
 export const appById = (id) => UPI_APPS.find((a) => a.id === id) ?? null;
 
 /**
- * Re-address a `upi://pay?…` link to one app's own scheme.
+ * Re-address a `upi://pay?…` link at one app.
  *
- * The query is carried across untouched, so the payee and amount can never
- * drift between the generic link and an app-specific one.
+ * The query is carried across untouched either way, so the payee and the
+ * amount can never drift between the generic link and an app-specific one.
+ *
+ * The two platforms need different constructions for the same intention:
+ *
+ *   Android   `intent://…;package=…;end` names the app to Chrome, and — the
+ *             reason it is here — bypasses the system default. A phone whose
+ *             default UPI handler is WhatsApp sends every plain `upi://` link
+ *             there without showing a chooser; this goes where it is told.
+ *
+ *   iOS       the app's own scheme, because there is no chooser to bypass and
+ *             no intent syntax to use.
  */
-export function forApp(upiLink, appId) {
+export function forApp(upiLink, appId, { android = false } = {}) {
   const app = appById(appId);
   if (!upiLink || !app) return upiLink ?? null;
-  return upiLink.replace(/^upi:\/\/pay\?/, app.scheme);
+  const query = upiLink.replace(/^upi:\/\/pay\?/, "");
+  return android
+    ? `intent://pay?${query}#Intent;scheme=upi;package=${app.android};end`
+    : app.scheme + query;
 }
 
 /**

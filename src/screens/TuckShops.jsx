@@ -6,7 +6,7 @@ import {
 } from "../lib/tuck";
 import { DIET_FILTERS, DIET_LABEL } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
-import { isAndroid, isIOS } from "../lib/platform";
+import { isAndroid } from "../lib/platform";
 import { loadBasket, saveBasket } from "../lib/basket";
 import {
   UPI_APPS, appById, forApp, rememberedApp, rememberApp, forgetApp,
@@ -498,24 +498,29 @@ export default function TuckShops() {
  * real money to whoever happens to own it.
  */
 /**
- * Paying on an iPhone, where the operating system will not choose for you.
+ * Choosing which UPI app gets the payment, on either platform.
  *
- * Android hands `upi://` to a system chooser that lists the installed apps
- * and remembers the pick. iOS has no such thing, so the page has to do both
- * jobs: offer the list, and remember the answer.
+ * It began as the iPhone's consolation prize — iOS never registered `upi://`
+ * system-wide, so the page had to offer the list itself. Android turned out
+ * to need the same thing for the opposite reason: it has a chooser, but a
+ * remembered default silently swallows it, and a phone that once picked
+ * WhatsApp sends every payment there without asking again. Naming the app
+ * explicitly goes where it is told.
  *
  * Once an app is chosen the main button goes straight to it and the picker
- * shrinks to a line of small print — because after the first time this is not
- * a decision any more, it is a button. The way back is always there, since
- * the only way to discover a scheme is dead is to tap it and watch nothing
+ * shrinks to a line of small print — after the first time this is not a
+ * decision any more, it is a button. The way back is always there, since the
+ * only way to find out an app is missing is to tap it and watch nothing
  * happen.
  */
-function IosPay({ pay, total }) {
+function AppPay({ pay, total }) {
   const [chosen, setChosen] = useState(rememberedApp);
   const [picking, setPicking] = useState(false);
 
   const app = appById(chosen);
-  const href = app ? forApp(pay, app.id) : pay;
+  // With nothing chosen this stays the plain link: Android shows its chooser,
+  // and iOS does nothing, which is what the QR underneath is for.
+  const href = app ? forApp(pay, app.id, { android: isAndroid() }) : pay;
 
   const pick = (id) => {
     setChosen(rememberApp(id));
@@ -614,23 +619,10 @@ function PayBlock({ shop, total }) {
           nobody intended. */}
       {warn && <p className="pay-warn">{warn}</p>}
 
-      {/* One button, and the phone picks the app. Naming Google Pay
-          specifically was possible — Android lets a link say which app should
-          answer — but it is the wrong default: plenty of the batch pays with
-          PhonePe or Paytm, and the chooser already puts whichever they use in
-          front of them, with Google Pay among them.
-
-          Android only. iOS has never registered `upi://` system-wide, so the
-          same href opens nothing at all, and a dead button is worse than no
-          button. iPhones get the QR and the address instead, which is what
-          they would have used anyway. */}
-      {isAndroid() && pay && (
-        <a className="btn block pay-btn" href={pay}>
-          Pay ₹{total} with UPI
-        </a>
-      )}
-
-      {isIOS() && pay && <IosPay pay={pay} total={total} />}
+      {/* The same flow on both platforms now. It reached Android late and by
+          a different route: not because the phone cannot choose, but because
+          it remembers a choice made once and never asks again. */}
+      {pay && <AppPay pay={pay} total={total} />}
 
       {qr && (
         <>
@@ -669,7 +661,7 @@ function PayBlock({ shop, total }) {
 
       <p className="pay-note">
         {isAndroid()
-          ? "This opens your own UPI app with the amount filled in."
+          ? "This opens your UPI app with the amount filled in."
           : "On iPhone the QR and the ID always work, whatever the button above does."}
         {" "}The app never handles the money and can&apos;t tell whether a
         payment went through. Check the name on the screen before you approve

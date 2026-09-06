@@ -154,6 +154,7 @@ const cases = [
   ["PorDetails", <PorDetails key="por" onBack={noop} />],
   ["PorDetails / no back button", <PorDetails key="porn" />],
   ["Utils", <Utils key="u" onOpen={noop} />],
+  ["Utils / contacts group", <Utils key="uc" onOpen={noop} group="contacts" />],
   ["DayMessMenu", <DayMessMenu key="dm" onBack={noop} now={now} />],
   // Sunday is the rotation's edge case — the week must wrap, not truncate.
   ["DayMessMenu / on a Sunday", <DayMessMenu key="dms" onBack={noop}
