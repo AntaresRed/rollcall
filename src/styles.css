@@ -48,7 +48,14 @@
 
 * { box-sizing: border-box; }
 
-html, body, #root { height: 100%; }
+html, body { height: 100%; }
+
+/* min-height, not height. A sticky element sticks only within its containing
+   block, and #root is the masthead's — so pinning that box to exactly one
+   viewport meant the back button scrolled away the moment the page grew past
+   it. Letting #root grow with its content is what makes the masthead stay put
+   the whole way down. */
+#root { min-height: 100%; }
 
 body {
   margin: 0;
@@ -256,7 +263,20 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
+.history-name { flex: 1 1 auto; min-width: 0; }
+/* What that line cost the night it was ordered — not today's price. */
+.history-cost {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--slate);
+}
 .history-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
   margin-top: 9px;
   padding-top: 8px;
   border-top: 1px solid var(--rule);
@@ -265,6 +285,14 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   letter-spacing: 0.06em;
   color: var(--mute);
 }
+.history-total {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.history-export { margin-top: 6px; margin-bottom: 8px; }
 .history-none {
   text-align: center;
   padding: 30px 16px;
@@ -273,7 +301,7 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 }
 .history-none p { margin: 0; }
 .history-none-sub { margin-top: 7px !important; font-size: 12.5px; color: var(--mute); }
-.history-clear { margin-top: 6px; }
+.history-clear { margin-top: 0; }
 .history-note {
   font-size: 12px;
   line-height: 1.5;
@@ -2146,6 +2174,46 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   color: var(--mute);
   margin-bottom: 5px;
 }
+/* Chips rather than a dropdown: ten short names, and each one carries its
+   own price. A <select> would hide the fee behind a tap, which is exactly the
+   thing worth seeing before choosing. */
+.place-pick { border: 0; padding: 0; margin: 16px 0 12px; }
+.place-pick legend {
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 7px;
+}
+.place-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+.place-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: var(--card);
+  font-size: 13px;
+  color: var(--ink);
+}
+.place-chip:hover { border-color: var(--signal); }
+.place-chip.on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  font-weight: 600;
+}
+.place-fee {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.place-chip.on .place-fee { color: #C9CDD3; }
+
 .cart-notes { display: block; margin: 0 0 12px; }
 .cart-notes textarea {
   width: 100%;
@@ -2800,10 +2868,12 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 
 /* ---------- faculty directory ---------- */
 
-/* Deliberately not sticky. The masthead above it is sticky but stops being
-   so after one viewport — #root is height:100%, which caps the containing
-   block — so a box pinned beneath it would float over the list with a strip
-   of scrolling content showing through the gap. */
+/* Not sticky, though it now could be. The reason recorded here used to be
+   that #root was height:100%, which capped the masthead's containing block
+   and stopped it sticking after one viewport; that is fixed, and the masthead
+   holds all the way down. What remains is a choice rather than a limit: on a
+   list this long the search box is worth reaching for once, and a second
+   pinned bar under the masthead costs a strip of screen on every screenful. */
 .dir-search {
   display: flex;
   align-items: center;

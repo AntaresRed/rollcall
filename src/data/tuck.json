@@ -6,9 +6,52 @@
       "name": "Mohan Da",
       "phone": "8100294443",
       "hours": "",
-      "upi": "anujkapse26jan@oksbi",
-      "pay_note": "TEST ONLY — this pays Anuj Kapse, not the shop. Replace with Mohan Da's own UPI ID and QR before sharing.",
+      "upi": "paytmqr6vv0l2@ptys",
+      "pay_note": "",
+      "delivery": "",
       "qr": "/tuck/mohanda.png",
+      "zones": [
+        {
+          "location": "NH",
+          "fee": 15
+        },
+        {
+          "location": "OH",
+          "fee": 15
+        },
+        {
+          "location": "Tagore",
+          "fee": 15
+        },
+        {
+          "location": "Annexe",
+          "fee": 15
+        },
+        {
+          "location": "NAB",
+          "fee": 15
+        },
+        {
+          "location": "OAB",
+          "fee": 15
+        },
+        {
+          "location": "Tata Hall",
+          "fee": 15
+        },
+        {
+          "location": "LVH",
+          "fee": 20
+        },
+        {
+          "location": "MDC",
+          "fee": 20
+        },
+        {
+          "location": "Family Quarters",
+          "fee": 20
+        }
+      ],
       "items": [
         {
           "sl": "1",
@@ -398,7 +441,9 @@
       "hours": "",
       "upi": "Q871252473@ybl",
       "pay_note": "",
+      "delivery": "6",
       "qr": "/tuck/tagore.png",
+      "zones": [],
       "items": [
         {
           "sl": "1",
@@ -780,5 +825,17 @@
         }
       ]
     }
+  ],
+  "locations": [
+    "NH",
+    "OH",
+    "Tagore",
+    "Annexe",
+    "NAB",
+    "OAB",
+    "Tata Hall",
+    "LVH",
+    "MDC",
+    "Family Quarters"
   ]
 }

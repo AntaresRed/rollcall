@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
-import { readOrders, clearOrders, byDay, clockOf, itemCount } from "../lib/nightorders";
+import {
+  readOrders, clearOrders, byDay, clockOf, itemCount, toCsv, KEEP_DAYS,
+} from "../lib/nightorders";
 
 /**
  * The baskets you have sent to a night canteen.
@@ -15,6 +17,18 @@ import { readOrders, clearOrders, byDay, clockOf, itemCount } from "../lib/night
 export default function OrderHistory({ onBack, now = new Date() }) {
   const [history, setHistory] = useState(readOrders);
   const days = useMemo(() => byDay(history, now), [history, now]);
+
+  const [copied, setCopied] = useState(false);
+
+  const exportCsv = async () => {
+    try {
+      await navigator.clipboard.writeText(toCsv(history));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      /* no clipboard permission — nothing is lost, the list is still on screen */
+    }
+  };
 
   const empty = () => {
     if (!confirm("Delete your order history on this device?")) return;
@@ -56,13 +70,21 @@ export default function OrderHistory({ onBack, now = new Date() }) {
                 {order.items.map((i) => (
                   <li key={i.name}>
                     <span className="history-qty">{i.qty}</span>
-                    {i.name}
+                    <span className="history-name">{i.name}</span>
+                    {i.price > 0 && <span className="history-cost">₹{i.price}</span>}
                   </li>
                 ))}
               </ul>
 
               <div className="history-foot">
-                {itemCount(order)} item{itemCount(order) === 1 ? "" : "s"}
+                <span>
+                  {itemCount(order)} item{itemCount(order) === 1 ? "" : "s"}
+                  {(order.room || order.reg) && " · "}
+                  {order.room && `Room ${order.room}`}
+                  {order.room && order.reg && " · "}
+                  {order.reg && order.reg}
+                </span>
+                {order.total > 0 && <span className="history-total">₹{order.total}</span>}
               </div>
             </div>
           ))}
@@ -70,9 +92,17 @@ export default function OrderHistory({ onBack, now = new Date() }) {
       ))}
 
       {history.length > 0 && (
-        <button className="btn ghost block history-clear" onClick={empty}>
-          Clear this history
-        </button>
+        <>
+          {/* The lightest export there is: text on the clipboard. No file to
+              download — which an installed app on iOS may simply refuse —
+              and it pastes straight into a spreadsheet or a message. */}
+          <button className="btn block history-export" onClick={exportCsv}>
+            {copied ? "Copied — paste into a spreadsheet" : "Copy history as a spreadsheet"}
+          </button>
+          <button className="btn ghost block history-clear" onClick={empty}>
+            Clear this history
+          </button>
+        </>
       )}
 
       {/* Said once, at the bottom, where somebody wondering why their laptop
@@ -80,7 +110,8 @@ export default function OrderHistory({ onBack, now = new Date() }) {
       <p className="history-note">
         Kept on this device only — a phone and a laptop keep separate
         histories, and clearing your browser data clears this too. The last
-        twenty orders are kept.
+        {" "}{KEEP_DAYS} days are kept, so copy anything you want to keep
+        longer.
       </p>
 
       {onBack && (

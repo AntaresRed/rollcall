@@ -11,13 +11,14 @@ import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue 
 import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
 import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS,
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
-import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, CAP } from "../src/lib/nightorders.js";
+import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, prune,
+  toCsv, CAP, KEEP_DAYS } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
 import { UPI_APPS, appById, forApp } from "../src/lib/upiapps.js";
 import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
   billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
-  shopQr, payNote } from "../src/lib/tuck.js";
+  shopQr, payNote, LOCATIONS, deliveryFor, chargesByPlace } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -971,7 +972,8 @@ console.log("baskets");
     order.canteen === "wh" && order.lines.length === 1);
   check("between them they lose nothing",
     Object.keys(who).length + Object.keys(order).length === Object.keys(cart).length);
-  check("identity is the two fields, named once", IDENTITY.join() === "room,reg");
+  check("identity is the fields that outlive an order",
+    IDENTITY.join() === "room,reg,place");
 
   // A fresh session: identity remembered, basket empty.
   const BLANK = { canteen: null, lines: [], room: "", reg: "", notes: "" };
@@ -1068,22 +1070,80 @@ console.log("tuck shops");
     { name: "French Fries", price: 50, qty: 2 },
     { name: "Paneer Masala Patty / with cheese", price: 60, qty: 1 },
   ];
-  const bill = tuckBill(basket);
+  // Mohan Da charges nothing to bring it over; Tagore charges six.
+  const bill = tuckBill(mohan, basket);
   check("line totals multiply", bill.items[0].total === 100);
-  check("the total adds up", bill.total === 160);
+  check("the subtotal adds up", bill.subtotal === 160);
+  check("no delivery charge, no delivery line", bill.delivery === 0);
+  check("so the total is the subtotal", bill.total === 160);
   check("the count is items, not lines", bill.count === 3);
-  check("an empty basket costs nothing", tuckBill([]).total === 0);
-  survives("no lines at all", () => tuckBill(null));
 
-  const msg = tuckOrder(mohan, bill.items, { room: "214" });
+  const dbill = tuckBill(tagore, basket);
+  check("Tagore's delivery charge is six", dbill.delivery === 6);
+  check("and it lands on the total", dbill.total === 166);
+  check("without touching the subtotal", dbill.subtotal === 160);
+
+  // An empty basket costs nothing — not the delivery fee on its own.
+  check("an empty basket costs nothing", tuckBill(mohan, []).total === 0);
+  check("nor the delivery fee by itself", tuckBill(tagore, []).total === 0);
+  check("and no charge is shown for it", tuckBill(tagore, []).delivery === 0);
+  survives("no lines at all", () => tuckBill(mohan, null));
+  survives("no shop at all", () => tuckBill(null, basket));
+
+  const msg = tuckOrder(mohan, bill.items, {});
   check("quantities lead each line", msg.includes("2 x French Fries"));
+  check("no delivery charge means no breakdown", !msg.includes("Subtotal"));
+
+  // The breakdown only appears when there is something to break down: a
+  // subtotal equal to the total is a line that makes the reader check.
+  const dmsg = tuckOrder(tagore, bill.items, {});
+  check("a delivery charge is spelled out", dmsg.includes("Delivery: Rs 6"));
+  check("with the subtotal above it", dmsg.includes("Subtotal: Rs 160"));
+  check("and the total below", dmsg.includes("Total: Rs 166"));
+  check("in that order",
+    dmsg.indexOf("Subtotal") < dmsg.indexOf("Delivery")
+    && dmsg.indexOf("Delivery") < dmsg.indexOf("Total: Rs 166"));
   // The price is what says WHICH one, on a card printed at two prices.
   check("the chosen price is on the line",
     msg.includes("Paneer Masala Patty / with cheese — Rs 60"));
   check("the total is stated", msg.includes("Total: Rs 160"));
-  check("the room is carried", msg.includes("Room: 214"));
-  check("nothing typed means no empty lines",
-    !tuckOrder(mohan, bill.items).includes("Room:"));
+  check("nowhere chosen means no delivery line",
+    !tuckOrder(mohan, bill.items).includes("Deliver to:"));
+
+  // ---- delivery by location ----
+  // Mohan Da charges by how far it walks; Tagore charges one rate wherever
+  // it goes. Both are data, so a change of tariff is a spreadsheet edit.
+  check("the campus is listed once, in tariff order",
+    LOCATIONS.join() === "NH,OH,Tagore,Annexe,NAB,OAB,Tata Hall,LVH,MDC,Family Quarters");
+  check("Mohan Da charges by place", chargesByPlace(mohan) === true);
+  check("Tagore does not", chargesByPlace(tagore) === false);
+
+  for (const near of ["NH", "OH", "Tagore", "Annexe", "NAB", "OAB", "Tata Hall"]) {
+    check(`${near} is fifteen`, deliveryFor(mohan, near) === 15);
+  }
+  for (const far of ["LVH", "MDC", "Family Quarters"]) {
+    check(`${far} is twenty`, deliveryFor(mohan, far) === 20);
+  }
+  check("a flat-rate shop ignores the location",
+    deliveryFor(tagore, "LVH") === 6 && deliveryFor(tagore, "NH") === 6);
+
+  // Nowhere chosen means no fee yet — the screen says the total is unsettled
+  // rather than quietly charging the cheapest.
+  check("no location, no charge yet", deliveryFor(mohan, "") === 0);
+  check("nor for somewhere off the list", deliveryFor(mohan, "Kolkata") === 0);
+  survives("no shop to price", () => deliveryFor(null, "NH"));
+
+  const nearBill = tuckBill(mohan, basket, "NH");
+  const farBill = tuckBill(mohan, basket, "LVH");
+  check("the near rate lands on the total", nearBill.total === 175);
+  check("and the far rate costs five more", farBill.total === 180);
+  check("the subtotal is the same either way",
+    nearBill.subtotal === farBill.subtotal);
+
+  const placed = tuckOrder(mohan, bill.items, { place: "LVH" });
+  check("where it is going is in the message", placed.includes("Deliver to: LVH"));
+  check("with that location's charge", placed.includes("Delivery: Rs 20"));
+  check("and the total to match", placed.includes("Total: Rs 180"));
 
   // ---- paying ----
   // A UPI address is registered, never calculated. Nothing may be derived
@@ -1095,7 +1155,8 @@ console.log("tuck shops");
     shopUpi(nobody) === null && shopQr(nobody) === null);
   check("and no link is built for it", upiHref(nobody, { amount: 160 }) === null);
 
-  // Tagore's own counter QR and ID, read off the printed card.
+  // Both shops' own counter QRs and IDs, read off the printed cards.
+  check("Mohan Da has its own UPI address", shopUpi(mohan) === "paytmqr6vv0l2@ptys");
   check("Tagore has its own UPI address", shopUpi(tagore) === "Q871252473@ybl");
   check("and its own QR", shopQr(tagore) === "/tuck/tagore.png");
   check("the two shops never share a payee", shopUpi(mohan) !== shopUpi(tagore));
@@ -1125,8 +1186,8 @@ console.log("tuck shops");
   const generic = upiHref(withUpi, { amount: 160, note: "Mohan Da order" });
   const query = generic.slice("upi://pay?".length);
 
-  check("the four apps asked for are offered",
-    UPI_APPS.map((a) => a.id).join() === "gpay,phonepe,paytm,cred");
+  check("the three apps asked for are offered",
+    UPI_APPS.map((a) => a.id).join() === "gpay,phonepe,paytm");
   check("each has a name and a scheme",
     UPI_APPS.every((a) => a.name && /^[a-z]+:\/\//.test(a.scheme)));
   check("no two share a scheme",
@@ -1159,12 +1220,16 @@ console.log("tuck shops");
   // danger is not that it is there; it is that it stops being obvious. So it
   // has to carry a warning the screen shows above the pay buttons, and that
   // pairing is checked rather than remembered.
+  // The stand-in is gone now that both shops have their own address. The
+  // rule outlives it: any payee that is not the shop's own has to carry a
+  // warning, and none may be left over from testing.
   const STANDIN = "anujkapse26jan@oksbi";
-  check("the stand-in payee is flagged wherever it appears",
-    SHOPS.every((s) => shopUpi(s) !== STANDIN || Boolean(payNote(s))));
-  check("and the warning says what it is",
-    !SHOPS.some((s) => shopUpi(s) === STANDIN) ||
-    /test/i.test(payNote(SHOPS.find((s) => shopUpi(s) === STANDIN))));
+  check("no stand-in payee is left on any shop",
+    SHOPS.every((s) => shopUpi(s) !== STANDIN));
+  check("and none carries a leftover test warning",
+    SHOPS.every((s) => payNote(s) === null));
+  check("every shop that can be paid has its own QR",
+    SHOPS.every((s) => !shopUpi(s) || shopQr(s)));
   check("a shop with a real payee needs no warning",
     payNote(tagore) === null);
   survives("no shop to warn about", () => payNote(null));
@@ -1229,60 +1294,82 @@ console.log("night order history");
   const wh = CANTEENS.find(c => c.id === "wh");
   const at = (mins) => new Date(Date.parse("2026-09-04T23:30:00") + mins * 60000);
   const basket = [
-    { name: "Veg Roll", price: 43, qty: 2 },
-    { name: "Chicken Momo", price: 105, qty: 1 },
+    { name: "Veg Roll", price: 43, qty: 2, total: 86 },
+    { name: "Chicken Momo", price: 105, qty: 1, total: 105 },
   ];
+  const who = { room: "214", reg: "0446/62" };
 
-  const one = entryFor(wh, basket, at(0));
+  const one = entryFor(wh, basket, { ...who, now: at(0) });
   check("the canteen is recorded", one.canteen === "wh" && one.where === wh.name);
   check("quantities are kept", one.items[0].qty === 2);
   check("names are kept", one.items.map(i => i.name).join() === "Veg Roll,Chicken Momo");
   check("the time is recorded", one.at === at(0).toISOString());
 
-  // The point of the whole feature: a price written down tonight is wrong the
-  // day the canteen reprints, and a stale figure in a history reads as fact.
-  check("no price reaches the record",
-    one.items.every(i => !("price" in i)));
-  check("nor anything else off the cart line",
-    one.items.every(i => Object.keys(i).sort().join() === "name,qty"));
-  check("and none survives a round trip through storage",
-    !JSON.stringify(one).match(/43|105|price/));
+  // What the order cost that night, not what the card says today.
+  check("what each line cost is kept", one.items[0].price === 86);
+  check("and the order total with it", one.total === 191);
+  check("the room is kept", one.room === "214");
+  check("and the registration number", one.reg === "0446/62");
+  check("nothing else off the cart line",
+    one.items.every(i => Object.keys(i).sort().join() === "name,price,qty"));
+  check("blank identity stays blank, not undefined",
+    entryFor(wh, basket, { now: at(0) }).room === "");
 
   // ---- the list ----
   let h = appendOrder([], one);
   check("the first order is kept", h.length === 1);
-  check("an empty basket is not an order", appendOrder(h, entryFor(wh, [], at(1))).length === 1);
+  check("an empty basket is not an order",
+    appendOrder(h, entryFor(wh, [], { now: at(1) })).length === 1);
   check("nor is a basket of nameless lines",
-    appendOrder(h, entryFor(wh, [{ qty: 2 }], at(1))).length === 1);
+    appendOrder(h, entryFor(wh, [{ qty: 2 }], { now: at(1) })).length === 1);
 
-  // Opening WhatsApp, coming back and tapping again is one order sent once.
-  h = appendOrder(h, entryFor(wh, basket, at(1)));
+  h = appendOrder(h, entryFor(wh, basket, { ...who, now: at(1) }));
   check("a second tap on the same basket does not double it", h.length === 1);
   check("but it moves the clock on", h[0].at === at(1).toISOString());
 
-  // Twenty minutes later is somebody genuinely ordering twice, which happens.
-  h = appendOrder(h, entryFor(wh, basket, at(21)));
+  h = appendOrder(h, entryFor(wh, basket, { ...who, now: at(21) }));
   check("the same basket much later is a second order", h.length === 2);
 
   const nh = CANTEENS.find(c => c.id === "nh");
-  h = appendOrder(h, entryFor(nh, basket, at(22)));
+  h = appendOrder(h, entryFor(nh, basket, { ...who, now: at(22) }));
   check("the same basket at another canteen is its own order", h.length === 3);
   check("newest first", h[0].canteen === "nh");
 
-  // Different items a minute apart are two orders, not one collapsed.
-  const other = appendOrder(
-    appendOrder([], entryFor(wh, basket, at(0))),
-    entryFor(wh, [{ name: "Veg Roll", price: 43, qty: 3 }], at(1)),
-  );
-  check("a changed quantity is not the same order", other.length === 2);
+  // ---- the window ----
+  // Two months, by date. A count cap meant a heavy week could push last
+  // month off the end, which is the opposite of what a history is for.
+  check("two months is the window", KEEP_DAYS === 60);
+  const day = (n) => new Date(Date.parse("2026-09-04T20:00:00") - n * 86400000);
+  const spread = [3, 20, 45, 59, 61, 200].map((n, i) =>
+    entryFor(wh, [{ name: `Item ${i}`, qty: 1, total: 10 }], { now: day(n) }));
+  const kept = prune(spread, { now: day(0) });
+  check("inside the window is kept", kept.length === 4);
+  check("and it is the oldest that goes",
+    kept.every(e => Date.parse(e.at) >= Date.parse(day(60).toISOString())));
+  check("fifty-nine days still counts",
+    kept.some(e => e.items[0].name === "Item 3"));
+  check("sixty-one days does not",
+    !kept.some(e => e.items[0].name === "Item 4"));
 
-  // ---- the cap ----
-  let many = [];
-  for (let i = 0; i < CAP + 8; i += 1) {
-    many = appendOrder(many, entryFor(wh, [{ name: `Item ${i}`, qty: 1 }], at(i * 30)));
-  }
-  check("the history is capped", many.length === CAP);
-  check("and it is the oldest that falls off", many[0].items[0].name === `Item ${CAP + 7}`);
+  // Measured from the newest entry, so a device with a wrong clock does not
+  // silently empty somebody's history.
+  // appendOrder prunes against the entry being added rather than the wall
+  // clock, so a phone whose date has drifted forward cannot wipe a history
+  // that is perfectly current.
+  const old = entryFor(wh, [{ name: "Old", qty: 1, total: 10 }], { now: day(30) });
+  const older = entryFor(wh, [{ name: "Older", qty: 1, total: 10 }], { now: day(50) });
+  const added = appendOrder([old, older],
+    entryFor(wh, [{ name: "New", qty: 1, total: 10 }], { now: day(20) }));
+  check("the window is measured from the history, not the clock",
+    added.length === 3);
+  check("and a far-future clock does not empty it",
+    prune(added, { now: day(20) }).length === 3);
+  check("an unreadable date is kept rather than dropped",
+    prune([{ at: "nonsense", items: [{ name: "x", qty: 1 }] }], { now: day(0) }).length === 1);
+
+  const many = Array.from({ length: 500 }, (_, i) =>
+    entryFor(wh, [{ name: `Item ${i}`, qty: 1, total: 5 }], { now: day(1) }));
+  check("a backstop cap still applies", prune(many, { now: day(0) }).length === CAP);
 
   check("items are counted, not lines", itemCount(one) === 3);
   check("an empty entry counts zero", itemCount(null) === 0);
@@ -1304,17 +1391,42 @@ console.log("night order history");
   check("a broken date has no clock", clockOf("nope") === "");
 
   const days = byDay([
-    entryFor(wh, basket, new Date("2026-09-04T23:30:00")),
-    entryFor(wh, basket, new Date("2026-09-04T21:00:00")),
-    entryFor(wh, basket, new Date("2026-09-03T23:00:00")),
+    entryFor(wh, basket, { ...who, now: new Date("2026-09-04T23:30:00") }),
+    entryFor(wh, basket, { ...who, now: new Date("2026-09-04T21:00:00") }),
+    entryFor(wh, basket, { ...who, now: new Date("2026-09-03T23:00:00") }),
   ], now);
   check("orders group by day", days.length === 2);
   check("two orders on the first day", days[0].orders.length === 2);
   check("and the day is labelled once", days[0].label === "Today");
 
+  // ---- the export ----
+  // One row per item, so a spreadsheet can group it back up. It cannot split
+  // a cell holding four dishes.
+  const csv = toCsv([one]);
+  const rows = csv.split("\n");
+  check("a header and a row per item", rows.length === 3);
+  check("the columns asked for",
+    rows[0] === "Date,Time,Mess,Item,Qty,Price,Order total,Room,Reg No");
+  check("the date is sortable", rows[1].startsWith("2026-09-04,23:30,"));
+  check("the mess is named", rows[1].includes(",WH,"));
+  check("the item, quantity and price are there",
+    rows[1].includes("Veg Roll,2,86,191,"));
+  check("the room and reg number close each row", rows[1].endsWith("214,0446/62"));
+  check("both items are exported",
+    rows[2].includes("Chicken Momo") && rows[2].includes("214"));
+
+  // A comma in a dish name must not become a new column.
+  const commad = toCsv([entryFor(wh, [{ name: "Rice, Dal & Salad", qty: 1, total: 60 }],
+    { ...who, now: at(0) })]);
+  check("a comma in a name is quoted", commad.includes('"Rice, Dal & Salad"'));
+  check("and the row still has nine columns",
+    commad.split("\n")[1].split(",").length === 10);
+
+  check("an empty history exports just the header", toCsv([]).split("\n").length === 1);
+  survives("no history to export", () => toCsv(null));
   survives("no history at all", () => byDay(null, now));
   survives("a garbled entry", () => byDay([{ at: "x", items: [] }], now));
-  survives("no canteen", () => entryFor(null, basket, now));
+  survives("no canteen", () => entryFor(null, basket, { now }));
 }
 
 console.log("");

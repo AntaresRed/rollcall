@@ -190,6 +190,13 @@ def night_mess():
         "the order categories first appear, so a category split across two "
         "blocks becomes two sections with the same name.",
         "",
+        "The shop's payment QR (optional):",
+        "Drop the shop's own printed QR at public/tuck/<shop>.png, lowercase. "
+        "It is discovered from the folder, so no spreadsheet change is needed. "
+        "Send the shop's own image rather than asking for one to be generated "
+        "from the UPI address: encoding a payment instruction wrongly pays the "
+        "wrong person, and the code on the counter already works.",
+        "",
         "The photographed menu (optional, but do send it):",
         "Photograph the menu on the wall and send the images alongside. They "
         "go in public/menu/night/ named <hostel>-1.jpg, <hostel>-2.jpg and "
@@ -234,6 +241,16 @@ def tuck():
         "menu sheet name. A shop with no phone number is fine — it is a "
         "counter you walk to — and the screen simply shows no call button "
         "rather than a dead one. Never borrow another shop's number.",
+        "Delivery (Rs): what the shop charges to bring an order over. Leave "
+        "blank for none. It is added to a basket that has something in it, "
+        "shown as its own line at checkout, and spelled out in the WhatsApp "
+        "message — never folded silently into the total.",
+        "UPI: the shop's own payment address, name@bank. A malformed one "
+        "stops the build; a missing one simply means no pay button. Never "
+        "derive one from a phone number — an address is registered, not "
+        "calculated, and a guess sends real money to a stranger.",
+        "Payment note: a warning shown in red above the pay buttons. Only "
+        "for a stand-in payee during testing. Clear it before sharing.",
         "",
         "The menu sheets:",
         "Named '<SHOP> Tuck'. Sl No., Item and Price must be spelled exactly. "
@@ -262,10 +279,11 @@ def tuck():
         "an item's name.",
     ], name="Tuck Shops.template.xlsx")
 
-    sheet(wb, "Info", ["Shop", "Name", "Phone", "Hours"],
-          [["MOHANDA", "Mohan Da", "8100294443", ""],
-           ["TAGORE", "Tagore Tuck Shop", "", ""]],
-          widths=[14, 26, 18, 22])
+    sheet(wb, "Info",
+          ["Shop", "Name", "Phone", "Hours", "Delivery (Rs)", "UPI", "Payment note"],
+          [["MOHANDA", "Mohan Da", "8100294443", "", "", "mohanda@okaxis", ""],
+           ["TAGORE", "Tagore Tuck Shop", "7602416780", "", 6, "shop@ybl", ""]],
+          widths=[14, 26, 18, 20, 15, 24, 34])
 
     for tag in ["MOHANDA", "TAGORE"]:
         sheet(wb, f"{tag} Tuck", ["Sl No.", "Item", "Price", "Diet"],

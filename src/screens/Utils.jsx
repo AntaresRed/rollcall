@@ -21,8 +21,9 @@ const ITEMS = [
   // hundred phone numbers in the app bundle.
   ["students", "Student contacts", "The institute's own student directory.", STUDENT_DIRECTORY],
   ["por", "POR details", "Council, clubs, committees and captains, and who to reach in each."],
-  ["mess", "Day & Night Mess and Tuck",
-   "The week's mess food, the night canteen prices and the tuck shop cards."],
+  ["mess", "Day-Night Mess & Tuck",
+   "The week's mess food, plus night canteen and tuck shop menus you can "
+   + "order from over WhatsApp."],
 ];
 
 export default function Utils({ onOpen }) {

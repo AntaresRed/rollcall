@@ -20,8 +20,15 @@
  * The browser already knows when the app closed.
  */
 
-/** The fields that outlive the basket. Everything else goes with the order. */
-export const IDENTITY = ["room", "reg"];
+/**
+ * The fields that outlive the basket. Everything else goes with the order.
+ *
+ * All three are facts about the person rather than about tonight: the night
+ * canteen asks for a room and a registration number, the tuck shops ask which
+ * corner of campus to walk to. None of them changes between orders, and being
+ * asked again every time is what stops somebody using the basket at all.
+ */
+export const IDENTITY = ["room", "reg", "place"];
 
 /** Split a cart into the part that persists and the part that does not. */
 export function splitBasket(cart) {

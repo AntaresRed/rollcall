@@ -474,7 +474,7 @@ export default function NightMessMenu() {
                 href={whatsAppHref(firstNumber, message)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => recordOrder(canteen, bill.items)}
+                onClick={() => recordOrder(canteen, bill.items, { room: cart.room, reg: cart.reg })}
               >
                 Order on WhatsApp
               </a>

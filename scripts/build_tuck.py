@@ -12,7 +12,8 @@ menu to share a screen's furniture, different enough that flattening the three
 into one parser would mean a change for one breaking the others.
 
 Sheets:
-  Info            Shop | Name | Phone | Hours
+  Info            Shop | Name | Phone | Hours | Delivery (Rs) | UPI | Payment note
+  Delivery        Shop | Location | Fee (Rs)      (optional)
   <TAG> Tuck      Sl No. | Item | Price | Diet
 
 Two things worth knowing about the data:
@@ -36,6 +37,11 @@ import sys
 import openpyxl
 
 DIETS = {"veg", "egg", "non-veg"}
+
+# Every other sheet in the book is a shop's menu, so the ones that are not
+# have to be named. Getting this wrong reads the tariff as a price card and
+# fails on a missing 'Sl No.' column, which is a confusing way to be told.
+RESERVED = {"info", "delivery"}
 COLUMNS = ["Sl No.", "Item", "Price"]
 
 
@@ -63,7 +69,7 @@ def read_info(ws):
     ci = {k: col(*n) for k, n in {
         "id": ("shop", "hostel"), "name": ("name",),
         "phone": ("phone",), "hours": ("hours",), "upi": ("upi", "vpa"),
-        "pay_note": ("payment note",),
+        "pay_note": ("payment note",), "delivery": ("delivery",),
     }.items()}
     if ci["id"] is None:
         die("Info sheet has no Shop column")
@@ -76,7 +82,7 @@ def read_info(ws):
         get = lambda k: (r[ci[k]] if ci[k] is not None and ci[k] < len(r) else "")
         out[tag] = {"name": get("name") or tag, "phone": get("phone"),
                     "hours": get("hours"), "upi": get("upi"),
-                    "pay_note": get("pay_note")}
+                    "pay_note": get("pay_note"), "delivery": get("delivery")}
     return out
 
 
@@ -142,15 +148,61 @@ def qr_for(qr_dir, tag):
     return None
 
 
+def read_delivery(ws):
+    """Shop -> [(location, fee)], in sheet order.
+
+    A shop charging one flat rate says so in the Info sheet and needs no rows
+    here. A shop charging by where it is walking to gets a row per place —
+    Mohan Da is fifteen rupees across most of campus and twenty out to LVH,
+    MDC and the family quarters.
+
+    The locations offered on screen are the distinct ones named here, in the
+    order they first appear, so adding a corner of campus is a row rather
+    than a code change.
+    """
+    rows = [[norm(c) for c in r] for r in ws.iter_rows(values_only=True)]
+    rows = [r for r in rows if any(r)]
+    if not rows:
+        return {}, []
+
+    head = [c.lower() for c in rows[0]]
+    def col(*names):
+        for i, h in enumerate(head):
+            if any(n in h for n in names):
+                return i
+        return None
+    ci = {"shop": col("shop"), "loc": col("location"), "fee": col("fee")}
+    missing = [k for k, v in ci.items() if v is None]
+    if missing:
+        die(f"Delivery sheet has no {', '.join(missing)} column "
+            f"(header reads {rows[0]})")
+
+    by_shop, order = {}, []
+    for r in rows[1:]:
+        get = lambda k: (r[ci[k]] if ci[k] < len(r) else "")
+        tag, loc, fee = get("shop").upper(), get("loc"), get("fee")
+        if not tag or not loc:
+            continue
+        if not re.fullmatch(r"\d+", fee):
+            die(f"Delivery: {tag} / {loc} has fee {fee!r}, which is not a "
+                f"whole number of rupees")
+        by_shop.setdefault(tag, []).append({"location": loc, "fee": int(fee)})
+        if loc not in order:
+            order.append(loc)
+    return by_shop, order
+
+
 def build(path, qr_dir="public/tuck"):
     wb = openpyxl.load_workbook(path, data_only=True)
     if "Info" not in wb.sheetnames:
         die("workbook has no Info sheet")
     info = read_info(wb["Info"])
+    zones, locations = (read_delivery(wb["Delivery"])
+                        if "Delivery" in wb.sheetnames else ({}, []))
 
     shops, warnings = [], []
     for name in wb.sheetnames:
-        if name == "Info":
+        if name.strip().lower() in RESERVED:
             continue
         tag = norm(name).split()[0].upper()
         items, unknown = read_items(wb[name])
@@ -178,8 +230,12 @@ def build(path, qr_dir="public/tuck"):
         if not upi and not qr:
             warnings.append(f"{tag}: no UPI address and no QR, so no way to pay "
                             f"from the app")
+        mine = zones.get(tag, [])
+        if mine and meta.get("delivery"):
+            die(f"{tag}: has both a flat Delivery (Rs) in Info and rows in "
+                f"the Delivery sheet — pick one")
         shops.append({"id": tag.lower(), "tag": tag, **meta,
-                      "qr": qr, "items": items})
+                      "qr": qr, "zones": mine, "items": items})
         warnings += [f"{tag}: {u}" for u in unknown]
 
     if not shops:
@@ -195,7 +251,11 @@ def build(path, qr_dir="public/tuck"):
         if len(tags) > 1:
             warnings.append(f"identical item lists: {', '.join(tags)}")
 
-    return {"shops": shops}, warnings
+    unknown = set(zones) - {s["tag"] for s in shops}
+    if unknown:
+        die(f"Delivery sheet names shops with no menu: {', '.join(sorted(unknown))}")
+
+    return {"shops": shops, "locations": locations}, warnings
 
 
 if __name__ == "__main__":
@@ -215,8 +275,12 @@ if __name__ == "__main__":
             by[i["diet"]] = by.get(i["diet"], 0) + 1
         split = "  ".join(f"{k} {v}" for k, v in sorted(by.items()))
         print(f"   {s['tag']:<8} {len(s['items']):>3} items   {split}")
+        fees = sorted({z["fee"] for z in s["zones"]})
+        charge = (f"Rs {'/'.join(str(f) for f in fees)} by location"
+                  if fees else (f"Rs {s['delivery']} flat" if s["delivery"] else "no delivery fee"))
         print(f"        {s['name']} · {s['phone'] or 'no number'}"
-              + (f" · {s['hours']}" if s["hours"] else ""))
+              + (f" · {s['hours']}" if s["hours"] else "")
+              + f" · {charge}")
 
     if warnings:
         print(f"\n{len(warnings)} thing(s) to look at:")

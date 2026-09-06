@@ -8,6 +8,12 @@ Read by: scripts/build_tuck.py    Feeds: the Tuck shops tab
 
 One row per shop. 'Shop' must match the first word of that shop's menu sheet name. A shop with no phone number is fine — it is a counter you walk to — and the screen simply shows no call button rather than a dead one. Never borrow another shop's number.
 
+Delivery (Rs): what the shop charges to bring an order over. Leave blank for none. It is added to a basket that has something in it, shown as its own line at checkout, and spelled out in the WhatsApp message — never folded silently into the total.
+
+UPI: the shop's own payment address, name@bank. A malformed one stops the build; a missing one simply means no pay button. Never derive one from a phone number — an address is registered, not calculated, and a guess sends real money to a stranger.
+
+Payment note: a warning shown in red above the pay buttons. Only for a stand-in payee during testing. Clear it before sharing.
+
 
 
 **The menu sheets:**

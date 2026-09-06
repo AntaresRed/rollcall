@@ -9,31 +9,50 @@
  * is. Calling it "your orders" would be claiming knowledge the app does not
  * have.
  *
- * Prices are deliberately not kept. A price recorded tonight is wrong the day
- * the canteen reprints its menu, and a stale figure in a history reads as
- * fact — the same reason the order message itself carries no money. What you
- * ordered is durable; what it cost is not.
+ * What is kept: the items and quantities, what each line cost, which canteen,
+ * when, and the room and registration number the order was placed under. The
+ * price is the figure the basket worked out that night, not today's — which
+ * is the point of a record, and the reason it should be read as history
+ * rather than as a current price list.
  *
- * Local to the device, in the same store as the basket. That is a real limit
- * — a phone and a laptop keep separate histories, and clearing site data
- * empties both — and it is the honest cost of holding nobody's dinner habits
- * and room number on a server.
+ * Local to the device. That is a real limit — a phone and a laptop keep
+ * separate histories, and clearing site data empties both — and it is the
+ * reason the export below exists: a copy you keep is the only copy that
+ * outlives the browser.
  */
 
 const STORE = "iimpresent.night.orders";
 
-/** Twenty is a season of late nights, and a few kilobytes. */
-export const CAP = 20;
+/**
+ * How far back the history reaches.
+ *
+ * Two months, by date rather than by count. A cap on the number of orders
+ * meant a heavy week could push last month off the end, which is the opposite
+ * of what a history is for.
+ */
+export const KEEP_DAYS = 60;
+
+/**
+ * A backstop, not the rule. Two months of ordering is nowhere near this; it
+ * exists so that a bug elsewhere cannot grow the store without bound.
+ */
+export const CAP = 400;
 
 /** Two taps on the same basket inside this window are one order, not two. */
 const SAME_ORDER_MINS = 3;
 
-/** Just the countable parts. Explicitly rebuilt rather than spread, so a new
- *  field on a cart line can never reach the history without being put here. */
+/** Explicitly rebuilt rather than spread, so a new field on a cart line can
+ *  never reach the history without being put here on purpose. */
 const strip = (lines) =>
   (lines ?? [])
     .filter((l) => l && l.name)
-    .map((l) => ({ name: String(l.name), qty: Number(l.qty) || 1 }));
+    .map((l) => ({
+      name: String(l.name),
+      qty: Number(l.qty) || 1,
+      // The line total as the basket worked it out, not the printed price:
+      // that is the figure the order was actually placed at.
+      price: Number(l.total ?? l.price) || 0,
+    }));
 
 const sameItems = (a, b) =>
   a.length === b.length &&
@@ -46,12 +65,16 @@ const sameItems = (a, b) =>
  * be renamed in the spreadsheet, and a history that silently retitles what
  * you ordered last month is worse than one that is a little out of date.
  */
-export function entryFor(canteen, lines, now = new Date()) {
+export function entryFor(canteen, lines, { room = "", reg = "", now = new Date() } = {}) {
+  const items = strip(lines);
   return {
     at: now.toISOString(),
     canteen: canteen?.id ?? null,
     where: canteen?.name ?? "",
-    items: strip(lines),
+    items,
+    total: items.reduce((n, i) => n + i.price, 0),
+    room: String(room ?? "").trim(),
+    reg: String(reg ?? "").trim(),
   };
 }
 
@@ -62,7 +85,7 @@ export function entryFor(canteen, lines, now = new Date()) {
  * without a browser. Returns the list unchanged when there is nothing to
  * record, because an empty basket cannot have been ordered.
  */
-export function appendOrder(history, entry, cap = CAP) {
+export function appendOrder(history, entry, { cap = CAP, days = KEEP_DAYS } = {}) {
   const list = Array.isArray(history) ? history : [];
   if (!entry?.items?.length) return list;
 
@@ -76,7 +99,25 @@ export function appendOrder(history, entry, cap = CAP) {
     if (gap >= 0 && gap < SAME_ORDER_MINS) return [entry, ...list.slice(1)];
   }
 
-  return [entry, ...list].slice(0, cap);
+  return prune([entry, ...list], { cap, days, now: new Date(entry.at) });
+}
+
+/**
+ * Drop anything older than the window.
+ *
+ * Measured from the newest entry rather than from the clock, so a history
+ * read on a device whose date is wrong is not silently emptied.
+ */
+export function prune(list, { cap = CAP, days = KEEP_DAYS, now = new Date() } = {}) {
+  const cutoff = now.getTime() - days * 86400000;
+  return (list ?? [])
+    .filter((e) => {
+      const at = new Date(e?.at).getTime();
+      // An unreadable date is kept: losing an order because its timestamp is
+      // odd is worse than showing one entry too many.
+      return Number.isNaN(at) || at >= cutoff;
+    })
+    .slice(0, cap);
 }
 
 /** Total things, not lines — three momos and a roll is four items. */
@@ -85,10 +126,13 @@ export const itemCount = (entry) =>
 
 // ---------- the device's copy ----------
 
-export function readOrders() {
+export function readOrders(now = new Date()) {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE) || "null");
-    return Array.isArray(raw) ? raw.filter((e) => e?.at && e?.items?.length) : [];
+    if (!Array.isArray(raw)) return [];
+    // Pruned on the way out as well as on the way in, so a history left
+    // untouched for a term still ages out rather than sitting there for ever.
+    return prune(raw.filter((e) => e?.at && e?.items?.length), { now });
   } catch {
     /* a private window, site data cleared, or storage switched off */
     return [];
@@ -105,8 +149,8 @@ function write(list) {
 }
 
 /** Called at the moment the order is handed to WhatsApp. */
-export function recordOrder(canteen, lines, now = new Date()) {
-  return write(appendOrder(readOrders(), entryFor(canteen, lines, now)));
+export function recordOrder(canteen, lines, { room = "", reg = "", now = new Date() } = {}) {
+  return write(appendOrder(readOrders(now), entryFor(canteen, lines, { room, reg, now })));
 }
 
 export const clearOrders = () => write([]);
@@ -155,4 +199,47 @@ export function byDay(history, now = new Date()) {
     else out.push({ label, orders: [entry] });
   }
   return out;
+}
+
+// ---------- taking it with you ----------
+
+/** A CSV cell: quoted only when it has to be, so the file stays small and
+ *  stays readable in a text editor as well as a spreadsheet. */
+const cell = (v) => {
+  const t = String(v ?? "");
+  return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+};
+
+const pad = (n) => String(n).padStart(2, "0");
+
+export const HISTORY_COLUMNS = [
+  "Date", "Time", "Mess", "Item", "Qty", "Price", "Order total", "Room", "Reg No",
+];
+
+/**
+ * The history as CSV — one row per item, order details repeated.
+ *
+ * A row per item rather than per order because that is the shape anything
+ * else can read: a spreadsheet can group it back up, but it cannot split a
+ * cell holding four dishes.
+ *
+ * Plain text on purpose. It is the lightest export there is — no library, no
+ * file handling, no download that an installed app on iOS might refuse — and
+ * it pastes straight into a spreadsheet or a message.
+ */
+export function toCsv(history) {
+  const rows = [HISTORY_COLUMNS.join(",")];
+  for (const e of history ?? []) {
+    const d = new Date(e?.at);
+    const date = Number.isNaN(d.getTime())
+      ? "" : `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const time = Number.isNaN(d.getTime()) ? "" : `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    for (const i of e?.items ?? []) {
+      rows.push([
+        date, time, e.where ?? "", i.name, i.qty, i.price,
+        e.total ?? "", e.room ?? "", e.reg ?? "",
+      ].map(cell).join(","));
+    }
+  }
+  return rows.join("\n");
 }

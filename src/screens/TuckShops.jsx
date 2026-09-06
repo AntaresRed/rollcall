@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   SHOPS, shopById, filterItems, hasDiet, shopPhone,
   priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, shopQr, payNote,
+  LOCATIONS, deliveryFor, chargesByPlace,
 } from "../lib/tuck";
 import { DIET_FILTERS, DIET_LABEL } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
@@ -29,7 +30,7 @@ import {
 
 const BASKET = "tuck";
 const LEGACY = "iimpresent.tuck.cart";
-const BLANK = { shop: null, lines: [], room: "", reg: "", notes: "" };
+const BLANK = { shop: null, lines: [], place: "", notes: "" };
 const EMPTY = [];
 
 /** Cleared when the app closes; the room and registration number are not. */
@@ -59,7 +60,10 @@ export default function TuckShops() {
     () => (cart.shop === shop?.id ? cart.lines : EMPTY),
     [cart, shop],
   );
-  const bill = useMemo(() => billFor(lines), [lines]);
+  const bill = useMemo(
+    () => billFor(shop, lines, cart.place),
+    [shop, lines, cart.place],
+  );
 
   /** The basket lines for one item — one per price it was ordered at. */
   const linesFor = (name) => lines.filter((l) => l.name === name);
@@ -134,7 +138,7 @@ export default function TuckShops() {
   }
 
   const message = orderText(shop, bill.items, {
-    room: cart.room, reg: cart.reg, notes: cart.notes,
+    place: cart.place, notes: cart.notes,
   });
 
   return (
@@ -166,6 +170,7 @@ export default function TuckShops() {
               <span>Walk over — no number on file</span>
             )}
             {shop.hours && <span>{shop.hours}</span>}
+            {Number(shop.delivery) > 0 && <span>Delivery ₹{shop.delivery}</span>}
           </div>
         </div>
       )}
@@ -364,32 +369,48 @@ export default function TuckShops() {
                 </div>
               ))}
 
+              {/* Broken down only when there is a charge to explain. Six
+                  rupees appearing inside a total nobody can reconcile is how
+                  a student decides the app is wrong. */}
               <div className="cart-sum">
+                {bill.delivery > 0 && (
+                  <>
+                    <div><span>Subtotal</span><span>₹{bill.subtotal}</span></div>
+                    <div><span>Delivery</span><span>₹{bill.delivery}</span></div>
+                  </>
+                )}
                 <div className="cart-grand"><span>Total</span><span>₹{bill.total}</span></div>
               </div>
 
-              <div className="cart-who">
-                <label>
-                  <span>Room number</span>
-                  <input
-                    type="text"
-                    value={cart.room ?? ""}
-                    placeholder="e.g. 214"
-                    autoComplete="off"
-                    onChange={(e) => setCart((p) => ({ ...p, room: e.target.value }))}
-                  />
-                </label>
-                <label>
-                  <span>Reg. number</span>
-                  <input
-                    type="text"
-                    value={cart.reg ?? ""}
-                    placeholder="e.g. 0446/62"
-                    autoComplete="off"
-                    onChange={(e) => setCart((p) => ({ ...p, reg: e.target.value }))}
-                  />
-                </label>
-              </div>
+              {/* One question instead of two, because for this shop it is
+                  also the question that sets the price: Mohan Da charges
+                  fifteen across most of campus and twenty out to LVH, MDC and
+                  the family quarters. Each option carries its own fee, so the
+                  cost of choosing is visible before it is chosen. */}
+              <fieldset className="place-pick">
+                <legend>Deliver to</legend>
+                <div className="place-grid">
+                  {LOCATIONS.map((loc) => {
+                    const fee = deliveryFor(shop, loc);
+                    return (
+                      <button
+                        key={loc}
+                        type="button"
+                        className={`place-chip${cart.place === loc ? " on" : ""}`}
+                        aria-pressed={cart.place === loc}
+                        onClick={() => setCart((p) => ({
+                          ...p, place: p.place === loc ? "" : loc,
+                        }))}
+                      >
+                        {loc}
+                        {chargesByPlace(shop) && fee > 0 && (
+                          <span className="place-fee">₹{fee}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
 
               <label className="cart-notes">
                 <span>Order instructions</span>
@@ -401,6 +422,15 @@ export default function TuckShops() {
                 />
                 <em>Optional. Anything the counter should know.</em>
               </label>
+
+              {/* The fee is unknown until somewhere is chosen, so the total
+                  on screen would be short and so would the payment. */}
+              {chargesByPlace(shop) && !cart.place && (
+                <p className="cart-warn">
+                  Pick where it is going — {shop.name} charges by how far it
+                  has to walk, so the total isn&apos;t settled yet.
+                </p>
+              )}
 
               {phone ? (
                 <a

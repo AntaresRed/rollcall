@@ -46,6 +46,12 @@ Keep each category's rows together. The app builds its sections in the order cat
 
 
 
+**The shop's payment QR (optional):**
+
+Drop the shop's own printed QR at public/tuck/<shop>.png, lowercase. It is discovered from the folder, so no spreadsheet change is needed. Send the shop's own image rather than asking for one to be generated from the UPI address: encoding a payment instruction wrongly pays the wrong person, and the code on the counter already works.
+
+
+
 **The photographed menu (optional, but do send it):**
 
 Photograph the menu on the wall and send the images alongside. They go in public/menu/night/ named <hostel>-1.jpg, <hostel>-2.jpg and so on — lowercase. The app discovers them from the folder, so no spreadsheet change is needed. A canteen with no photos simply shows no 'See Original Menu' button.

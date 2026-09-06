@@ -19,20 +19,14 @@ const STORE = "iimpresent.upi.app";
 /**
  * The apps worth offering, most-used first.
  *
- * Each takes the same UPI query string; only the scheme differs.
- *
- * CRED is here on request and is the least certain of the four. It is a real
- * UPI app and registers as a payment handler on Android, but it came to UPI
- * late from credit-card bills, and whether its iOS build answers a pay intent
- * is not something a web page can find out. Which is true of all four — the
- * list is a set of attempts, and the screen is built so a dead one costs a
- * tap and nothing else.
+ * Each takes the same UPI query string; only the scheme differs. Every one is
+ * a best effort — a web page cannot ask iOS whether a scheme has a handler —
+ * so the screen is built so that a dead one costs a tap and nothing else.
  */
 export const UPI_APPS = [
   { id: "gpay", name: "Google Pay", scheme: "gpay://upi/pay?" },
   { id: "phonepe", name: "PhonePe", scheme: "phonepe://pay?" },
   { id: "paytm", name: "Paytm", scheme: "paytmmp://pay?" },
-  { id: "cred", name: "CRED", scheme: "cred://upi/pay?" },
 ];
 
 export const appById = (id) => UPI_APPS.find((a) => a.id === id) ?? null;

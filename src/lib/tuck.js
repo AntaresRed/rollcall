@@ -15,6 +15,27 @@ import { DIET_FILTERS } from "./nightmenu";
 
 export const SHOPS = tuck.shops;
 
+/** Everywhere a tuck shop will walk to, in the order the tariff names them. */
+export const LOCATIONS = tuck.locations ?? [];
+
+/**
+ * What this shop charges to carry an order to that corner of campus.
+ *
+ * Two shapes, because the two shops genuinely differ. Tagore charges one flat
+ * rate wherever it goes; Mohan Da charges by distance — fifteen across most
+ * of campus, twenty out to LVH, MDC and the family quarters. A shop with a
+ * tariff and no location chosen yet charges nothing, because nobody has said
+ * where it is going.
+ */
+export function deliveryFor(shop, location) {
+  const zones = shop?.zones ?? [];
+  if (!zones.length) return Number(shop?.delivery) || 0;
+  return zones.find((z) => z.location === location)?.fee ?? 0;
+}
+
+/** Whether this shop's price depends on where it is going. */
+export const chargesByPlace = (shop) => (shop?.zones?.length ?? 0) > 0;
+
 export const shopById = (id) => SHOPS.find((s) => s.id === id) ?? SHOPS[0] ?? null;
 
 const norm = (s) => String(s ?? "").toLowerCase();
@@ -79,12 +100,24 @@ export function priceOptions(item) {
  *  two lines, because it is two different things to cook. */
 export const lineKey = (name, price) => `${name}@@${price}`;
 
-export function billFor(lines) {
+/**
+ * The bill, including whatever the shop charges to bring it over.
+ *
+ * The charge rides on the shop rather than the basket: Tagore adds six rupees
+ * and Mohan Da adds nothing, and somebody choosing between the two should see
+ * that before they decide. It is only ever added to a basket with something
+ * in it — an empty basket costs nothing, not the delivery fee on its own.
+ */
+export function billFor(shop, lines, place = "") {
   const items = (lines ?? []).map((l) => ({ ...l, total: l.price * l.qty }));
+  const subtotal = items.reduce((n, i) => n + i.total, 0);
+  const delivery = deliveryFor(shop, place);
   return {
     items,
     count: items.reduce((n, i) => n + i.qty, 0),
-    total: items.reduce((n, i) => n + i.total, 0),
+    subtotal,
+    delivery: subtotal > 0 ? delivery : 0,
+    total: subtotal + (subtotal > 0 ? delivery : 0),
   };
 }
 
@@ -97,15 +130,17 @@ export function billFor(lines) {
  * says which one was ordered. The total is included because it is what gets
  * paid.
  */
-export function orderText(shop, lines, { room = "", reg = "", notes = "" } = {}) {
-  const bill = billFor(lines);
+export function orderText(shop, lines, { place = "", notes = "" } = {}) {
+  const bill = billFor(shop, lines, place);
   const out = bill.items.map((i) => `${i.qty} x ${i.name} — Rs ${i.total}`);
-  const blocks = [out.join("\n"), `Total: Rs ${bill.total}`];
+  // The breakdown only appears when there is something to break down. A
+  // subtotal that equals the total is a line that makes the reader check.
+  const sum = bill.delivery
+    ? `Subtotal: Rs ${bill.subtotal}\nDelivery: Rs ${bill.delivery}\nTotal: Rs ${bill.total}`
+    : `Total: Rs ${bill.total}`;
+  const blocks = [out.join("\n"), sum];
   if (notes.trim()) blocks.push(`Instructions: ${notes.trim()}`);
-  const who = [];
-  if (room.trim()) who.push(`Room: ${room.trim()}`);
-  if (reg.trim()) who.push(`Reg. No: ${reg.trim()}`);
-  if (who.length) blocks.push(who.join("\n"));
+  if (place.trim()) blocks.push(`Deliver to: ${place.trim()}`);
   return blocks.join("\n\n");
 }
 
