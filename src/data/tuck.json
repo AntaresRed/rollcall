@@ -7,7 +7,7 @@
       "phone": "8100294443",
       "hours": "",
       "upi": "anujkapse26jan@oksbi",
-      "pay_note": "TEST ONLY — this pays Anuj Kapse, not the shop. Will be replaced with Mohan Da's own UPI ID and QR post testing.",
+      "pay_note": "TEST ONLY — this pays Anuj Kapse, not the shop. Replace with Mohan Da's own UPI ID and QR before sharing.",
       "qr": "/tuck/mohanda.png",
       "items": [
         {
@@ -396,9 +396,9 @@
       "name": "Tagore Tuck Shop",
       "phone": "7602416780",
       "hours": "",
-      "upi": "",
+      "upi": "Q871252473@ybl",
       "pay_note": "",
-      "qr": null,
+      "qr": "/tuck/tagore.png",
       "items": [
         {
           "sl": "1",

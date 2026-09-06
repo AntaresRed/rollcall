@@ -1088,9 +1088,18 @@ console.log("tuck shops");
   // ---- paying ----
   // A UPI address is registered, never calculated. Nothing may be derived
   // from a phone number: a plausible guess sends real money to a stranger.
+  // Both shops now have a payee on file, so the empty case needs a made-up
+  // one rather than borrowing a real shop that has since been filled in.
+  const nobody = { id: "x", name: "Nowhere", items: [] };
   check("a shop with nothing on file offers no payment link",
-    shopUpi(tagore) === null && shopQr(tagore) === null);
-  check("and no link is built for it", upiHref(tagore, { amount: 160 }) === null);
+    shopUpi(nobody) === null && shopQr(nobody) === null);
+  check("and no link is built for it", upiHref(nobody, { amount: 160 }) === null);
+
+  // Tagore's own counter QR and ID, read off the printed card.
+  check("Tagore has its own UPI address", shopUpi(tagore) === "Q871252473@ybl");
+  check("and its own QR", shopQr(tagore) === "/tuck/tagore.png");
+  check("the two shops never share a payee", shopUpi(mohan) !== shopUpi(tagore));
+  check("nor a QR", shopQr(mohan) !== shopQr(tagore));
   check("a phone number is not a UPI address",
     shopUpi({ upi: "8100294443" }) === null);
   check("nor is something half-typed",

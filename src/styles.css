@@ -2329,9 +2329,12 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 /* Four cells: dot, name, price, and the add column — which is fixed width so
    the prices line up whether or not a row carries a basket count beside its
    plus. Getting this wrong wraps the button onto a row of its own. */
-.tuck-row { grid-template-columns: 11px 1fr auto 68px; }
+/* Wide enough for the whole stepper. It was sized for a lone plus, and once
+   a minus joined it the row ran into the price — worst on the two-price
+   items, whose "₹40 / 60" is the longest price on the card. */
+.tuck-row { grid-template-columns: 11px 1fr auto 88px; }
 /* Until the Diet column is filled in there is no dot to leave room for. */
-.tuck-row.nodiet { grid-template-columns: 1fr auto 68px; }
+.tuck-row.nodiet { grid-template-columns: 1fr auto 88px; }
 /* How many of this item are in the basket, at whatever prices — the row's
    own stepper cannot say it, because one row can be two basket lines. */
 .tuck-have {
@@ -2349,9 +2352,23 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .choose-name { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
 .choose-hint { font-size: 12.5px; line-height: 1.5; color: var(--mute); margin: 0 0 14px; }
 .choose-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
   font-family: var(--mono);
   font-size: 16px;
   margin-bottom: 8px;
+}
+/* How many of that price are in the basket — the thing you need to know
+   before deciding which one to take away. Set apart with its own rule,
+   because "₹40" and "1 in basket" run together into "₹401" otherwise. */
+.choose-have {
+  padding-left: 10px;
+  border-left: 1px solid var(--rule-strong);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--mute);
 }
 .cart-each {
   display: block;

@@ -41,7 +41,9 @@ export default function TuckShops() {
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState(loadCart);
   const [showCart, setShowCart] = useState(false);
-  // The item whose price is being chosen — null unless a choice is open.
+  // { item, mode } while a price is being chosen, null otherwise. The same
+  // question — "which of these prices?" — is asked when adding and when
+  // removing, because an item can sit in the basket at more than one.
   const [choosing, setChoosing] = useState(null);
 
   useEffect(() => { saveBasket(BASKET, cart); }, [cart]);
@@ -59,10 +61,13 @@ export default function TuckShops() {
   );
   const bill = useMemo(() => billFor(lines), [lines]);
 
+  /** The basket lines for one item — one per price it was ordered at. */
+  const linesFor = (name) => lines.filter((l) => l.name === name);
+
   /** How many of this item are in the basket, across every price it was
    *  ordered at — the number that belongs on its row. */
   const qtyOf = (name) =>
-    lines.filter((l) => l.name === name).reduce((n, l) => n + l.qty, 0);
+    linesFor(name).reduce((n, l) => n + l.qty, 0);
 
   useEffect(() => {
     if (!showCart && !choosing) return undefined;
@@ -96,7 +101,21 @@ export default function TuckShops() {
   const add = (item) => {
     const prices = priceOptions(item);
     if (prices.length <= 1) change(item.name, prices[0] ?? 0, 1);
-    else setChoosing(item);
+    else setChoosing({ item, mode: "add" });
+  };
+
+  /**
+   * Take one off the row.
+   *
+   * Only ambiguous when the same dish is in the basket at two prices — with
+   * and without cheese, say. Guessing which one to remove would be a coin
+   * flip on somebody's order, so it asks, using the same dialog as adding and
+   * offering only the prices actually in the basket.
+   */
+  const drop = (item) => {
+    const mine = linesFor(item.name);
+    if (mine.length === 1) change(item.name, mine[0].price, -1);
+    else if (mine.length > 1) setChoosing({ item, mode: "drop" });
   };
 
   const switchShop = (next) => {
@@ -221,16 +240,30 @@ export default function TuckShops() {
             <span className="night-item">{item.name}</span>
             <span className="night-price">₹{item.price}</span>
             <span className="night-act">
-              {qty > 0 && <span className="tuck-have">{qty}</span>}
-              <button
-                className="night-add"
-                aria-label={prices.length > 1
-                  ? `Add ${item.name} — choose a price`
-                  : `Add ${item.name}`}
-                onClick={() => add(item)}
-              >
-                +
-              </button>
+              {qty > 0 ? (
+                <span className="qty">
+                  <button
+                    aria-label={`One fewer ${item.name}`}
+                    onClick={() => drop(item)}
+                  >
+                    −
+                  </button>
+                  <b>{qty}</b>
+                  <button aria-label={`One more ${item.name}`} onClick={() => add(item)}>
+                    +
+                  </button>
+                </span>
+              ) : (
+                <button
+                  className="night-add"
+                  aria-label={prices.length > 1
+                    ? `Add ${item.name} — choose a price`
+                    : `Add ${item.name}`}
+                  onClick={() => add(item)}
+                >
+                  +
+                </button>
+              )}
             </span>
           </div>
         );
@@ -254,28 +287,47 @@ export default function TuckShops() {
           onClick={(e) => { if (e.target === e.currentTarget) setChoosing(null); }}
         >
           <div className="modal choose-modal" role="dialog" aria-modal="true"
-               aria-label={`Choose a price for ${choosing.name}`}>
+               aria-label={`Choose a price for ${choosing.item.name}`}>
             <div className="modal-head">
-              <span>Which one?</span>
+              <span>{choosing.mode === "drop" ? "Remove which one?" : "Which one?"}</span>
               <button className="modal-x" aria-label="Cancel" onClick={() => setChoosing(null)}>
                 ×
               </button>
             </div>
             <div className="modal-body">
-              <p className="choose-name">{choosing.name}</p>
+              <p className="choose-name">{choosing.item.name}</p>
               <p className="choose-hint">
-                The card prints this at more than one price. Pick the one you
-                want and it goes to the counter with your order.
+                {choosing.mode === "drop"
+                  ? "You have this at more than one price. Pick the one to take off."
+                  : "The card prints this at more than one price. Pick the one you want and it goes to the counter with your order."}
               </p>
-              {priceOptions(choosing).map((p) => (
-                <button
-                  key={p}
-                  className="btn ghost block choose-price"
-                  onClick={() => { change(choosing.name, p, 1); setChoosing(null); }}
-                >
-                  ₹{p}
-                </button>
-              ))}
+
+              {/* Adding offers every price on the card; removing offers only
+                  the ones actually in the basket, with the count, so nobody
+                  is asked to take away something they never ordered. */}
+              {choosing.mode === "drop"
+                ? linesFor(choosing.item.name).map((l) => (
+                  <button
+                    key={l.price}
+                    className="btn ghost block choose-price"
+                    onClick={() => {
+                      change(l.name, l.price, -1);
+                      setChoosing(null);
+                    }}
+                  >
+                    ₹{l.price}
+                    <span className="choose-have">{l.qty} in basket</span>
+                  </button>
+                ))
+                : priceOptions(choosing.item).map((p) => (
+                  <button
+                    key={p}
+                    className="btn ghost block choose-price"
+                    onClick={() => { change(choosing.item.name, p, 1); setChoosing(null); }}
+                  >
+                    ₹{p}
+                  </button>
+                ))}
             </div>
           </div>
         </div>
