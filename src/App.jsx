@@ -64,6 +64,13 @@ const TABS = [
 /** Stable empty array: a fresh [] on every render would re-run every memo. */
 const EMPTY = [];
 
+/** The tab bar's height, as a CSS variable — see where it is called below. */
+const publishNavHeight = (el) => {
+  document.documentElement.style.setProperty(
+    "--nav-h", `${Math.round(el.getBoundingClientRect().height)}px`,
+  );
+};
+
 export default function App() {
   const [ready, setReady] = useState(false);
   const [classes, setClasses] = useState([]);
@@ -434,19 +441,29 @@ export default function App() {
    * measured on and wrong by a hair everywhere else, which is exactly how
    * something ends up looking like it is hugging the bar.
    */
-  const navRef = useRef(null);
+  // Held as state rather than a ref so the second effect can depend on it:
+  // the bar mounts well after the first render — sign-in and the course
+  // picker come first — and a ref gives an effect nothing to wait for.
+  const [nav, setNav] = useState(null);
+
+  // Measured after every render, which is what this has always done. The
+  // observer below ought to make it redundant, and on a phone it very likely
+  // does; but a bar that changed height without the observer noticing would
+  // put the basket dock back to hugging the tab bar, and one rect read is a
+  // cheap price for never finding out the hard way which browsers deliver
+  // that notification and when.
+  useEffect(() => { if (nav) publishNavHeight(nav); });
+
+  // The watchers, on the other hand, only ever needed setting up once per
+  // bar. Left on the effect above they were rebuilt on every render — a new
+  // ResizeObserver every minute the clock ticked, and another callback queued
+  // on `fonts.ready` each time, none of which learned anything the previous
+  // one hadn't.
   useEffect(() => {
-    const nav = navRef.current;
     if (!nav) return undefined;
+    const publish = () => publishNavHeight(nav);
 
-    const publish = () => {
-      document.documentElement.style.setProperty(
-        "--nav-h", `${Math.round(nav.getBoundingClientRect().height)}px`,
-      );
-    };
-    publish();
-
-    // Four triggers, because no one of them is reliable on its own. The
+    // Three triggers, because no one of them is reliable on its own. The
     // observer is the right instrument but was measurably slow to land in
     // testing, leaving the dock a step out of place after a rotation; resize
     // and orientationchange cover that. `fonts.ready` matters more than it
@@ -464,7 +481,7 @@ export default function App() {
       window.removeEventListener("resize", publish);
       window.removeEventListener("orientationchange", publish);
     };
-  });
+  }, [nav]);
 
   const handleSignOut = useCallback(async () => {
     if (!confirm("Sign out of IIMPresent? Your timetable and attendance stay on the server.")) return;
@@ -711,7 +728,7 @@ export default function App() {
         </Suspense>
       </div>
 
-      <nav className="tabs" role="tablist" ref={navRef}>
+      <nav className="tabs" role="tablist" ref={setNav}>
         {TABS.map(([key, label, Icon]) => (
           <button
             key={key}

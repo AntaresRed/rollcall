@@ -127,17 +127,65 @@ export const countItems = (categories) =>
  * short strings only while somebody is typing, which is nothing.
  */
 
-const letters = (s) => norm(s).replace(/[^a-z0-9]+/g, " ").trim();
+/**
+ * How much of this scratch work to keep.
+ *
+ * Comfortably more than every word on every canteen's card, so in normal use
+ * nothing is ever thrown away. It exists only so that a very long session of
+ * typing cannot grow either table without bound.
+ */
+const CACHE_MAX = 4000;
+
+/**
+ * A name reduced to its words: lower case, punctuation to spaces.
+ *
+ * Remembered for the same reason the bigrams below are — this runs over the
+ * whole card on every keystroke, and both the query and the item names repeat
+ * across all of it. Strings are immutable, so handing back the same one twice
+ * is no different from computing it twice.
+ */
+const lettersCache = new Map();
+const letters = (s) => {
+  const known = lettersCache.get(s);
+  if (known !== undefined) return known;
+  const out = norm(s).replace(/[^a-z0-9]+/g, " ").trim();
+  if (lettersCache.size >= CACHE_MAX) lettersCache.clear();
+  lettersCache.set(s, out);
+  return out;
+};
 
 /** A word counts as accounted for by the name at about this likeness. */
 const accountedFor = (score) => score >= 0.5;
 
+/**
+ * Bigram counts, remembered between comparisons.
+ *
+ * The scoring below runs the same few strings past every item on the card:
+ * the query and each of its words are identical for all two hundred of them,
+ * and the item names are identical from one keystroke to the next. Counting
+ * them once per distinct string rather than once per comparison is where
+ * nearly all of this function's time was going.
+ *
+ * Sharing the maps is safe because they are only ever read — `dice` counts
+ * them and nothing writes back. Cleared wholesale rather than evicted one by
+ * one once it outgrows a few menus' worth of words: the next search refills
+ * what it needs in a single pass, and a cache with an eviction policy to
+ * reason about would cost more thought than it saves time.
+ */
+const gramCache = new Map();
+
 function bigrams(s) {
+  const known = gramCache.get(s);
+  if (known) return known;
+
   const out = new Map();
   for (let i = 0; i < s.length - 1; i += 1) {
     const g = s.slice(i, i + 2);
     out.set(g, (out.get(g) ?? 0) + 1);
   }
+
+  if (gramCache.size >= CACHE_MAX) gramCache.clear();
+  gramCache.set(s, out);
   return out;
 }
 
