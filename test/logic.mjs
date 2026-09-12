@@ -12,13 +12,14 @@ import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.j
 import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS,
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, prune,
-  toCsv, CAP, KEEP_DAYS } from "../src/lib/nightorders.js";
+  toCsv, withoutOrder, historyFilename, CAP, KEEP_DAYS } from "../src/lib/nightorders.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
 import { UPI_APPS, appById, forApp, logoFor } from "../src/lib/upiapps.js";
 import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
   billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
-  shopQr, payNote, LOCATIONS, deliveryFor, chargesByPlace } from "../src/lib/tuck.js";
+  shopQr, payNote, LOCATIONS, deliveryFor, chargesByPlace,
+  filterGrouped, hasCategories } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -1025,8 +1026,12 @@ console.log("tuck shops");
   // at two prices. Picking one to store would be inventing a fact.
   check("two-price items are kept whole",
     mohan.items.some((i) => /\d+\s*\/\s*\d+/.test(i.price)));
-  check("bracketed second prices survive too",
-    mohan.items.some((i) => /\(\d+\)/.test(i.price)));
+  // Most of Mohan Da's two-price lines are now separate items. What stays
+  // whole is the one nobody could read: "Boiled Egg (1 piece)" at 13/15,
+  // where the card never says what the second price buys.
+  check("the unreadable two-price line is still offered as a choice",
+    priceOptions(mohan.items.find((i) => i.name === "Boiled Egg (1 piece)"))
+      .join() === "13,15");
   check("the serial numbers are kept as printed, gaps and all",
     mohan.items.some((i) => String(i.sl) === "28") &&
     !mohan.items.some((i) => String(i.sl) === "27"));
@@ -1054,16 +1059,107 @@ console.log("tuck shops");
   const priced = (name) => priceOptions(mohan.items.find((i) => i.name === name));
   check("one price stays one choice",
     priced("French Fries").join() === "50");
-  check("a slashed price becomes two",
-    priced("Paneer Masala Patty / with cheese").join() === "40,60");
-  check("a bracketed one does too",
-    priced("Double Egg Bread Omelet (Cheese)").join() === "45,65");
-  check("four fillings, four prices",
-    priced("Masala Rice (Veg / Egg / Chicken / Paneer)").join() === "50,70,75");
+  // Read off literal prices rather than real menu rows: the rows a printed
+  // card happens to carry change — several of these were split into separate
+  // items — but what the parser must do with each shape does not.
+  const asPrinted = (price) => priceOptions({ price }).join();
+  check("a slashed price becomes two", asPrinted("40 / 60") === "40,60");
+  check("a bracketed one does too", asPrinted("45 (65)") === "45,65");
+  check("four fillings, three distinct prices",
+    asPrinted("50 / 70 / 75 / 75") === "50,70,75");
   check("two prices that happen to be equal are one choice",
-    priced("Fried Momo (Veg / Chicken)").join() === "80");
+    asPrinted("80 / 80") === "80");
+  check("no number at all offers nothing", asPrinted("ask inside") === "");
   check("every item offers at least one price",
     mohan.items.every((i) => priceOptions(i).length > 0));
+
+  // ---- the splits ----
+  // One printed line that is really several things to order. The reading is
+  // declared in build_tuck.py and verified against the card there; what is
+  // checked here is that the result reached the app intact.
+  const named = (n) => mohan.items.find((i) => i.name === n);
+  check("two unrelated dishes on one line became two items",
+    named("Pav Bhaji")?.price === "50" && named("Extra Pav")?.price === "15");
+  check("and both still point at the line they were printed on",
+    named("Pav Bhaji")?.sl === named("Extra Pav")?.sl);
+  check("one dish at two prices became the dish and the dish with cheese",
+    named("Vada Pav")?.price === "50" &&
+    named("Vada Pav with Cheese")?.price === "70");
+  check("two dishes sharing one price became two items at that price",
+    named("Chicken Steamed Momos (5 pieces)")?.price === "70" &&
+    named("Veg Steamed Momos (5 pieces)")?.price === "70");
+  check("a three-way line became three",
+    named("Cold Bournvita") && named("Hot Bournvita") && named("Cold Coffee"));
+  check("the combined lines are gone",
+    !named("Pav Bhaji / Extra Pav") && !named("Upma / Poha"));
+  check("no name is now duplicated",
+    new Set(mohan.items.map((i) => i.name)).size === mohan.items.length);
+
+  // The night canteens abbreviate with a slash too — S/C is Sweet Corn and
+  // H/S is Hot and Sour — so those must survive untouched. Splitting them
+  // would invent dishes the kitchen has never heard of.
+  const nightNames = CANTEENS.flatMap((c) => c.categories.flatMap((k) => k.items.map((i) => i.name)));
+  check("abbreviated soups are left whole", nightNames.includes("Veg S/C Soup"));
+  check("and so are the hot and sour ones", nightNames.includes("Chicken H/S Soup"));
+  check("a real either/or was split", nightNames.includes("Coffee (Hot)")
+    && nightNames.includes("Coffee (Cold)"));
+  check("and its combined form is gone", !nightNames.includes("Coffee (Hot/Cold)"));
+
+  // ---- the sections ----
+  check("Mohan Da's card is grouped", hasCategories(mohan));
+  check("Tagore's card is grouped too", hasCategories(tagore));
+  // A shop nobody has read into sections keeps the flat list. Tested against
+  // a made-up shop rather than a real one: both real cards are grouped now,
+  // and a test that quietly stops exercising its case is worse than no test.
+  const ungrouped = { id: "x", items: [{ name: "Tea", price: "10", diet: "veg" }] };
+  check("a shop with no sections has none", !hasCategories(ungrouped));
+  check("and grouping it returns null, not an empty list",
+    filterGrouped(ungrouped, {}) === null);
+  check("grouping loses nothing",
+    filterGrouped(mohan, {}).reduce((n, c) => n + c.items.length, 0) === mohan.items.length);
+  check("the sections are named in card order",
+    filterGrouped(mohan, {})[0].name === "Sandwiches");
+  check("Upma and Poha landed under Indian Breakfast",
+    filterGrouped(mohan, {}).find((c) => c.name === "Indian Breakfast")
+      ?.items.map((i) => i.name).sort().join() === "Poha,Upma");
+  check("a search narrows the sections it returns",
+    filterGrouped(mohan, { query: "maggi" }).every((c) =>
+      c.items.every((i) => i.name.toLowerCase().includes("maggi"))));
+  check("and drops the ones it empties",
+    filterGrouped(mohan, { query: "maggi" }).length
+      < filterGrouped(mohan, {}).length);
+  check("a search matching nothing returns no sections",
+    filterGrouped(mohan, { query: "zzzz" }).length === 0);
+  survives("no shop to group", () => filterGrouped(null, {}));
+
+  // ---- Tagore's own card ----
+  // It used to carry a copy of Mohan Da's list under its own phone number,
+  // which is the worst shape this data can take: a real counter answering
+  // for someone else's menu. These pin the two apart.
+  const tag = (n) => tagore.items.find((i) => i.name === n);
+  check("Tagore has its own card now", tagore.items.length === 74);
+  check("and it is not Mohan Da's",
+    JSON.stringify(tagore.items.map((i) => i.name))
+      !== JSON.stringify(mohan.items.map((i) => i.name)));
+  check("its own prices, off its own photographs",
+    tag("Plain Maggi")?.price === "36" && tag("Fruit Chaat")?.price === "50");
+  check("Mohan Da charges differently for the same dish",
+    mohan.items.find((i) => i.name === "Plain Masala Maggi")?.price === "45");
+  // The card prints "ROOM DELIVERY CHARGE 6" as its last row. That is a fee,
+  // not something to put in a basket — asserted through deliveryFor, which is
+  // what the bill actually calls, rather than the raw cell it reads.
+  check("the room delivery charge is a fee, not an item",
+    !tagore.items.some((i) => /delivery/i.test(i.name)));
+  check("and it is the six rupees the card prints",
+    deliveryFor(tagore, "anywhere") === 6);
+  check("S/W is left alone — it abbreviates Sandwich, not a choice",
+    tagore.items.some((i) => i.name === "Paneer Cheese Kulcha S/W"));
+  check("its hot/cold drinks were split",
+    tag("Chocolate (Hot)")?.price === "48" && tag("Chocolate (Cold)")?.price === "48");
+  check("and its three-filling pasta became three",
+    ["Tomato", "Cheese", "Mushroom"].every((f) => tag(`Maggi Pasta (${f})`)));
+  check("both shops now offer their original menu",
+    shopQr(mohan) && mohan.pages.length === 1 && tagore.pages.length === 3);
   survives("no item", () => priceOptions(null));
 
   const basket = [
@@ -1447,6 +1543,37 @@ console.log("night order history");
 
   check("an empty history exports just the header", toCsv([]).split("\n").length === 1);
   survives("no history to export", () => toCsv(null));
+
+  // ---- removing one order ----
+  // The timestamp is the identity: two identical baskets on different nights
+  // are two orders, and deleting one must not take the other with it.
+  const first = entryFor(wh, basket, { ...who, now: at(0) });
+  const second = entryFor(wh, basket, { ...who, now: at(60) });
+  const third = entryFor(nh, basket, { ...who, now: at(120) });
+  const three = [third, second, first];
+
+  check("removing one leaves the rest", withoutOrder(three, second.at).length === 2);
+  check("and removes the right one",
+    !withoutOrder(three, second.at).some(e => e.at === second.at));
+  check("an identical basket on another night stays",
+    withoutOrder(three, second.at).some(e => e.at === first.at));
+  check("removing something not there changes nothing",
+    withoutOrder(three, "2026-01-01T00:00:00.000Z").length === 3);
+  check("removing every order empties it",
+    withoutOrder(withoutOrder(withoutOrder(three, first.at), second.at), third.at).length === 0);
+  survives("no history to remove from", () => withoutOrder(null, first.at));
+  survives("no timestamp to remove", () => withoutOrder(three, undefined));
+  check("a missing timestamp removes nothing", withoutOrder(three, undefined).length === 3);
+  check("a garbled entry is not mistaken for a match",
+    withoutOrder([{ items: [] }, first], first.at).length === 1);
+
+  // ---- the file it saves as ----
+  check("the export is dated", historyFilename(new Date(2026, 8, 4)) === "night-orders-2026-09-04.csv");
+  check("and pads single digits", historyFilename(new Date(2026, 0, 7)) === "night-orders-2026-01-07.csv");
+  check("the extension can be asked for",
+    historyFilename(new Date(2026, 8, 4), "txt").endsWith(".txt"));
+  check("a broken clock still names a file",
+    /^night-orders-\d{4}-\d{2}-\d{2}\.csv$/.test(historyFilename(new Date("nonsense"))));
   survives("no history at all", () => byDay(null, now));
   survives("a garbled entry", () => byDay([{ at: "x", items: [] }], now));
   survives("no canteen", () => entryFor(null, basket, { now }));

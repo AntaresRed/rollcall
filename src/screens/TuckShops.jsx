@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  SHOPS, shopById, filterItems, hasDiet, shopPhone,
+  SHOPS, shopById, filterItems, filterGrouped, hasDiet, shopPhone,
   priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, shopQr, payNote,
   LOCATIONS, deliveryFor, chargesByPlace,
 } from "../lib/tuck";
@@ -42,6 +42,11 @@ export default function TuckShops() {
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState(loadCart);
   const [showCart, setShowCart] = useState(false);
+  const [showScan, setShowScan] = useState(false);
+  // Which sections the student has opened. Empty to begin with: thirteen
+  // headings you can read at a glance beats ninety-eight rows you have to
+  // scroll past to learn what is on the card at all.
+  const [open, setOpen] = useState(() => new Set());
   // { item, mode } while a price is being chosen, null otherwise. The same
   // question — "which of these prices?" — is asked when adding and when
   // removing, because an item can sit in the basket at more than one.
@@ -51,9 +56,11 @@ export default function TuckShops() {
 
   const shop = useMemo(() => shopById(id), [id]);
   const shown = useMemo(() => filterItems(shop, { diet, query }), [shop, diet, query]);
+  const grouped = useMemo(() => filterGrouped(shop, { diet, query }), [shop, diet, query]);
   const total = shop?.items?.length ?? 0;
   const diets = hasDiet(shop);
   const narrowed = query.trim().length > 0 || diet !== "all";
+  const searching = query.trim().length > 0;
   const phone = shopPhone(shop);
 
   const lines = useMemo(
@@ -130,6 +137,10 @@ export default function TuckShops() {
     setQuery("");
     setDiet("all");
     setShowCart(false);
+    setShowScan(false);
+    // The other shop's sections are not these ones, and arriving with a
+    // heading already open that belongs to a card you just left is noise.
+    setOpen(new Set());
     if (lines.length) setCart((p) => ({ ...p, shop: next, lines: [] }));
   };
 
@@ -173,6 +184,48 @@ export default function TuckShops() {
             {Number(shop.delivery) > 0 && <span>Delivery ₹{shop.delivery}</span>}
           </div>
         </div>
+      )}
+
+      {/* The typed list is a transcription; the photograph is what the shop
+          actually charges. On this card that gap is wider than on the night
+          menu — a third of it is printed at two prices and some of it has
+          been re-priced by hand — so it is a filled button rather than a line
+          of text somebody scrolls past. */}
+      {shop?.pages?.length > 0 && (
+        <>
+          <button
+            className="btn scan-cta"
+            aria-expanded={showScan}
+            onClick={() => setShowScan((v) => !v)}
+          >
+            <ScanIcon />
+            <span className="scan-cta-text">
+              {showScan ? "Hide" : "See"} Original {shop.name} Menu
+            </span>
+            <span className="scan-cta-pages">
+              {shop.pages.length} page{shop.pages.length === 1 ? "" : "s"}
+            </span>
+          </button>
+
+          {showScan && (
+            <div className="scan-pages">
+              <p className="scan-note">
+                Photographed from the card on the counter. Tap a page to open
+                it full size, where it can be zoomed.
+              </p>
+              {shop.pages.map((src, i) => (
+                <a key={src} href={src} target="_blank" rel="noopener noreferrer">
+                  <img
+                    className="scan-page"
+                    src={src}
+                    alt={`${shop.name}, page ${i + 1} of ${shop.pages.length}`}
+                    loading="lazy"
+                  />
+                </a>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <div className="night-find">
@@ -231,54 +284,58 @@ export default function TuckShops() {
         </div>
       )}
 
-      {shown.map((item) => {
-        const qty = qtyOf(item.name);
-        const prices = priceOptions(item);
-        return (
-          <div
-            className={`night-row tuck-row${diets ? "" : " nodiet"}${qty ? " in-cart" : ""}`}
-            key={item.name}
-          >
-            {diets && (
-              <span className={`diet-dot ${item.diet}`} title={DIET_LABEL[item.diet]} />
-            )}
-            <span className="night-item">{item.name}</span>
-            <span className="night-price">₹{item.price}</span>
-            <span className="night-act">
-              {qty > 0 ? (
-                <span className="qty">
-                  <button
-                    aria-label={`One fewer ${item.name}`}
-                    onClick={() => drop(item)}
-                  >
-                    −
-                  </button>
-                  <b>{qty}</b>
-                  <button aria-label={`One more ${item.name}`} onClick={() => add(item)}>
-                    +
-                  </button>
-                </span>
-              ) : (
+      {/* Grouped when somebody has read the card's running order into
+          sections, flat when nobody has. The row is the same either way — an
+          ungrouped card is not a different kind of menu, just a less sorted
+          one. */}
+      {grouped
+        ? grouped.map((cat) => {
+            // A search opens whatever it found. Leaving results folded away
+            // behind a closed heading would make the menu look like it has
+            // nothing, which is the exact thing the search disproves.
+            const isOpen = searching || open.has(cat.name);
+            return (
+              <div className={`night-cat${isOpen ? " open" : ""}`} key={cat.name}>
                 <button
-                  className="night-add"
-                  aria-label={prices.length > 1
-                    ? `Add ${item.name} — choose a price`
-                    : `Add ${item.name}`}
-                  onClick={() => add(item)}
+                  className="night-cat-head"
+                  aria-expanded={isOpen}
+                  onClick={() => setOpen((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(cat.name)) next.delete(cat.name);
+                    else next.add(cat.name);
+                    return next;
+                  })}
                 >
-                  +
+                  <Chevron open={isOpen} />
+                  <span className="night-cat-name">{cat.name}</span>
+                  <span className="night-cat-n">{cat.items.length}</span>
                 </button>
-              )}
-            </span>
-          </div>
-        );
-      })}
+                {isOpen && cat.items.map((item) => (
+                  <Row key={item.name} item={item} diets={diets}
+                       qty={qtyOf(item.name)} onAdd={add} onDrop={drop} />
+                ))}
+              </div>
+            );
+          })
+        : shown.map((item) => (
+            <Row key={item.name} item={item} diets={diets}
+                 qty={qtyOf(item.name)} onAdd={add} onDrop={drop} />
+          ))}
 
+      {/* The two-price sentence only earns its place on a card that still has
+          one. Most of those lines are now separate items with a price each,
+          and Tagore's card never had any — an explanation of something that
+          is not on screen just makes the reader hunt for it. */}
       {shown.length > 0 && (
         <p className="night-note">
-          Two prices means the shop's own two options — usually without and
-          with cheese. Prices are transcribed from the counter's card and can
-          go out of date; what they charge is what they charge.
+          {shown.some((i) => priceOptions(i).length > 1) && (
+            <>
+              Two prices means the shop's own two options — usually without and
+              with cheese.{" "}
+            </>
+          )}
+          Prices are transcribed from the counter's card and can go out of
+          date; what they charge is what they charge.
         </p>
       )}
 
@@ -689,6 +746,71 @@ function SearchIcon() {
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.6" />
       <path d="M10.5 10.5 14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/**
+ * One item on the card.
+ *
+ * Shared by the grouped and flat renderings so the two cannot drift: this is
+ * the row where a price is read and a thing is ordered, and having two copies
+ * of it would mean fixing everything here twice.
+ */
+function Row({ item, diets, qty, onAdd, onDrop }) {
+  const prices = priceOptions(item);
+  return (
+    <div className={`night-row tuck-row${diets ? "" : " nodiet"}${qty ? " in-cart" : ""}`}>
+      {diets && (
+        <span className={`diet-dot ${item.diet}`} title={DIET_LABEL[item.diet]} />
+      )}
+      <span className="night-item">{item.name}</span>
+      <span className="night-price">₹{item.price}</span>
+      <span className="night-act">
+        {qty > 0 ? (
+          <span className="qty">
+            <button aria-label={`One fewer ${item.name}`} onClick={() => onDrop(item)}>−</button>
+            <b>{qty}</b>
+            <button aria-label={`One more ${item.name}`} onClick={() => onAdd(item)}>+</button>
+          </span>
+        ) : (
+          <button
+            className="night-add"
+            aria-label={prices.length > 1
+              ? `Add ${item.name} — choose a price`
+              : `Add ${item.name}`}
+            onClick={() => onAdd(item)}
+          >
+            +
+          </button>
+        )}
+      </span>
+    </div>
+  );
+}
+
+/** The same chevron the night canteens' sections use. */
+function Chevron({ open }) {
+  return (
+    <svg
+      className={`night-chev${open ? " open" : ""}`}
+      width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"
+    >
+      <path d="M5 3.5 9.5 7 5 10.5" stroke="currentColor" strokeWidth="1.8"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** The same mark the night canteens use for their scans — it is the same
+ *  promise, so it should not be a different picture. */
+function ScanIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <rect x="2.5" y="2.5" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M2.5 11.5 6.5 8l3 2.5L12 8.5l3.5 3" stroke="currentColor" strokeWidth="1.6"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="6.75" cy="6.25" r="1.25" fill="currentColor" />
     </svg>
   );
 }

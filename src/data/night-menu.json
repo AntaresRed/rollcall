@@ -1312,7 +1312,12 @@
               "diet": "veg"
             },
             {
-              "name": "French Toast (Sweet/Salt)",
+              "name": "French Toast (Sweet)",
+              "price": 38,
+              "diet": "veg"
+            },
+            {
+              "name": "French Toast (Salt)",
               "price": 38,
               "diet": "veg"
             }
@@ -1527,27 +1532,52 @@
               "diet": "veg"
             },
             {
-              "name": "Plain Milk (Hot/Cold)",
+              "name": "Plain Milk (Hot)",
               "price": 23,
               "diet": "veg"
             },
             {
-              "name": "Haldi Milk (Hot/Cold)",
+              "name": "Plain Milk (Cold)",
+              "price": 23,
+              "diet": "veg"
+            },
+            {
+              "name": "Haldi Milk (Hot)",
               "price": 25,
               "diet": "veg"
             },
             {
-              "name": "Bournvita (Hot/Cold)",
+              "name": "Haldi Milk (Cold)",
+              "price": 25,
+              "diet": "veg"
+            },
+            {
+              "name": "Bournvita (Hot)",
               "price": 35,
               "diet": "veg"
             },
             {
-              "name": "Horlicks (Hot/Cold)",
+              "name": "Bournvita (Cold)",
               "price": 35,
               "diet": "veg"
             },
             {
-              "name": "Coffee (Hot/Cold)",
+              "name": "Horlicks (Hot)",
+              "price": 35,
+              "diet": "veg"
+            },
+            {
+              "name": "Horlicks (Cold)",
+              "price": 35,
+              "diet": "veg"
+            },
+            {
+              "name": "Coffee (Hot)",
+              "price": 35,
+              "diet": "veg"
+            },
+            {
+              "name": "Coffee (Cold)",
               "price": 35,
               "diet": "veg"
             },
@@ -3168,7 +3198,12 @@
               "diet": "veg"
             },
             {
-              "name": "French Toast (Sweet/Salt)",
+              "name": "French Toast (Sweet)",
+              "price": 46,
+              "diet": "veg"
+            },
+            {
+              "name": "French Toast (Salt)",
               "price": 46,
               "diet": "veg"
             },
@@ -3238,7 +3273,12 @@
               "diet": "veg"
             },
             {
-              "name": "Plain Milk (Hot/Cold)",
+              "name": "Plain Milk (Hot)",
+              "price": 27,
+              "diet": "veg"
+            },
+            {
+              "name": "Plain Milk (Cold)",
               "price": 27,
               "diet": "veg"
             },
@@ -4569,7 +4609,12 @@
               "diet": "veg"
             },
             {
-              "name": "French Toast (Sweet/Salt)",
+              "name": "French Toast (Sweet)",
+              "price": 46,
+              "diet": "veg"
+            },
+            {
+              "name": "French Toast (Salt)",
               "price": 46,
               "diet": "veg"
             },
@@ -4639,7 +4684,12 @@
               "diet": "veg"
             },
             {
-              "name": "Plain Milk (Hot/Cold)",
+              "name": "Plain Milk (Hot)",
+              "price": 27,
+              "diet": "veg"
+            },
+            {
+              "name": "Plain Milk (Cold)",
               "price": 27,
               "diet": "veg"
             },

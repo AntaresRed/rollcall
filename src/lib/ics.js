@@ -1,4 +1,5 @@
 import { expectedSessions, hhmm, toMinutes, SLOT_ENDS, venueOf } from "./api";
+import { deliverFile } from "./deliver";
 
 /**
  * The timetable as an iCalendar file.
@@ -177,38 +178,12 @@ export const icsFilename = (term) =>
   `${(term?.label || "timetable").replace(/[^A-Za-z0-9]+/g, "-").toLowerCase()}.ics`;
 
 /**
- * Hand the file to the student.
+ * Hand the calendar file to the student.
  *
- * The share sheet is tried first because this is installed to the Home Screen
- * on iOS more often than not, and there a downloaded blob lands in Files with
- * no obvious route into Calendar — whereas the share sheet offers Calendar
- * directly. Everywhere else `canShare` is false for files and it falls
- * straight through to an ordinary download.
+ * The delivery itself now lives in `deliver.js`, because the order history
+ * needs the same awkward dance. What stays here is the one thing specific to
+ * a calendar: its media type, which is what tells iOS to offer Calendar in
+ * the share sheet rather than a list of text editors.
  */
-export async function deliverIcs(filename, text) {
-  const type = "text/calendar";
-
-  try {
-    const file = new File([text], filename, { type });
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title: filename });
-      return "shared";
-    }
-  } catch (err) {
-    // Dismissing the sheet is a decision, not a failure — don't then shove a
-    // download at someone who just backed out of it.
-    if (err?.name === "AbortError") return "cancelled";
-  }
-
-  const url = URL.createObjectURL(new Blob([text], { type }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.rel = "noopener";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  // Revoked late: Safari reads the blob after the click returns.
-  setTimeout(() => URL.revokeObjectURL(url), 30_000);
-  return "downloaded";
-}
+export const deliverIcs = (filename, text) =>
+  deliverFile(filename, text, "text/calendar");

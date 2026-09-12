@@ -50,17 +50,54 @@ const norm = (s) => String(s ?? "").toLowerCase();
 export const hasDiet = (shop) =>
   (shop?.items ?? []).some((i) => i.diet && i.diet !== "unknown");
 
+/** Does this item pass the diet filter and the search? */
+const matches = (item, rule, terms) => {
+  if (!rule.keep(item.diet)) return false;
+  if (!terms.length) return true;
+  const hay = norm(item.name);
+  return terms.every((t) => hay.includes(t));
+};
+
+const ruleFor = (diet) => DIET_FILTERS.find((f) => f.id === diet) ?? DIET_FILTERS[0];
+const termsOf = (query) => norm(query).split(/\s+/).filter(Boolean);
+
 /** One shop's list, filtered by diet and by a search. */
 export function filterItems(shop, { diet = "all", query = "" } = {}) {
-  const rule = DIET_FILTERS.find((f) => f.id === diet) ?? DIET_FILTERS[0];
-  const terms = norm(query).split(/\s+/).filter(Boolean);
+  const rule = ruleFor(diet);
+  const terms = termsOf(query);
+  return (shop?.items ?? []).filter((i) => matches(i, rule, terms));
+}
 
-  return (shop?.items ?? []).filter((i) => {
-    if (!rule.keep(i.diet)) return false;
-    if (!terms.length) return true;
-    const hay = norm(i.name);
-    return terms.every((t) => hay.includes(t));
-  });
+/**
+ * Whether this shop's running order has been read into sections.
+ *
+ * Not every card has been. A shop without them keeps the single flat list it
+ * has always had, which is the honest rendering of a card nobody has grouped
+ * yet — better than inventing one heading called "Everything".
+ */
+export const hasCategories = (shop) => (shop?.categories?.length ?? 0) > 0;
+
+/**
+ * The same filter, but kept in its sections.
+ *
+ * Null — not an empty array — for a shop with no sections, so the screen can
+ * tell "grouped, and nothing matched" apart from "this shop is not grouped".
+ *
+ * Empty sections are dropped rather than left as headings with nothing under
+ * them, the same way the night canteens do it: a heading that opens onto
+ * nothing reads as a loading bug.
+ */
+export function filterGrouped(shop, { diet = "all", query = "" } = {}) {
+  if (!hasCategories(shop)) return null;
+  const rule = ruleFor(diet);
+  const terms = termsOf(query);
+
+  const out = [];
+  for (const cat of shop.categories) {
+    const items = (cat.items ?? []).filter((i) => matches(i, rule, terms));
+    if (items.length) out.push({ name: cat.name, items });
+  }
+  return out;
 }
 
 /** The first callable number, the same rule the night canteens use. */

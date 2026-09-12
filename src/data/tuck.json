@@ -10,6 +10,9 @@
       "pay_note": "",
       "delivery": "",
       "qr": "/tuck/mohanda.png",
+      "pages": [
+        "/menu/tuck/mohanda-1.jpg"
+      ],
       "zones": [
         {
           "location": "NH",
@@ -50,6 +53,661 @@
         {
           "location": "Family Quarters",
           "fee": 20
+        }
+      ],
+      "categories": [
+        {
+          "name": "Sandwiches",
+          "items": [
+            {
+              "sl": "1",
+              "name": "Plain Cheese Sandwich Grilled",
+              "price": "40",
+              "diet": "unknown"
+            },
+            {
+              "sl": "2",
+              "name": "Veg Cheese Sandwich Grilled",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "3",
+              "name": "Aloo Cheese Sandwich Grilled",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "4",
+              "name": "Veg Tikki cheese Sandwich Grilled",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "5",
+              "name": "Paneer cheese Sandwich Grilled",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "6",
+              "name": "Chicken Tikki cheese Sandwich Grilled",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "7",
+              "name": "Chicken Cheese Sandwich Grilled",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "8",
+              "name": "Chicken Sandwich Grilled (without cheese)",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "9",
+              "name": "Chicken Sausage Cheese Sandwich Grilled",
+              "price": "70",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Burgers & Fries",
+          "items": [
+            {
+              "sl": "10",
+              "name": "French Fries",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "11",
+              "name": "Chicken Cheese Burger",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "12",
+              "name": "Veg Cheese Burger",
+              "price": "70",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Patties & Pav",
+          "items": [
+            {
+              "sl": "13",
+              "name": "Paneer Masala Patty",
+              "price": "40",
+              "diet": "unknown"
+            },
+            {
+              "sl": "13",
+              "name": "Paneer Masala Patty with Cheese",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "14",
+              "name": "Veg Masala Patty",
+              "price": "40",
+              "diet": "unknown"
+            },
+            {
+              "sl": "14",
+              "name": "Veg Masala Patty with Cheese",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "15",
+              "name": "Chicken Masala Patty",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "15",
+              "name": "Chicken Masala Patty with Cheese",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "16",
+              "name": "Vada Pav",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "16",
+              "name": "Vada Pav with Cheese",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "17",
+              "name": "Pav Bhaji",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "17",
+              "name": "Extra Pav",
+              "price": "15",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Momos",
+          "items": [
+            {
+              "sl": "18",
+              "name": "Chicken Steamed Momos (5 pieces)",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "18",
+              "name": "Veg Steamed Momos (5 pieces)",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "19",
+              "name": "Fried Veg Momo",
+              "price": "80",
+              "diet": "unknown"
+            },
+            {
+              "sl": "19",
+              "name": "Fried Chicken Momo",
+              "price": "80",
+              "diet": "unknown"
+            },
+            {
+              "sl": "20",
+              "name": "Pan Fried Veg Momo (5 pieces)",
+              "price": "100",
+              "diet": "unknown"
+            },
+            {
+              "sl": "20",
+              "name": "Pan Fried Chicken Momo (5 pieces)",
+              "price": "100",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Eggs",
+          "items": [
+            {
+              "sl": "21",
+              "name": "Boiled Egg (1 piece)",
+              "price": "13 / 15",
+              "diet": "unknown"
+            },
+            {
+              "sl": "22",
+              "name": "Double Egg Bread Omelet",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "22",
+              "name": "Double Egg Bread Omelet with Cheese",
+              "price": "65",
+              "diet": "unknown"
+            },
+            {
+              "sl": "23",
+              "name": "Half Fry (2 Eggs 2 Bread)",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "24",
+              "name": "Scrambled Egg (2 Eggs 2 Bread)",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "25",
+              "name": "Boiled Egg Chat",
+              "price": "50",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Starters & Fried Snacks",
+          "items": [
+            {
+              "sl": "26",
+              "name": "Chicken Nuggets (5 pieces)",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "28",
+              "name": "Chicken Sausage (Fry)",
+              "price": "80",
+              "diet": "unknown"
+            },
+            {
+              "sl": "28",
+              "name": "Chicken Sausage (Steamed)",
+              "price": "80",
+              "diet": "unknown"
+            },
+            {
+              "sl": "32",
+              "name": "Chicken Strips (1 piece)",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "35",
+              "name": "Chicken Spring Roll",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "36",
+              "name": "Chicken Seekh Kebab (3 pieces)",
+              "price": "125",
+              "diet": "unknown"
+            },
+            {
+              "sl": "37",
+              "name": "Veg Spring Roll",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "38",
+              "name": "Mini Samosa (5 pieces)",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "39",
+              "name": "Chilli Garlic Potato Bites (8 pieces)",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "40",
+              "name": "Veg Cheese Nuggets (5 pieces)",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "41",
+              "name": "Smiley (5 pieces)",
+              "price": "50",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Rice, Oats & Paratha",
+          "items": [
+            {
+              "sl": "43",
+              "name": "Aloo Paratha (1 piece)",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "44",
+              "name": "Masala Rice (Veg)",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "44",
+              "name": "Masala Rice (Egg)",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "44",
+              "name": "Masala Rice (Chicken)",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "44",
+              "name": "Masala Rice (Paneer)",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "45",
+              "name": "Oats (Veg)",
+              "price": "40",
+              "diet": "unknown"
+            },
+            {
+              "sl": "45",
+              "name": "Oats (Egg)",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "45",
+              "name": "Oats (Chicken)",
+              "price": "65",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Soups",
+          "items": [
+            {
+              "sl": "46",
+              "name": "Tomato Soup",
+              "price": "35",
+              "diet": "unknown"
+            },
+            {
+              "sl": "46",
+              "name": "Tomato Soup with Butter",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "47",
+              "name": "Veg Sweet Corn Soup",
+              "price": "35",
+              "diet": "unknown"
+            },
+            {
+              "sl": "47",
+              "name": "Veg Sweet Corn Soup with Butter",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "48",
+              "name": "Hot and Sour Veg Soup",
+              "price": "35",
+              "diet": "unknown"
+            },
+            {
+              "sl": "48",
+              "name": "Hot and Sour Veg Soup with Butter",
+              "price": "45",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Chaat",
+          "items": [
+            {
+              "sl": "49",
+              "name": "Sprout Chaat (Veg)",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "49",
+              "name": "Sprout Chaat (Egg)",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "49",
+              "name": "Sprout Chaat (Chicken)",
+              "price": "65",
+              "diet": "unknown"
+            },
+            {
+              "sl": "50",
+              "name": "Peanut Chaat",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "50",
+              "name": "Chips Chaat",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "51",
+              "name": "Sweet Corn Chaat",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "52",
+              "name": "Fruit Chaat",
+              "price": "60",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Pasta",
+          "items": [
+            {
+              "sl": "53",
+              "name": "White Sauce Pasta (Veg)",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "53",
+              "name": "White Sauce Pasta (Non-Veg)",
+              "price": "95",
+              "diet": "unknown"
+            },
+            {
+              "sl": "54",
+              "name": "Red Sauce Pasta (Veg)",
+              "price": "80",
+              "diet": "unknown"
+            },
+            {
+              "sl": "54",
+              "name": "Red Sauce Pasta (Non-Veg)",
+              "price": "105",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Drinks",
+          "items": [
+            {
+              "sl": "55",
+              "name": "Cold Bournvita",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "55",
+              "name": "Hot Bournvita",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "55",
+              "name": "Cold Coffee",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "56",
+              "name": "Cold Milk",
+              "price": "25",
+              "diet": "unknown"
+            },
+            {
+              "sl": "56",
+              "name": "Hot Milk",
+              "price": "30",
+              "diet": "unknown"
+            },
+            {
+              "sl": "56",
+              "name": "Haldi Milk Hot",
+              "price": "30",
+              "diet": "unknown"
+            },
+            {
+              "sl": "57",
+              "name": "Hot Chocolate Milk",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "57",
+              "name": "Cold Chocolate Milk",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "58",
+              "name": "Masala Soda",
+              "price": "40",
+              "diet": "unknown"
+            },
+            {
+              "sl": "59",
+              "name": "Masala Coke",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "60",
+              "name": "Ice Tea",
+              "price": "40",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Indian Breakfast",
+          "items": [
+            {
+              "sl": "61",
+              "name": "Upma",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "61",
+              "name": "Poha",
+              "price": "50",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Maggi",
+          "items": [
+            {
+              "sl": "62",
+              "name": "Plain Masala Maggi",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "62",
+              "name": "Plain Masala Maggi with Cheese",
+              "price": "65",
+              "diet": "unknown"
+            },
+            {
+              "sl": "63",
+              "name": "Double Masala Maggi",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "63",
+              "name": "Double Masala Maggi with Cheese",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "64",
+              "name": "Vegetable Maggi",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "64",
+              "name": "Vegetable Maggi with Cheese",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "65",
+              "name": "Chicken Masala Maggi",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "66",
+              "name": "Fried Maggi (Veg)",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "66",
+              "name": "Fried Maggi (Egg)",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "66",
+              "name": "Fried Maggi (Chicken)",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "67",
+              "name": "Atta Maggi",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "67",
+              "name": "Atta Maggi with Cheese",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "68",
+              "name": "Butter Garlic Maggi",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "69",
+              "name": "Korean Veg. Maggi",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "70",
+              "name": "Korean Chicken Maggi",
+              "price": "70",
+              "diet": "unknown"
+            }
+          ]
         }
       ],
       "items": [
@@ -127,49 +785,97 @@
         },
         {
           "sl": "13",
-          "name": "Paneer Masala Patty / with cheese",
-          "price": "40 / 60",
+          "name": "Paneer Masala Patty",
+          "price": "40",
+          "diet": "unknown"
+        },
+        {
+          "sl": "13",
+          "name": "Paneer Masala Patty with Cheese",
+          "price": "60",
           "diet": "unknown"
         },
         {
           "sl": "14",
-          "name": "Veg Masala Patty / Veg Masala Patty With Cheese",
-          "price": "40 / 60",
+          "name": "Veg Masala Patty",
+          "price": "40",
+          "diet": "unknown"
+        },
+        {
+          "sl": "14",
+          "name": "Veg Masala Patty with Cheese",
+          "price": "60",
           "diet": "unknown"
         },
         {
           "sl": "15",
-          "name": "Chicken Masala Patty / Chicken Masala Patty With Cheese",
-          "price": "50 / 70",
+          "name": "Chicken Masala Patty",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "15",
+          "name": "Chicken Masala Patty with Cheese",
+          "price": "70",
           "diet": "unknown"
         },
         {
           "sl": "16",
-          "name": "Vada Pav / (with Cheese)",
-          "price": "50 / 70",
+          "name": "Vada Pav",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "16",
+          "name": "Vada Pav with Cheese",
+          "price": "70",
           "diet": "unknown"
         },
         {
           "sl": "17",
-          "name": "Pav Bhaji / Extra Pav",
-          "price": "50 / 15",
+          "name": "Pav Bhaji",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "17",
+          "name": "Extra Pav",
+          "price": "15",
           "diet": "unknown"
         },
         {
           "sl": "18",
-          "name": "Chicken / Veg Steamed Momos (5 pieces)",
+          "name": "Chicken Steamed Momos (5 pieces)",
+          "price": "70",
+          "diet": "unknown"
+        },
+        {
+          "sl": "18",
+          "name": "Veg Steamed Momos (5 pieces)",
           "price": "70",
           "diet": "unknown"
         },
         {
           "sl": "19",
-          "name": "Fried Momo (Veg / Chicken)",
-          "price": "80 / 80",
+          "name": "Fried Veg Momo",
+          "price": "80",
+          "diet": "unknown"
+        },
+        {
+          "sl": "19",
+          "name": "Fried Chicken Momo",
+          "price": "80",
           "diet": "unknown"
         },
         {
           "sl": "20",
-          "name": "Pan Fried Veg / Chicken Momo (5 pieces)",
+          "name": "Pan Fried Veg Momo (5 pieces)",
+          "price": "100",
+          "diet": "unknown"
+        },
+        {
+          "sl": "20",
+          "name": "Pan Fried Chicken Momo (5 pieces)",
           "price": "100",
           "diet": "unknown"
         },
@@ -181,8 +887,14 @@
         },
         {
           "sl": "22",
-          "name": "Double Egg Bread Omelet (Cheese)",
-          "price": "45 (65)",
+          "name": "Double Egg Bread Omelet",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "22",
+          "name": "Double Egg Bread Omelet with Cheese",
+          "price": "65",
           "diet": "unknown"
         },
         {
@@ -211,7 +923,13 @@
         },
         {
           "sl": "28",
-          "name": "Chicken Sausage (Fry / Steamed)",
+          "name": "Chicken Sausage (Fry)",
+          "price": "80",
+          "diet": "unknown"
+        },
+        {
+          "sl": "28",
+          "name": "Chicken Sausage (Steamed)",
           "price": "80",
           "diet": "unknown"
         },
@@ -271,43 +989,109 @@
         },
         {
           "sl": "44",
-          "name": "Masala Rice (Veg / Egg / Chicken / Paneer)",
-          "price": "50 / 70 / 75 / 75",
+          "name": "Masala Rice (Veg)",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "44",
+          "name": "Masala Rice (Egg)",
+          "price": "70",
+          "diet": "unknown"
+        },
+        {
+          "sl": "44",
+          "name": "Masala Rice (Chicken)",
+          "price": "75",
+          "diet": "unknown"
+        },
+        {
+          "sl": "44",
+          "name": "Masala Rice (Paneer)",
+          "price": "75",
           "diet": "unknown"
         },
         {
           "sl": "45",
-          "name": "Oats (Veg / Egg / Chicken)",
-          "price": "40 / 60 / 65",
+          "name": "Oats (Veg)",
+          "price": "40",
+          "diet": "unknown"
+        },
+        {
+          "sl": "45",
+          "name": "Oats (Egg)",
+          "price": "60",
+          "diet": "unknown"
+        },
+        {
+          "sl": "45",
+          "name": "Oats (Chicken)",
+          "price": "65",
           "diet": "unknown"
         },
         {
           "sl": "46",
-          "name": "Tomato Soup / With Butter",
-          "price": "35 / 45",
+          "name": "Tomato Soup",
+          "price": "35",
+          "diet": "unknown"
+        },
+        {
+          "sl": "46",
+          "name": "Tomato Soup with Butter",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "47",
-          "name": "Veg Sweet Corn Soup / With Butter",
-          "price": "35 / 45",
+          "name": "Veg Sweet Corn Soup",
+          "price": "35",
+          "diet": "unknown"
+        },
+        {
+          "sl": "47",
+          "name": "Veg Sweet Corn Soup with Butter",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "48",
-          "name": "Hot and Sour Veg Soup / With Butter",
-          "price": "35 / 45",
+          "name": "Hot and Sour Veg Soup",
+          "price": "35",
+          "diet": "unknown"
+        },
+        {
+          "sl": "48",
+          "name": "Hot and Sour Veg Soup with Butter",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "49",
-          "name": "Sprout chat (Veg / Egg / Chicken)",
-          "price": "45 / 60 / 65",
+          "name": "Sprout Chaat (Veg)",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "49",
+          "name": "Sprout Chaat (Egg)",
+          "price": "60",
+          "diet": "unknown"
+        },
+        {
+          "sl": "49",
+          "name": "Sprout Chaat (Chicken)",
+          "price": "65",
           "diet": "unknown"
         },
         {
           "sl": "50",
-          "name": "Peanut Chaat / Chips Chaat",
+          "name": "Peanut Chaat",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "50",
+          "name": "Chips Chaat",
           "price": "45",
           "diet": "unknown"
         },
@@ -325,32 +1109,74 @@
         },
         {
           "sl": "53",
-          "name": "White Sauce Pasta (Veg / Non-Veg)",
-          "price": "70 / 95",
+          "name": "White Sauce Pasta (Veg)",
+          "price": "70",
+          "diet": "unknown"
+        },
+        {
+          "sl": "53",
+          "name": "White Sauce Pasta (Non-Veg)",
+          "price": "95",
           "diet": "unknown"
         },
         {
           "sl": "54",
-          "name": "Red Sauce Pasta (Veg / Non-Veg)",
-          "price": "80 / 105",
+          "name": "Red Sauce Pasta (Veg)",
+          "price": "80",
+          "diet": "unknown"
+        },
+        {
+          "sl": "54",
+          "name": "Red Sauce Pasta (Non-Veg)",
+          "price": "105",
           "diet": "unknown"
         },
         {
           "sl": "55",
-          "name": "Cold / Hot Bournvita / Cold Coffee",
-          "price": "50 / 50 / 50",
+          "name": "Cold Bournvita",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "55",
+          "name": "Hot Bournvita",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "55",
+          "name": "Cold Coffee",
+          "price": "50",
           "diet": "unknown"
         },
         {
           "sl": "56",
-          "name": "Cold / Hot Milk / Haldi Milk Hot",
-          "price": "25 / 30 / 30",
+          "name": "Cold Milk",
+          "price": "25",
+          "diet": "unknown"
+        },
+        {
+          "sl": "56",
+          "name": "Hot Milk",
+          "price": "30",
+          "diet": "unknown"
+        },
+        {
+          "sl": "56",
+          "name": "Haldi Milk Hot",
+          "price": "30",
           "diet": "unknown"
         },
         {
           "sl": "57",
-          "name": "Hot / Cold Chocolate Milk",
-          "price": "50 / 50",
+          "name": "Hot Chocolate Milk",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "57",
+          "name": "Cold Chocolate Milk",
+          "price": "50",
           "diet": "unknown"
         },
         {
@@ -373,26 +1199,50 @@
         },
         {
           "sl": "61",
-          "name": "Upma / Poha",
-          "price": "55 / 50",
+          "name": "Upma",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "61",
+          "name": "Poha",
+          "price": "50",
           "diet": "unknown"
         },
         {
           "sl": "62",
-          "name": "Plain Masala Maggi (With Cheese)",
-          "price": "45 (65)",
+          "name": "Plain Masala Maggi",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "62",
+          "name": "Plain Masala Maggi with Cheese",
+          "price": "65",
           "diet": "unknown"
         },
         {
           "sl": "63",
-          "name": "Double Masala Maggi (With Cheese)",
-          "price": "50 (70)",
+          "name": "Double Masala Maggi",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "63",
+          "name": "Double Masala Maggi with Cheese",
+          "price": "70",
           "diet": "unknown"
         },
         {
           "sl": "64",
-          "name": "Vegetable Maggi (With Cheese)",
-          "price": "50 / 70",
+          "name": "Vegetable Maggi",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "64",
+          "name": "Vegetable Maggi with Cheese",
+          "price": "70",
           "diet": "unknown"
         },
         {
@@ -403,14 +1253,32 @@
         },
         {
           "sl": "66",
-          "name": "Fried Maggi (Veg / Egg / Chicken)",
-          "price": "50 / 70 / 75",
+          "name": "Fried Maggi (Veg)",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "66",
+          "name": "Fried Maggi (Egg)",
+          "price": "70",
+          "diet": "unknown"
+        },
+        {
+          "sl": "66",
+          "name": "Fried Maggi (Chicken)",
+          "price": "75",
           "diet": "unknown"
         },
         {
           "sl": "67",
-          "name": "Atta Maggi (With Cheese)",
-          "price": "50 / 70",
+          "name": "Atta Maggi",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "67",
+          "name": "Atta Maggi with Cheese",
+          "price": "70",
           "diet": "unknown"
         },
         {
@@ -443,383 +1311,955 @@
       "pay_note": "",
       "delivery": "6",
       "qr": "/tuck/tagore.png",
+      "pages": [
+        "/menu/tuck/tagore-1.jpg",
+        "/menu/tuck/tagore-2.jpg",
+        "/menu/tuck/tagore-3.jpg"
+      ],
       "zones": [],
+      "categories": [
+        {
+          "name": "Chaat",
+          "items": [
+            {
+              "sl": "1",
+              "name": "Fruit Chaat",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "2",
+              "name": "Sprout Chaat",
+              "price": "40",
+              "diet": "unknown"
+            },
+            {
+              "sl": "3",
+              "name": "Boiled Egg Chaat (2 Egg)",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "4",
+              "name": "Peanut Chaat",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "5",
+              "name": "Chips Chakhna",
+              "price": "40",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Soups",
+          "items": [
+            {
+              "sl": "6",
+              "name": "Tomato Soup",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "7",
+              "name": "Veg Sweet Corn Soup",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "8",
+              "name": "Chicken Sweet Corn Soup",
+              "price": "45",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Drinks & Cereal",
+          "items": [
+            {
+              "sl": "9",
+              "name": "Ginger Tea",
+              "price": "15",
+              "diet": "unknown"
+            },
+            {
+              "sl": "10",
+              "name": "Hot Coffee",
+              "price": "25",
+              "diet": "unknown"
+            },
+            {
+              "sl": "11",
+              "name": "Lemon Tea",
+              "price": "15",
+              "diet": "unknown"
+            },
+            {
+              "sl": "12",
+              "name": "Hot Milk",
+              "price": "25",
+              "diet": "unknown"
+            },
+            {
+              "sl": "13",
+              "name": "Nimbu Pani",
+              "price": "25",
+              "diet": "unknown"
+            },
+            {
+              "sl": "14",
+              "name": "Chocolate (Hot)",
+              "price": "48",
+              "diet": "unknown"
+            },
+            {
+              "sl": "14",
+              "name": "Chocolate (Cold)",
+              "price": "48",
+              "diet": "unknown"
+            },
+            {
+              "sl": "15",
+              "name": "Bournvita (Hot)",
+              "price": "42",
+              "diet": "unknown"
+            },
+            {
+              "sl": "15",
+              "name": "Bournvita (Cold)",
+              "price": "42",
+              "diet": "unknown"
+            },
+            {
+              "sl": "16",
+              "name": "Corn Flakes (Hot)",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "16",
+              "name": "Corn Flakes (Cold)",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "17",
+              "name": "Chocos (Hot)",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "17",
+              "name": "Chocos (Cold)",
+              "price": "50",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Maggi & Noodles",
+          "items": [
+            {
+              "sl": "18",
+              "name": "Plain Maggi",
+              "price": "36",
+              "diet": "unknown"
+            },
+            {
+              "sl": "19",
+              "name": "Veg Maggi",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "20",
+              "name": "Veg Atta Maggi",
+              "price": "47",
+              "diet": "unknown"
+            },
+            {
+              "sl": "21",
+              "name": "Veg Fried Maggi",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "22",
+              "name": "Veg Korean Maggi",
+              "price": "75",
+              "diet": "unknown"
+            },
+            {
+              "sl": "23",
+              "name": "Chicken Korean Maggi",
+              "price": "78",
+              "diet": "unknown"
+            },
+            {
+              "sl": "24",
+              "name": "Egg Fried Maggi",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "25",
+              "name": "Chicken Fried Maggi",
+              "price": "62",
+              "diet": "unknown"
+            },
+            {
+              "sl": "26",
+              "name": "Curry Maggi",
+              "price": "48",
+              "diet": "unknown"
+            },
+            {
+              "sl": "27",
+              "name": "Top Ramen Masala",
+              "price": "46",
+              "diet": "unknown"
+            },
+            {
+              "sl": "28",
+              "name": "Curry Top Ramen",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "29",
+              "name": "Cheese Maggi",
+              "price": "52",
+              "diet": "unknown"
+            },
+            {
+              "sl": "30",
+              "name": "Veg Cheese Maggi",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "31",
+              "name": "Chicken Cheese Maggi",
+              "price": "62",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Eggs & Breakfast",
+          "items": [
+            {
+              "sl": "32",
+              "name": "Bread Omelette (2 Egg)",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "33",
+              "name": "Bhujiya with Bread (2 Egg)",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "34",
+              "name": "Poha",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "35",
+              "name": "Upma",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "36",
+              "name": "Oats",
+              "price": "45",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Pasta & Rice",
+          "items": [
+            {
+              "sl": "37",
+              "name": "Maggi Pasta (Tomato)",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "37",
+              "name": "Maggi Pasta (Cheese)",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "37",
+              "name": "Maggi Pasta (Mushroom)",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "38",
+              "name": "Veg Masala Rice",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "39",
+              "name": "Egg Masala Rice",
+              "price": "65",
+              "diet": "unknown"
+            },
+            {
+              "sl": "40",
+              "name": "Egg Chicken Masala Rice",
+              "price": "75",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Corn & Popcorn",
+          "items": [
+            {
+              "sl": "41",
+              "name": "Sweetcorn",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "42",
+              "name": "Popcorn",
+              "price": "35",
+              "diet": "unknown"
+            },
+            {
+              "sl": "43",
+              "name": "Peri Peri Popcorn",
+              "price": "45",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Sandwiches & Kulcha",
+          "items": [
+            {
+              "sl": "44",
+              "name": "Plain Cheese Sandwich",
+              "price": "35",
+              "diet": "unknown"
+            },
+            {
+              "sl": "45",
+              "name": "Veg Cheese Sandwich",
+              "price": "46",
+              "diet": "unknown"
+            },
+            {
+              "sl": "46",
+              "name": "Veg Cheese Tikki Sandwich",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "47",
+              "name": "Paneer Cheese Sandwich",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "48",
+              "name": "Boiled Egg Cheese Sandwich",
+              "price": "52",
+              "diet": "unknown"
+            },
+            {
+              "sl": "49",
+              "name": "Chicken Sandwich",
+              "price": "50",
+              "diet": "unknown"
+            },
+            {
+              "sl": "50",
+              "name": "Chicken Cheese Sandwich",
+              "price": "60",
+              "diet": "unknown"
+            },
+            {
+              "sl": "51",
+              "name": "Chicken Cheese Tikki Sandwich",
+              "price": "72",
+              "diet": "unknown"
+            },
+            {
+              "sl": "52",
+              "name": "Mushroom Cheese Sandwich",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "53",
+              "name": "Paneer Cheese Kulcha S/W",
+              "price": "70",
+              "diet": "unknown"
+            },
+            {
+              "sl": "54",
+              "name": "Mushroom Cheese Kulcha S/W",
+              "price": "76",
+              "diet": "unknown"
+            },
+            {
+              "sl": "55",
+              "name": "Veg Cheese Kulcha Sandwich",
+              "price": "65",
+              "diet": "unknown"
+            },
+            {
+              "sl": "56",
+              "name": "Chicken Cheese Kulcha S/W",
+              "price": "75",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Burgers",
+          "items": [
+            {
+              "sl": "57",
+              "name": "Veg Cheese Burger",
+              "price": "65",
+              "diet": "unknown"
+            },
+            {
+              "sl": "58",
+              "name": "Chicken Cheese Burger",
+              "price": "75",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Patties",
+          "items": [
+            {
+              "sl": "59",
+              "name": "Veg Masala Patty",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "60",
+              "name": "Veg Cheese Masala Patty",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "61",
+              "name": "Paneer Masala Patty",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "62",
+              "name": "Paneer Cheese Masala Patty",
+              "price": "58",
+              "diet": "unknown"
+            },
+            {
+              "sl": "63",
+              "name": "Egg Masala Patty",
+              "price": "45",
+              "diet": "unknown"
+            },
+            {
+              "sl": "64",
+              "name": "Chicken Cheese Masala Patty",
+              "price": "68",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Fried Snacks",
+          "items": [
+            {
+              "sl": "65",
+              "name": "Chicken Nuggets (5 pieces)",
+              "price": "90",
+              "diet": "unknown"
+            },
+            {
+              "sl": "66",
+              "name": "Chicken Popcorn (8 pieces)",
+              "price": "80",
+              "diet": "unknown"
+            },
+            {
+              "sl": "67",
+              "name": "French Fry",
+              "price": "55",
+              "diet": "unknown"
+            },
+            {
+              "sl": "68",
+              "name": "Peri Peri Fry",
+              "price": "70",
+              "diet": "unknown"
+            }
+          ]
+        }
+      ],
       "items": [
         {
           "sl": "1",
-          "name": "Plain Cheese Sandwich Grilled",
-          "price": "40",
+          "name": "Fruit Chaat",
+          "price": "50",
           "diet": "unknown"
         },
         {
           "sl": "2",
-          "name": "Veg Cheese Sandwich Grilled",
-          "price": "60",
+          "name": "Sprout Chaat",
+          "price": "40",
           "diet": "unknown"
         },
         {
           "sl": "3",
-          "name": "Aloo Cheese Sandwich Grilled",
-          "price": "60",
+          "name": "Boiled Egg Chaat (2 Egg)",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "4",
-          "name": "Veg Tikki cheese Sandwich Grilled",
-          "price": "70",
+          "name": "Peanut Chaat",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "5",
-          "name": "Paneer cheese Sandwich Grilled",
-          "price": "70",
+          "name": "Chips Chakhna",
+          "price": "40",
           "diet": "unknown"
         },
         {
           "sl": "6",
-          "name": "Chicken Tikki cheese Sandwich Grilled",
-          "price": "75",
+          "name": "Tomato Soup",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "7",
-          "name": "Chicken Cheese Sandwich Grilled",
-          "price": "70",
+          "name": "Veg Sweet Corn Soup",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "8",
-          "name": "Chicken Sandwich Grilled (without cheese)",
-          "price": "50",
+          "name": "Chicken Sweet Corn Soup",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "9",
-          "name": "Chicken Sausage Cheese Sandwich Grilled",
-          "price": "70",
+          "name": "Ginger Tea",
+          "price": "15",
           "diet": "unknown"
         },
         {
           "sl": "10",
-          "name": "French Fries",
-          "price": "50",
+          "name": "Hot Coffee",
+          "price": "25",
           "diet": "unknown"
         },
         {
           "sl": "11",
+          "name": "Lemon Tea",
+          "price": "15",
+          "diet": "unknown"
+        },
+        {
+          "sl": "12",
+          "name": "Hot Milk",
+          "price": "25",
+          "diet": "unknown"
+        },
+        {
+          "sl": "13",
+          "name": "Nimbu Pani",
+          "price": "25",
+          "diet": "unknown"
+        },
+        {
+          "sl": "14",
+          "name": "Chocolate (Hot)",
+          "price": "48",
+          "diet": "unknown"
+        },
+        {
+          "sl": "14",
+          "name": "Chocolate (Cold)",
+          "price": "48",
+          "diet": "unknown"
+        },
+        {
+          "sl": "15",
+          "name": "Bournvita (Hot)",
+          "price": "42",
+          "diet": "unknown"
+        },
+        {
+          "sl": "15",
+          "name": "Bournvita (Cold)",
+          "price": "42",
+          "diet": "unknown"
+        },
+        {
+          "sl": "16",
+          "name": "Corn Flakes (Hot)",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "16",
+          "name": "Corn Flakes (Cold)",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "17",
+          "name": "Chocos (Hot)",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "17",
+          "name": "Chocos (Cold)",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "18",
+          "name": "Plain Maggi",
+          "price": "36",
+          "diet": "unknown"
+        },
+        {
+          "sl": "19",
+          "name": "Veg Maggi",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "20",
+          "name": "Veg Atta Maggi",
+          "price": "47",
+          "diet": "unknown"
+        },
+        {
+          "sl": "21",
+          "name": "Veg Fried Maggi",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "22",
+          "name": "Veg Korean Maggi",
+          "price": "75",
+          "diet": "unknown"
+        },
+        {
+          "sl": "23",
+          "name": "Chicken Korean Maggi",
+          "price": "78",
+          "diet": "unknown"
+        },
+        {
+          "sl": "24",
+          "name": "Egg Fried Maggi",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "25",
+          "name": "Chicken Fried Maggi",
+          "price": "62",
+          "diet": "unknown"
+        },
+        {
+          "sl": "26",
+          "name": "Curry Maggi",
+          "price": "48",
+          "diet": "unknown"
+        },
+        {
+          "sl": "27",
+          "name": "Top Ramen Masala",
+          "price": "46",
+          "diet": "unknown"
+        },
+        {
+          "sl": "28",
+          "name": "Curry Top Ramen",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "29",
+          "name": "Cheese Maggi",
+          "price": "52",
+          "diet": "unknown"
+        },
+        {
+          "sl": "30",
+          "name": "Veg Cheese Maggi",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "31",
+          "name": "Chicken Cheese Maggi",
+          "price": "62",
+          "diet": "unknown"
+        },
+        {
+          "sl": "32",
+          "name": "Bread Omelette (2 Egg)",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "33",
+          "name": "Bhujiya with Bread (2 Egg)",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "34",
+          "name": "Poha",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "35",
+          "name": "Upma",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "36",
+          "name": "Oats",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "37",
+          "name": "Maggi Pasta (Tomato)",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "37",
+          "name": "Maggi Pasta (Cheese)",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "37",
+          "name": "Maggi Pasta (Mushroom)",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "38",
+          "name": "Veg Masala Rice",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "39",
+          "name": "Egg Masala Rice",
+          "price": "65",
+          "diet": "unknown"
+        },
+        {
+          "sl": "40",
+          "name": "Egg Chicken Masala Rice",
+          "price": "75",
+          "diet": "unknown"
+        },
+        {
+          "sl": "41",
+          "name": "Sweetcorn",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "42",
+          "name": "Popcorn",
+          "price": "35",
+          "diet": "unknown"
+        },
+        {
+          "sl": "43",
+          "name": "Peri Peri Popcorn",
+          "price": "45",
+          "diet": "unknown"
+        },
+        {
+          "sl": "44",
+          "name": "Plain Cheese Sandwich",
+          "price": "35",
+          "diet": "unknown"
+        },
+        {
+          "sl": "45",
+          "name": "Veg Cheese Sandwich",
+          "price": "46",
+          "diet": "unknown"
+        },
+        {
+          "sl": "46",
+          "name": "Veg Cheese Tikki Sandwich",
+          "price": "60",
+          "diet": "unknown"
+        },
+        {
+          "sl": "47",
+          "name": "Paneer Cheese Sandwich",
+          "price": "55",
+          "diet": "unknown"
+        },
+        {
+          "sl": "48",
+          "name": "Boiled Egg Cheese Sandwich",
+          "price": "52",
+          "diet": "unknown"
+        },
+        {
+          "sl": "49",
+          "name": "Chicken Sandwich",
+          "price": "50",
+          "diet": "unknown"
+        },
+        {
+          "sl": "50",
+          "name": "Chicken Cheese Sandwich",
+          "price": "60",
+          "diet": "unknown"
+        },
+        {
+          "sl": "51",
+          "name": "Chicken Cheese Tikki Sandwich",
+          "price": "72",
+          "diet": "unknown"
+        },
+        {
+          "sl": "52",
+          "name": "Mushroom Cheese Sandwich",
+          "price": "70",
+          "diet": "unknown"
+        },
+        {
+          "sl": "53",
+          "name": "Paneer Cheese Kulcha S/W",
+          "price": "70",
+          "diet": "unknown"
+        },
+        {
+          "sl": "54",
+          "name": "Mushroom Cheese Kulcha S/W",
+          "price": "76",
+          "diet": "unknown"
+        },
+        {
+          "sl": "55",
+          "name": "Veg Cheese Kulcha Sandwich",
+          "price": "65",
+          "diet": "unknown"
+        },
+        {
+          "sl": "56",
+          "name": "Chicken Cheese Kulcha S/W",
+          "price": "75",
+          "diet": "unknown"
+        },
+        {
+          "sl": "57",
+          "name": "Veg Cheese Burger",
+          "price": "65",
+          "diet": "unknown"
+        },
+        {
+          "sl": "58",
           "name": "Chicken Cheese Burger",
           "price": "75",
           "diet": "unknown"
         },
         {
-          "sl": "12",
-          "name": "Veg Cheese Burger",
-          "price": "70",
-          "diet": "unknown"
-        },
-        {
-          "sl": "13",
-          "name": "Paneer Masala Patty / with cheese",
-          "price": "40 / 60",
-          "diet": "unknown"
-        },
-        {
-          "sl": "14",
-          "name": "Veg Masala Patty / Veg Masala Patty With Cheese",
-          "price": "40 / 60",
-          "diet": "unknown"
-        },
-        {
-          "sl": "15",
-          "name": "Chicken Masala Patty / Chicken Masala Patty With Cheese",
-          "price": "50 / 70",
-          "diet": "unknown"
-        },
-        {
-          "sl": "16",
-          "name": "Vada Pav / (with Cheese)",
-          "price": "50 / 70",
-          "diet": "unknown"
-        },
-        {
-          "sl": "17",
-          "name": "Pav Bhaji / Extra Pav",
-          "price": "50 / 15",
-          "diet": "unknown"
-        },
-        {
-          "sl": "18",
-          "name": "Chicken / Veg Steamed Momos (5 pieces)",
-          "price": "70",
-          "diet": "unknown"
-        },
-        {
-          "sl": "19",
-          "name": "Fried Momo (Veg / Chicken)",
-          "price": "80 / 80",
-          "diet": "unknown"
-        },
-        {
-          "sl": "20",
-          "name": "Pan Fried Veg / Chicken Momo (5 pieces)",
-          "price": "100",
-          "diet": "unknown"
-        },
-        {
-          "sl": "21",
-          "name": "Boiled Egg (1 piece)",
-          "price": "13 / 15",
-          "diet": "unknown"
-        },
-        {
-          "sl": "22",
-          "name": "Double Egg Bread Omelet (Cheese)",
-          "price": "45 (65)",
-          "diet": "unknown"
-        },
-        {
-          "sl": "23",
-          "name": "Half Fry (2 Eggs 2 Bread)",
-          "price": "45",
-          "diet": "unknown"
-        },
-        {
-          "sl": "24",
-          "name": "Scrambled Egg (2 Eggs 2 Bread)",
-          "price": "45",
-          "diet": "unknown"
-        },
-        {
-          "sl": "25",
-          "name": "Boiled Egg Chat",
-          "price": "50",
-          "diet": "unknown"
-        },
-        {
-          "sl": "26",
-          "name": "Chicken Nuggets (5 pieces)",
-          "price": "75",
-          "diet": "unknown"
-        },
-        {
-          "sl": "28",
-          "name": "Chicken Sausage (Fry / Steamed)",
-          "price": "80",
-          "diet": "unknown"
-        },
-        {
-          "sl": "32",
-          "name": "Chicken Strips (1 piece)",
-          "price": "60",
-          "diet": "unknown"
-        },
-        {
-          "sl": "35",
-          "name": "Chicken Spring Roll",
-          "price": "75",
-          "diet": "unknown"
-        },
-        {
-          "sl": "36",
-          "name": "Chicken Seekh Kebab (3 pieces)",
-          "price": "125",
-          "diet": "unknown"
-        },
-        {
-          "sl": "37",
-          "name": "Veg Spring Roll",
-          "price": "60",
-          "diet": "unknown"
-        },
-        {
-          "sl": "38",
-          "name": "Mini Samosa (5 pieces)",
-          "price": "75",
-          "diet": "unknown"
-        },
-        {
-          "sl": "39",
-          "name": "Chilli Garlic Potato Bites (8 pieces)",
-          "price": "50",
-          "diet": "unknown"
-        },
-        {
-          "sl": "40",
-          "name": "Veg Cheese Nuggets (5 pieces)",
-          "price": "60",
-          "diet": "unknown"
-        },
-        {
-          "sl": "41",
-          "name": "Smiley (5 pieces)",
-          "price": "50",
-          "diet": "unknown"
-        },
-        {
-          "sl": "43",
-          "name": "Aloo Paratha (1 piece)",
-          "price": "50",
-          "diet": "unknown"
-        },
-        {
-          "sl": "44",
-          "name": "Masala Rice (Veg / Egg / Chicken / Paneer)",
-          "price": "50 / 70 / 75 / 75",
-          "diet": "unknown"
-        },
-        {
-          "sl": "45",
-          "name": "Oats (Veg / Egg / Chicken)",
-          "price": "40 / 60 / 65",
-          "diet": "unknown"
-        },
-        {
-          "sl": "46",
-          "name": "Tomato Soup / With Butter",
-          "price": "35 / 45",
-          "diet": "unknown"
-        },
-        {
-          "sl": "47",
-          "name": "Veg Sweet Corn Soup / With Butter",
-          "price": "35 / 45",
-          "diet": "unknown"
-        },
-        {
-          "sl": "48",
-          "name": "Hot and Sour Veg Soup / With Butter",
-          "price": "35 / 45",
-          "diet": "unknown"
-        },
-        {
-          "sl": "49",
-          "name": "Sprout chat (Veg / Egg / Chicken)",
-          "price": "45 / 60 / 65",
-          "diet": "unknown"
-        },
-        {
-          "sl": "50",
-          "name": "Peanut Chaat / Chips Chaat",
-          "price": "45",
-          "diet": "unknown"
-        },
-        {
-          "sl": "51",
-          "name": "Sweet Corn Chaat",
-          "price": "50",
-          "diet": "unknown"
-        },
-        {
-          "sl": "52",
-          "name": "Fruit Chaat",
-          "price": "60",
-          "diet": "unknown"
-        },
-        {
-          "sl": "53",
-          "name": "White Sauce Pasta (Veg / Non-Veg)",
-          "price": "70 / 95",
-          "diet": "unknown"
-        },
-        {
-          "sl": "54",
-          "name": "Red Sauce Pasta (Veg / Non-Veg)",
-          "price": "80 / 105",
-          "diet": "unknown"
-        },
-        {
-          "sl": "55",
-          "name": "Cold / Hot Bournvita / Cold Coffee",
-          "price": "50 / 50 / 50",
-          "diet": "unknown"
-        },
-        {
-          "sl": "56",
-          "name": "Cold / Hot Milk / Haldi Milk Hot",
-          "price": "25 / 30 / 30",
-          "diet": "unknown"
-        },
-        {
-          "sl": "57",
-          "name": "Hot / Cold Chocolate Milk",
-          "price": "50 / 50",
-          "diet": "unknown"
-        },
-        {
-          "sl": "58",
-          "name": "Masala Soda",
-          "price": "40",
-          "diet": "unknown"
-        },
-        {
           "sl": "59",
-          "name": "Masala Coke",
+          "name": "Veg Masala Patty",
           "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "60",
-          "name": "Ice Tea",
-          "price": "40",
+          "name": "Veg Cheese Masala Patty",
+          "price": "55",
           "diet": "unknown"
         },
         {
           "sl": "61",
-          "name": "Upma / Poha",
-          "price": "55 / 50",
+          "name": "Paneer Masala Patty",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "62",
-          "name": "Plain Masala Maggi (With Cheese)",
-          "price": "45 (65)",
+          "name": "Paneer Cheese Masala Patty",
+          "price": "58",
           "diet": "unknown"
         },
         {
           "sl": "63",
-          "name": "Double Masala Maggi (With Cheese)",
-          "price": "50 (70)",
+          "name": "Egg Masala Patty",
+          "price": "45",
           "diet": "unknown"
         },
         {
           "sl": "64",
-          "name": "Vegetable Maggi (With Cheese)",
-          "price": "50 / 70",
+          "name": "Chicken Cheese Masala Patty",
+          "price": "68",
           "diet": "unknown"
         },
         {
           "sl": "65",
-          "name": "Chicken Masala Maggi",
-          "price": "70",
+          "name": "Chicken Nuggets (5 pieces)",
+          "price": "90",
           "diet": "unknown"
         },
         {
           "sl": "66",
-          "name": "Fried Maggi (Veg / Egg / Chicken)",
-          "price": "50 / 70 / 75",
+          "name": "Chicken Popcorn (8 pieces)",
+          "price": "80",
           "diet": "unknown"
         },
         {
           "sl": "67",
-          "name": "Atta Maggi (With Cheese)",
-          "price": "50 / 70",
+          "name": "French Fry",
+          "price": "55",
           "diet": "unknown"
         },
         {
           "sl": "68",
-          "name": "Butter Garlic Maggi",
-          "price": "70",
-          "diet": "unknown"
-        },
-        {
-          "sl": "69",
-          "name": "Korean Veg. Maggi",
-          "price": "70",
-          "diet": "unknown"
-        },
-        {
-          "sl": "70",
-          "name": "Korean Chicken Maggi",
+          "name": "Peri Peri Fry",
           "price": "70",
           "diet": "unknown"
         }

@@ -120,6 +120,26 @@ export function prune(list, { cap = CAP, days = KEEP_DAYS, now = new Date() } = 
     .slice(0, cap);
 }
 
+/**
+ * The history without one order.
+ *
+ * Keyed on the timestamp, because that is what actually identifies an entry:
+ * two identical baskets sent on different nights are different orders, and
+ * the same basket cannot be recorded twice inside the collapse window above.
+ *
+ * Whole orders only, never lines within one. An order is the unit that was
+ * handed over, and letting somebody delete three of its four dishes would
+ * leave a record claiming something was sent that never was — which is the
+ * one thing this screen exists to promise it does not do.
+ *
+ * Pure, and separate from the write below, for the same reason `appendOrder`
+ * is: the rule is worth testing without a browser.
+ */
+export function withoutOrder(history, at) {
+  if (!at) return Array.isArray(history) ? history : [];
+  return (history ?? []).filter((e) => e?.at !== at);
+}
+
 /** Total things, not lines — three momos and a roll is four items. */
 export const itemCount = (entry) =>
   (entry?.items ?? []).reduce((n, i) => n + (Number(i.qty) || 0), 0);
@@ -154,6 +174,11 @@ export function recordOrder(canteen, lines, { room = "", reg = "", now = new Dat
 }
 
 export const clearOrders = () => write([]);
+
+/** Called when somebody removes one order from the history screen. */
+export function removeOrder(at, now = new Date()) {
+  return write(withoutOrder(readOrders(now), at));
+}
 
 // ---------- reading it back ----------
 
@@ -215,6 +240,13 @@ const pad = (n) => String(n).padStart(2, "0");
 export const HISTORY_COLUMNS = [
   "Date", "Time", "Mess", "Item", "Qty", "Price", "Order total", "Room", "Reg No",
 ];
+
+/** What the saved file is called. Dated, so exporting twice in a term leaves
+ *  two files rather than a puzzle about which is which. */
+export function historyFilename(now = new Date(), ext = "csv") {
+  const d = now instanceof Date && !Number.isNaN(now.getTime()) ? now : new Date();
+  return `night-orders-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.${ext}`;
+}
 
 /**
  * The history as CSV — one row per item, order details repeated.

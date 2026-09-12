@@ -117,7 +117,44 @@ def read_menu(ws):
             order.append(cat)
         cats[cat].append({"name": item, "price": price, "diet": diet})
 
-    return [{"name": c, "items": cats[c]} for c in order], unknown
+    return [{"name": c, "items": split_items(cats[c])} for c in order], unknown
+
+
+# -------------------------------------------------------------------- splits
+#
+# Printed lines offering a straight choice, written as one item.
+#
+# Only where the two really are separate things to order. The price is the
+# same either way, so this buys nothing at the till — what it buys is a menu
+# somebody can search: typing "cold coffee" now finds the coffee instead of
+# being offered it as a near miss.
+#
+# What is NOT here matters more. The canteens abbreviate with a slash too:
+# "Veg S/C Soup" is Sweet Corn and "Chicken H/S Soup" is Hot and Sour, so
+# splitting on the slash would invent "Veg S Soup" and "Veg C Soup", which are
+# not dishes. Those stay whole, and this is a named list rather than a pattern
+# precisely so that it cannot reach them.
+SPLITS = {
+    "French Toast (Sweet/Salt)": ["French Toast (Sweet)", "French Toast (Salt)"],
+    "Plain Milk (Hot/Cold)": ["Plain Milk (Hot)", "Plain Milk (Cold)"],
+    "Haldi Milk (Hot/Cold)": ["Haldi Milk (Hot)", "Haldi Milk (Cold)"],
+    "Bournvita (Hot/Cold)": ["Bournvita (Hot)", "Bournvita (Cold)"],
+    "Horlicks (Hot/Cold)": ["Horlicks (Hot)", "Horlicks (Cold)"],
+    "Coffee (Hot/Cold)": ["Coffee (Hot)", "Coffee (Cold)"],
+}
+
+
+def split_items(items):
+    """Expand the one-line choices, keeping each half at the printed price."""
+    out = []
+    for item in items:
+        names = SPLITS.get(item["name"])
+        if not names:
+            out.append(item)
+            continue
+        for name in names:
+            out.append({**item, "name": name})
+    return out
 
 
 def scans(pages_dir, tag):

@@ -293,6 +293,34 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   font-variant-numeric: tabular-nums;
 }
 .history-export { margin-top: 6px; margin-bottom: 8px; }
+.history-copy { margin-top: 0; margin-bottom: 8px; }
+
+/* Quiet until reached for: removing an order is a thing you occasionally
+   want, not a thing the screen should keep offering. It still carries a full
+   44px touch target through the padding, because a small bin you have to aim
+   at is how people delete the wrong night's dinner. */
+.history-x {
+  flex: 0 0 auto;
+  /* The head is baseline-aligned for its two pieces of text; an icon has no
+     baseline worth lining up, so it centres against them instead. */
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: -8px -6px -8px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--mute);
+  cursor: pointer;
+}
+.history-x:hover, .history-x:focus-visible {
+  color: var(--absent);
+  background: var(--absent-wash);
+}
 .history-none {
   text-align: center;
   padding: 30px 16px;
