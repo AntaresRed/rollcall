@@ -427,11 +427,59 @@ export function currentSlotOf(cls, originalDate, prior) {
 }
 
 /**
+ * Reschedules still waiting for a date, oldest first, each carrying its class.
+ *
+ * A class rescheduled with "date not decided" is an override with no new date:
+ * it leaves its published slot like any move, but lands nowhere until a date
+ * is given. The same shape used to be labelled "cancelled". The app no longer
+ * cancels classes — they are rescheduled here, not called off — so every
+ * override without a date is read as this state, old ones included.
+ *
+ * Only for classes still on the timetable, matching the Reschedule screen: an
+ * override for a course the student has since dropped is a to-do they can no
+ * longer reach, and badging it would nag about nothing.
+ */
+export function undecidedReschedules(overrides, classes) {
+  const byId = new Map((classes ?? []).map((c) => [c.id, c]));
+  return (overrides ?? [])
+    .filter((o) => o && !o.new_date && byId.has(o.class_id))
+    .map((o) => ({ ...o, cls: byId.get(o.class_id) }))
+    .sort((a, b) => String(a.original_date).localeCompare(String(b.original_date)));
+}
+
+/**
+ * Attendance without the marks parked on undecided reschedules.
+ *
+ * A mark made before a class was rescheduled is kept rather than deleted —
+ * it belongs to a meeting that is still going to happen, and Undo should
+ * bring it straight back — but until a date is decided it must not count
+ * for or against the course. The session screens already ignore it, since
+ * they join marks onto sessions and this one has no session. The per-course
+ * totals count raw rows, so they need it taken out here.
+ *
+ * Hands back the same array when there is nothing to remove, so memos
+ * downstream do not re-run for nothing.
+ */
+export function countedAttendance(attendance, overrides, classes) {
+  const held = new Set(
+    undecidedReschedules(overrides, classes).map((o) =>
+      attendanceKey(o.cls.subject, o.original_date, o.cls.start_time)),
+  );
+  if (!held.size) return attendance;
+  return (attendance ?? []).filter(
+    (a) => !held.has(attendanceKey(a.subject, a.class_date, a.start_time)),
+  );
+}
+
+/**
  * Move one occurrence of a class to a different date and/or time.
  *
- * `newDate === null` cancels the session outright. Any attendance already
- * marked against the old slot moves with it, because it's the same class
- * meeting — just held elsewhere in the week.
+ * `newDate === null` records the class as rescheduled with the date not yet
+ * decided — see `undecidedReschedules`. It raises no alert and asks for no
+ * mark until a date is given.
+ *
+ * Any attendance already marked against the old slot moves with it, because
+ * it's the same class meeting — just held elsewhere.
  */
 export async function rescheduleSession(cls, originalDate, { newDate, newStart, newEnd, note } = {}) {
   const { data: { user } } = await supabase.auth.getUser();
@@ -463,12 +511,6 @@ export async function rescheduleSession(cls, originalDate, { newDate, newStart, 
   if (error) throw error;
 
   // Carry any existing mark across to where the class actually happened.
-  //
-  // One case is still beyond reach: a session moved and then cancelled loses
-  // the record of where it went (the override's new_date is overwritten with
-  // null), so giving it a date afterwards cannot find the mark. Recovering
-  // that needs somewhere to remember the previous slot, which is a schema
-  // change rather than a fix here.
   const existing = await supabase
     .from("attendance")
     .select("*")
@@ -484,11 +526,17 @@ export async function rescheduleSession(cls, originalDate, { newDate, newStart, 
         .update({ class_date: newDate, start_time: start ?? currentStart })
         .eq("id", existing.data.id);
     } else {
-      // Cancelled: keep the record but stop it counting against the budget.
-      await supabase
-        .from("attendance")
-        .update({ status: "cancelled" })
-        .eq("id", existing.data.id);
+      // Date not decided. The mark is kept — this used to stamp it with the
+      // retired "cancelled" status — and parked on the published slot,
+      // because that is where giving the class a date later looks for it:
+      // once new_date is null, currentSlotOf reads original_date. A class
+      // moved first and only then made undecided would otherwise leave its
+      // mark stranded on a date nothing points to any more.
+      // countedAttendance keeps it out of the totals in the meantime.
+      const home = { class_date: originalDate, start_time: hhmm(cls.start_time) };
+      if (currentDate !== home.class_date || currentStart !== home.start_time) {
+        await supabase.from("attendance").update(home).eq("id", existing.data.id);
+      }
     }
   }
 }

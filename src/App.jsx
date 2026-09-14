@@ -5,7 +5,7 @@ import {
   attendanceKey, isoDate, setCourseMuted, unmarkedSessions,
   loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
   loadPublishedCatalogue, loadProfile, cohortOf,
-  loadPublishedCohorts, loadCataloguePayload,
+  loadPublishedCohorts, loadCataloguePayload, countedAttendance,
 } from "./lib/api";
 import {
   setActiveCatalogue, catalogueKind, catalogueCohort,
@@ -64,6 +64,9 @@ const TABS = [
 /** Stable empty array: a fresh [] on every render would re-run every memo. */
 const EMPTY = [];
 
+/** The least time the opening screen is on show, in milliseconds. */
+const SPLASH_MIN_MS = 1300;
+
 /** The tab bar's height, as a CSS variable — see where it is called below. */
 const publishNavHeight = (el) => {
   document.documentElement.style.setProperty(
@@ -107,6 +110,18 @@ export default function App() {
   // Set by CoursePicker while its selection differs from what's saved, so
   // backing out of it can warn — and stay silent when there's nothing to lose.
   const pickerDirty = useRef(false);
+
+  // The opening screen stays up for at least SPLASH_MIN_MS, however quickly
+  // boot finishes. Without a floor, a warm start swaps the splash out after a
+  // frame or two, which reads as a flicker rather than an opening screen.
+  // Timed from the first paint of the splash itself, not from page load: the
+  // page is blank until this bundle arrives, so counting that wait would
+  // shorten — or on a slow connection skip — the part anyone actually sees.
+  const [splashHeld, setSplashHeld] = useState(true);
+  useEffect(() => {
+    const id = setTimeout(() => setSplashHeld(false), SPLASH_MIN_MS);
+    return () => clearTimeout(id);
+  }, []);
 
   const say = (msg) => {
     setToast(msg);
@@ -345,7 +360,7 @@ export default function App() {
       const [o, a] = await Promise.all([loadOverrides(), loadAttendance()]);
       setOverrides(o);
       setAttendance(a);
-      say(change.newDate ? "Class moved" : "Marked as cancelled");
+      say(change.newDate ? "Class moved" : "Saved — date not decided");
     } catch {
       say("Couldn't save that change. Try again.");
     }
@@ -504,7 +519,12 @@ export default function App() {
     [viewAs, classes],
   );
   const viewTerm = viewAs ? termFromCatalogue(viewAs.payload) : term;
-  const viewAttendance = viewAs ? EMPTY : attendance;
+  // A mark left on a class whose new date isn't decided doesn't count until it
+  // is — see countedAttendance. Filtered once, here, so no screen can forget.
+  const viewAttendance = useMemo(
+    () => (viewAs ? EMPTY : countedAttendance(attendance, overrides, classes)),
+    [viewAs, attendance, overrides, classes],
+  );
   const viewOverrides = viewAs ? EMPTY : overrides;
   const readOnly = Boolean(viewAs);
 
@@ -521,7 +541,7 @@ export default function App() {
   );
 
   // ---- everything below this line may return early ----
-  if (!ready) return <Splash />;
+  if (!ready || splashHeld) return <Splash />;
   if (!session) return <SignIn error={authError} />;
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
 

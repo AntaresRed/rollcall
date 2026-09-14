@@ -3,6 +3,7 @@ import {
   toMinutes, hhmm, pretty, inSession, breakOn, skipBudget, courseStats,
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
   catalogueDrift, currentSlotOf, attendanceBreakdown, markableSessions,
+  undecidedReschedules, countedAttendance,
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
@@ -599,13 +600,73 @@ console.log("finding the mark that belongs to a rescheduled meeting");
     currentSlotOf(cls, "2026-09-07",
       { new_date: "2026-09-09", new_start: "14:30:00" }).start === "14:30");
 
-  // Cancelled: new_date is null, so the meeting is back at its published slot.
-  const cancelled = currentSlotOf(cls, "2026-09-07",
+  // Date not decided: new_date is null, so the mark is looked for at the
+  // published slot — which is where rescheduleSession parks it.
+  const undecided = currentSlotOf(cls, "2026-09-07",
     { new_date: null, new_start: null });
-  check("a cancelled meeting resolves to its published slot",
-    cancelled.date === "2026-09-07" && cancelled.start === "10:15");
+  check("a meeting with no date decided resolves to its published slot",
+    undecided.date === "2026-09-07" && undecided.start === "10:15");
 
   survives("junk everywhere", () => currentSlotOf(null, "2026-09-07", null));
+}
+
+console.log("");
+console.log("rescheduled, date not decided");
+{
+  const day = weekdayOf(new Date("2026-09-07T00:00:00"));
+  const strat = { id: "u1", subject: "Strategy", day_of_week: day, start_time: "10:15",
+    end_time: "11:45", term_phase: "full" };
+  const other = { id: "u2", subject: "Pricing", day_of_week: day, start_time: "12:00",
+    end_time: "13:30", term_phase: "full" };
+  const classes = [strat, other];
+  const waiting = { class_id: "u1", original_date: "2026-09-07", new_date: null, new_start: null };
+  const movedOn = { class_id: "u2", original_date: "2026-09-07", new_date: "2026-09-08", new_start: "12:00" };
+  const dropped = { class_id: "gone", original_date: "2026-09-01", new_date: null };
+
+  // The list at the top of Reschedule, and the badge on its button.
+  const list = undecidedReschedules([movedOn, waiting, dropped], classes);
+  check("only reschedules with no date are waiting",
+    list.length === 1 && list[0].class_id === "u1");
+  check("and each carries its class", list[0].cls === strat);
+  check("a dropped course's leftovers are not a to-do",
+    !list.some((o) => o.class_id === "gone"));
+  check("oldest first", undecidedReschedules([
+    { class_id: "u1", original_date: "2026-09-14", new_date: null },
+    { class_id: "u2", original_date: "2026-09-07", new_date: null },
+  ], classes).map((o) => o.original_date).join() === "2026-09-07,2026-09-14");
+  survives("no overrides or classes", () => undecidedReschedules(undefined, undefined));
+
+  // It leaves its slot and lands nowhere, so nothing asks about it.
+  const oneDay = { from: "2026-09-07", to: "2026-09-07" };
+  check("the class is gone from the day it was due",
+    !expectedSessions(classes, null, oneDay, [waiting]).some((s) => s.cls.id === "u1"));
+  check("and the other class that day stays put",
+    expectedSessions(classes, null, oneDay, [waiting]).some((s) => s.cls.id === "u2"));
+  // Checked against that one meeting: Strategy runs weekly, so its other
+  // weeks are rightly still asked about.
+  const now = new Date("2026-09-10T18:00:00");
+  const isThatMeeting = (s) => s.cls.id === "u1" && s.date === "2026-09-07";
+  check("Edit attendance doesn't ask for a mark on it",
+    !unmarkedSessions(classes, [], null, now, 28, [waiting]).some(isThatMeeting));
+  check("while the same meeting, not rescheduled, is asked about",
+    unmarkedSessions(classes, [], null, now, 28, []).some(isThatMeeting));
+
+  // A mark made before it was rescheduled is kept, but counts for nothing.
+  const marks = [
+    { subject: "Strategy", class_date: "2026-09-07", start_time: "10:15", status: "absent" },
+    { subject: "Pricing", class_date: "2026-09-08", start_time: "12:00", status: "present" },
+  ];
+  const counted = countedAttendance(marks, [waiting, movedOn], classes);
+  check("the parked mark is left out of the totals",
+    counted.length === 1 && counted[0].subject === "Pricing");
+  check("so it costs no skip",
+    courseStats(classes, counted).find((r) => r.subject === "Strategy").absent === 0);
+  check("with nothing waiting, the very same array comes back",
+    countedAttendance(marks, [movedOn], classes) === marks);
+  check("once it has a date, the mark counts again",
+    countedAttendance(marks, [{ ...waiting, new_date: "2026-09-09" }], classes).length === 2);
+  check("seconds on a stored time don't let a parked mark slip through",
+    countedAttendance([{ ...marks[0], start_time: "10:15:00" }], [waiting], classes).length === 0);
 }
 
 console.log("");

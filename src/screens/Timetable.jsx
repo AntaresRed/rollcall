@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
   DAYS, SLOT_STARTS, SLOT_ENDS, PHASE_LABEL,
-  pretty, toMinutes, weekdayOf, isoDate, phaseActive, breakOn,
+  pretty, toMinutes, weekdayOf, isoDate, phaseActive, breakOn, undecidedReschedules,
 } from "../lib/api";
 
 /**
@@ -20,10 +20,13 @@ export default function Timetable({
   const date = isoDate(now);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const activeBreak = breakOn(date, term);
-  // Only changes still ahead of us are worth flagging on the grid.
-  const upcomingChanges = overrides.filter(
-    (o) => (o.new_date ?? o.original_date) >= date,
-  ).length;
+  // The Reschedule badge counts classes still waiting for a date — the same
+  // kind of number as Edit attendance's badge: something left to do, rather
+  // than a tally of changes already made, which the screen itself lists.
+  const waitingForDate = useMemo(
+    () => undecidedReschedules(overrides, classes).length,
+    [overrides, classes],
+  );
 
   // Only render days and slots that are actually in use — an empty Sunday
   // column is just noise, and trimming makes the columns wider.
@@ -166,8 +169,8 @@ export default function Timetable({
         {onReschedule && (
           <button className="btn ghost" onClick={onReschedule}>
             Reschedule
-            {upcomingChanges > 0 && (
-              <span className="tag signal" style={{ marginLeft: 6 }}>{upcomingChanges}</span>
+            {waitingForDate > 0 && (
+              <span className="tag signal" style={{ marginLeft: 6 }}>{waitingForDate}</span>
             )}
           </button>
         )}

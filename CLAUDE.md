@@ -68,6 +68,12 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
 - **Cohorts** are the graduating year parsed from the email. `null` means
   unknown. It must never be treated as "unfiltered".
 - **UPI:** only a shop's own address or QR. Never derive or guess one.
+- **Reschedules:** a `session_overrides` row with no `new_date` means
+  "rescheduled, date not decided" — the app no longer cancels classes, and
+  older rows once labelled "cancelled" are read the same way. It raises no
+  alert and isn't asked about. A mark made before it was rescheduled is parked
+  on the published slot and kept out of the totals by `countedAttendance`
+  until a date is set.
 - Pin exact dependency versions in Edge Functions.
 - Tests of parsing logic use literal fixtures, not real menu rows — rows get
   split or renamed and the test silently stops testing anything.

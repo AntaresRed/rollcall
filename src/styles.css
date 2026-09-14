@@ -1255,6 +1255,29 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   text-transform: uppercase;
   color: var(--mute);
 }
+/* "When is it now?" — a new date, or not decided yet. The chosen answer is
+   filled like the attendance choice, but in ink rather than green or red:
+   neither answer is good news or bad. */
+.reschedule-when { margin-top: 0; gap: 8px; }
+/* The form sits indented inside a class row, so it has well under the full
+   screen width. Tighter than the attendance pills so each label stays on one
+   line on an ordinary phone. */
+.reschedule-when .mark {
+  padding: 8px 8px;
+  font-size: 13px;
+}
+.reschedule-when .mark[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.reschedule-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--slate);
+}
+
 .reschedule-form input,
 .reschedule-form select {
   font-family: var(--sans);
@@ -1598,6 +1621,28 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   text-align: center;
   /* No opacity fade: at 9.5px it was landing under 4:1, and the small size
      plus uppercase mono already makes it recede far enough. */
+}
+
+/* On the opening screen the credit sits at the foot rather than in the
+   centred stack, so it never competes with the mark and the loading bar.
+   Lifted clear of the home indicator on phones that have one. */
+.splash-credit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+  margin: 0;
+  padding: 0 24px;
+  /* A step up from the Profile credit it shares a class with: bigger and
+     darker, but still the mono small caps, so it reads as a signature rather
+     than a second headline under the wordmark. */
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--slate);
+}
+.splash-credit b {
+  font-weight: 600;
+  color: var(--ink);
 }
 
 /* ---------- timetable action buttons ---------- */

@@ -99,7 +99,10 @@ create table if not exists public.classes (
 -- ---------- rescheduled sessions ----------
 -- A weekly course has no row per occurrence — occurrences are generated from
 -- the pattern — so a moved class is stored as an exception against the date it
--- was originally due. new_date NULL means the session was cancelled outright.
+-- was originally due. new_date NULL means the class has been rescheduled but
+-- its new date isn't decided yet (the app used to call this "cancelled"; it no
+-- longer cancels classes). It raises no alert and counts for nothing until a
+-- date is set.
 create table if not exists public.session_overrides (
   id            uuid primary key default gen_random_uuid(),
   user_id       uuid not null references auth.users(id) on delete cascade,

@@ -56,6 +56,10 @@ export default function Splash({ message = "Getting your schedule" }) {
       <div className="splash-bar" aria-hidden="true">
         <span />
       </div>
+      {/* The same signature as the foot of Profile, set a step louder here:
+          on Profile it sits under a page of settings, while on the opening
+          screen it has the whole foot to itself. */}
+      <p className="made-by splash-credit">Made by <b>Anuj Kapse</b></p>
     </div>
   );
 }
