@@ -21,7 +21,8 @@ import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
   billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
   shopQr, payNote, LOCATIONS, deliveryFor, chargesByPlace,
   filterGrouped, hasCategories } from "../src/lib/tuck.js";
-import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize } from "../src/lib/por.js";
+import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize,
+  searchAllPor, postLine, porLabel } from "../src/lib/por.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -1846,6 +1847,53 @@ console.log("POR details");
     searchPor("clubs", "(((").length === 0);
   survives("an unknown dataset", () => searchPor("nope", "x"));
   check("an unknown dataset is empty", searchPor("nope", "").length === 0);
+
+  // ---- the body on every row ----
+  check("the post line joins post and body",
+    postLine("President", "Consult Club") === "President · Consult Club");
+  check("no post on file still names the body",
+    postLine(null, "Placement Representatives") === "Placement Representatives");
+  check("a post that already names its body isn't repeated",
+    postLine("Hult Prize Lead", "Hult Prize") === "Hult Prize Lead");
+  check("in any case",
+    postLine("hult prize lead", "Hult Prize") === "hult prize lead");
+  check("nothing on file stays blank", postLine("  ", "") === "");
+
+  const allLists = ["student-council", "preparation-committee", "placement-representatives",
+    "clubs", "sigs-chapters", "cultural-cell", "7-lakes-fest", "sports-council"];
+  check("every POR row names its club or body", allLists.every((id) =>
+    searchPor(id, "").every((s) => s.people.every((p) =>
+      p.post && p.post.endsWith(s.label || porLabel(id))))));
+  check("a club row names its club, not the list it's filed in",
+    searchPor("clubs", "").every((s) => s.people.every((p) => !p.post.endsWith("Clubs"))));
+  check("a single body's list is searchable by its own name",
+    searchPor("cultural-cell", "cultural cell").reduce((n, s) => n + s.people.length, 0)
+      === porSize("cultural-cell"));
+
+  // ---- searching every list from the first screen ----
+  const hult = searchAllPor("hult prize");
+  check("a chapter is found without knowing which menu it's under",
+    hult.length === 1 && hult[0].datasetId === "sigs-chapters");
+  check("with everyone in it",
+    hult[0]?.sections.reduce((n, s) => n + s.people.length, 0) === 6);
+  check("and says where it's filed",
+    hult[0]?.labels.join(" / ") === "Cultural Bodies / SIGs and Chapters");
+  check("and carries the path that opens it",
+    hult[0]?.path.join("/") === "cultural-bodies/sigs-chapters" && nodeAt(hult[0].path)?.dataset === "sigs-chapters");
+  check("a club's name finds that club",
+    searchAllPor("consult club").some((g) => g.datasetId === "clubs"
+      && g.sections.some((s) => s.label === "Consult Club")));
+  check("a single body is found by its name from the top too",
+    searchAllPor("cultural cell").some((g) => g.datasetId === "cultural-cell"));
+  // allLists is written in menu order, so positions in it must only climb.
+  const positions = searchAllPor("president").map((g) => allLists.indexOf(g.datasetId));
+  check("results come in menu order", positions.length > 1
+    && positions.every((pos, i) => pos >= 0 && (i === 0 || pos > positions[i - 1])));
+  check("an empty search shows the menu, not everyone",
+    searchAllPor("").length === 0 && searchAllPor("   ").length === 0);
+  check("punctuation alone finds nobody from the top either", searchAllPor("(((").length === 0);
+  check("a search that matches nothing returns no groups",
+    searchAllPor("zzzznotathing").length === 0);
 
   // Data integrity across every list.
   const everyone = Object.keys({

@@ -57,6 +57,49 @@ export function countUnder(node) {
 export const porTotal = POR_MENU.reduce((n, node) => n + countUnder(node), 0);
 
 /**
+ * Every list below the menu, in menu order, with the path of ids that opens it
+ * and the labels along the way — what a search from the first screen walks.
+ */
+const LEAVES = (() => {
+  const out = [];
+  const walk = (nodes, path, labels) => {
+    for (const n of nodes) {
+      const p = [...path, n.id];
+      const l = [...labels, n.label];
+      if (n.dataset) out.push({ datasetId: n.dataset, path: p, labels: l });
+      else walk(n.children ?? [], p, l);
+    }
+  };
+  walk(POR_MENU, [], []);
+  return out;
+})();
+
+/**
+ * The body a post belongs to: the club, SIG or chapter on lists split into
+ * those, and otherwise the list itself — "Student Council", "Cultural Cell".
+ */
+const bodyOf = (data, section) => section?.label || data?.label || "";
+
+/**
+ * The line under a person's name — post and body together, "President ·
+ * Consult Club".
+ *
+ * The body is on every row rather than only in the heading above it, because
+ * a row is often seen without its heading: scrolled past, screenshotted and
+ * sent to someone, or turned up by a search across every list. Someone with no
+ * post on file (the placement reps) still gets the body, which is the useful
+ * half. A post that already names its body is left alone, so a sheet that
+ * writes "Hult Prize Lead" doesn't come out as "Hult Prize Lead · Hult Prize".
+ */
+export function postLine(role, body) {
+  const r = String(role ?? "").trim();
+  const b = String(body ?? "").trim();
+  if (!r) return b;
+  if (!b || lower(r).includes(lower(b))) return r;
+  return `${r} · ${b}`;
+}
+
+/**
  * Walk a path of ids to the node it names.
  *
  * Returns null for a path that doesn't resolve, so a stale or hand-typed one
@@ -86,17 +129,29 @@ export function trailOf(path = []) {
 
 // Each person's searchable text is derived once at module load rather than
 // per keystroke — Clubs alone is a hundred and eighty rows.
+//
+// The body goes into it, not just the section heading: on a list that is one
+// body with no sections, like Cultural Cell, the heading is empty, and typing
+// the body's own name used to find nobody.
 const INDEX = new Map(
   Object.entries(por).map(([id, data]) => [
     id,
-    (data.sections ?? []).map((section) => ({
-      ...section,
-      people: section.people.map((p) => {
-        const text = [p.name, p.role, p.email, p.phone, section.label, section.kind]
-          .filter(Boolean).join(" ");
-        return { ...p, _text: lower(text), _squashed: squash(text) };
-      }),
-    })),
+    (data.sections ?? []).map((section) => {
+      const body = bodyOf(data, section);
+      return {
+        ...section,
+        people: section.people.map((p) => {
+          const text = [p.name, p.role, p.email, p.phone, body, section.kind]
+            .filter(Boolean).join(" ");
+          return {
+            ...p,
+            post: postLine(p.role, body),
+            _text: lower(text),
+            _squashed: squash(text),
+          };
+        }),
+      };
+    }),
   ]),
 );
 
@@ -124,6 +179,24 @@ export function searchPor(datasetId, query = "") {
         })),
     }))
     .filter((section) => section.people.length > 0);
+}
+
+/**
+ * Every list searched at once, for the search box on the first POR screen.
+ *
+ * Searching one list only works if you already know where a body is filed:
+ * "Hult Prize" typed into Clubs finds nothing, because it is a Chapter under
+ * Cultural Bodies. From the top, a club's name is enough. Results stay grouped
+ * by the list they came from, in menu order, each with the path that opens it.
+ *
+ * An empty search returns nothing rather than everyone, so the screen shows
+ * the menu instead of three hundred and fifty names.
+ */
+export function searchAllPor(query = "") {
+  if (!lower(query).trim()) return [];
+  return LEAVES
+    .map((leaf) => ({ ...leaf, sections: searchPor(leaf.datasetId, query) }))
+    .filter((group) => group.sections.length > 0);
 }
 
 export const porLabel = (datasetId) => por[datasetId]?.label ?? "";

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind,
+  POR_MENU, nodeAt, trailOf, countUnder, searchPor, searchAllPor, porLinks, linkKind,
 } from "../lib/por";
 import { prettyPhone, telHref, whatsAppHref } from "../lib/phone";
 
@@ -26,8 +26,12 @@ export default function PorDetails({ onBack }) {
 
   const go = (id) => { setPath((p) => [...p, id]); setQuery(""); };
   const upTo = (depth) => { setPath((p) => p.slice(0, depth)); setQuery(""); };
+  // Opened from a search on the first screen: the search comes along, so the
+  // list opens showing the same people rather than all of them again.
+  const openList = (fullPath) => setPath(fullPath);
 
   const leafId = node?.dataset ?? null;
+  const atTop = path.length === 0 || !node;
 
   return (
     <>
@@ -51,9 +55,28 @@ export default function PorDetails({ onBack }) {
         ))}
       </nav>
 
-      {leafId
-        ? <ContactList datasetId={leafId} query={query} onQuery={setQuery} />
-        : <Menu items={level ?? POR_MENU} onPick={go} />}
+      {leafId ? (
+        <ContactList datasetId={leafId} query={query} onQuery={setQuery} />
+      ) : atTop ? (
+        <>
+          {/* Only on the first screen. Further down the menu you have
+              already said where to look, and a search there would be the
+              same box one tap earlier. */}
+          <div className="por-top-search">
+            <SearchBox
+              query={query}
+              onQuery={setQuery}
+              placeholder="Search any club, body, name or post…"
+              label="Search all POR contacts"
+            />
+          </div>
+          {query.trim()
+            ? <AllResults query={query} onOpen={openList} />
+            : <Menu items={POR_MENU} onPick={go} />}
+        </>
+      ) : (
+        <Menu items={level ?? POR_MENU} onPick={go} />
+      )}
 
       <button
         className="btn ghost block"
@@ -86,6 +109,63 @@ function Menu({ items, onPick }) {
   );
 }
 
+function SearchBox({ query, onQuery, placeholder, label }) {
+  return (
+    <div className="dir-search">
+      <SearchIcon />
+      <input
+        type="search"
+        value={query}
+        placeholder={placeholder}
+        aria-label={label}
+        autoComplete="off"
+        onChange={(e) => onQuery(e.target.value)}
+      />
+      {query && (
+        <button className="dir-clear" aria-label="Clear search" onClick={() => onQuery("")}>
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * A search from the first screen, across every list.
+ *
+ * Grouped by the list each person came from, and the group heading is also the
+ * way into that list — a student who searched "consult" usually wants the
+ * whole club next, not just the rows that matched.
+ */
+function AllResults({ query, onOpen }) {
+  const groups = useMemo(() => searchAllPor(query), [query]);
+  const found = groups.reduce(
+    (n, g) => n + g.sections.reduce((m, s) => m + s.people.length, 0), 0);
+
+  return (
+    <>
+      <div className="dir-bar">
+        <span className="dir-count">{found} {found === 1 ? "person" : "people"}</span>
+      </div>
+
+      {found === 0 && <div className="empty">Nobody in POR details matches that.</div>}
+
+      {groups.map((g) => (
+        <div className="por-group" key={g.datasetId}>
+          <button className="por-group-head" onClick={() => onOpen(g.path)}>
+            <span>{g.labels.join(" / ")}</span>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.7"
+                    strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <Sections sections={g.sections} keyPrefix={g.datasetId} />
+        </div>
+      ))}
+    </>
+  );
+}
+
 function ContactList({ datasetId, query, onQuery }) {
   const sections = useMemo(() => searchPor(datasetId, query), [datasetId, query]);
   const found = sections.reduce((n, s) => n + s.people.length, 0);
@@ -93,22 +173,12 @@ function ContactList({ datasetId, query, onQuery }) {
 
   return (
     <>
-      <div className="dir-search">
-        <SearchIcon />
-        <input
-          type="search"
-          value={query}
-          placeholder="Search by name, post or number…"
-          aria-label="Search these contacts"
-          autoComplete="off"
-          onChange={(e) => onQuery(e.target.value)}
-        />
-        {query && (
-          <button className="dir-clear" aria-label="Clear search" onClick={() => onQuery("")}>
-            ×
-          </button>
-        )}
-      </div>
+      <SearchBox
+        query={query}
+        onQuery={onQuery}
+        placeholder="Search by name, post, club or number…"
+        label="Search these contacts"
+      />
 
       <div className="dir-bar">
         <span className="dir-count">{found} {found === 1 ? "person" : "people"}</span>
@@ -135,8 +205,18 @@ function ContactList({ datasetId, query, onQuery }) {
 
       {found === 0 && <div className="empty">Nobody here matches that.</div>}
 
+      <Sections sections={sections} keyPrefix={datasetId} />
+    </>
+  );
+}
+
+/** Section headings and their people — shared by one list and the search
+ *  across all of them, so a row reads the same wherever it turns up. */
+function Sections({ sections, keyPrefix }) {
+  return (
+    <>
       {sections.map((section) => (
-        <section className="por-section" key={`${section.label ?? "all"}|${section.kind ?? ""}`}>
+        <section className="por-section" key={`${keyPrefix}|${section.label ?? "all"}|${section.kind ?? ""}`}>
           {/* A single unnamed section is the whole list — a heading over it
               would only repeat the screen's own title. */}
           {section.label && (
@@ -150,7 +230,7 @@ function ContactList({ datasetId, query, onQuery }) {
             <div className="por-row" key={`${p.name}|${p.role ?? ""}|${i}`}>
               <div className="por-who">
                 <span className="por-name">{p.name}</span>
-                {p.role && <span className="por-role">{p.role}</span>}
+                {p.post && <span className="por-role">{p.post}</span>}
                 {p.email && (
                   <a className="por-email" href={`mailto:${p.email}`}>{p.email}</a>
                 )}

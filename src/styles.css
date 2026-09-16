@@ -3388,6 +3388,33 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   flex-direction: column;
   gap: 8px;
 }
+
+/* The search above the first menu. Space below it only when the menu follows;
+   results bring their own count bar, which already sits clear of the box. */
+.por-top-search + .por-menu { margin-top: 14px; }
+
+/* Results from every list, grouped under the list they came from. The heading
+   is also the way into that list, so it looks like the breadcrumbs above —
+   the same mono, the same colour that means "you can go here". */
+.por-group { margin-top: 14px; }
+.por-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 0 2px;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--signal-deep);
+}
+.por-group-head span { flex: 1; min-width: 0; }
+.por-group-head svg { flex: 0 0 auto; }
+.por-group-head:hover { color: var(--signal); }
 .por-item {
   display: flex;
   align-items: center;
