@@ -47,11 +47,13 @@ EMPTY = {"", "-", "—", "–", "n/a", "na"}
 # drifts to a third value, the build fails rather than reapplying a stale
 # correction over a newer truth. Same reasoning as CORRECTIONS in build_por.py.
 #
-# `row` is the serial number on the printed list, so a correction can be
-# checked against the photo of it without re-reading every line.
+# `source` is where the room came from: the serial number on the printed list
+# ("NAB 5", "ABC 63"), so a correction can be checked against the photo of it
+# without re-reading every line — or "reported directly" for the handful the
+# board itself has got wrong, which outrank it.
 
 MOVES = [
-    # (name, room in the sheet, room on the posted list, row)
+    # (name, room in the sheet, room now, source)
     ("Vimal Kumar M",      "C-307", "K-102", "NAB 5"),
     ("Apoorva Bharadwaj",  "K-401", "K-503", "NAB 32"),
     ("Sudhir Jaiswal",     "C-302", "K-103", "NAB 54"),
@@ -60,6 +62,10 @@ MOVES = [
     ("Sumanta Basu",       "A-304", "A-209", "ABC 63"),
     # The sheet carries no room at all for him; the posted list does.
     ("Uttam Kumar Sarkar", None,    "A-203", "ABC 62"),
+    # ABC 68 still has him in A-309, but he has moved into the K-401 that
+    # Apoorva Bharadwaj vacated (NAB 32) — the board has not caught up. A
+    # first-hand report outranks it, the same way it outranks the sheet.
+    ("Abhishek Goel",      "A-309", "K-401", "reported directly"),
 ]
 
 # People whose room on the sheet the posted list hands to somebody else,
@@ -78,7 +84,7 @@ VACATED = [
 # the card would be worse than the blank. They drop out of here the moment the
 # sheet carries them, which the build checks.
 ADDITIONS = [
-    # (name, room, row)
+    # (name, room, source)
     ("Samarth Gupta",          "M-109", "NAB 49"),
     ("Sabyasachi Mukhopadhyay", "M-404", "NAB 51"),
     ("Ayesha Gupta",           "M-402", "NAB 52"),
@@ -99,26 +105,26 @@ def apply_posted_rooms(people):
     """
     by_name = {p["name"].lower(): p for p in people}
 
-    def own_office(name, row):
+    def own_office(name, source):
         person = by_name.get(name.lower())
         if person is None:
             raise SystemExit(
-                f"{row}: {name} is not in the sheet. Either the sheet dropped "
+                f"{source}: {name} is not in the sheet. Either the sheet dropped "
                 f"them — in which case move this entry to ADDITIONS — or the "
                 f"name is spelled differently there and this one needs fixing.")
         # The own office, never an administrative one: a dean's room on the
         # posted list is their faculty office, not the dean's office.
         return person["offices"][0]
 
-    for name, was, now, row in MOVES:
-        office = own_office(name, row)
+    for name, was, now, source in MOVES:
+        office = own_office(name, source)
         if office["room"] == now:
             raise SystemExit(
-                f"{row}: the sheet already puts {name} in {now}. Drop this "
+                f"{source}: the sheet already puts {name} in {now}. Drop this "
                 f"entry from MOVES.")
         if office["room"] != was:
             raise SystemExit(
-                f"{row}: expected {name} in {was} on the sheet, found "
+                f"{source}: expected {name} in {was} on the sheet, found "
                 f"{office['room']}. Recheck against the posted list before "
                 f"reapplying this move.")
         office["room"] = now
@@ -132,10 +138,10 @@ def apply_posted_rooms(people):
                 f"and drop or update this entry.")
         office["room"] = None
 
-    for name, room, row in ADDITIONS:
+    for name, room, source in ADDITIONS:
         if name.lower() in by_name:
             raise SystemExit(
-                f"{row}: the sheet now carries {name} itself. Drop this entry "
+                f"{source}: the sheet now carries {name} itself. Drop this entry "
                 f"from ADDITIONS so their real extension and address are used.")
         people.append({
             "name": name,
