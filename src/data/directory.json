@@ -18,7 +18,7 @@
     "offices": [
       {
         "label": null,
-        "room": "A-309",
+        "room": "K-401",
         "ext": "2040 / 1150",
         "direct": "033-7121-2040 / 1150",
         "email": "agoel@iimcal.ac.in"
@@ -104,12 +104,38 @@
     ]
   },
   {
+    "name": "Anupama Kondayya",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "K-105",
+        "ext": "2011",
+        "direct": null,
+        "email": "akondayya@iimcal.ac.in"
+      }
+    ]
+  },
+  {
+    "name": "Anurima Chakrabarty",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "K-309",
+        "ext": null,
+        "direct": null,
+        "email": null
+      }
+    ]
+  },
+  {
     "name": "Apoorva Bharadwaj",
     "title": null,
     "offices": [
       {
         "label": null,
-        "room": "K-401",
+        "room": "K-503",
         "ext": "2013",
         "direct": "033-7121-2013",
         "email": "apoorva@iimcal.ac.in"
@@ -182,6 +208,32 @@
     ]
   },
   {
+    "name": "Ayesha Gupta",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "M-402",
+        "ext": null,
+        "direct": null,
+        "email": null
+      }
+    ]
+  },
+  {
+    "name": "Ayush Gupta",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "M-409",
+        "ext": null,
+        "direct": null,
+        "email": null
+      }
+    ]
+  },
+  {
     "name": "Balram Avittathur",
     "title": null,
     "offices": [
@@ -211,19 +263,6 @@
         "ext": "1110 / 2026",
         "direct": "033-2438-1387",
         "email": "dean_acad@iimcal.ac.in"
-      }
-    ]
-  },
-  {
-    "name": "Anupama Kondayya",
-    "title": "Assistant Professor",
-    "offices": [
-      {
-        "label": null,
-        "room": "K-105",
-        "ext": "2011",
-        "direct": null,
-        "email": "akondayya@iimcal.ac.in"
       }
     ]
   },
@@ -402,10 +441,23 @@
     "offices": [
       {
         "label": null,
-        "room": "K-307",
+        "room": null,
         "ext": "2041",
         "direct": "033-7121-2041",
         "email": "lakshmi@iimcal.ac.in"
+      }
+    ]
+  },
+  {
+    "name": "Latasri Hazarika",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "K-307",
+        "ext": null,
+        "direct": null,
+        "email": null
       }
     ]
   },
@@ -638,15 +690,54 @@
     ]
   },
   {
+    "name": "R. Mukherjee",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "M-410",
+        "ext": null,
+        "direct": null,
+        "email": null
+      }
+    ]
+  },
+  {
+    "name": "Rahul Kumar",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "M-103",
+        "ext": null,
+        "direct": null,
+        "email": null
+      }
+    ]
+  },
+  {
     "name": "Rahul Roy",
     "title": null,
     "offices": [
       {
         "label": null,
-        "room": "K-102",
+        "room": null,
         "ext": "2089",
         "direct": "033-7121-2089",
         "email": "rahul@iimcal.ac.in"
+      }
+    ]
+  },
+  {
+    "name": "Rajashik Roy Chaudhury",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "M-411",
+        "ext": null,
+        "direct": null,
+        "email": null
       }
     ]
   },
@@ -742,6 +833,19 @@
     ]
   },
   {
+    "name": "Rohit Negi",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "C-304",
+        "ext": null,
+        "direct": null,
+        "email": null
+      }
+    ]
+  },
+  {
     "name": "Runa Sarkar",
     "title": null,
     "offices": [
@@ -751,6 +855,19 @@
         "ext": "2098",
         "direct": "033-7121-2098",
         "email": "runa@iimcal.ac.in"
+      }
+    ]
+  },
+  {
+    "name": "Sabyasachi Mukhopadhyay",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "M-404",
+        "ext": null,
+        "direct": null,
+        "email": null
       }
     ]
   },
@@ -803,6 +920,19 @@
         "ext": "2066",
         "direct": "033-7121-2066",
         "email": "saikatm@iimcal.ac.in"
+      }
+    ]
+  },
+  {
+    "name": "Samarth Gupta",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "M-109",
+        "ext": null,
+        "direct": null,
+        "email": null
       }
     ]
   },
@@ -877,7 +1007,7 @@
     "offices": [
       {
         "label": null,
-        "room": "C-308",
+        "room": "K-106",
         "ext": "2021",
         "direct": "033-7121-2021",
         "email": "sourav@iimcal.ac.in"
@@ -890,7 +1020,7 @@
     "offices": [
       {
         "label": null,
-        "room": "K-105",
+        "room": null,
         "ext": "2017",
         "direct": "033-7121-2017",
         "email": "subir@iimcal.ac.in"
@@ -942,7 +1072,7 @@
     "offices": [
       {
         "label": null,
-        "room": "C-302",
+        "room": "K-103",
         "ext": "2136 / 1140",
         "direct": "033-7121-2136 / 1140",
         "email": "sudhir@iimcal.ac.in"
@@ -955,7 +1085,7 @@
     "offices": [
       {
         "label": null,
-        "room": "A-304",
+        "room": "A-209",
         "ext": "2012",
         "direct": "033-7121-2012",
         "email": "sumanta@iimcal.ac.in"
@@ -981,10 +1111,23 @@
     "offices": [
       {
         "label": null,
-        "room": "A-303",
+        "room": "A-310",
         "ext": "2032",
         "direct": "033-7121-2032",
         "email": "tanika@iimcal.ac.in"
+      }
+    ]
+  },
+  {
+    "name": "Umang Varshney",
+    "title": null,
+    "offices": [
+      {
+        "label": null,
+        "room": "M-102",
+        "ext": null,
+        "direct": null,
+        "email": null
       }
     ]
   },
@@ -994,7 +1137,7 @@
     "offices": [
       {
         "label": null,
-        "room": null,
+        "room": "A-203",
         "ext": "7100",
         "direct": "033-2467-8300",
         "email": "uttam@iimcal.ac.in"
@@ -1033,7 +1176,7 @@
     "offices": [
       {
         "label": null,
-        "room": "C-307",
+        "room": "K-102",
         "ext": "2057",
         "direct": "033-7121-2057",
         "email": "vimal@iimcal.ac.in"
@@ -1046,7 +1189,7 @@
     "offices": [
       {
         "label": null,
-        "room": "M-103",
+        "room": null,
         "ext": "2138",
         "direct": "033-7121-2138",
         "email": "vipul@iimcal.ac.in"
