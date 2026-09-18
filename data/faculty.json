@@ -121,8 +121,8 @@
         "name": "Sudhir Jaiswall",
         "role": "CC",
         "email": "sudhir@iimcal.ac.in",
-        "directory_name": "Sudhir Jaiswal",
-        "match_confidence": 0.95
+        "directory_name": "Sudhir S. Jaiswall",
+        "match_confidence": 1.0
       },
       {
         "name": "Balachandran R",
@@ -512,9 +512,9 @@
       {
         "name": "Anupama Kondayya",
         "role": null,
-        "email": null,
-        "directory_name": null,
-        "match_confidence": 0.0
+        "email": "akondayya@iimcal.ac.in",
+        "directory_name": "Anupama Kondayya",
+        "match_confidence": 1.0
       }
     ]
   },
@@ -542,9 +542,9 @@
       {
         "name": "Sabyasachi Mukhopadhyay",
         "role": null,
-        "email": null,
-        "directory_name": null,
-        "match_confidence": 0.0
+        "email": "sabym@iimcal.ac.in",
+        "directory_name": "Sabyasachi Mukhopadhyay",
+        "match_confidence": 1.0
       }
     ]
   },
@@ -557,9 +557,9 @@
       {
         "name": "Umang Varshney",
         "role": null,
-        "email": null,
-        "directory_name": null,
-        "match_confidence": 0.0
+        "email": "umangvarshney@iimcal.ac.in",
+        "directory_name": "Umang Varshney",
+        "match_confidence": 1.0
       }
     ]
   },
@@ -624,9 +624,9 @@
       {
         "name": "Rohit Negi",
         "role": null,
-        "email": null,
-        "directory_name": null,
-        "match_confidence": 0.0
+        "email": "rohit.n@iimcal.ac.in",
+        "directory_name": "Rohit Negi",
+        "match_confidence": 1.0
       }
     ]
   },

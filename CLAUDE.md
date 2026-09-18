@@ -44,7 +44,9 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
 - **Corrections are declarative tables inside the build scripts, and each is
   verified on every run:** `CORRECTIONS` / `ADDITIONS` / `EXTRA_DATASETS` in
   `build_por.py`, `SECTIONS` / `SPLITS` / `NOT_SPLIT` in `build_tuck.py`,
-  `SPLITS` in `build_night_menu.py`, and `data/overrides.json` for schedule
+  `SPLITS` in `build_night_menu.py`, `NAME_FIXES` / `DEAN_NAMES` /
+  `STRAY_TITLES` / `ROOM_FIXES` / `EXTRA_PEOPLE` in `build_directory_tsv.py`,
+  and `data/overrides.json` for schedule
   amendments. When one goes stale the build fails **on purpose**. Update the
   entry against the source; never weaken the check.
 - Printed cards stay faithful in the workbook, with the card's own row numbers.
@@ -54,6 +56,12 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   `public/menu/night/<tag>-<n>.jpg`, `public/menu/tuck/<tag>-<n>.jpg`,
   `public/tuck/<tag>.png` (payment QR). A shop or canteen with no photos simply
   hides its "See original menu" button.
+- Faculty directory: the MBA office's workbook (`Faculty Directory 2026
+  -2027_Updated - Copy.xlsx`) is the source of truth. `build_directory_tsv.py`
+  flattens it into `FacultyDirectory.tsv`, which feeds `build_directory.py`
+  (the directory screen) and `build_faculty.py` → `build_catalogue.py`
+  (instructor emails); `build_pgp1_catalogue.py` reads `directory.json`.
+  Rebuild all four after a directory change.
 - **Hazard:** `build_catalogue.py` also rewrites
   `supabase/repair-stale-classes.sql`. Never point it at a template.
 

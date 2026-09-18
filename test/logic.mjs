@@ -363,8 +363,9 @@ check("every person has at least one office",
 // own name and again under their dean's title, with a different room, a
 // different extension and a role address.
 check("a dean's two rows collapse to one entry with two offices", (() => {
-  const hits = facultyDirectory([], "manish thakur");
-  return hits.length === 1 && hits[0].offices.length === 2 && hits[0].title === "Dean NIER";
+  const hits = facultyDirectory([], "peeyush mehta");
+  return hits.length === 1 && hits[0].offices.length === 2
+    && hits[0].title === "Dean Faculty & Research";
 })());
 check("search finds a room typed without its hyphen",
   facultyDirectory([], "k208").some((p) => p.name === "Abhipsa Pal"));
