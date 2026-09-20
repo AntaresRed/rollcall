@@ -539,6 +539,15 @@ export async function rescheduleSession(cls, originalDate, { newDate, newStart, 
       }
     }
   }
+
+  // Tell the section, or take back what was said. A move with a date is worth
+  // other people hearing; "date not decided" withdraws the claim rather than
+  // making a vaguer one, because there is no longer a slot to propose.
+  if (newDate) {
+    await reportReschedule(cls, originalDate, newDate, start ?? hhmm(cls.start_time));
+  } else {
+    await withdrawReport(cls, originalDate);
+  }
 }
 
 /** Put a moved or cancelled session back where the timetable says it belongs. */
@@ -549,6 +558,164 @@ export async function clearOverride(classId, originalDate) {
     .eq("class_id", classId)
     .eq("original_date", originalDate);
   if (error) throw error;
+
+  // Undoing the move here also retracts what was told to the section — a
+  // student who put a class back is no longer one of the people saying it
+  // moved. The class row is fetched because the report is keyed on the
+  // published slot, which an id alone doesn't give.
+  const { data: cls } = await supabase
+    .from("classes")
+    .select("subject, section, start_time")
+    .eq("id", classId)
+    .maybeSingle();
+  if (cls) await withdrawReport(cls, originalDate);
+}
+
+// ---------- section reschedule reports ----------
+
+/**
+ * A reschedule is a fact about a class, but an override records it as a fact
+ * about one student. So a class that moved is on the right day for the four
+ * people who entered it and the wrong day for everyone else in the section,
+ * who go on being alerted for a slot nothing happens in.
+ *
+ * These three functions are the other half: the same change, told to the
+ * section without naming anyone. Three students saying the same thing is
+ * enough for the database to assemble it (see reschedule-reports.sql) and for
+ * the app to *offer* it to the rest. Nothing is ever applied from it.
+ *
+ * Every write here is best-effort. A report that fails must never cost a
+ * student their own reschedule, which is the change they actually asked for —
+ * so these swallow their errors rather than throwing, and the caller doesn't
+ * wait to find out.
+ */
+async function reportReschedule(cls, originalDate, newDate, newStart) {
+  try {
+    await supabase.from("reschedule_reports").upsert(
+      {
+        subject: cls.subject,
+        section: cls.section ?? "",
+        original_date: originalDate,
+        original_start: hhmm(cls.start_time),
+        new_date: newDate,
+        new_start: newStart,
+      },
+      { onConflict: "reporter_id,subject,section,original_date,original_start" },
+    );
+  } catch { /* the reschedule itself already saved */ }
+}
+
+async function withdrawReport(cls, originalDate) {
+  try {
+    await supabase
+      .from("reschedule_reports")
+      .delete()
+      .eq("subject", cls.subject)
+      .eq("section", cls.section ?? "")
+      .eq("original_date", originalDate)
+      .eq("original_start", hhmm(cls.start_time));
+  } catch { /* nothing to undo for the section */ }
+}
+
+/**
+ * Moves enough of the section agrees on, for sessions recent or near enough to
+ * still be worth acting on.
+ *
+ * The window matches the one the Reschedule screen shows. A corroborated move
+ * from two months ago is true but useless: the class has been and gone, and
+ * the attendance for it was settled long since.
+ */
+export async function loadRescheduleConsensus(now = new Date(), windowDays = 21) {
+  const from = isoDate(new Date(now.getTime() - windowDays * DAY_MS));
+  const to = isoDate(new Date(now.getTime() + windowDays * DAY_MS));
+  const { data, error } = await supabase
+    .from("reschedule_consensus")
+    .select("*")
+    .gte("original_date", from)
+    .lte("original_date", to);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    ...r,
+    original_start: hhmm(r.original_start),
+    new_start: hhmm(r.new_start),
+  }));
+}
+
+/**
+ * The section's reports, narrowed to the ones that are this student's to act
+ * on and turned into something the screen can render.
+ *
+ * Two filters do the work, and both are deliberately quiet:
+ *
+ * A report only applies if the student actually has that session, at that
+ * published slot, on that day — `occurrencesOn` answers this exactly, term
+ * phases and all, rather than this having to re-derive it.
+ *
+ * And a student who has already moved this session is left alone. Their
+ * override takes the occurrence off `original_date`, so it drops out here by
+ * itself. That silently covers the case where they moved it somewhere *other*
+ * than where the section says: arguing with a decision they've already made,
+ * on the strength of a count, is not worth a screenful of doubt.
+ */
+export function rescheduleProposals(classes, term, consensus, overrides = [], dismissed = []) {
+  const skip = new Set(dismissed);
+  const out = [];
+
+  for (const r of consensus ?? []) {
+    const match = occurrencesOn(classes, term, r.original_date, overrides).find(
+      ({ cls, movedFrom }) =>
+        // `movedFrom` means some *other* session landed on this date. The one
+        // being reported is the one that natively sits here.
+        !movedFrom &&
+        cls.subject === r.subject &&
+        (cls.section ?? "") === (r.section ?? "") &&
+        hhmm(cls.start_time) === hhmm(r.original_start),
+    );
+    if (!match) continue;
+
+    const key = proposalKey(match.cls.id, r.original_date);
+    if (skip.has(key)) continue;
+
+    out.push({
+      key,
+      cls: match.cls,
+      originalDate: r.original_date,
+      newDate: r.new_date,
+      newStart: hhmm(r.new_start),
+      reports: r.reports,
+    });
+  }
+
+  return out.sort(
+    (a, b) =>
+      a.newDate.localeCompare(b.newDate) ||
+      toMinutes(a.newStart) - toMinutes(b.newStart) ||
+      a.cls.subject.localeCompare(b.cls.subject),
+  );
+}
+
+export const proposalKey = (classId, originalDate) => `${classId}|${originalDate}`;
+
+// Dismissals stay on the device. They are a "no thanks" to a suggestion, not
+// a record of anything — worth nothing to another device, and not worth a
+// table or a round trip.
+const DISMISSED_KEY = "iimp.reschedule.dismissed";
+
+export function loadDismissedProposals() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(DISMISSED_KEY));
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+export function dismissProposal(key) {
+  const next = [...new Set([...loadDismissedProposals(), key])];
+  try {
+    localStorage.setItem(DISMISSED_KEY, JSON.stringify(next));
+  } catch { /* a dismissal that can't be stored is one that comes back */ }
+  return next;
 }
 
 // ---------- catch-up ----------

@@ -6,6 +6,7 @@ import {
   loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
   loadPublishedCatalogue, loadProfile, cohortOf,
   loadPublishedCohorts, loadCataloguePayload, countedAttendance,
+  loadRescheduleConsensus,
 } from "./lib/api";
 import {
   setActiveCatalogue, catalogueKind, catalogueCohort,
@@ -80,6 +81,10 @@ export default function App() {
   const [attendance, setAttendance] = useState([]);
   const [term, setTerm] = useState(null);
   const [overrides, setOverrides] = useState([]);
+  // What the rest of the section has recorded. Nothing depends on it being
+  // there, so it is fetched beside the boot load rather than inside it: a slow
+  // or failing query holds up nobody's timetable.
+  const [consensus, setConsensus] = useState([]);
   const [tab, setTab] = useState("today");
   const [now, setNow] = useState(new Date());
   const [alerts, setAlerts] = useState(false);
@@ -175,6 +180,8 @@ export default function App() {
         // later would leave already-rendered screens on the old one.
         if (published?.payload) setActiveCatalogue(published.payload);
         real.current = { catalogue: published?.payload ?? null };
+
+        loadRescheduleConsensus().then(setConsensus).catch(() => setConsensus([]));
 
         if (profile?.is_admin) {
           loadPublishedCohorts().then(setCohorts).catch(() => setCohorts([]));
@@ -726,9 +733,13 @@ export default function App() {
             now={now}
             term={viewTerm}
             overrides={viewOverrides}
+            consensus={readOnly ? EMPTY : consensus}
             onShowCalendar={() => setSubScreen("calendar")}
-            // Rescheduling writes, so it is not offered while viewing.
+            // Rescheduling writes, so it is not offered while viewing. Same
+            // for accepting what the section reports, which is a move like
+            // any other.
             onReschedule={readOnly ? null : () => setSubScreen("reschedule")}
+            onMove={readOnly ? null : moveSession}
             onShowBreakdown={() => setSubScreen("breakdown")}
             onShowAttendance={() => setSubScreen("attendance")}
             pendingCount={pendingCount}

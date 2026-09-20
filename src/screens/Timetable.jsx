@@ -1,8 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   DAYS, SLOT_STARTS, SLOT_ENDS, PHASE_LABEL,
   pretty, toMinutes, weekdayOf, isoDate, phaseActive, breakOn, undecidedReschedules,
+  rescheduleProposals, loadDismissedProposals, dismissProposal,
 } from "../lib/api";
+
+const fmtWhen = (iso) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, {
+    weekday: "short", day: "numeric", month: "short",
+  });
 
 /**
  * The week as an actual grid — time down the left, days across the top.
@@ -13,8 +19,8 @@ import {
  * pinned, because six readable columns don't fit in 380px.
  */
 export default function Timetable({
-  classes, now, term, overrides = [], onShowCalendar, onReschedule,
-  onShowBreakdown, onShowAttendance, pendingCount = 0,
+  classes, now, term, overrides = [], consensus = [], onShowCalendar, onReschedule,
+  onShowBreakdown, onShowAttendance, onMove, pendingCount = 0,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -27,6 +33,34 @@ export default function Timetable({
     () => undecidedReschedules(overrides, classes).length,
     [overrides, classes],
   );
+
+  // Moves enough of the section has recorded that this student hasn't. This
+  // sits on the grid rather than behind the Reschedule button because it is
+  // news about the week being looked at — a badge on a button only reaches
+  // the people who were already going to press it.
+  const [dismissed, setDismissed] = useState(loadDismissedProposals);
+  const [busy, setBusy] = useState(false);
+  const proposals = useMemo(
+    () => rescheduleProposals(classes, term, consensus, overrides, dismissed),
+    [classes, term, consensus, overrides, dismissed],
+  );
+
+  // Accepting is an ordinary move, made through the same call the Reschedule
+  // form uses — so the mark already made travels with it, and this student's
+  // own report joins the count they just agreed with.
+  const accept = async (p) => {
+    if (!onMove) return;
+    setBusy(true);
+    try {
+      await onMove(p.cls, p.originalDate, {
+        newDate: p.newDate,
+        newStart: p.newStart,
+        newEnd: SLOT_ENDS[p.newStart] ?? null,
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
 
   // Only render days and slots that are actually in use — an empty Sunday
   // column is just noise, and trimming makes the columns wider.
@@ -193,6 +227,27 @@ export default function Timetable({
           </button>
         )}
       </div>
+
+      {/* Stated, not applied. The section being sure is good evidence about a
+          class and no evidence at all about whether this student takes it the
+          way the others do — so it stays a sentence with two answers until
+          one of them is given. */}
+      {onMove && proposals.map((p) => (
+        <div className="banner compact" key={p.key}>
+          <p>
+            <strong>{p.cls.subject}</strong> moved to {fmtWhen(p.newDate)}{" "}
+            {pretty(p.newStart)} — {p.reports} in your section recorded this.
+          </p>
+          <div className="banner-acts">
+            <button className="mark" disabled={busy} onClick={() => accept(p)}>
+              Accept
+            </button>
+            <button className="mark" onClick={() => setDismissed(dismissProposal(p.key))}>
+              Reject
+            </button>
+          </div>
+        </div>
+      ))}
     </>
   );
 }

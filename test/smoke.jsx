@@ -81,6 +81,13 @@ const overrides = [
     new_start: null, new_end: null, note: null },
 ];
 
+// A move five people in the section have recorded and this student hasn't.
+const consensus = [
+  { cohort_year: 2027, subject: "Consumption Culture & Markets", section: "A",
+    original_date: "2026-09-24", original_start: "16:15",
+    new_date: "2026-09-26", new_start: "18:00", reports: 5 },
+];
+
 const noop = () => {};
 const occ = occurrencesOn(classes, term, isoDate(now), overrides);
 
@@ -92,6 +99,15 @@ const cases = [
   ["Today", <Today key="t" occurrences={occ} attendance={attendance} now={now} onMark={noop} />],
   ["Today / empty", <Today key="te" occurrences={[]} attendance={[]} now={now} onMark={noop} />],
   ["Timetable", <Timetable key="tt" classes={classes} now={now} term={term} overrides={overrides} onShowCalendar={noop} onReschedule={noop} />],
+  ["Timetable / the section reports a move", <Timetable key="ttc" classes={classes} now={now} term={term}
+    overrides={overrides} consensus={consensus} onShowCalendar={noop} onReschedule={noop} onMove={noop} />],
+  ["Timetable / a report for a class you don't have", <Timetable key="ttx" classes={classes} now={now} term={term}
+    overrides={overrides} consensus={[{ ...consensus[0], subject: "Nobody's Course" }]}
+    onShowCalendar={noop} onReschedule={noop} onMove={noop} />],
+  // Viewing as another cohort: reports arrive but there is nothing to accept
+  // with, so the line must not offer a button that writes.
+  ["Timetable / reports with no way to act", <Timetable key="ttr" classes={classes} now={now} term={term}
+    overrides={overrides} consensus={consensus} onShowCalendar={noop} />],
   ["Timetable / all four actions", <Timetable key="tta" classes={classes} now={now} term={term}
       overrides={overrides} onShowCalendar={noop} onReschedule={noop} onShowBreakdown={noop}
       onShowAttendance={noop} pendingCount={3} />],

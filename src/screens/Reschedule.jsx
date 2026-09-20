@@ -69,6 +69,7 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
     () => undecidedReschedules(overrides, classes),
     [overrides, classes],
   );
+
   const changed = useMemo(() => {
     const byId = new Map(classes.map((c) => [c.id, c]));
     return overrides

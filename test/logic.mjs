@@ -3,7 +3,7 @@ import {
   toMinutes, hhmm, pretty, inSession, breakOn, skipBudget, courseStats,
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
   catalogueDrift, currentSlotOf, attendanceBreakdown, markableSessions,
-  undecidedReschedules, countedAttendance,
+  undecidedReschedules, countedAttendance, rescheduleProposals, proposalKey,
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
@@ -669,6 +669,72 @@ console.log("rescheduled, date not decided");
     countedAttendance(marks, [{ ...waiting, new_date: "2026-09-09" }], classes).length === 2);
   check("seconds on a stored time don't let a parked mark slip through",
     countedAttendance([{ ...marks[0], start_time: "10:15:00" }], [waiting], classes).length === 0);
+}
+
+console.log("");
+console.log("what the section reports");
+{
+  const day = weekdayOf(new Date("2026-09-07T00:00:00"));
+  const mkt = { id: "u1", subject: "Marketing", section: "C", day_of_week: day,
+    start_time: "10:15", end_time: "11:45", term_phase: "full" };
+  const ops = { id: "u2", subject: "Operations", section: "B", day_of_week: day,
+    start_time: "12:00", end_time: "13:30", term_phase: "full" };
+  const classes = [mkt, ops];
+  const report = {
+    subject: "Marketing", section: "C",
+    original_date: "2026-09-07", original_start: "10:15",
+    new_date: "2026-09-12", new_start: "18:00", reports: 4,
+  };
+
+  const one = rescheduleProposals(classes, null, [report]);
+  check("a corroborated move you haven't made is proposed",
+    one.length === 1 && one[0].cls === mkt && one[0].newDate === "2026-09-12");
+  check("and says how many people recorded it", one[0].reports === 4);
+
+  // A report is only yours if it is about a session you actually sit in.
+  check("a subject you don't take is not proposed",
+    rescheduleProposals(classes, null, [{ ...report, subject: "Finance" }]).length === 0);
+  check("another section's move is not yours",
+    rescheduleProposals(classes, null, [{ ...report, section: "A" }]).length === 0);
+  check("a different slot that day is a different session",
+    rescheduleProposals(classes, null, [{ ...report, original_start: "14:30" }]).length === 0);
+  check("a date the class doesn't run on is not proposed",
+    rescheduleProposals(classes, null, [{ ...report, original_date: "2026-09-08" }]).length === 0);
+
+  // Already decided for yourself. The override takes the session off the day,
+  // so every one of these drops out without needing its own rule.
+  const mine = { class_id: "u1", original_date: "2026-09-07",
+    new_date: "2026-09-12", new_start: "18:00" };
+  check("once you've made the same move it stops being news",
+    rescheduleProposals(classes, null, [report], [mine]).length === 0);
+  check("a move of your own somewhere else is not argued with",
+    rescheduleProposals(classes, null, [report],
+      [{ ...mine, new_date: "2026-09-14" }]).length === 0);
+  check("nor is one still waiting for a date",
+    rescheduleProposals(classes, null, [report],
+      [{ class_id: "u1", original_date: "2026-09-07", new_date: null }]).length === 0);
+
+  check("dismissing one hides it",
+    rescheduleProposals(classes, null, [report], [],
+      [proposalKey("u1", "2026-09-07")]).length === 0);
+  check("and hides only that one",
+    rescheduleProposals(classes, null, [report], [],
+      [proposalKey("u2", "2026-09-07")]).length === 1);
+
+  check("seconds on a stored time still match their slot",
+    rescheduleProposals([{ ...mkt, start_time: "10:15:00" }], null,
+      [{ ...report, original_start: "10:15:00", new_start: "18:00:00" }]).length === 1);
+
+  const two = rescheduleProposals(classes, null, [
+    { ...report, subject: "Operations", section: "B", original_start: "12:00",
+      new_date: "2026-09-14", new_start: "08:30" },
+    report,
+  ]);
+  check("proposals come in the order they'll happen",
+    two.map((p) => p.newDate).join() === "2026-09-12,2026-09-14");
+
+  survives("nothing reported", () => rescheduleProposals(classes, null, undefined));
+  survives("no classes", () => rescheduleProposals([], null, [report]));
 }
 
 console.log("");
