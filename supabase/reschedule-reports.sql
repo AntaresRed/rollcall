@@ -94,7 +94,7 @@ create or replace view public.reschedule_consensus as
     from public.reschedule_reports
    group by cohort_year, subject, section,
             original_date, original_start, new_date, new_start
-  having count(*) >= 3;
+  having count(*) >= 2;
 
 -- Deliberately the opposite of attendance_summary, which is security_invoker
 -- so that a student sees only their own rows. The whole purpose here is to
