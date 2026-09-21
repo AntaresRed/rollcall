@@ -106,4 +106,4 @@ revoke all on public.reschedule_consensus from anon;
 grant select on public.reschedule_consensus to authenticated;
 
 comment on view public.reschedule_consensus is
-  'Reschedules reported by at least three students of a cohort, with no reporter identities. Suggestions only; nothing is applied from this.';
+  'Reschedules reported by at least two students of a cohort, with no reporter identities. Suggestions only; nothing is applied from this.';

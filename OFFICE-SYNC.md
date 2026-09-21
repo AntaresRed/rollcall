@@ -3,9 +3,17 @@
 What the MBA office attendance system (the "sender") must send to IIMPresent
 (the "receiver"), and what IIMPresent does with it.
 
-Hand this whole file to the project building the office system. Sections 1–6 are
-the sender's side; 7–9 are the receiver's, included so both sides can see why
-each field exists.
+Hand this whole file to the project building the office system.
+
+**Sections 1–6 are the sender's side of the contract — the part to build.**
+Sections 7–9 describe what IIMPresent does with what arrives. They are here so
+the sender's authors can see why each field is asked for, and are **not** work
+for that project: the tables, policies and screens in them belong to IIMPresent
+and already have an owner.
+
+Where this file says "tell the IIMPresent side", it means raise it with the
+maintainer of this repo — some of the choices below are open, and the wrong
+answer assumed silently is worse than a question asked.
 
 **What's sent, nightly:** for every student — the subjects they're enrolled in,
 a status for every session date in each subject, and the office's own totals per
@@ -36,10 +44,10 @@ puller on a timer would eventually arrive mid-update and read a half-processed
 day. Push also means the office server needs no inbound port open to the
 internet — only outbound HTTPS.
 
-Deployed with `--no-verify-jwt`, like the two existing functions, because the
-sender has no Supabase user. **That makes the signature in §2 the only thing
-standing between the internet and this endpoint.** It is verified before the
-body is parsed.
+The endpoint is a Supabase Edge Function deployed with `--no-verify-jwt`,
+because the sender is a server with no Supabase user account and so has no JWT
+to present. **That makes the signature in §2 the only thing standing between
+the internet and this endpoint.** It is verified before the body is parsed.
 
 ## 2. Authentication — HMAC-SHA256, not a bearer token
 
@@ -64,9 +72,41 @@ signature is bound to one body and a five-minute window.
 supabase secrets set OFFICE_SYNC_KEY_K1=$(openssl rand -hex 32)
 ```
 
-Never in either repo, never in a committed `.env`, never pasted into a chat. If
-the office server has a static IP, say so and I'll add an allowlist as a second
-layer.
+The secret is generated on the IIMPresent side and handed over once, out of
+band. Never in either repo, never in a committed `.env`, never pasted into a
+chat.
+
+### No static IP: what stands in for the allowlist
+
+An IP allowlist was offered as a second layer. The sender has no static egress
+address, so it isn't available and the signature is the only thing
+authenticating the caller. That is sound on its own — an HMAC is not weakened by
+the caller moving — but two things follow from it.
+
+**Where the secret lives becomes the entire security boundary.** It must be read
+at run time from a managed secret store: GitHub Actions secrets, the cloud
+runner's environment, a secrets manager. Not a file on a laptop, not a shell
+profile, not the repo. **If the nightly job is meant to run from someone's
+laptop, move it to a scheduled cloud runner before it holds a real key.** A
+laptop is a poor custodian for a long-lived shared secret and a worse one for a
+job that has to run every night whether or not the lid is open.
+
+**Prevention gives way to detection.** Rotate on a fixed cadence — 90 days — and
+immediately on any suspicion; the `key-id` header exists so rotation costs no
+downtime. The receiver logs every 401 and alerts on a burst of them. With the
+endpoint reachable by anyone, noticing replaces blocking.
+
+The receiver checks cheapest-first, so unauthenticated traffic costs it almost
+nothing: oversized body, then missing or malformed headers, then a timestamp
+outside the 300 s window, and only then the HMAC.
+
+Worth knowing how small the blast radius is. This endpoint only writes, only to
+the office mirror tables, and a complete batch replaces them every night. Someone
+holding the key could write false office attendance. They could not read a single
+student's record — there is no GET — could not touch `public.attendance`, where
+students' own marks live, and anything they wrote would be overwritten by the
+next night's send. A leaked sender key is a corruption problem with a
+twelve-hour half-life, not a data breach.
 
 ## 3. Envelope
 
@@ -162,8 +202,9 @@ only to help a human confirm a course mapping is right.
   slot", with no detail about where it moved from. Even this much removes most
   of the guesswork (§5).
 
-Neither is required. §5 describes what the receiver does with nothing but a date
-and a time, which is the assumed case.
+`session_no` and `rescheduled` are both optional, and the receiver assumes
+neither will arrive. §5 describes what it does with nothing but a date and a
+time. Send either if it's cheap; neither is worth building new tracking for.
 
 ### `totals[]` — the official number
 
@@ -196,17 +237,16 @@ Names, phone numbers, addresses, grades, marks, fee status, disciplinary notes.
 The receiver rejects unknown fields. Minimum data for the job, so a breach costs
 as little as possible.
 
-## 5. Two fields that decide whether this works
+## 5. The parts most likely to go wrong
 
 ### `start_time` — send the scheduled slot, not the actual one
 
 Date plus start time is what makes a session unique, on both sides. IIMPresent's
 own attendance table is keyed on `(user_id, subject, class_date, start_time)`,
 with the comment *"the slot has to be part of the identity or the second mark
-overwrites the first"* ([schema.sql:126](supabase/schema.sql:126)), because
-sixteen Term V courses run two back-to-back sittings of one subject in a day.
-The office table uses the same key, which is what lets a dispute be pinned to an
-exact slot rather than a whole day.
+overwrites the first"*, because sixteen Term V courses run two back-to-back
+sittings of one subject in a day. The office table uses the same key, which is
+what lets a dispute be pinned to an exact slot rather than a whole day.
 
 The subtlety is *which* time. If the office records the minute the class actually
 began — 10:22 for a lecture that was slotted at 10:15 — then nothing joins,
@@ -270,8 +310,9 @@ don't line up.
 
 ### Does the feed include sessions that haven't happened yet?
 
-If the office's list ever contains *upcoming* sessions, not only conducted ones,
-say so — it makes reschedules observable rather than inferred. The receiver keeps
+**Open question — please answer it.** If the office's list ever contains
+*upcoming* sessions, not only conducted ones, it makes reschedules observable
+rather than inferred, and item 3 above stops being load-bearing. The receiver keeps
 each night's batch, so a session that was listed for 17 Sep yesterday and is
 listed for 19 Sep today is a move the office *told* us about, without anyone
 adding a field. If the feed only ever contains conducted sessions, this is
@@ -302,17 +343,18 @@ week's export — all of it fixes itself the next night with no repair step and 
 watermark logic to get subtly wrong.
 
 If that turns out to be too heavy on the office's servers, the fallback is
-sessions from the last 14 days nightly plus one full send weekly. Say so and I'll
-support both; don't switch silently, because the receiver's reconciliation in the
-next paragraph depends on knowing which it's getting.
+sessions from the last 14 days nightly plus one full send weekly. Tell the
+IIMPresent side and both will be supported — but don't switch silently, because
+the reconciliation in the next paragraph depends on knowing which it's getting.
 
 Limits: **≤ 500 rows per request** (counting all three arrays together), pages
 sequential, never parallel. Rows may be split across pages however is
 convenient — every row carries its own full key, so each is applied
 independently and a page boundary can fall anywhere.
-On a 5xx or a network failure, retry the same page
-with the same `batch_id`, `page` and body, backing off 2 s, 4 s, 8 s, 16 s, 30 s.
-An identical re-send is a no-op, so retrying is always safe.
+
+On a 5xx or a network failure, retry the same page with the same `batch_id`,
+`page` and body, backing off 2 s, 4 s, 8 s, 16 s, 30 s. An identical re-send is
+a no-op, so retrying is always safe.
 
 When the final page of a `complete: true` batch lands, anything left over from an
 older batch — a subject no longer enrolled, a session the office removed — is
@@ -477,7 +519,7 @@ On Profile, below the existing `Stats` block:
 - **Reschedule mismatch** — "the office recorded Marketing Research on 19 Sep at
   19:00; your timetable has it on 17 Sep at 10:15. Was it moved?" — is offered,
   never applied. One tap runs the existing `setOverride` flow
-  ([api.js:475](src/lib/api.js:475)), which writes the `session_overrides` row
+ , which writes the `session_overrides` row
   and carries any mark already made across to where the class actually happened.
   Auto-applying it would rewrite a student's timetable and move their attendance
   on the strength of a heuristic; a proposal costs one tap and can be wrong
@@ -493,8 +535,8 @@ On Profile, below the existing `Stats` block:
 - **Enrolment mismatch** — "the office has you in Ops-B, your app says Ops-C.
   Update?" — is offered, never applied automatically. Applying it is safe: course
   changes patch the timetable in place rather than rebuilding it
-  ([api.js:188](src/lib/api.js:188)), and attendance rows outlive their class row
-  by design ([schema.sql:122](supabase/schema.sql:122)), so marks already made
+  (`api.js`), and attendance rows outlive their class row
+  by design (`schema.sql`), so marks already made
   survive the fix.
 - The two numbers are always shown side by side and labelled. Neither is silently
   corrected from the other, and nothing here writes to `public.attendance`.

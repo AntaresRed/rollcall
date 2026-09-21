@@ -1005,16 +1005,6 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   font-size: 11px;
   color: var(--slate);
 }
-.budget-warn {
-  margin-top: 10px;
-  background: var(--absent-wash);
-  border: 1px solid #edcdcb;
-  color: var(--absent);
-  border-radius: 8px;
-  padding: 9px 11px;
-  font-size: 12.5px;
-}
-
 .tag.quiet { background: var(--rule); color: var(--slate); }
 
 /* ---------- sessions grouped by day (Edit attendance, Reschedule) ---------- */

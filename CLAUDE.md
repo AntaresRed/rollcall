@@ -82,6 +82,10 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   alert and isn't asked about. A mark made before it was rescheduled is parked
   on the published slot and kept out of the totals by `countedAttendance`
   until a date is set.
+- **Unreleased features go behind `profiles.is_tester`** (`supabase/prototype-gate.sql`),
+  not a hardcoded address. Gate the *data* in the policy, not just the UI —
+  `public.is_tester()` exists to be used in RLS. Adding a flag column means
+  restating the `own profile update` policy so the account can't set it itself.
 - Pin exact dependency versions in Edge Functions.
 - Tests of parsing logic use literal fixtures, not real menu rows — rows get
   split or renamed and the test silently stops testing anything.

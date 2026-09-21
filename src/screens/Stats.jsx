@@ -86,13 +86,6 @@ export default function Stats({ classes, attendance, onToggleMute }) {
               {r.pct !== null && <span>{r.pct}% so far</span>}
             </div>
 
-            {over && (
-              <div className="budget-warn">
-                Over the limit by {Math.abs(r.skipsLeft)}. Worth talking to the
-                academic office rather than relying on this number.
-              </div>
-            )}
-
             {onToggleMute && (
               <button
                 className="mark"
