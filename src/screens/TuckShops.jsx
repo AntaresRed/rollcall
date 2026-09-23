@@ -9,7 +9,6 @@ import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { isAndroid } from "../lib/platform";
 import { loadBasket, saveBasket } from "../lib/basket";
 import { recordOrder } from "../lib/orders";
-import { logFoodOrder } from "../lib/api";
 import { UNTOUCHED, messageOf, withAdded } from "../lib/finalmessage";
 import FinalMessage from "./FinalMessage";
 import {
@@ -169,12 +168,8 @@ export default function TuckShops() {
   });
   const message = messageOf(cart, written);
 
-  /** Recorded on the way out, as the night canteen does. A repeat tap on the
-   *  same message is one order, and is copied to the database once. */
-  const sent = () => {
-    const entry = recordOrder(shop, message, { kind: "tuck", total: bill.total });
-    if (entry) logFoodOrder(entry);
-  };
+  /** Recorded on the way out, as the night canteen does. */
+  const sent = () => recordOrder(shop, message, { kind: "tuck", total: bill.total });
 
   return (
     <>

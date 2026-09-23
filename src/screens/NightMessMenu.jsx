@@ -5,7 +5,6 @@ import {
 } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { recordOrder } from "../lib/orders";
-import { logFoodOrder } from "../lib/api";
 import { loadBasket, saveBasket } from "../lib/basket";
 import { UNTOUCHED, messageOf, withAdded } from "../lib/finalmessage";
 import FinalMessage from "./FinalMessage";
@@ -158,12 +157,8 @@ export default function NightMessMenu() {
   const message = messageOf(cart, written);
 
   /** Recorded on the way out, because this is the last moment the app knows
-   *  anything. A repeat tap on the same message is one order, and is copied
-   *  to the database once. */
-  const sent = () => {
-    const entry = recordOrder(canteen, message, { kind: "night", total: bill.total });
-    if (entry) logFoodOrder(entry);
-  };
+   *  anything. */
+  const sent = () => recordOrder(canteen, message, { kind: "night", total: bill.total });
 
   return (
     <>

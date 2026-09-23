@@ -19,8 +19,8 @@
  *
  * Local to the device. That is a real limit — a phone and a laptop keep
  * separate histories, and clearing site data empties both — and it is the
- * reason the export below exists. (A copy of each order also goes to the
- * database, see `logFoodOrder` in api.js, but that one is not read back here.)
+ * reason the export below exists: a copy you keep is the only copy that
+ * outlives the browser.
  */
 
 /** Unchanged from when only the night canteen kept a history, so the orders
@@ -172,19 +172,9 @@ function write(list) {
   return list;
 }
 
-/**
- * Called at the moment the order is handed to WhatsApp.
- *
- * Returns the entry when it is a new order, and null when it is the same
- * message tapped again — so the caller copies each order to the database
- * once, not once per tap.
- */
+/** Called at the moment the order is handed to WhatsApp. */
 export function recordOrder(shop, message, { kind = "night", total = 0, now = new Date() } = {}) {
-  const entry = entryFor(shop, message, { kind, total, now });
-  if (!entry.message) return null;
-  const before = readOrders(now);
-  write(appendOrder(before, entry));
-  return isRepeat(before[0], entry) ? null : entry;
+  return write(appendOrder(readOrders(now), entryFor(shop, message, { kind, total, now })));
 }
 
 export const clearOrders = () => write([]);

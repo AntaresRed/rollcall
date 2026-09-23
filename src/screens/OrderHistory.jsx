@@ -159,15 +159,13 @@ export default function OrderHistory({ onBack, now = new Date() }) {
 
       {/* Said once, at the bottom, where somebody wondering why their laptop
           shows nothing will be looking. */}
-      {/* Two things said plainly: this list lives on the device, and a copy
-          of each message is kept with the account. The second is the one a
-          student would otherwise have no way of knowing. */}
+      {/* Said once, at the bottom, where somebody wondering why their laptop
+          shows nothing will be looking. */}
       <p className="history-note">
-        This list is kept on this device — a phone and a laptop keep separate
-        histories, and clearing your browser data clears it. The last
+        Kept on this device only — a phone and a laptop keep separate
+        histories, and clearing your browser data clears this too. The last
         {" "}{KEEP_DAYS} days are kept, so save anything you want to keep
-        longer. A copy of each order message is also saved with your
-        IIMPresent account, and removing it here doesn&apos;t remove that copy.
+        longer.
       </p>
 
       {onBack && (

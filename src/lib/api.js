@@ -1156,29 +1156,3 @@ export async function loadCataloguePayload(id) {
   if (error) throw error;
   return data.payload;
 }
-
-// ---------- food orders ----------
-
-/**
- * A copy of an order message, kept with the account (see food-orders.sql).
- *
- * The device's own history is the student's; this is how anyone can tell how
- * much the basket is actually used. It records the same thing that history
- * does — the message as handed to WhatsApp — and no more.
- *
- * Best-effort and not awaited by the caller. WhatsApp is already opening, and
- * an order must never wait on, or fail because of, a copy of itself. Offline,
- * the copy is simply lost; the device's history still has it.
- */
-export async function logFoodOrder(entry) {
-  if (!entry?.message) return;
-  try {
-    await supabase.from("food_orders").insert({
-      kind: entry.kind,
-      shop: entry.canteen ?? "",
-      shop_name: entry.where ?? "",
-      message: entry.message,
-      basket_total: entry.total || null,
-    });
-  } catch { /* the order itself has already gone to WhatsApp */ }
-}

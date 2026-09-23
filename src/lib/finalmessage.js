@@ -22,7 +22,8 @@
  * worse than the small chance of a line landing slightly out of place. A
  * change that cannot be applied safely to somebody else's words — a quantity,
  * a removal, a total, a room number — is not attempted. The screen says the
- * message is behind the basket and offers to rebuild it.
+ * message is behind the basket, and the student corrects it by hand. Only
+ * emptying the basket starts the message afresh.
  */
 
 /** A dish line as the order writers produce it: "2 x Veg Roll…". */
