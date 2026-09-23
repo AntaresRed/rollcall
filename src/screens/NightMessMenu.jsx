@@ -481,7 +481,7 @@ export default function NightMessMenu() {
                   placeholder="Less spicy, no onion, extra plates…"
                   onChange={(e) => setCart((p) => ({ ...p, notes: e.target.value }))}
                 />
-                <em>Optional. Anything the kitchen should know.</em>
+                <em>Optional.</em>
               </label>
 
               <FinalMessage

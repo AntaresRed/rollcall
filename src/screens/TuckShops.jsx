@@ -496,7 +496,7 @@ export default function TuckShops() {
                   placeholder="Less spicy, no onion, extra plates…"
                   onChange={(e) => setCart((p) => ({ ...p, notes: e.target.value }))}
                 />
-                <em>Optional. Anything the counter should know.</em>
+                <em>Optional.</em>
               </label>
 
               {/* The fee is unknown until somewhere is chosen, so the total
