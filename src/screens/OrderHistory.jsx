@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import {
-  readOrders, clearOrders, removeOrder, byDay, clockOf, itemCount,
-  toCsv, historyFilename, KEEP_DAYS,
-} from "../lib/nightorders";
+  readOrders, clearOrders, removeOrder, byDay, clockOf, textOf,
+  toCsv, historyFilename, KEEP_DAYS, KIND_LABEL,
+} from "../lib/orders";
 import { deliverFile } from "../lib/deliver";
 
 /**
- * The baskets you have sent to a night canteen.
+ * The messages you have sent to a night canteen or a tuck shop.
  *
  * Read once and held, rather than re-read on every render: this is a device's
  * own file and nothing else on screen writes to it while it is open.
@@ -56,14 +56,13 @@ export default function OrderHistory({ onBack, now = new Date() }) {
   /**
    * Forget one order.
    *
-   * Whole orders, not the dishes inside one: the record is of a basket handed
-   * over, and editing its contents afterwards would turn a history of what
-   * was sent into a history of what somebody would rather have sent.
+   * Whole orders, never an edit: the record is of a message handed over, and
+   * changing it afterwards would turn a history of what was sent into a
+   * history of what somebody would rather have sent.
    */
   const forget = (order) => {
-    const what = `${itemCount(order)} item${itemCount(order) === 1 ? "" : "s"}`
-      + ` from ${order.where || "the night canteen"}`;
-    if (!confirm(`Remove this order — ${what} — from your history?`)) return;
+    const where = order.where || KIND_LABEL[order.kind ?? "night"];
+    if (!confirm(`Remove this order to ${where} (${clockOf(order.at)}) from your history?`)) return;
     setHistory(removeOrder(order.at));
   };
 
@@ -78,16 +77,18 @@ export default function OrderHistory({ onBack, now = new Date() }) {
       <div className="eyebrow">Order history</div>
 
       <p className="history-warn">
-        <b>This is what you sent, not what you ate.</b> Anything you changed
-        after leaving the app — editing the message in WhatsApp, adding
-        something over the phone, or cancelling — can't be seen from here.
+        <b>This is what you sent, not what you ate.</b> Each order is the final
+        message as it left the app. Anything you changed after that — editing
+        it in WhatsApp, adding something over the phone, or cancelling — can't
+        be seen from here.
       </p>
 
       {!history.length && (
         <div className="history-none">
           <p>Nothing sent from this device yet.</p>
           <p className="history-none-sub">
-            Orders you send from the night canteen basket will be listed here.
+            Orders you send from a night canteen or tuck shop basket will be
+            listed here.
           </p>
         </div>
       )}
@@ -96,17 +97,22 @@ export default function OrderHistory({ onBack, now = new Date() }) {
         <div className="history-day" key={day.label + day.orders[0].at}>
           <div className="history-day-head">{day.label}</div>
 
-          {day.orders.map((order) => (
+          {day.orders.map((order) => {
+            const kind = KIND_LABEL[order.kind ?? "night"];
+            return (
             <div className="history-card" key={order.at}>
               <div className="history-card-head">
-                <span className="history-where">{order.where || "Night canteen"}</span>
+                <span className="history-where">
+                  {order.where || kind}
+                  <span className="history-kind">{kind}</span>
+                </span>
                 <span className="history-when">{clockOf(order.at)}</span>
                 {/* Per order rather than one "edit mode": there is only ever
                     one thing to do to an entry, and a mode to get into and
                     out of for a single action is more screen than it saves. */}
                 <button
                   className="history-x"
-                  aria-label={`Remove this order from ${order.where || "the night canteen"}`}
+                  aria-label={`Remove this order to ${order.where || kind}`}
                   title="Remove from history"
                   onClick={() => forget(order)}
                 >
@@ -114,28 +120,22 @@ export default function OrderHistory({ onBack, now = new Date() }) {
                 </button>
               </div>
 
-              <ul className="history-items">
-                {order.items.map((i) => (
-                  <li key={i.name}>
-                    <span className="history-qty">{i.qty}</span>
-                    <span className="history-name">{i.name}</span>
-                    {i.price > 0 && <span className="history-cost">₹{i.price}</span>}
-                  </li>
-                ))}
-              </ul>
+              {/* The message word for word, line breaks and all — it is the
+                  record, so it is shown the way it was sent rather than
+                  re-laid out as a list the app would be guessing at. */}
+              <p className="history-msg">{textOf(order)}</p>
 
-              <div className="history-foot">
-                <span>
-                  {itemCount(order)} item{itemCount(order) === 1 ? "" : "s"}
-                  {(order.room || order.reg) && " · "}
-                  {order.room && `Room ${order.room}`}
-                  {order.room && order.reg && " · "}
-                  {order.reg && order.reg}
-                </span>
-                {order.total > 0 && <span className="history-total">₹{order.total}</span>}
-              </div>
+              {/* The basket's figure, not the message's: once the message can
+                  be edited the two can differ, so it says which it is. */}
+              {order.total > 0 && (
+                <div className="history-foot">
+                  <span>Basket total</span>
+                  <span className="history-total">₹{order.total}</span>
+                </div>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
       ))}
 
@@ -159,11 +159,15 @@ export default function OrderHistory({ onBack, now = new Date() }) {
 
       {/* Said once, at the bottom, where somebody wondering why their laptop
           shows nothing will be looking. */}
+      {/* Two things said plainly: this list lives on the device, and a copy
+          of each message is kept with the account. The second is the one a
+          student would otherwise have no way of knowing. */}
       <p className="history-note">
-        Kept on this device only — a phone and a laptop keep separate
-        histories, and clearing your browser data clears this too. The last
+        This list is kept on this device — a phone and a laptop keep separate
+        histories, and clearing your browser data clears it. The last
         {" "}{KEEP_DAYS} days are kept, so save anything you want to keep
-        longer.
+        longer. A copy of each order message is also saved with your
+        IIMPresent account, and removing it here doesn&apos;t remove that copy.
       </p>
 
       {onBack && (

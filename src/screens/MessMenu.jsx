@@ -31,7 +31,7 @@ export default function MessMenu({ onBack, now = new Date() }) {
         Mess &amp; tuck
         <button
           className="eyebrow-act"
-          aria-label="Your night canteen order history"
+          aria-label="Your food order history"
           title="Order history"
           onClick={() => setHistory(true)}
         >

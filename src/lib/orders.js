@@ -1,26 +1,30 @@
 /**
- * What you have sent to the night canteen — a record of intent, not of dinner.
+ * What you have sent to a night canteen or a tuck shop — a record of intent,
+ * not of dinner.
  *
  * The app hands a written-out order to WhatsApp and the student presses send.
  * Nothing here can see what happened next: whether it was sent at all, whether
  * a line was edited in the thread, whether something was added over the phone,
- * whether the counter had already closed. So this records the basket at the
+ * whether the counter had already closed. So this records the message at the
  * moment it was handed over, and the screen says plainly that that is what it
  * is. Calling it "your orders" would be claiming knowledge the app does not
  * have.
  *
- * What is kept: the items and quantities, what each line cost, which canteen,
- * when, and the room and registration number the order was placed under. The
- * price is the figure the basket worked out that night, not today's — which
- * is the point of a record, and the reason it should be read as history
- * rather than as a current price list.
+ * What is kept is the message itself — the final text, as edited, word for
+ * word — rather than the basket it was written from. Once the student can
+ * change that text, the basket stops being a faithful account of what was
+ * asked for, and a history that disagrees with the WhatsApp thread is worse
+ * than none. Alongside it: which shop, when, and what the basket came to that
+ * night. That figure is the basket's, not the message's, and is labelled so.
  *
  * Local to the device. That is a real limit — a phone and a laptop keep
  * separate histories, and clearing site data empties both — and it is the
- * reason the export below exists: a copy you keep is the only copy that
- * outlives the browser.
+ * reason the export below exists. (A copy of each order also goes to the
+ * database, see `logFoodOrder` in api.js, but that one is not read back here.)
  */
 
+/** Unchanged from when only the night canteen kept a history, so the orders
+ *  already on people's phones are still found. */
 const STORE = "iimpresent.night.orders";
 
 /**
@@ -38,43 +42,46 @@ export const KEEP_DAYS = 60;
  */
 export const CAP = 400;
 
-/** Two taps on the same basket inside this window are one order, not two. */
+/** Two taps on the same message inside this window are one order, not two. */
 const SAME_ORDER_MINS = 3;
 
-/** Explicitly rebuilt rather than spread, so a new field on a cart line can
- *  never reach the history without being put here on purpose. */
-const strip = (lines) =>
-  (lines ?? [])
-    .filter((l) => l && l.name)
-    .map((l) => ({
-      name: String(l.name),
-      qty: Number(l.qty) || 1,
-      // The line total as the basket worked it out, not the printed price:
-      // that is the figure the order was actually placed at.
-      price: Number(l.total ?? l.price) || 0,
-    }));
-
-const sameItems = (a, b) =>
-  a.length === b.length &&
-  a.every((l, i) => l.name === b[i].name && l.qty === b[i].qty);
+export const KIND_LABEL = { night: "Night canteen", tuck: "Tuck shop" };
 
 /**
- * One basket, as it was handed over.
+ * The text of an entry.
  *
- * The canteen's name is copied in rather than looked up later: a canteen can
- * be renamed in the spreadsheet, and a history that silently retitles what
- * you ordered last month is worse than one that is a little out of date.
+ * Entries from before the message was recorded hold the basket instead. Those
+ * are written back out the way the night canteen's message was then — dishes,
+ * then room and registration number — which is what was sent, less any
+ * instructions, which were never kept.
  */
-export function entryFor(canteen, lines, { room = "", reg = "", now = new Date() } = {}) {
-  const items = strip(lines);
+export function textOf(entry) {
+  if (typeof entry?.message === "string") return entry.message;
+  const items = (entry?.items ?? [])
+    .filter((l) => l && l.name)
+    .map((l) => `${Number(l.qty) || 1} x ${l.name}`);
+  if (!items.length) return "";
+  const who = [];
+  if (entry.room) who.push(`Room: ${entry.room}`);
+  if (entry.reg) who.push(`Reg. No: ${entry.reg}`);
+  return who.length ? `${items.join("\n")}\n\n${who.join("\n")}` : items.join("\n");
+}
+
+/**
+ * One message, as it was handed over.
+ *
+ * The shop's name is copied in rather than looked up later: a shop can be
+ * renamed in the spreadsheet, and a history that silently retitles what you
+ * ordered last month is worse than one that is a little out of date.
+ */
+export function entryFor(shop, message, { kind = "night", total = 0, now = new Date() } = {}) {
   return {
     at: now.toISOString(),
-    canteen: canteen?.id ?? null,
-    where: canteen?.name ?? "",
-    items,
-    total: items.reduce((n, i) => n + i.price, 0),
-    room: String(room ?? "").trim(),
-    reg: String(reg ?? "").trim(),
+    kind: kind === "tuck" ? "tuck" : "night",
+    canteen: shop?.id ?? null,
+    where: shop?.name ?? "",
+    message: String(message ?? "").trim(),
+    total: Number(total) || 0,
   };
 }
 
@@ -83,23 +90,28 @@ export function entryFor(canteen, lines, { room = "", reg = "", now = new Date()
  *
  * Pure, so the awkward parts — the cap, and the double tap — are testable
  * without a browser. Returns the list unchanged when there is nothing to
- * record, because an empty basket cannot have been ordered.
+ * record, because an empty message cannot have been an order.
  */
 export function appendOrder(history, entry, { cap = CAP, days = KEEP_DAYS } = {}) {
   const list = Array.isArray(history) ? history : [];
-  if (!entry?.items?.length) return list;
+  if (!textOf(entry).trim()) return list;
 
   // Opening WhatsApp and coming back to tap again is one order being sent
-  // once, not two dinners. Only the identical basket at the same canteen
+  // once, not two dinners. Only the identical message to the same shop
   // within a few minutes collapses; anything else is somebody ordering twice,
   // which people genuinely do.
-  const top = list[0];
-  if (top && top.canteen === entry.canteen && sameItems(top.items, entry.items)) {
-    const gap = (new Date(entry.at) - new Date(top.at)) / 60000;
-    if (gap >= 0 && gap < SAME_ORDER_MINS) return [entry, ...list.slice(1)];
-  }
+  if (isRepeat(list[0], entry)) return [entry, ...list.slice(1)];
 
   return prune([entry, ...list], { cap, days, now: new Date(entry.at) });
+}
+
+/** The same message to the same shop, a moment after the last one. */
+export function isRepeat(top, entry) {
+  if (!top || !entry) return false;
+  if ((top.kind ?? "night") !== entry.kind || top.canteen !== entry.canteen) return false;
+  if (textOf(top) !== textOf(entry)) return false;
+  const gap = (new Date(entry.at) - new Date(top.at)) / 60000;
+  return gap >= 0 && gap < SAME_ORDER_MINS;
 }
 
 /**
@@ -124,25 +136,17 @@ export function prune(list, { cap = CAP, days = KEEP_DAYS, now = new Date() } = 
  * The history without one order.
  *
  * Keyed on the timestamp, because that is what actually identifies an entry:
- * two identical baskets sent on different nights are different orders, and
- * the same basket cannot be recorded twice inside the collapse window above.
+ * two identical messages sent on different nights are different orders, and
+ * the same message cannot be recorded twice inside the collapse window above.
  *
- * Whole orders only, never lines within one. An order is the unit that was
- * handed over, and letting somebody delete three of its four dishes would
- * leave a record claiming something was sent that never was — which is the
- * one thing this screen exists to promise it does not do.
- *
- * Pure, and separate from the write below, for the same reason `appendOrder`
- * is: the rule is worth testing without a browser.
+ * Whole orders only. An order is the unit that was handed over, and editing
+ * one afterwards would leave a record claiming something was sent that never
+ * was — which is the one thing this screen exists to promise it does not do.
  */
 export function withoutOrder(history, at) {
   if (!at) return Array.isArray(history) ? history : [];
   return (history ?? []).filter((e) => e?.at !== at);
 }
-
-/** Total things, not lines — three momos and a roll is four items. */
-export const itemCount = (entry) =>
-  (entry?.items ?? []).reduce((n, i) => n + (Number(i.qty) || 0), 0);
 
 // ---------- the device's copy ----------
 
@@ -152,7 +156,7 @@ export function readOrders(now = new Date()) {
     if (!Array.isArray(raw)) return [];
     // Pruned on the way out as well as on the way in, so a history left
     // untouched for a term still ages out rather than sitting there for ever.
-    return prune(raw.filter((e) => e?.at && e?.items?.length), { now });
+    return prune(raw.filter((e) => e?.at && textOf(e).trim()), { now });
   } catch {
     /* a private window, site data cleared, or storage switched off */
     return [];
@@ -168,9 +172,19 @@ function write(list) {
   return list;
 }
 
-/** Called at the moment the order is handed to WhatsApp. */
-export function recordOrder(canteen, lines, { room = "", reg = "", now = new Date() } = {}) {
-  return write(appendOrder(readOrders(now), entryFor(canteen, lines, { room, reg, now })));
+/**
+ * Called at the moment the order is handed to WhatsApp.
+ *
+ * Returns the entry when it is a new order, and null when it is the same
+ * message tapped again — so the caller copies each order to the database
+ * once, not once per tap.
+ */
+export function recordOrder(shop, message, { kind = "night", total = 0, now = new Date() } = {}) {
+  const entry = entryFor(shop, message, { kind, total, now });
+  if (!entry.message) return null;
+  const before = readOrders(now);
+  write(appendOrder(before, entry));
+  return isRepeat(before[0], entry) ? null : entry;
 }
 
 export const clearOrders = () => write([]);
@@ -237,23 +251,21 @@ const cell = (v) => {
 
 const pad = (n) => String(n).padStart(2, "0");
 
-export const HISTORY_COLUMNS = [
-  "Date", "Time", "Mess", "Item", "Qty", "Price", "Order total", "Room", "Reg No",
-];
+export const HISTORY_COLUMNS = ["Date", "Time", "Type", "From", "Message", "Basket total"];
 
 /** What the saved file is called. Dated, so exporting twice in a term leaves
  *  two files rather than a puzzle about which is which. */
 export function historyFilename(now = new Date(), ext = "csv") {
   const d = now instanceof Date && !Number.isNaN(now.getTime()) ? now : new Date();
-  return `night-orders-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.${ext}`;
+  return `food-orders-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.${ext}`;
 }
 
 /**
- * The history as CSV — one row per item, order details repeated.
+ * The history as CSV — one row per order, the message in one cell.
  *
- * A row per item rather than per order because that is the shape anything
- * else can read: a spreadsheet can group it back up, but it cannot split a
- * cell holding four dishes.
+ * A row per order now, where it used to be a row per dish: the record is the
+ * message as sent, and splitting somebody's edited text back into dishes
+ * would be guessing at it. Spreadsheets keep a quoted multi-line cell whole.
  *
  * Plain text on purpose. It is the lightest export there is — no library, no
  * file handling, no download that an installed app on iOS might refuse — and
@@ -263,15 +275,13 @@ export function toCsv(history) {
   const rows = [HISTORY_COLUMNS.join(",")];
   for (const e of history ?? []) {
     const d = new Date(e?.at);
-    const date = Number.isNaN(d.getTime())
-      ? "" : `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    const time = Number.isNaN(d.getTime()) ? "" : `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    for (const i of e?.items ?? []) {
-      rows.push([
-        date, time, e.where ?? "", i.name, i.qty, i.price,
-        e.total ?? "", e.room ?? "", e.reg ?? "",
-      ].map(cell).join(","));
-    }
+    const ok = !Number.isNaN(d.getTime());
+    const date = ok ? `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` : "";
+    const time = ok ? `${pad(d.getHours())}:${pad(d.getMinutes())}` : "";
+    rows.push([
+      date, time, KIND_LABEL[e?.kind ?? "night"] ?? "", e?.where ?? "",
+      textOf(e), e?.total || "",
+    ].map(cell).join(","));
   }
   return rows.join("\n");
 }

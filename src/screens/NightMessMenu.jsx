@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  CANTEENS, canteenById, filterMenu, countItems, billFor, orderText,
+  CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, itemLine,
   similarItems, DIET_FILTERS, DIET_LABEL,
 } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
-import { recordOrder } from "../lib/nightorders";
+import { recordOrder } from "../lib/orders";
+import { logFoodOrder } from "../lib/api";
 import { loadBasket, saveBasket } from "../lib/basket";
+import { UNTOUCHED, messageOf, withAdded } from "../lib/finalmessage";
+import FinalMessage from "./FinalMessage";
 
 /**
  * The night canteens — a priced list per hostel, with a basket.
@@ -26,7 +29,7 @@ const BASKET = "night";
 /** The single store this replaced, kept only so a room number typed into it
  *  survives the upgrade. See loadBasket. */
 const LEGACY = "iimpresent.night.cart";
-const BLANK = { canteen: null, lines: [], reg: "", room: "", notes: "" };
+const BLANK = { canteen: null, lines: [], reg: "", room: "", notes: "", ...UNTOUCHED };
 
 /**
  * Suggest only when the exact hits are this thin.
@@ -106,7 +109,8 @@ export default function NightMessMenu() {
 
   const change = (item, by) => {
     setCart((prev) => {
-      const mine = prev.canteen === canteen.id ? prev.lines : [];
+      const same = prev.canteen === canteen.id;
+      const mine = same ? prev.lines : [];
       const at = mine.findIndex((l) => l.name === item.name);
       const next = [...mine];
       if (at < 0) {
@@ -116,7 +120,16 @@ export default function NightMessMenu() {
         if (qty <= 0) next.splice(at, 1);
         else next[at] = { ...next[at], qty };
       }
-      return { ...prev, canteen: canteen.id, lines: next };
+      // An emptied basket takes its message with it: whatever was typed was
+      // about dishes that are no longer being ordered.
+      if (!next.length) return { ...prev, canteen: canteen.id, lines: next, ...UNTOUCHED };
+      const draft = same ? { final: prev.final ?? null, finalBase: prev.finalBase ?? "" } : UNTOUCHED;
+      const kept = at < 0 && by > 0
+        ? withAdded(draft, itemLine({ name: item.name, qty: by }), orderText(canteen, next, {
+          reg: prev.reg ?? "", room: prev.room ?? "", notes: prev.notes ?? "",
+        }))
+        : draft;
+      return { ...prev, canteen: canteen.id, lines: next, ...kept };
     });
   };
 
@@ -129,7 +142,7 @@ export default function NightMessMenu() {
     setId(next);
     setShowScan(false);
     setShowCart(false);
-    if (lines.length) setCart((p) => ({ ...p, canteen: next, lines: [] }));
+    if (lines.length) setCart((p) => ({ ...p, canteen: next, lines: [], ...UNTOUCHED }));
   };
 
   if (!CANTEENS.length) {
@@ -137,9 +150,20 @@ export default function NightMessMenu() {
   }
 
   const firstNumber = canteen?.phone?.split("/")[0].replace(/\D/g, "") ?? "";
-  const message = orderText(canteen, bill.items, {
-    reg: cart.reg, room: cart.room, notes: cart.notes,
+  // What the basket writes out, and what will actually be sent — the same
+  // until the student edits the final message.
+  const written = orderText(canteen, bill.items, {
+    reg: cart.reg ?? "", room: cart.room ?? "", notes: cart.notes ?? "",
   });
+  const message = messageOf(cart, written);
+
+  /** Recorded on the way out, because this is the last moment the app knows
+   *  anything. A repeat tap on the same message is one order, and is copied
+   *  to the database once. */
+  const sent = () => {
+    const entry = recordOrder(canteen, message, { kind: "night", total: bill.total });
+    if (entry) logFoodOrder(entry);
+  };
 
   return (
     <>
@@ -465,19 +489,31 @@ export default function NightMessMenu() {
                 <em>Optional. Anything the kitchen should know.</em>
               </label>
 
+              <FinalMessage
+                cart={cart}
+                written={written}
+                onChange={(patch) => setCart((p) => ({ ...p, ...patch }))}
+              />
+
               {/* Recorded here, on the way out, because this is the last
                   moment the app knows anything. What happens in WhatsApp is
                   none of its business and none of its knowledge — the history
                   screen says so in as many words. */}
-              <a
-                className="btn block cart-order"
-                href={whatsAppHref(firstNumber, message)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => recordOrder(canteen, bill.items, { room: cart.room, reg: cart.reg })}
-              >
-                Order on WhatsApp
-              </a>
+              {message.trim() ? (
+                <a
+                  className="btn block cart-order"
+                  href={whatsAppHref(firstNumber, message)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={sent}
+                >
+                  Order on WhatsApp
+                </a>
+              ) : (
+                <p className="cart-warn">
+                  The final message is empty, so there is nothing to send.
+                </p>
+              )}
               <a className="btn ghost block" href={telHref(firstNumber)}>
                 Call {prettyPhone(firstNumber)} instead
               </a>
@@ -494,7 +530,7 @@ export default function NightMessMenu() {
               <button
                 className="btn ghost block cart-empty"
                 onClick={() => {
-                  setCart((p) => ({ ...p, canteen: null, lines: [] }));
+                  setCart((p) => ({ ...p, canteen: null, lines: [], ...UNTOUCHED }));
                   setShowCart(false);
                 }}
               >

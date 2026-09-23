@@ -167,9 +167,11 @@ export function billFor(shop, lines, place = "") {
  * says which one was ordered. The total is included because it is what gets
  * paid.
  */
+export const itemLine = (i) => `${i.qty} x ${i.name} — Rs ${i.price * i.qty}`;
+
 export function orderText(shop, lines, { place = "", notes = "" } = {}) {
   const bill = billFor(shop, lines, place);
-  const out = bill.items.map((i) => `${i.qty} x ${i.name} — Rs ${i.total}`);
+  const out = bill.items.map(itemLine);
   // The breakdown only appears when there is something to break down. A
   // subtotal that equals the total is a line that makes the reader check.
   const sum = bill.delivery

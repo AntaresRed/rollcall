@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   SHOPS, shopById, filterItems, filterGrouped, hasDiet, shopPhone,
-  priceOptions, lineKey, billFor, orderText, shopUpi, upiHref, shopQr, payNote,
+  priceOptions, lineKey, billFor, orderText, itemLine, shopUpi, upiHref, shopQr, payNote,
   LOCATIONS, deliveryFor, chargesByPlace,
 } from "../lib/tuck";
 import { DIET_FILTERS, DIET_LABEL } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { isAndroid } from "../lib/platform";
 import { loadBasket, saveBasket } from "../lib/basket";
+import { recordOrder } from "../lib/orders";
+import { logFoodOrder } from "../lib/api";
+import { UNTOUCHED, messageOf, withAdded } from "../lib/finalmessage";
+import FinalMessage from "./FinalMessage";
 import {
   UPI_APPS, appById, forApp, rememberedApp, rememberApp, forgetApp,
 } from "../lib/upiapps";
@@ -30,7 +34,7 @@ import {
 
 const BASKET = "tuck";
 const LEGACY = "iimpresent.tuck.cart";
-const BLANK = { shop: null, lines: [], place: "", notes: "" };
+const BLANK = { shop: null, lines: [], place: "", notes: "", ...UNTOUCHED };
 const EMPTY = [];
 
 /** Cleared when the app closes; the room and registration number are not. */
@@ -93,7 +97,8 @@ export default function TuckShops() {
 
   const change = (name, price, by) => {
     setCart((prev) => {
-      const mine = prev.shop === shop.id ? prev.lines : [];
+      const same = prev.shop === shop.id;
+      const mine = same ? prev.lines : [];
       const key = lineKey(name, price);
       const at = mine.findIndex((l) => lineKey(l.name, l.price) === key);
       const next = [...mine];
@@ -104,7 +109,16 @@ export default function TuckShops() {
         if (qty <= 0) next.splice(at, 1);
         else next[at] = { ...next[at], qty };
       }
-      return { ...prev, shop: shop.id, lines: next };
+      // An emptied basket takes its message with it: whatever was typed was
+      // about dishes that are no longer being ordered.
+      if (!next.length) return { ...prev, shop: shop.id, lines: next, ...UNTOUCHED };
+      const draft = same ? { final: prev.final ?? null, finalBase: prev.finalBase ?? "" } : UNTOUCHED;
+      const kept = at < 0 && by > 0
+        ? withAdded(draft, itemLine({ name, price, qty: by }), orderText(shop, next, {
+          place: prev.place ?? "", notes: prev.notes ?? "",
+        }))
+        : draft;
+      return { ...prev, shop: shop.id, lines: next, ...kept };
     });
   };
 
@@ -141,16 +155,26 @@ export default function TuckShops() {
     // The other shop's sections are not these ones, and arriving with a
     // heading already open that belongs to a card you just left is noise.
     setOpen(new Set());
-    if (lines.length) setCart((p) => ({ ...p, shop: next, lines: [] }));
+    if (lines.length) setCart((p) => ({ ...p, shop: next, lines: [], ...UNTOUCHED }));
   };
 
   if (!SHOPS.length) {
     return <div className="empty">No tuck shop menu has been added yet.</div>;
   }
 
-  const message = orderText(shop, bill.items, {
-    place: cart.place, notes: cart.notes,
+  // What the basket writes out, and what will actually be sent — the same
+  // until the student edits the final message.
+  const written = orderText(shop, bill.items, {
+    place: cart.place ?? "", notes: cart.notes ?? "",
   });
+  const message = messageOf(cart, written);
+
+  /** Recorded on the way out, as the night canteen does. A repeat tap on the
+   *  same message is one order, and is copied to the database once. */
+  const sent = () => {
+    const entry = recordOrder(shop, message, { kind: "tuck", total: bill.total });
+    if (entry) logFoodOrder(entry);
+  };
 
   return (
     <>
@@ -489,12 +513,23 @@ export default function TuckShops() {
                 </p>
               )}
 
-              {phone ? (
+              <FinalMessage
+                cart={cart}
+                written={written}
+                onChange={(patch) => setCart((p) => ({ ...p, ...patch }))}
+              />
+
+              {phone && !message.trim() ? (
+                <p className="cart-warn">
+                  The final message is empty, so there is nothing to send.
+                </p>
+              ) : phone ? (
                 <a
                   className="btn block cart-order"
                   href={whatsAppHref(phone, message)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={sent}
                 >
                   Send order on WhatsApp
                 </a>
@@ -515,7 +550,7 @@ export default function TuckShops() {
               <button
                 className="btn ghost block cart-empty"
                 onClick={() => {
-                  setCart((p) => ({ ...p, shop: null, lines: [] }));
+                  setCart((p) => ({ ...p, shop: null, lines: [], ...UNTOUCHED }));
                   setShowCart(false);
                 }}
               >

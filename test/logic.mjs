@@ -12,8 +12,9 @@ import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue 
 import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
 import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS,
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
-import { entryFor, appendOrder, itemCount, dayLabel, clockOf, byDay, prune,
-  toCsv, withoutOrder, historyFilename, CAP, KEEP_DAYS } from "../src/lib/nightorders.js";
+import { entryFor, appendOrder, textOf, isRepeat, dayLabel, clockOf, byDay, prune,
+  toCsv, withoutOrder, historyFilename, CAP, KEEP_DAYS } from "../src/lib/orders.js";
+import { insertLine, messageOf, edited, withAdded, isBehind, UNTOUCHED } from "../src/lib/finalmessage.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
 import { UPI_APPS, appById, forApp, logoFor } from "../src/lib/upiapps.js";
@@ -1537,90 +1538,93 @@ console.log("install banner");
 }
 
 console.log("");
-console.log("night order history");
+console.log("order history");
 {
-  const wh = CANTEENS.find(c => c.id === "wh");
+  // Literal shops and messages: the record is the text, and a test built on
+  // real menu rows would stop testing anything the day a dish is renamed.
+  const wh = { id: "wh", name: "WH" };
+  const nh = { id: "nh", name: "NH" };
+  const tagore = { id: "tagore", name: "Tagore" };
   const at = (mins) => new Date(Date.parse("2026-09-04T23:30:00") + mins * 60000);
-  const basket = [
-    { name: "Veg Roll", price: 43, qty: 2, total: 86 },
-    { name: "Chicken Momo", price: 105, qty: 1, total: 105 },
-  ];
-  const who = { room: "214", reg: "0446/62" };
+  const msg = "2 x Veg Roll\n1 x Chicken Momo\n\nRoom: 214\nReg. No: 0446/62";
 
-  const one = entryFor(wh, basket, { ...who, now: at(0) });
-  check("the canteen is recorded", one.canteen === "wh" && one.where === wh.name);
-  check("quantities are kept", one.items[0].qty === 2);
-  check("names are kept", one.items.map(i => i.name).join() === "Veg Roll,Chicken Momo");
+  const one = entryFor(wh, msg, { total: 211, now: at(0) });
+  check("the shop is recorded", one.canteen === "wh" && one.where === "WH");
+  check("the message is kept word for word", one.message === msg);
+  check("it is a night order unless said otherwise", one.kind === "night");
+  check("a tuck order says so", entryFor(tagore, msg, { kind: "tuck" }).kind === "tuck");
+  check("an unknown kind is not invented", entryFor(wh, msg, { kind: "lunch" }).kind === "night");
   check("the time is recorded", one.at === at(0).toISOString());
+  check("the basket total is kept", one.total === 211);
+  check("surrounding whitespace is trimmed", entryFor(wh, "  hi \n").message === "hi");
+  check("nothing else is recorded",
+    Object.keys(one).sort().join() === "at,canteen,kind,message,total,where");
 
-  // What the order cost that night, not what the card says today.
-  check("what each line cost is kept", one.items[0].price === 86);
-  check("and the order total with it", one.total === 191);
-  check("the room is kept", one.room === "214");
-  check("and the registration number", one.reg === "0446/62");
-  check("nothing else off the cart line",
-    one.items.every(i => Object.keys(i).sort().join() === "name,price,qty"));
-  check("blank identity stays blank, not undefined",
-    entryFor(wh, basket, { now: at(0) }).room === "");
+  // ---- entries from before the message was recorded ----
+  const legacy = {
+    at: at(-600).toISOString(), canteen: "wh", where: "WH", total: 191,
+    items: [{ name: "Veg Roll", qty: 2, price: 86 }, { name: "Chicken Momo", qty: 1, price: 105 }],
+    room: "214", reg: "0446/62",
+  };
+  check("an old entry is written back out as its message", textOf(legacy) === msg);
+  check("an old entry with no room has just its dishes",
+    textOf({ items: [{ name: "Maggi", qty: 1 }] }) === "1 x Maggi");
+  check("an empty entry has no text", textOf({ items: [] }) === "" && textOf(null) === "");
 
   // ---- the list ----
   let h = appendOrder([], one);
   check("the first order is kept", h.length === 1);
-  check("an empty basket is not an order",
-    appendOrder(h, entryFor(wh, [], { now: at(1) })).length === 1);
-  check("nor is a basket of nameless lines",
-    appendOrder(h, entryFor(wh, [{ qty: 2 }], { now: at(1) })).length === 1);
+  check("an empty message is not an order",
+    appendOrder(h, entryFor(wh, "   ", { now: at(1) })).length === 1);
 
-  h = appendOrder(h, entryFor(wh, basket, { ...who, now: at(1) }));
-  check("a second tap on the same basket does not double it", h.length === 1);
+  h = appendOrder(h, entryFor(wh, msg, { now: at(1) }));
+  check("a second tap on the same message does not double it", h.length === 1);
   check("but it moves the clock on", h[0].at === at(1).toISOString());
+  check("and it is recognised as a repeat",
+    isRepeat(one, entryFor(wh, msg, { now: at(1) })));
 
-  h = appendOrder(h, entryFor(wh, basket, { ...who, now: at(21) }));
-  check("the same basket much later is a second order", h.length === 2);
+  h = appendOrder(h, entryFor(wh, msg + " extra", { now: at(2) }));
+  check("an edited message is a different order", h.length === 2);
 
-  const nh = CANTEENS.find(c => c.id === "nh");
-  h = appendOrder(h, entryFor(nh, basket, { ...who, now: at(22) }));
-  check("the same basket at another canteen is its own order", h.length === 3);
+  h = appendOrder(h, entryFor(wh, msg, { now: at(21) }));
+  check("the same message much later is a second order", h.length === 3);
+
+  h = appendOrder(h, entryFor(nh, msg, { now: at(22) }));
+  check("the same message to another canteen is its own order", h.length === 4);
   check("newest first", h[0].canteen === "nh");
 
+  check("a repeat of an old entry is recognised against its rebuilt text",
+    isRepeat({ ...legacy, at: at(0).toISOString() }, entryFor(wh, msg, { now: at(1) })));
+  check("the same text to a tuck shop is not a repeat of a night order",
+    !isRepeat(one, entryFor(wh, msg, { kind: "tuck", now: at(1) })));
+
   // ---- the window ----
-  // Two months, by date. A count cap meant a heavy week could push last
-  // month off the end, which is the opposite of what a history is for.
   check("two months is the window", KEEP_DAYS === 60);
   const day = (n) => new Date(Date.parse("2026-09-04T20:00:00") - n * 86400000);
   const spread = [3, 20, 45, 59, 61, 200].map((n, i) =>
-    entryFor(wh, [{ name: `Item ${i}`, qty: 1, total: 10 }], { now: day(n) }));
+    entryFor(wh, `1 x Item ${i}`, { now: day(n) }));
   const kept = prune(spread, { now: day(0) });
   check("inside the window is kept", kept.length === 4);
   check("and it is the oldest that goes",
     kept.every(e => Date.parse(e.at) >= Date.parse(day(60).toISOString())));
-  check("fifty-nine days still counts",
-    kept.some(e => e.items[0].name === "Item 3"));
-  check("sixty-one days does not",
-    !kept.some(e => e.items[0].name === "Item 4"));
+  check("fifty-nine days still counts", kept.some(e => e.message === "1 x Item 3"));
+  check("sixty-one days does not", !kept.some(e => e.message === "1 x Item 4"));
 
-  // Measured from the newest entry, so a device with a wrong clock does not
-  // silently empty somebody's history.
   // appendOrder prunes against the entry being added rather than the wall
   // clock, so a phone whose date has drifted forward cannot wipe a history
   // that is perfectly current.
-  const old = entryFor(wh, [{ name: "Old", qty: 1, total: 10 }], { now: day(30) });
-  const older = entryFor(wh, [{ name: "Older", qty: 1, total: 10 }], { now: day(50) });
-  const added = appendOrder([old, older],
-    entryFor(wh, [{ name: "New", qty: 1, total: 10 }], { now: day(20) }));
-  check("the window is measured from the history, not the clock",
-    added.length === 3);
+  const old = entryFor(wh, "1 x Old", { now: day(30) });
+  const older = entryFor(wh, "1 x Older", { now: day(50) });
+  const added = appendOrder([old, older], entryFor(wh, "1 x New", { now: day(20) }));
+  check("the window is measured from the history, not the clock", added.length === 3);
   check("and a far-future clock does not empty it",
     prune(added, { now: day(20) }).length === 3);
   check("an unreadable date is kept rather than dropped",
-    prune([{ at: "nonsense", items: [{ name: "x", qty: 1 }] }], { now: day(0) }).length === 1);
+    prune([{ at: "nonsense", message: "x" }], { now: day(0) }).length === 1);
 
   const many = Array.from({ length: 500 }, (_, i) =>
-    entryFor(wh, [{ name: `Item ${i}`, qty: 1, total: 5 }], { now: day(1) }));
+    entryFor(wh, `1 x Item ${i}`, { now: day(1) }));
   check("a backstop cap still applies", prune(many, { now: day(0) }).length === CAP);
-
-  check("items are counted, not lines", itemCount(one) === 3);
-  check("an empty entry counts zero", itemCount(null) === 0);
 
   // ---- reading it back ----
   const now = new Date("2026-09-04T23:59:00");
@@ -1639,73 +1643,112 @@ console.log("night order history");
   check("a broken date has no clock", clockOf("nope") === "");
 
   const days = byDay([
-    entryFor(wh, basket, { ...who, now: new Date("2026-09-04T23:30:00") }),
-    entryFor(wh, basket, { ...who, now: new Date("2026-09-04T21:00:00") }),
-    entryFor(wh, basket, { ...who, now: new Date("2026-09-03T23:00:00") }),
+    entryFor(wh, msg, { now: new Date("2026-09-04T23:30:00") }),
+    entryFor(wh, msg, { now: new Date("2026-09-04T21:00:00") }),
+    entryFor(wh, msg, { now: new Date("2026-09-03T23:00:00") }),
   ], now);
   check("orders group by day", days.length === 2);
   check("two orders on the first day", days[0].orders.length === 2);
   check("and the day is labelled once", days[0].label === "Today");
 
   // ---- the export ----
-  // One row per item, so a spreadsheet can group it back up. It cannot split
-  // a cell holding four dishes.
-  const csv = toCsv([one]);
-  const rows = csv.split("\n");
-  check("a header and a row per item", rows.length === 3);
+  // One row per order: the message is the record, and splitting somebody's
+  // edited text back into dishes would be guessing at it.
+  const csv = toCsv([one, entryFor(tagore, "1 x Maggi — Rs 30", { kind: "tuck", total: 36, now: at(5) })]);
   check("the columns asked for",
-    rows[0] === "Date,Time,Mess,Item,Qty,Price,Order total,Room,Reg No");
-  check("the date is sortable", rows[1].startsWith("2026-09-04,23:30,"));
-  check("the mess is named", rows[1].includes(",WH,"));
-  check("the item, quantity and price are there",
-    rows[1].includes("Veg Roll,2,86,191,"));
-  check("the room and reg number close each row", rows[1].endsWith("214,0446/62"));
-  check("both items are exported",
-    rows[2].includes("Chicken Momo") && rows[2].includes("214"));
+    csv.split("\n")[0] === "Date,Time,Type,From,Message,Basket total");
+  check("the date is sortable", csv.includes("\n2026-09-04,23:30,Night canteen,WH,"));
+  check("the message is one quoted cell, line breaks and all",
+    csv.includes(`"${msg}",211`));
+  check("a tuck order is labelled as one", csv.includes(",Tuck shop,Tagore,1 x Maggi — Rs 30,36"));
+  check("an old entry exports its rebuilt message", toCsv([legacy]).includes(`"${msg}",191`));
 
-  // A comma in a dish name must not become a new column.
-  const commad = toCsv([entryFor(wh, [{ name: "Rice, Dal & Salad", qty: 1, total: 60 }],
-    { ...who, now: at(0) })]);
-  check("a comma in a name is quoted", commad.includes('"Rice, Dal & Salad"'));
-  check("and the row still has nine columns",
-    commad.split("\n")[1].split(",").length === 10);
+  const quoted = toCsv([entryFor(wh, 'Say "hi", please', { now: at(0) })]);
+  check("quotes and commas in a message are escaped", quoted.includes('"Say ""hi"", please"'));
+  check("no total is an empty cell, not a zero", quoted.endsWith(","));
 
   check("an empty history exports just the header", toCsv([]).split("\n").length === 1);
   survives("no history to export", () => toCsv(null));
 
   // ---- removing one order ----
-  // The timestamp is the identity: two identical baskets on different nights
-  // are two orders, and deleting one must not take the other with it.
-  const first = entryFor(wh, basket, { ...who, now: at(0) });
-  const second = entryFor(wh, basket, { ...who, now: at(60) });
-  const third = entryFor(nh, basket, { ...who, now: at(120) });
+  const first = entryFor(wh, msg, { now: at(0) });
+  const second = entryFor(wh, msg, { now: at(60) });
+  const third = entryFor(nh, msg, { now: at(120) });
   const three = [third, second, first];
 
   check("removing one leaves the rest", withoutOrder(three, second.at).length === 2);
   check("and removes the right one",
     !withoutOrder(three, second.at).some(e => e.at === second.at));
-  check("an identical basket on another night stays",
+  check("an identical message on another night stays",
     withoutOrder(three, second.at).some(e => e.at === first.at));
   check("removing something not there changes nothing",
     withoutOrder(three, "2026-01-01T00:00:00.000Z").length === 3);
-  check("removing every order empties it",
-    withoutOrder(withoutOrder(withoutOrder(three, first.at), second.at), third.at).length === 0);
   survives("no history to remove from", () => withoutOrder(null, first.at));
-  survives("no timestamp to remove", () => withoutOrder(three, undefined));
   check("a missing timestamp removes nothing", withoutOrder(three, undefined).length === 3);
-  check("a garbled entry is not mistaken for a match",
-    withoutOrder([{ items: [] }, first], first.at).length === 1);
 
   // ---- the file it saves as ----
-  check("the export is dated", historyFilename(new Date(2026, 8, 4)) === "night-orders-2026-09-04.csv");
-  check("and pads single digits", historyFilename(new Date(2026, 0, 7)) === "night-orders-2026-01-07.csv");
-  check("the extension can be asked for",
-    historyFilename(new Date(2026, 8, 4), "txt").endsWith(".txt"));
+  check("the export is dated", historyFilename(new Date(2026, 8, 4)) === "food-orders-2026-09-04.csv");
+  check("and pads single digits", historyFilename(new Date(2026, 0, 7)) === "food-orders-2026-01-07.csv");
   check("a broken clock still names a file",
-    /^night-orders-\d{4}-\d{2}-\d{2}\.csv$/.test(historyFilename(new Date("nonsense"))));
+    /^food-orders-\d{4}-\d{2}-\d{2}\.csv$/.test(historyFilename(new Date("nonsense"))));
   survives("no history at all", () => byDay(null, now));
-  survives("a garbled entry", () => byDay([{ at: "x", items: [] }], now));
-  survives("no canteen", () => entryFor(null, basket, { now }));
+  survives("no shop", () => entryFor(null, msg, { now }));
+  survives("no message", () => entryFor(wh, undefined, { now }));
+}
+
+console.log("");
+console.log("final message");
+{
+  // Literal texts in the shape the order writers produce, so a change to a
+  // menu cannot quietly hollow these out.
+  const night2 = "1 x Veg Roll\n\nRoom: 214";
+  const night3 = "1 x Veg Roll\n1 x Maggi\n\nRoom: 214";
+
+  check("untouched, the message is what the basket writes",
+    messageOf(UNTOUCHED, night2) === night2);
+  check("a new dish goes after the last dish, above the room",
+    insertLine(night2, "1 x Maggi") === night3);
+  check("with no dishes left it goes first",
+    insertLine("Room: 214", "1 x Maggi") === "1 x Maggi\nRoom: 214");
+  check("into an empty message it is the message", insertLine("  ", "1 x Maggi") === "1 x Maggi");
+  check("a line merely containing a number is not a dish",
+    insertLine("Room 2 x block\n1 x Tea", "1 x Maggi") === "Room 2 x block\n1 x Tea\n1 x Maggi");
+
+  // Editing: the text becomes the student's, and the base is taken once.
+  let st = edited(UNTOUCHED, night2, "1 x Veg Roll, less spicy\n\nRoom: 214");
+  check("an edit is what gets sent", messageOf(st, night2) === "1 x Veg Roll, less spicy\n\nRoom: 214");
+  check("an edit alone is not behind", !isBehind(st, night2));
+  const again = edited(st, "something newer", "typed more");
+  check("typing again keeps the base from the first edit", again.finalBase === night2);
+
+  // A dish added after the edit is appended, and the edit survives.
+  st = withAdded(st, "1 x Maggi", night3);
+  check("the new dish is appended to the edited text",
+    st.final === "1 x Veg Roll, less spicy\n1 x Maggi\n\nRoom: 214");
+  check("and when that was the whole change, it is not behind", !isBehind(st, night3));
+
+  // On a tuck card the total moves with every dish, which the edited text
+  // cannot be trusted to follow. That has to show.
+  const tuck1 = "1 x Maggi — Rs 30\n\nTotal: Rs 30";
+  const tuck2 = "1 x Maggi — Rs 30\n1 x Tea — Rs 10\n\nTotal: Rs 40";
+  let t = edited(UNTOUCHED, tuck1, "1 x Maggi — Rs 30 (extra hot)\n\nTotal: Rs 30");
+  t = withAdded(t, "1 x Tea — Rs 10", tuck2);
+  check("a tuck dish is still appended", t.final.includes("1 x Tea — Rs 10\n\nTotal: Rs 30"));
+  check("but a stale total is flagged", isBehind(t, tuck2));
+
+  // Anything that is not a new dish is left alone and flagged.
+  const moreRolls = "2 x Veg Roll\n\nRoom: 214";
+  const e2 = edited(UNTOUCHED, night2, "custom");
+  check("a quantity change is not written into an edit",
+    messageOf(e2, moreRolls) === "custom");
+  check("and says the message is behind", isBehind(e2, moreRolls));
+  check("a room number changed after the edit is behind too",
+    isBehind(e2, "1 x Veg Roll\n\nRoom: 301"));
+
+  check("untouched is never behind", !isBehind(UNTOUCHED, night3));
+  check("adding to an untouched message leaves it following the basket",
+    withAdded(UNTOUCHED, "1 x Maggi", night3) === UNTOUCHED);
+  survives("no state at all", () => withAdded(undefined, "1 x Maggi", night3));
 }
 
 console.log("");

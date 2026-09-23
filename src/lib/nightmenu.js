@@ -94,8 +94,10 @@ export function billFor(canteen, lines) {
  * The bill still exists for the basket on screen. What a student is deciding
  * to spend and what the kitchen needs to read are different questions.
  */
+export const itemLine = (i) => `${i.qty} x ${i.name}`;
+
 export function orderText(canteen, lines, { reg = "", room = "", notes = "" } = {}) {
-  const out = billFor(canteen, lines).items.map((i) => `${i.qty} x ${i.name}`);
+  const out = billFor(canteen, lines).items.map(itemLine);
   const blocks = [out.join("\n")];
   // Above the address, because it is about the food: whoever is cooking reads
   // to the end of the dishes and straight on into how to cook them.
