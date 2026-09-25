@@ -116,6 +116,16 @@ export default function LeaveMail({
           </Field>
         </div>
 
+        <Field label="Address during leave">
+          <textarea rows={3} value={form.address} onChange={set("address")} />
+        </Field>
+        <Field label="Reason for leave">
+          <textarea rows={2} value={form.reason} onChange={set("reason")} />
+        </Field>
+        <Field label="Additional info" optional>
+          <textarea rows={2} value={form.info} onChange={set("info")} />
+        </Field>
+
         <div className="leave-pair">
           <Field label="Departure date">
             <input type="date" value={form.departDate} onChange={set("departDate")} />
@@ -137,16 +147,6 @@ export default function LeaveMail({
             <input type="time" value={form.returnTime} onChange={set("returnTime")} />
           </Field>
         </div>
-
-        <Field label="Address during leave">
-          <textarea rows={3} value={form.address} onChange={set("address")} />
-        </Field>
-        <Field label="Reason for leave">
-          <textarea rows={2} value={form.reason} onChange={set("reason")} />
-        </Field>
-        <Field label="Additional info" optional>
-          <textarea rows={2} value={form.info} onChange={set("info")} />
-        </Field>
       </div>
 
       {/* What's missing sits right above the button it is holding back, so a

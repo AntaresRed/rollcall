@@ -2058,8 +2058,12 @@ console.log("\nleave mail");
     leaveProblems({ ...trip, departTime: "" }).some((p) => p.includes("departure")));
   check("whitespace is not an answer",
     leaveProblems({ ...trip, reason: "   " }).some((p) => p.includes("Reason for leave")));
+  check("a short contact number is refused",
+    leaveProblems({ ...trip, phone: "98765" }).some((p) => /contact number/i.test(p)));
+  check("a number written with +91 and spaces is fine",
+    leaveProblems({ ...trip, phone: "+91 98765 43210" }).length === 0);
   check("a return before the departure is refused",
-    leaveProblems({ ...trip, returnDate: "2026-10-01" }).some((p) => /before the departure/.test(p)));
+    leaveProblems({ ...trip, returnDate: "2026-10-01" }).some((p) => /after the departure/.test(p)));
   check("a return at the very minute of departure is refused",
     leaveProblems({ ...trip, returnDate: "2026-10-02", returnTime: "18:00" }).length === 1);
   check("\"Other\" needs the hostel typed in",
@@ -2080,6 +2084,13 @@ console.log("\nleave mail");
     body.includes("Address during leave:\n12 Park Street\nKolkata 700016"));
   check("names are trimmed", body.includes("Name of student: A Student\n"));
   check("signed with name and registration number", body.endsWith("Thanking you,\nA Student\n0001/01"));
+  check("opens by informing, not asking",
+    body.startsWith("Respected Sir/Madam,\n\nI am writing to inform you regarding my leave details\n\nDate:"));
+  check("no request line before the sign-off", !/grant/i.test(body)
+    && body.includes("6 October 2026, 9:05 AM\n\nThanking you,"));
+  check("the dates come last, after the reason",
+    body.indexOf("Reason for leave:") < body.indexOf("of departure:")
+    && body.indexOf("of departure:") < body.indexOf("of return:"));
 
   check("subject names the student and the dates",
     leaveSubject(trip) === "Leave application – A Student (0001/01) – 2 Oct to 6 Oct 2026");
@@ -2100,11 +2111,15 @@ console.log("\nleave mail");
   check("Gmail carries to, cc, subject and body",
     gmail.searchParams.get("to") === LEAVE_TO.join(",") && gmail.searchParams.get("cc") === LEAVE_CC.join(",")
     && gmail.searchParams.get("su") === leaveSubject(trip) && gmail.searchParams.get("body") === body);
+  check("Gmail spaces are %20, never +", !leaveGmailHref(trip, "").includes("+")
+    && new URL(leaveGmailHref({ ...trip, reason: "1+1 days" }, "")).searchParams.get("body").includes("1+1 days"));
   check("no account, no authuser", !new URL(leaveGmailHref(trip, "")).searchParams.has("authuser"));
 
   const kept = rememberedPart(trip);
   check("who you are is remembered", kept.name === trip.name && kept.reg === "0001/01" && kept.address === trip.address);
-  check("the trip is not remembered", !("reason" in kept) && !("departDate" in kept) && !("date" in kept));
+  check("the reason is remembered", kept.reason === "Family function");
+  check("the trip is not remembered", !("info" in kept) && !("departDate" in kept)
+    && !("returnDate" in kept) && !("date" in kept));
 
   const at = new Date(2026, 8, 25, 7, 5);
   const fresh = startingLeave(at, null, null, "Google Name");
@@ -2114,7 +2129,16 @@ console.log("\nleave mail");
     fresh.departDate === "2026-09-25" && fresh.departTime === "07:05");
   check("the return is left for the student", fresh.returnDate === "" && fresh.returnTime === "");
   check("a departure already typed this session wins over now",
-    startingLeave(at, null, { departDate: "2026-10-02", departTime: "18:00" }).departTime === "18:00");
+    startingLeave(at, null, { savedOn: "2026-09-25", departDate: "2026-10-02", departTime: "18:00" })
+      .departTime === "18:00");
+  check("a trip left over from another day is dropped",
+    startingLeave(at, null, { savedOn: "2026-09-22", departDate: "2026-09-22", info: "Old" })
+      .departDate === "2026-09-25"
+    && startingLeave(at, null, { savedOn: "2026-09-22", info: "Old" }).info === "");
+  check("a trip with no day on it is dropped",
+    startingLeave(at, null, { departDate: "2026-10-02" }).departDate === "2026-09-25");
+  check("the mail's date is always today, even from today's trip",
+    startingLeave(at, null, { savedOn: "2026-09-25", date: "2026-09-01" }).date === "2026-09-25");
   check("a stored name wins over the account's",
     startingLeave(at, { name: "Corrected Name" }, null, "Google Name").name === "Corrected Name");
   check("a cleared stored name falls back to the account's",
@@ -2123,7 +2147,11 @@ console.log("\nleave mail");
     Object.keys(BLANK_LEAVE).every((k) =>
       typeof startingLeave(at, { name: 5, reg: null, room: {} }, "junk")[k] === "string"));
   check("a reloaded trip is picked back up",
-    startingLeave(at, null, { reason: "Wedding", date: "2026-09-25" }).reason === "Wedding");
+    startingLeave(at, null, { savedOn: "2026-09-25", info: "Back early", returnDate: "2026-10-06" }).info === "Back early");
+  check("a remembered reason comes back",
+    startingLeave(at, { reason: "Going home" }).reason === "Going home");
+  check("a reason in the trip store cannot override the remembered one",
+    startingLeave(at, { reason: "Going home" }, { reason: "Old" }).reason === "Going home");
   check("the trip store cannot overwrite who you are",
     startingLeave(at, { name: "Me" }, { name: "Someone else" }).name === "Me");
 }

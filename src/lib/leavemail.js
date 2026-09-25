@@ -34,19 +34,21 @@ export const LEAVE_FIELDS = [
   { key: "phone", label: "Contact number while on leave" },
   { key: "hostel", label: "Hostel" },
   { key: "room", label: "Room number" },
-  { key: "departure", label: "Date and expected time of departure" },
-  { key: "return", label: "Date and expected time of return" },
   { key: "address", label: "Address during leave" },
   { key: "reason", label: "Reason for leave" },
   { key: "info", label: "Additional information", optional: true },
+  { key: "departure", label: "Date and expected time of departure" },
+  { key: "return", label: "Date and expected time of return" },
 ];
 
 /**
- * What survives between one leave and the next. Who you are and where you go
- * home to do not change; the dates and the reason are this trip's alone, and
- * finding last month's reason already filled in is how a wrong one gets sent.
+ * What survives between one leave and the next: who you are, where you go
+ * home to, and why — most leave is the same trip home for the same reason.
+ * The dates never repeat, and neither does whatever went in additional info.
  */
-export const REMEMBERED = ["name", "reg", "phone", "hostel", "hostelOther", "room", "address"];
+export const REMEMBERED = [
+  "name", "reg", "phone", "hostel", "hostelOther", "room", "address", "reason",
+];
 
 export const BLANK_LEAVE = {
   date: "", name: "", reg: "", phone: "", hostel: "", hostelOther: "", room: "",
@@ -122,10 +124,16 @@ export function leaveProblems(form) {
     .filter((fl) => !fl.optional && !v[fl.key])
     .map((fl) => fl.label);
   const problems = missing.length ? [`Still needed: ${missing.join(", ")}.`] : [];
+  // Ten digits at least, whatever else is typed around them: a number the
+  // office can't ring is the one field that matters once the student has
+  // gone. Spaces, dashes and a +91 are all fine.
+  if (v.phone && v.phone.replace(/\D/g, "").length < 10) {
+    problems.push("The contact number looks incomplete.");
+  }
   if (v.departure && v.return) {
     const out = `${form.departDate}T${form.departTime}`;
     const back = `${form.returnDate}T${form.returnTime}`;
-    if (back <= out) problems.push("The return is before the departure.");
+    if (back <= out) problems.push("The return has to be after the departure.");
   }
   return problems;
 }
@@ -204,15 +212,20 @@ export function leaveMailto(form) {
  * in on that browser; it cannot sign anyone in, and needs nothing from us.
  */
 export function leaveGmailHref(form, email) {
-  const p = new URLSearchParams();
-  if (email) p.set("authuser", email);
-  p.set("view", "cm");
-  p.set("fs", "1");
-  p.set("to", LEAVE_TO.join(","));
-  p.set("cc", LEAVE_CC.join(","));
-  p.set("su", leaveSubject(form));
-  p.set("body", leaveBody(form));
-  return `https://mail.google.com/mail/?${p.toString()}`;
+  // encodeURIComponent rather than URLSearchParams: the latter writes a space
+  // as "+", which is only a space by form-encoding convention, and a body
+  // full of literal plus signs is not a risk worth taking on a mail to an
+  // office.
+  const p = [
+    ...(email ? [["authuser", email]] : []),
+    ["view", "cm"],
+    ["fs", "1"],
+    ["to", LEAVE_TO.join(",")],
+    ["cc", LEAVE_CC.join(",")],
+    ["su", leaveSubject(form)],
+    ["body", leaveBody(form)],
+  ].map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
+  return `https://mail.google.com/mail/?${p}`;
 }
 
 /** Split a form into what is remembered on the device and what is not. */
@@ -223,6 +236,7 @@ export function rememberedPart(form) {
 }
 
 const pad = (n) => String(n).padStart(2, "0");
+const isoDay = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 /**
  * The starting form: blank, the remembered fields, and — only where nothing
@@ -236,6 +250,12 @@ const pad = (n) => String(n).padStart(2, "0");
  *
  * `trip` is this session's half-written trip, if the app was reloaded under
  * it — which on a phone is what switching to the mail app and back can do.
+ * It is only taken back on the day it was written. A "session" is however
+ * long the browser keeps the tab alive, which for an installed app can be
+ * days, and last Monday's dates coming back is how a mail goes out saying
+ * the student left on a day they were sitting in class. The mail's own date
+ * is never taken back at all: it is the day the mail is sent, always today.
+ *
  * Only strings are taken from either store, so an older or half-written
  * shape cannot turn a controlled input uncontrolled.
  */
@@ -245,8 +265,9 @@ export function startingLeave(now, remembered, trip = null, accountName = "") {
     for (const k of keys) if (typeof from?.[k] === "string" && from[k] !== "") out[k] = from[k];
     return out;
   };
-  const tripKeys = Object.keys(BLANK_LEAVE).filter((k) => !REMEMBERED.includes(k));
-  const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const today = isoDay(now);
+  const tripKeys = Object.keys(BLANK_LEAVE)
+    .filter((k) => !REMEMBERED.includes(k) && k !== "date");
   return {
     ...BLANK_LEAVE,
     date: today,
@@ -254,9 +275,10 @@ export function startingLeave(now, remembered, trip = null, accountName = "") {
     departTime: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
     ...(accountName ? { name: accountName } : {}),
     ...pick(remembered, REMEMBERED),
-    ...pick(trip, tripKeys),
+    ...(trip?.savedOn === today ? pick(trip, tripKeys) : {}),
   };
 }
+
 
 /* Storage, split like the basket's: who you are in localStorage, this trip in
    sessionStorage, which the browser clears when the app closes. The accessor
@@ -293,8 +315,8 @@ export function loadLeave(now, accountName = "") {
   return startingLeave(now, read("local", WHO), read("session", TRIP), accountName);
 }
 
-export function saveLeave(form) {
-  const trip = {};
+export function saveLeave(form, now = new Date()) {
+  const trip = { savedOn: isoDay(now) };
   for (const [k, v] of Object.entries(form ?? {})) if (!REMEMBERED.includes(k)) trip[k] = v;
   write("local", WHO, rememberedPart(form));
   write("session", TRIP, trip);

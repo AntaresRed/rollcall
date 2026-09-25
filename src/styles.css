@@ -3562,10 +3562,14 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .leave-field textarea:focus { outline: none; border-color: var(--signal); }
 /* Pairs that belong together — a date and its time — side by side, until
    the phone is too narrow for either to be read back. */
+/* Aligned on the boxes, not the labels: "Contact while on leave" wraps to
+   two lines on a phone, and top-aligned it pushed its box below the one
+   beside it. */
 .leave-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  align-items: end;
 }
 @media (max-width: 339px) { .leave-pair { grid-template-columns: 1fr; } }
 .leave-hostel { margin: 0; }
