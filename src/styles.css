@@ -3560,13 +3560,6 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .leave-field textarea { resize: vertical; min-height: 58px; }
 .leave-field input:focus,
 .leave-field textarea:focus { outline: none; border-color: var(--signal); }
-.leave-field em {
-  display: block;
-  margin-top: 5px;
-  font-style: normal;
-  font-size: 11.5px;
-  color: var(--mute);
-}
 /* Pairs that belong together — a date and its time — side by side, until
    the phone is too narrow for either to be read back. */
 .leave-pair {
@@ -3620,13 +3613,44 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .leave-copy:hover { border-color: var(--signal); }
 .leave-pending {
-  padding: 11px 14px;
+  margin-top: 12px;
+  padding: 10px 14px;
   font-size: 13px;
   color: var(--warn-ink);
   background: var(--warn-wash);
-  border-radius: 0 0 var(--r) 0;
+  border: 1px solid #ecd9b4;
+  border-radius: var(--r);
 }
 .leave-pending p { margin: 0; }
 .leave-pending p + p { margin-top: 4px; }
-.leave-acts { display: flex; flex-direction: column; gap: 8px; }
-.leave-send { text-align: center; text-decoration: none; }
+.leave-send { margin-top: 12px; text-align: center; text-decoration: none; }
+/* Lower-case and unshouted beside an upper-case label, so it reads as a
+   remark about the field rather than as part of its name. */
+.leave-optional {
+  margin-left: 6px;
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--mute);
+}
+.leave-optional::before { content: "("; }
+.leave-optional::after { content: ")"; }
+/* Tinted in the signal colour so it reads as something to tap, not as a
+   caption under the button. The disclosure's rule gives way to a box. */
+.leave-draft-toggle {
+  margin-top: 10px;
+  padding: 11px 14px;
+  background: var(--signal-wash);
+  border: 1px solid #F6CFE2;
+  border-radius: var(--r);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--signal-deep);
+}
+.leave-draft-toggle:hover { border-color: var(--signal); }
+.leave-draft-wait { color: var(--mute); }

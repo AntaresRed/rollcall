@@ -4,22 +4,26 @@ import {
   leaveProblems, leaveSubject, leaveBody, leaveMailto, leaveGmailHref,
 } from "../lib/leavemail";
 import { isIOS, isAndroid } from "../lib/platform";
-import { isoDate } from "../lib/api";
 
 /**
  * The leave mail — leave of more than a day, reported to the offices the
  * institute names, from the student's own iimcal address.
  *
- * Written and addressed here, sent from the student's mail. Both ways out are
- * handovers: Gmail's compose window in their institute account, or whatever
- * mail app the phone uses. Everything the handover carries is also on screen
- * with its own copy button, for the day neither link behaves.
+ * Written and addressed here, sent from the student's mail: Send Mail is a
+ * handover, never a send. The draft and the addresses sit folded away under
+ * the button, each with its own copy button — most people never need them,
+ * and they are there for the day the handover doesn't behave.
  */
-export default function LeaveMail({ email = "", accountName = "", onBack, initial = null }) {
-  // `initial` bypasses the stored form. Only the smoke test passes it — it
-  // has no storage, and would otherwise never see the finished mail render.
-  const [form, setForm] = useState(() => (initial ? { ...BLANK_LEAVE, ...initial } : loadLeave(isoDate(), accountName)));
+export default function LeaveMail({
+  email = "", accountName = "", onBack, initial = null, openDraft = false,
+}) {
+  // `initial` bypasses the stored form, and `openDraft` unfolds the draft.
+  // Only the smoke test passes either — it has no storage and cannot click,
+  // and would otherwise never see the finished mail render.
+  const [form, setForm] = useState(() =>
+    (initial ? { ...BLANK_LEAVE, ...initial } : loadLeave(new Date(), accountName)));
   const [copied, setCopied] = useState("");
+  const [draftOpen, setDraftOpen] = useState(openDraft);
 
   useEffect(() => { saveLeave(form); }, [form]);
 
@@ -37,38 +41,16 @@ export default function LeaveMail({ email = "", accountName = "", onBack, initia
     }
   };
 
-  // On a phone the mail app is the likelier route: Gmail's web compose opens
-  // in a browser tab there, not in the Gmail app. On a laptop it is the other
-  // way round — mailto often lands in a desktop client nobody set up.
+  // One button, two routes. On a phone the mail app: Gmail's web compose
+  // opens in a browser tab there, not in the Gmail app. On a laptop Gmail in
+  // the institute account, because mailto there usually lands in a desktop
+  // client nobody ever set up.
   const phone = isIOS() || isAndroid();
-  const gmail = (
-    <a
-      key="gmail"
-      className={`btn block leave-send${phone ? " ghost" : ""}`}
-      href={leaveGmailHref(form, email)}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Open in Gmail
-    </a>
-  );
-  const mailApp = (
-    <a
-      key="app"
-      className={`btn block leave-send${phone ? "" : " ghost"}`}
-      href={leaveMailto(form)}
-    >
-      Open in mail app
-    </a>
-  );
+  const sendHref = phone ? leaveMailto(form) : leaveGmailHref(form, email);
 
   return (
     <>
       <div className="eyebrow">Leave mail</div>
-      <p className="screen-note">
-        For leave of more than a day. Fill this in and the mail is written and
-        addressed for you — you send it from your own iimcal account.
-      </p>
 
       <div className="leave-form">
         <Field label="Date">
@@ -98,9 +80,9 @@ export default function LeaveMail({ email = "", accountName = "", onBack, initia
           </Field>
         </div>
 
-        {/* Chips, like the tuck shop's delivery spots: four short names that
-            are the same answer every time, better seen than hidden in a
-            dropdown. */}
+        {/* Chips, like the tuck shop's delivery spots: a handful of short
+            names that are the same answer every time, better seen than
+            hidden in a dropdown. */}
         <fieldset className="place-pick leave-hostel">
           <legend>Hostel</legend>
           <div className="place-grid">
@@ -162,51 +144,68 @@ export default function LeaveMail({ email = "", accountName = "", onBack, initia
         <Field label="Reason for leave">
           <textarea rows={2} value={form.reason} onChange={set("reason")} />
         </Field>
-        <Field label="Additional info" note="Optional. Left out of the mail if blank.">
+        <Field label="Additional info" optional>
           <textarea rows={2} value={form.info} onChange={set("info")} />
         </Field>
       </div>
 
-      <div className="eyebrow">The mail</div>
-      <div className="leave-mail">
-        <Line label="To" value={LEAVE_TO.join(", ")} copied={copied === "to"}
-              onCopy={() => copy("to", LEAVE_TO.join(", "))} />
-        <Line label="CC" value={LEAVE_CC.join(", ")} copied={copied === "cc"}
-              onCopy={() => copy("cc", LEAVE_CC.join(", "))} />
-        {ready ? (
-          <>
-            <Line label="Subject" value={subject} copied={copied === "subject"}
-                  onCopy={() => copy("subject", subject)} />
-            <div className="leave-body">
-              <div className="leave-line-head">
-                <span className="leave-line-label">Mail</span>
-                <CopyButton copied={copied === "body"} onCopy={() => copy("body", body)} />
-              </div>
-              <pre>{body}</pre>
-            </div>
-          </>
-        ) : (
-          <div className="leave-pending">
-            {problems.map((p) => <p key={p}>{p}</p>)}
-          </div>
-        )}
-      </div>
-
+      {/* What's missing sits right above the button it is holding back, so a
+          greyed-out Send Mail never has to be puzzled over. */}
+      {!ready && (
+        <div className="leave-pending">
+          {problems.map((p) => <p key={p}>{p}</p>)}
+        </div>
+      )}
       {ready ? (
-        <div className="leave-acts">{phone ? [mailApp, gmail] : [gmail, mailApp]}</div>
+        <a
+          className="btn block leave-send"
+          href={sendHref}
+          {...(phone ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+        >
+          Send Mail
+        </a>
       ) : (
-        <button className="btn block leave-send" disabled>
-          Fill in the form to send
-        </button>
+        <button className="btn block leave-send" disabled>Send Mail</button>
       )}
 
-      <p className="fineprint">
-        Nothing is sent until you press Send in your mail. Check that the From
-        line is your <span className="mono">@email.iimcal.ac.in</span> address —
-        a phone&apos;s mail app uses whichever account is its default. Your name,
-        registration number, phone, hostel, room and leave address are
-        remembered on this device for next time; the dates and reason are not.
-      </p>
+      <button
+        type="button"
+        className="disclosure leave-draft-toggle"
+        aria-expanded={draftOpen}
+        onClick={() => setDraftOpen((o) => !o)}
+      >
+        <span className={`disclosure-caret${draftOpen ? " open" : ""}`} />
+        Copy admin e-mails or check draft
+      </button>
+
+      {draftOpen && (
+        <>
+          <div className="eyebrow">Mail Draft</div>
+          <div className="leave-mail">
+            <Line label="To" value={LEAVE_TO.join(", ")} copied={copied === "to"}
+                  onCopy={() => copy("to", LEAVE_TO.join(", "))} />
+            <Line label="CC" value={LEAVE_CC.join(", ")} copied={copied === "cc"}
+                  onCopy={() => copy("cc", LEAVE_CC.join(", "))} />
+            {ready ? (
+              <>
+                <Line label="Subject" value={subject} copied={copied === "subject"}
+                      onCopy={() => copy("subject", subject)} />
+                <div className="leave-body">
+                  <div className="leave-line-head">
+                    <span className="leave-line-label">Mail</span>
+                    <CopyButton copied={copied === "body"} onCopy={() => copy("body", body)} />
+                  </div>
+                  <pre>{body}</pre>
+                </div>
+              </>
+            ) : (
+              <div className="leave-line leave-line-value leave-draft-wait">
+                The subject and mail appear here once the form is filled in.
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
@@ -217,12 +216,16 @@ export default function LeaveMail({ email = "", accountName = "", onBack, initia
   );
 }
 
-function Field({ label, note = null, children }) {
+/** The optional marker sits on the label's own line, where the eye already
+ *  is, rather than under a box that has to be read past first. */
+function Field({ label, optional = false, children }) {
   return (
     <label className="leave-field">
-      <span>{label}</span>
+      <span>
+        {label}
+        {optional && <em className="leave-optional">Optional</em>}
+      </span>
       {children}
-      {note && <em>{note}</em>}
     </label>
   );
 }

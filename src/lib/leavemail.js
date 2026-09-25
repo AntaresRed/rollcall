@@ -19,7 +19,7 @@ export const LEAVE_CC = [
 
 /** Chips on the form. "Other" opens a text box rather than forcing a student
  *  who lives somewhere else to pick the nearest wrong answer. */
-export const LEAVE_HOSTELS = ["NH", "OH", "LVH", "WH"];
+export const LEAVE_HOSTELS = ["NH", "OH", "LVH", "Annexe", "Tagore"];
 
 /**
  * Every field, in the order the mail lists them. `label` is what the office
@@ -172,11 +172,9 @@ export function leaveBody(form) {
   return [
     "Respected Sir/Madam,",
     "",
-    "I am writing to apply for leave from campus. My details are below.",
+    "I am writing to inform you regarding my leave details",
     "",
     ...lines,
-    "",
-    "Kindly grant me leave for this period.",
     "",
     "Thanking you,",
     v.name,
@@ -224,27 +222,36 @@ export function rememberedPart(form) {
   return keep;
 }
 
+const pad = (n) => String(n).padStart(2, "0");
+
 /**
- * The starting form: blank, today's date, the remembered fields, and — only
- * where nothing was remembered — the name from the Google account. A stored
- * name wins because the account name is often a nickname or in the wrong
- * order, and whoever corrected it once should not have to again.
+ * The starting form: blank, the remembered fields, and — only where nothing
+ * was remembered — the name from the Google account. A stored name wins
+ * because the account name is often a nickname or in the wrong order, and
+ * whoever corrected it once should not have to again.
+ *
+ * The mail's date and the departure both start at `now`: the mail usually
+ * goes out on the way out of the gate, so the departure is the field most
+ * often right as it stands. Only the return is left for the student to say.
  *
  * `trip` is this session's half-written trip, if the app was reloaded under
  * it — which on a phone is what switching to the mail app and back can do.
  * Only strings are taken from either store, so an older or half-written
  * shape cannot turn a controlled input uncontrolled.
  */
-export function startingLeave(today, remembered, trip = null, accountName = "") {
+export function startingLeave(now, remembered, trip = null, accountName = "") {
   const pick = (from, keys) => {
     const out = {};
     for (const k of keys) if (typeof from?.[k] === "string" && from[k] !== "") out[k] = from[k];
     return out;
   };
   const tripKeys = Object.keys(BLANK_LEAVE).filter((k) => !REMEMBERED.includes(k));
+  const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   return {
     ...BLANK_LEAVE,
     date: today,
+    departDate: today,
+    departTime: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
     ...(accountName ? { name: accountName } : {}),
     ...pick(remembered, REMEMBERED),
     ...pick(trip, tripKeys),
@@ -282,8 +289,8 @@ const write = (which, key, value) => {
   }
 };
 
-export function loadLeave(today, accountName = "") {
-  return startingLeave(today, read("local", WHO), read("session", TRIP), accountName);
+export function loadLeave(now, accountName = "") {
+  return startingLeave(now, read("local", WHO), read("session", TRIP), accountName);
 }
 
 export function saveLeave(form) {

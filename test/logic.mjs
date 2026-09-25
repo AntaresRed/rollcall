@@ -24,7 +24,7 @@ import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
   filterGrouped, hasCategories } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize,
   searchAllPor, postLine, porLabel } from "../src/lib/por.js";
-import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, BLANK_LEAVE, longDate, clock, hostelOf,
+import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, LEAVE_HOSTELS, BLANK_LEAVE, longDate, clock, hostelOf,
   leaveProblems, leaveBody, leaveSubject, leaveMailto, leaveGmailHref,
   rememberedPart, startingLeave } from "../src/lib/leavemail.js";
 import catalogue from "../src/data/catalogue.json";
@@ -2036,6 +2036,8 @@ console.log("\nleave mail");
     address: "12 Park Street\nKolkata 700016", reason: "Family function", info: "",
   };
 
+  check("hostels are the five, Annexe and Tagore separate",
+    LEAVE_HOSTELS.join() === "NH,OH,LVH,Annexe,Tagore");
   check("recipients are exactly the office's list",
     LEAVE_TO.join() === "saopgp@iimcal.ac.in,aso@iimcal.ac.in"
     && LEAVE_CC.join() === "securityofficer@iimcal.ac.in,manager_hostel@iimcal.ac.in,hasecy@email.iimcal.ac.in");
@@ -2104,20 +2106,26 @@ console.log("\nleave mail");
   check("who you are is remembered", kept.name === trip.name && kept.reg === "0001/01" && kept.address === trip.address);
   check("the trip is not remembered", !("reason" in kept) && !("departDate" in kept) && !("date" in kept));
 
-  const fresh = startingLeave("2026-09-25", null, null, "Google Name");
+  const at = new Date(2026, 8, 25, 7, 5);
+  const fresh = startingLeave(at, null, null, "Google Name");
   check("a first visit starts on today with the account name",
     fresh.date === "2026-09-25" && fresh.name === "Google Name" && fresh.reason === "");
+  check("departure starts at now, zero-padded",
+    fresh.departDate === "2026-09-25" && fresh.departTime === "07:05");
+  check("the return is left for the student", fresh.returnDate === "" && fresh.returnTime === "");
+  check("a departure already typed this session wins over now",
+    startingLeave(at, null, { departDate: "2026-10-02", departTime: "18:00" }).departTime === "18:00");
   check("a stored name wins over the account's",
-    startingLeave("2026-09-25", { name: "Corrected Name" }, null, "Google Name").name === "Corrected Name");
+    startingLeave(at, { name: "Corrected Name" }, null, "Google Name").name === "Corrected Name");
   check("a cleared stored name falls back to the account's",
-    startingLeave("2026-09-25", { name: "" }, null, "Google Name").name === "Google Name");
+    startingLeave(at, { name: "" }, null, "Google Name").name === "Google Name");
   check("junk in storage is ignored, the shape kept",
     Object.keys(BLANK_LEAVE).every((k) =>
-      typeof startingLeave("2026-09-25", { name: 5, reg: null, room: {} }, "junk")[k] === "string"));
+      typeof startingLeave(at, { name: 5, reg: null, room: {} }, "junk")[k] === "string"));
   check("a reloaded trip is picked back up",
-    startingLeave("2026-09-26", null, { reason: "Wedding", date: "2026-09-25" }).reason === "Wedding");
+    startingLeave(at, null, { reason: "Wedding", date: "2026-09-25" }).reason === "Wedding");
   check("the trip store cannot overwrite who you are",
-    startingLeave("2026-09-25", { name: "Me" }, { name: "Someone else" }).name === "Me");
+    startingLeave(at, { name: "Me" }, { name: "Someone else" }).name === "Me");
 }
 
 console.log(`\n${fail === 0 ? "all logic checks passed" : fail + " FAILURES"}`);

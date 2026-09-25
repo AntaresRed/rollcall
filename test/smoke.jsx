@@ -174,15 +174,15 @@ const cases = [
   ["Utils / contacts group", <Utils key="uc" onOpen={noop} group="contacts" />],
   ["LeaveMail / blank", <LeaveMail key="lm" email="abc2027@email.iimcal.ac.in"
       accountName="A Student" onBack={noop} />],
-  ["LeaveMail / ready to send", <LeaveMail key="lmr" email="abc2027@email.iimcal.ac.in"
-      onBack={noop} initial={{
+  ["LeaveMail / ready to send, draft open", <LeaveMail key="lmr" email="abc2027@email.iimcal.ac.in"
+      onBack={noop} openDraft initial={{
         date: "2026-09-25", name: "A Student", reg: "0001/01", phone: "9876543210",
         hostel: "Other", hostelOther: "Married quarters", room: "12",
         departDate: "2026-10-02", departTime: "18:00", returnDate: "2026-10-06", returnTime: "21:30",
         address: "12 Park Street\nKolkata 700016", reason: "Family function", info: "",
       }} />],
   // An older stored shape: fields missing entirely rather than blank.
-  ["LeaveMail / partial form", <LeaveMail key="lmp" initial={{ name: "A Student" }} />],
+  ["LeaveMail / partial form, draft open", <LeaveMail key="lmp" openDraft initial={{ name: "A Student" }} />],
   ["DayMessMenu", <DayMessMenu key="dm" onBack={noop} now={now} />],
   // Sunday is the rotation's edge case — the week must wrap, not truncate.
   ["DayMessMenu / on a Sunday", <DayMessMenu key="dms" onBack={noop}
