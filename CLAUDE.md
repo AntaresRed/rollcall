@@ -29,7 +29,7 @@ npm run build    # eslint + all tests + vite build — run before saying anythin
 npm run smoke    # tests only
 ```
 
-`npm run build` must end with `67/67 screens rendered` and `all logic checks passed`.
+`npm run build` must end with `70/70 screens rendered` and `all logic checks passed`.
 
 The app needs `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and
 `VITE_VAPID_PUBLIC_KEY` (see `.env.example`). Screens that need sign-in can't be

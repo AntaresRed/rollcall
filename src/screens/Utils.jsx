@@ -4,8 +4,8 @@
  * Five entries in one flat list had become a list you read rather than a menu
  * you scan: three of them were contact directories that belong together, and
  * the two that were not sat between them. So the contacts are one door now,
- * and the top level is three doors — people, calendar, food — each with a
- * mark you can recognise before reading the label.
+ * and the top level is a few doors — people, calendar, food, leave — each
+ * with a mark you can recognise before reading the label.
  *
  * Both levels are the same component and the same card, because they are the
  * same act: pick one of a few things. A second level that looked different
@@ -30,6 +30,10 @@ const GROUPS = [
     "The week's mess food, plus night canteen and tuck shop menus you can "
     + "order from over WhatsApp.",
     MessIcon],
+  ["leave", "Leave Mail",
+    "Leave of more than a day: the mail written and addressed, sent from "
+    + "your iimcal account.",
+    MailIcon],
 ];
 
 /** Behind the first door. */
@@ -133,6 +137,17 @@ function MessIcon() {
       <path d="M2.5 20.5h15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
       <path d="M20.5 3.5v8.5m0 0v8.5m0-8.5c1.2-1 1.2-2.4 1.2-4V3.5"
             stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="5.5" width="18" height="13" rx="2"
+            stroke="currentColor" strokeWidth="1.7" />
+      <path d="m3.8 7 8.2 6 8.2-6" stroke="currentColor" strokeWidth="1.7"
+            strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

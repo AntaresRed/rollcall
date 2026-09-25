@@ -36,6 +36,7 @@ const Utils = lazy(() => import("./screens/Utils"));
 const MessMenu = lazy(() => import("./screens/MessMenu"));
 const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
 const SectionPicker = lazy(() => import("./screens/SectionPicker"));
+const LeaveMail = lazy(() => import("./screens/LeaveMail"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -52,6 +53,7 @@ const SUB_SCREEN_BACK = {
   por: "Back to contacts",
   mess: "Back to utils",
   export: "Back to utils",
+  leave: "Back to utils",
   admin: "Back to profile",
 };
 
@@ -723,6 +725,16 @@ export default function App() {
             classes={viewClasses}
             term={viewTerm}
             overrides={viewOverrides}
+            onBack={() => setSubScreen(null)}
+          />
+        )}
+        {/* The student's own address and name, not the viewed cohort's:
+            viewing-as changes whose timetable is on screen, never whose
+            mail this is. */}
+        {tab === "utils" && subScreen === "leave" && (
+          <LeaveMail
+            email={session.user?.email ?? ""}
+            accountName={session.user?.user_metadata?.full_name ?? session.user?.user_metadata?.name ?? ""}
             onBack={() => setSubScreen(null)}
           />
         )}

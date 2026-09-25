@@ -24,6 +24,9 @@ import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
   filterGrouped, hasCategories } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize,
   searchAllPor, postLine, porLabel } from "../src/lib/por.js";
+import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, BLANK_LEAVE, longDate, clock, hostelOf,
+  leaveProblems, leaveBody, leaveSubject, leaveMailto, leaveGmailHref,
+  rememberedPart, startingLeave } from "../src/lib/leavemail.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -2024,6 +2027,98 @@ console.log("POR details");
     algeria?.phone === "8787415552" && sourav?.phone === "7449382453");
 }
 
+console.log("\nleave mail");
+{
+  const trip = {
+    date: "2026-09-25", name: "  A Student ", reg: "0001/01", phone: "9876543210",
+    hostel: "NH", hostelOther: "", room: "214",
+    departDate: "2026-10-02", departTime: "18:00", returnDate: "2026-10-06", returnTime: "09:05",
+    address: "12 Park Street\nKolkata 700016", reason: "Family function", info: "",
+  };
+
+  check("recipients are exactly the office's list",
+    LEAVE_TO.join() === "saopgp@iimcal.ac.in,aso@iimcal.ac.in"
+    && LEAVE_CC.join() === "securityofficer@iimcal.ac.in,manager_hostel@iimcal.ac.in,hasecy@email.iimcal.ac.in");
+
+  check("dates are written out in full", longDate("2026-10-02") === "Friday, 2 October 2026");
+  check("an impossible date is blank, not rolled over", longDate("2026-02-30") === "");
+  for (const v of [undefined, null, "", "02/10/2026", {}])
+    check("longDate(" + JSON.stringify(v) + ") is blank", longDate(v) === "");
+  check("times on a 12-hour clock",
+    clock("00:15") === "12:15 AM" && clock("12:00") === "12:00 PM" && clock("21:30") === "9:30 PM");
+
+  check("a complete form has no problems", leaveProblems(trip).length === 0);
+  const blank = leaveProblems(BLANK_LEAVE);
+  check("a blank form lists every required field",
+    blank.length === 1 && LEAVE_FIELDS.filter((f) => !f.optional).every((f) => blank[0].includes(f.label)));
+  check("additional info is never demanded", !blank[0].includes("Additional information"));
+  check("a departure date without a time is missing",
+    leaveProblems({ ...trip, departTime: "" }).some((p) => p.includes("departure")));
+  check("whitespace is not an answer",
+    leaveProblems({ ...trip, reason: "   " }).some((p) => p.includes("Reason for leave")));
+  check("a return before the departure is refused",
+    leaveProblems({ ...trip, returnDate: "2026-10-01" }).some((p) => /before the departure/.test(p)));
+  check("a return at the very minute of departure is refused",
+    leaveProblems({ ...trip, returnDate: "2026-10-02", returnTime: "18:00" }).length === 1);
+  check("\"Other\" needs the hostel typed in",
+    leaveProblems({ ...trip, hostel: "Other" }).some((p) => p.includes("Hostel")));
+  check("\"Other\" resolves to what was typed",
+    hostelOf({ hostel: "Other", hostelOther: " MDC " }) === "MDC" && hostelOf({ hostel: "OH" }) === "OH");
+  survives("problems for no form at all", () => leaveProblems(undefined));
+
+  const body = leaveBody(trip);
+  check("every required field is in the body",
+    LEAVE_FIELDS.filter((f) => !f.optional).every((f) => body.includes(f.label + ":")));
+  check("blank additional info is left out entirely", !body.includes("Additional information"));
+  check("filled additional info is included",
+    leaveBody({ ...trip, info: "Reachable after 8 PM" }).includes("Additional information: Reachable after 8 PM"));
+  check("departure carries its date and time",
+    body.includes("Date and expected time of departure: Friday, 2 October 2026, 6:00 PM"));
+  check("a multi-line address starts under its label",
+    body.includes("Address during leave:\n12 Park Street\nKolkata 700016"));
+  check("names are trimmed", body.includes("Name of student: A Student\n"));
+  check("signed with name and registration number", body.endsWith("Thanking you,\nA Student\n0001/01"));
+
+  check("subject names the student and the dates",
+    leaveSubject(trip) === "Leave application – A Student (0001/01) – 2 Oct to 6 Oct 2026");
+  check("a leave across new year carries both years",
+    leaveSubject({ ...trip, departDate: "2026-12-28", returnDate: "2027-01-03" })
+      .endsWith("28 Dec 2026 to 3 Jan 2027"));
+
+  const mailto = leaveMailto(trip);
+  check("mailto is addressed to both offices", mailto.startsWith("mailto:saopgp@iimcal.ac.in,aso@iimcal.ac.in?"));
+  check("mailto copies all three", decodeURIComponent(mailto).includes("cc=" + LEAVE_CC.join(",")));
+  check("mailto breaks lines as CRLF", mailto.includes("%0D%0A") && !mailto.replace(/%0D%0A/g, "").includes("%0A"));
+  check("an ampersand in the reason cannot end the body early",
+    new URLSearchParams(leaveMailto({ ...trip, reason: "Sister's wedding & reception" }).split("?")[1])
+      .get("body").includes("wedding & reception"));
+
+  const gmail = new URL(leaveGmailHref(trip, "abc2027@email.iimcal.ac.in"));
+  check("Gmail opens in the institute account", gmail.searchParams.get("authuser") === "abc2027@email.iimcal.ac.in");
+  check("Gmail carries to, cc, subject and body",
+    gmail.searchParams.get("to") === LEAVE_TO.join(",") && gmail.searchParams.get("cc") === LEAVE_CC.join(",")
+    && gmail.searchParams.get("su") === leaveSubject(trip) && gmail.searchParams.get("body") === body);
+  check("no account, no authuser", !new URL(leaveGmailHref(trip, "")).searchParams.has("authuser"));
+
+  const kept = rememberedPart(trip);
+  check("who you are is remembered", kept.name === trip.name && kept.reg === "0001/01" && kept.address === trip.address);
+  check("the trip is not remembered", !("reason" in kept) && !("departDate" in kept) && !("date" in kept));
+
+  const fresh = startingLeave("2026-09-25", null, null, "Google Name");
+  check("a first visit starts on today with the account name",
+    fresh.date === "2026-09-25" && fresh.name === "Google Name" && fresh.reason === "");
+  check("a stored name wins over the account's",
+    startingLeave("2026-09-25", { name: "Corrected Name" }, null, "Google Name").name === "Corrected Name");
+  check("a cleared stored name falls back to the account's",
+    startingLeave("2026-09-25", { name: "" }, null, "Google Name").name === "Google Name");
+  check("junk in storage is ignored, the shape kept",
+    Object.keys(BLANK_LEAVE).every((k) =>
+      typeof startingLeave("2026-09-25", { name: 5, reg: null, room: {} }, "junk")[k] === "string"));
+  check("a reloaded trip is picked back up",
+    startingLeave("2026-09-26", null, { reason: "Wedding", date: "2026-09-25" }).reason === "Wedding");
+  check("the trip store cannot overwrite who you are",
+    startingLeave("2026-09-25", { name: "Me" }, { name: "Someone else" }).name === "Me");
+}
 
 console.log(`\n${fail === 0 ? "all logic checks passed" : fail + " FAILURES"}`);
 process.exit(fail ? 1 : 0);

@@ -3509,3 +3509,124 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   .por-row { align-items: flex-start; }
   .por-contact { width: 100%; }
 }
+
+
+/* ---------- leave mail ---------- */
+
+/* The same fields as the basket's, stacked in one card: this is a form you
+   fill top to bottom once, not a list you come back to. */
+.leave-form {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.leave-field { display: block; min-width: 0; }
+.leave-field span,
+.leave-line-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 5px;
+}
+.leave-field input,
+.leave-field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+/* iOS draws date and time inputs at their content width and centres the
+   text; left-aligned and full width, they line up with the fields above. */
+.leave-field input[type="date"],
+.leave-field input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 40px;
+  text-align: left;
+}
+.leave-field input::-webkit-date-and-time-value { text-align: left; }
+.leave-field textarea { resize: vertical; min-height: 58px; }
+.leave-field input:focus,
+.leave-field textarea:focus { outline: none; border-color: var(--signal); }
+.leave-field em {
+  display: block;
+  margin-top: 5px;
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--mute);
+}
+/* Pairs that belong together — a date and its time — side by side, until
+   the phone is too narrow for either to be read back. */
+.leave-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 339px) { .leave-pair { grid-template-columns: 1fr; } }
+.leave-hostel { margin: 0; }
+
+/* The mail as it will arrive: an envelope's header lines, then the body. */
+.leave-mail {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--r);
+  margin-bottom: 14px;
+}
+.leave-line,
+.leave-body { padding: 11px 14px; border-bottom: 1px solid var(--rule); }
+.leave-mail > :last-child { border-bottom: 0; }
+.leave-line-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.leave-line-head .leave-line-label { margin: 0; }
+.leave-line-value {
+  margin-top: 3px;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+.leave-body pre {
+  margin: 6px 0 0;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.leave-copy {
+  flex: 0 0 auto;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.leave-copy:hover { border-color: var(--signal); }
+.leave-pending {
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--warn-ink);
+  background: var(--warn-wash);
+  border-radius: 0 0 var(--r) 0;
+}
+.leave-pending p { margin: 0; }
+.leave-pending p + p { margin-top: 4px; }
+.leave-acts { display: flex; flex-direction: column; gap: 8px; }
+.leave-send { text-align: center; text-decoration: none; }
