@@ -10,7 +10,7 @@
  * from which account, before it does.
  */
 
-export const LEAVE_TO = ["saopgp@iimcal.ac.in", "aso@iimcal.ac.in"];
+export const LEAVE_TO = ["pgpoffice@iimcal.ac.in", "aso@iimcal.ac.in"];
 export const LEAVE_CC = [
   "securityofficer@iimcal.ac.in",
   "manager_hostel@iimcal.ac.in",

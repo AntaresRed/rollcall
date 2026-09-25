@@ -2039,7 +2039,7 @@ console.log("\nleave mail");
   check("hostels are the five, Annexe and Tagore separate",
     LEAVE_HOSTELS.join() === "NH,OH,LVH,Annexe,Tagore");
   check("recipients are exactly the office's list",
-    LEAVE_TO.join() === "saopgp@iimcal.ac.in,aso@iimcal.ac.in"
+    LEAVE_TO.join() === "pgpoffice@iimcal.ac.in,aso@iimcal.ac.in"
     && LEAVE_CC.join() === "securityofficer@iimcal.ac.in,manager_hostel@iimcal.ac.in,hasecy@email.iimcal.ac.in");
 
   check("dates are written out in full", longDate("2026-10-02") === "Friday, 2 October 2026");
@@ -2099,7 +2099,7 @@ console.log("\nleave mail");
       .endsWith("28 Dec 2026 to 3 Jan 2027"));
 
   const mailto = leaveMailto(trip);
-  check("mailto is addressed to both offices", mailto.startsWith("mailto:saopgp@iimcal.ac.in,aso@iimcal.ac.in?"));
+  check("mailto is addressed to both offices", mailto.startsWith("mailto:pgpoffice@iimcal.ac.in,aso@iimcal.ac.in?"));
   check("mailto copies all three", decodeURIComponent(mailto).includes("cc=" + LEAVE_CC.join(",")));
   check("mailto breaks lines as CRLF", mailto.includes("%0D%0A") && !mailto.replace(/%0D%0A/g, "").includes("%0A"));
   check("an ampersand in the reason cannot end the body early",
