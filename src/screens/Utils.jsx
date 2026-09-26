@@ -1,3 +1,5 @@
+import { track } from "../lib/track";
+
 /**
  * Utils — the reference material that isn't this week's schedule.
  *
@@ -84,6 +86,8 @@ export default function Utils({ onOpen, group = null }) {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
+              // Leaves the app, so App never hears of it — counted here.
+              onClick={() => track("open", id)}
             >
               {inside}
             </a>

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DayMessMenu from "./DayMessMenu";
 import NightMessMenu from "./NightMessMenu";
 import OrderHistory from "./OrderHistory";
 import TuckShops from "./TuckShops";
+import { track } from "../lib/track";
 
 /**
  * Day and night mess, under one roof.
@@ -21,6 +22,10 @@ export default function MessMenu({ onBack, now = new Date() }) {
   const [when, setWhen] = useState("day");
   const [history, setHistory] = useState(false);
 
+  // Which of the three gets looked at. Counted as shown rather than as
+  // tapped, so the day mess — on screen without a tap — is counted too.
+  useEffect(() => { track("menu", when); }, [when]);
+
   if (history) {
     return <OrderHistory now={now} onBack={() => setHistory(false)} />;
   }
@@ -33,7 +38,7 @@ export default function MessMenu({ onBack, now = new Date() }) {
           className="eyebrow-act"
           aria-label="Your food order history"
           title="Order history"
-          onClick={() => setHistory(true)}
+          onClick={() => { track("open", "order-history"); setHistory(true); }}
         >
           <ReceiptIcon />
         </button>

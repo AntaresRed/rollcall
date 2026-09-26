@@ -9,6 +9,7 @@ import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { isAndroid } from "../lib/platform";
 import { loadBasket, saveBasket } from "../lib/basket";
 import { recordOrder } from "../lib/orders";
+import { track } from "../lib/track";
 import { UNTOUCHED, messageOf, withAdded } from "../lib/finalmessage";
 import FinalMessage from "./FinalMessage";
 import {
@@ -169,7 +170,10 @@ export default function TuckShops() {
   const message = messageOf(cart, written);
 
   /** Recorded on the way out, as the night canteen does. */
-  const sent = () => recordOrder(shop, message, { kind: "tuck", total: bill.total });
+  const sent = () => {
+    recordOrder(shop, message, { kind: "tuck", total: bill.total });
+    track("order", `tuck:${shop.id}`);
+  };
 
   return (
     <>
@@ -215,7 +219,10 @@ export default function TuckShops() {
           <button
             className="btn scan-cta"
             aria-expanded={showScan}
-            onClick={() => setShowScan((v) => !v)}
+            onClick={() => {
+              if (!showScan) track("original_menu", `tuck:${shop.id}`);
+              setShowScan((v) => !v);
+            }}
           >
             <ScanIcon />
             <span className="scan-cta-text">
@@ -600,7 +607,7 @@ export default function TuckShops() {
  * only way to find out an app is missing is to tap it and watch nothing
  * happen.
  */
-function AppPay({ pay, total }) {
+function AppPay({ pay, total, shopId }) {
   const [chosen, setChosen] = useState(rememberedApp);
   const [picking, setPicking] = useState(false);
 
@@ -616,7 +623,7 @@ function AppPay({ pay, total }) {
 
   return (
     <>
-      <a className="btn block pay-btn" href={href}>
+      <a className="btn block pay-btn" href={href} onClick={() => track("pay", `${shopId}:app`)}>
         Pay ₹{total}{app ? ` with ${app.name}` : " with UPI"}
       </a>
 
@@ -705,6 +712,7 @@ function PayBlock({ shop, total }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(vpa);
+      track("pay", `${shop.id}:copy`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -722,14 +730,17 @@ function PayBlock({ shop, total }) {
       {/* The same flow on both platforms now. It reached Android late and by
           a different route: not because the phone cannot choose, but because
           it remembers a choice made once and never asks again. */}
-      {pay && <AppPay pay={pay} total={total} />}
+      {pay && <AppPay pay={pay} total={total} shopId={shop.id} />}
 
       {qr && (
         <>
           <button
             className="btn ghost block pay-alt"
             aria-expanded={showQr}
-            onClick={() => setShowQr((v) => !v)}
+            onClick={() => {
+              if (!showQr) track("pay", `${shop.id}:qr`);
+              setShowQr((v) => !v);
+            }}
           >
             {showQr ? "Hide" : "Show"} {shop.name}&apos;s QR
           </button>

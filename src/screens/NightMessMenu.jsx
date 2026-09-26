@@ -5,6 +5,7 @@ import {
 } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
 import { recordOrder } from "../lib/orders";
+import { track } from "../lib/track";
 import { loadBasket, saveBasket } from "../lib/basket";
 import { UNTOUCHED, messageOf, withAdded } from "../lib/finalmessage";
 import FinalMessage from "./FinalMessage";
@@ -158,7 +159,10 @@ export default function NightMessMenu() {
 
   /** Recorded on the way out, because this is the last moment the app knows
    *  anything. */
-  const sent = () => recordOrder(canteen, message, { kind: "night", total: bill.total });
+  const sent = () => {
+    recordOrder(canteen, message, { kind: "night", total: bill.total });
+    track("order", `night:${canteen.id}`);
+  };
 
   return (
     <>
@@ -198,7 +202,10 @@ export default function NightMessMenu() {
           <button
             className="btn scan-cta"
             aria-expanded={showScan}
-            onClick={() => setShowScan((v) => !v)}
+            onClick={() => {
+              if (!showScan) track("original_menu", `night:${canteen.id}`);
+              setShowScan((v) => !v);
+            }}
           >
             <ScanIcon />
             <span className="scan-cta-text">

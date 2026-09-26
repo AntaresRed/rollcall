@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { buildTimetableIcs, icsFilename, deliverIcs } from "../lib/ics";
+import { track } from "../lib/track";
 
 const fmtDate = (iso) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, {
@@ -33,6 +34,7 @@ export default function CalendarExport({ classes, term, overrides = [], onBack }
     setState("working");
     try {
       const how = await deliverIcs(icsFilename(term), built.ics);
+      if (how !== "cancelled") track("calendar_export");
       setState(how === "cancelled" ? "idle" : "done");
     } catch {
       setState("failed");

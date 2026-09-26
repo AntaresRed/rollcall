@@ -15,6 +15,7 @@ import {
 import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
 } from "./lib/push";
+import { track } from "./lib/track";
 
 import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
@@ -149,6 +150,9 @@ export default function App() {
           setReady(true);
           return;
         }
+        // A cold start, not every return to the app: a Home Screen app brought
+        // back from the background resumes without running this again.
+        track("open", "app");
 
         // Nothing below blocks first paint. Service-worker registration and
         // the push-subscription check both wait on `serviceWorker.ready`,
@@ -434,6 +438,17 @@ export default function App() {
     setSubScreen(null);
   };
 
+  /**
+   * Open a sub-screen on purpose, and count it. Back arrows and the switches
+   * that happen as a side effect call setSubScreen directly, so a count is a
+   * tap on the way in, never a return. An admin looking at another year's app
+   * is inspecting it, not using it, so that is left out.
+   */
+  const openSub = (id) => {
+    if (!readOnlyRef.current) track("open", id);
+    setSubScreen(id);
+  };
+
   const startOver = () => {
     // Remember where the edit was launched from, so saving returns there
     // rather than dumping the student on Today.
@@ -709,7 +724,7 @@ export default function App() {
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "contacts" && (
-          <Utils onOpen={setSubScreen} group="contacts" />
+          <Utils onOpen={openSub} group="contacts" />
         )}
         {tab === "utils" && subScreen === "faculty" && (
           <Faculty classes={viewClasses} onBack={() => setSubScreen("contacts")} />
@@ -738,7 +753,7 @@ export default function App() {
             onBack={() => setSubScreen(null)}
           />
         )}
-        {tab === "utils" && !subScreen && <Utils onOpen={setSubScreen} />}
+        {tab === "utils" && !subScreen && <Utils onOpen={openSub} />}
         {tab === "timetable" && !subScreen && (
           <Timetable
             classes={viewClasses}
@@ -746,14 +761,14 @@ export default function App() {
             term={viewTerm}
             overrides={viewOverrides}
             consensus={readOnly ? EMPTY : consensus}
-            onShowCalendar={() => setSubScreen("calendar")}
+            onShowCalendar={() => openSub("calendar")}
             // Rescheduling writes, so it is not offered while viewing. Same
             // for accepting what the section reports, which is a move like
             // any other.
-            onReschedule={readOnly ? null : () => setSubScreen("reschedule")}
+            onReschedule={readOnly ? null : () => openSub("reschedule")}
             onMove={readOnly ? null : moveSession}
-            onShowBreakdown={() => setSubScreen("breakdown")}
-            onShowAttendance={() => setSubScreen("attendance")}
+            onShowBreakdown={() => openSub("breakdown")}
+            onShowAttendance={() => openSub("attendance")}
             pendingCount={pendingCount}
           />
         )}
@@ -765,7 +780,7 @@ export default function App() {
             onToggleMute={readOnly ? null : toggleMute}
             onChangeCourses={readOnly ? null : startOver}
             onSignOut={handleSignOut}
-            onScheduleAdmin={isAdmin && !readOnly ? () => setSubScreen("admin") : null}
+            onScheduleAdmin={isAdmin && !readOnly ? () => openSub("admin") : null}
           />
         )}
         </Suspense>
@@ -779,7 +794,11 @@ export default function App() {
             role="tab"
             aria-selected={tab === key}
             aria-label={label}
-            onClick={() => { setTab(key); setSubScreen(null); }}
+            onClick={() => {
+              if (!readOnly) track("open", key);
+              setTab(key);
+              setSubScreen(null);
+            }}
           >
             <span className="tab-icon">
               <Icon />

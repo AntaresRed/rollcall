@@ -6,6 +6,7 @@ import {
 import { isIOS, isAndroid } from "../lib/platform";
 import { makeLeavePdf } from "../lib/leavepdf";
 import { deliverFile } from "../lib/deliver";
+import { track } from "../lib/track";
 
 /**
  * The leave mail — leave of more than a day, reported to the offices the
@@ -85,6 +86,7 @@ export default function LeaveMail({
    */
   const send = async () => {
     if (!pdfFile) return;
+    track("leave_mail", "send");
     const save = (share) => deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share });
     if (ios) {
       const how = await save(true);
@@ -104,7 +106,9 @@ export default function LeaveMail({
   };
 
   const saveOnly = () => {
-    if (pdfFile) deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share: ios });
+    if (!pdfFile) return;
+    track("leave_mail", "save-pdf");
+    deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share: ios });
   };
 
   return (
