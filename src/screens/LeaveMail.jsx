@@ -225,9 +225,16 @@ export default function LeaveMail({
           </p>
         </div>
       )}
-      <button className="btn block leave-send" disabled={!pdfFile} onClick={send}>
-        {ready && !pdfFile && !pdfFailed ? "Preparing the form…" : "Send Mail"}
-      </button>
+      {/* Side by side: the form on its own is worth having too — to print,
+          to send again later, or to hand over in person. */}
+      <div className="leave-acts">
+        <button className="btn leave-send" disabled={!pdfFile} onClick={send}>
+          {ready && !pdfFile && !pdfFailed ? "Preparing…" : "Send Mail"}
+        </button>
+        <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
+          Download form
+        </button>
+      </div>
       {/* The one thing a link can't do: attach the file. Said once, after the
           tap, when the student is about to need it. */}
       {saved === "saved" && pdfFile && (
@@ -270,17 +277,6 @@ export default function LeaveMail({
                     <CopyButton copied={copied === "body"} onCopy={() => copy("body", body)} />
                   </div>
                   <pre>{body}</pre>
-                </div>
-                <div className="leave-line">
-                  <div className="leave-line-head">
-                    <span className="leave-line-label">Attachment</span>
-                    <button type="button" className="leave-copy" disabled={!pdfFile} onClick={saveOnly}>
-                      Save
-                    </button>
-                  </div>
-                  <div className="leave-line-value">
-                    {pdfFile ? pdfFile.name : pdfFailed ? "Couldn't prepare the form" : "Preparing the form…"}
-                  </div>
                 </div>
               </>
             ) : (

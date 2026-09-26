@@ -3628,6 +3628,16 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .leave-pending p { margin: 0; }
 .leave-pending p + p { margin-top: 4px; }
 .leave-send { margin-top: 12px; text-align: center; text-decoration: none; }
+.leave-acts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.leave-acts .leave-send { margin-top: 0; padding-left: 10px; padding-right: 10px; }
+/* The ghost style is drawn for paper; on a disabled button it would fade to
+   nothing, so it keeps its border. */
+.leave-acts .btn.ghost { border-color: var(--rule-strong); }
 .leave-saved {
   margin: 8px 0 0;
   font-size: 12.5px;
