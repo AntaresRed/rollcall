@@ -14,11 +14,16 @@
  * things said on screen: a share sheet that was dismissed is a decision, not
  * a failure, and telling somebody "saved" when they backed out would be a
  * small lie.
+ *
+ * `share: false` skips the sheet and always downloads, for a caller that has
+ * somewhere to go next and wants the file simply saved on the way. With it
+ * off, nothing here awaits before the download starts, so the caller can
+ * still open a window afterwards inside the same tap.
  */
-export async function deliverFile(filename, text, type) {
+export async function deliverFile(filename, text, type, { share = true } = {}) {
   try {
     const file = new File([text], filename, { type });
-    if (navigator.canShare?.({ files: [file] })) {
+    if (share && navigator.canShare?.({ files: [file] })) {
       await navigator.share({ files: [file], title: filename });
       return "shared";
     }

@@ -4,6 +4,8 @@ import {
   leaveProblems, leaveSubject, leaveBody, leaveMailto, leaveGmailHref,
 } from "../lib/leavemail";
 import { isIOS, isAndroid } from "../lib/platform";
+import { makeLeavePdf } from "../lib/leavepdf";
+import { deliverFile } from "../lib/deliver";
 
 /**
  * The leave mail — leave of more than a day, reported to the offices the
@@ -41,12 +43,69 @@ export default function LeaveMail({
     }
   };
 
+  // The form PDF, made ahead of the tap rather than on it. iOS only opens a
+  // share sheet from inside the tap itself, and fetching the form and the
+  // signature font first would use that moment up. So it is rebuilt quietly
+  // a beat after each change, keyed by the form it was made from, and Send
+  // Mail waits for it only if it is pressed within that beat.
+  const formKey = useMemo(() => JSON.stringify(form), [form]);
+  const [pdf, setPdf] = useState(null);          // { key, file } | { key, error }
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    if (!ready) return undefined;
+    let live = true;
+    const id = setTimeout(() => {
+      makeLeavePdf(form)
+        .then((file) => live && setPdf({ key: formKey, file }))
+        .catch(() => live && setPdf({ key: formKey, error: true }));
+    }, 350);
+    return () => { live = false; clearTimeout(id); };
+    // `form` is read through `formKey`, which changes exactly when it does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, formKey, attempt]);
+  const pdfFile = pdf?.key === formKey ? pdf.file : null;
+  const pdfFailed = pdf?.key === formKey && pdf.error;
+
+  const [saved, setSaved] = useState("");        // "" | "saved" | "cancelled"
+
   // One button, two routes. On a phone the mail app: Gmail's web compose
   // opens in a browser tab there, not in the Gmail app. On a laptop Gmail in
   // the institute account, because mailto there usually lands in a desktop
   // client nobody ever set up.
-  const phone = isIOS() || isAndroid();
-  const sendHref = phone ? leaveMailto(form) : leaveGmailHref(form, email);
+  const ios = isIOS();
+  const phone = ios || isAndroid();
+
+  /**
+   * Save the form, then open the mail. Links cannot attach anything, so the
+   * student attaches the saved PDF themselves — the note that appears says
+   * so. On iOS the save is the share sheet ("Save to Files"), because a plain
+   * download from a Home Screen app has nowhere useful to land; everywhere
+   * else it is an ordinary download, started before the mail opens so both
+   * happen inside the one tap.
+   */
+  const send = async () => {
+    if (!pdfFile) return;
+    const save = (share) => deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share });
+    if (ios) {
+      const how = await save(true);
+      if (how === "cancelled") { setSaved("cancelled"); return; }
+      setSaved("saved");
+      window.location.href = leaveMailto(form);
+      return;
+    }
+    save(false);
+    setSaved("saved");
+    if (phone) {
+      // A beat for the download to register before the mail app takes over.
+      setTimeout(() => { window.location.href = leaveMailto(form); }, 400);
+    } else {
+      window.open(leaveGmailHref(form, email), "_blank", "noopener");
+    }
+  };
+
+  const saveOnly = () => {
+    if (pdfFile) deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share: ios });
+  };
 
   return (
     <>
@@ -156,16 +215,31 @@ export default function LeaveMail({
           {problems.map((p) => <p key={p}>{p}</p>)}
         </div>
       )}
-      {ready ? (
-        <a
-          className="btn block leave-send"
-          href={sendHref}
-          {...(phone ? {} : { target: "_blank", rel: "noopener noreferrer" })}
-        >
-          Send Mail
-        </a>
-      ) : (
-        <button className="btn block leave-send" disabled>Send Mail</button>
+      {ready && pdfFailed && (
+        <div className="leave-pending">
+          <p>
+            Couldn&apos;t prepare the form PDF. Check your connection, then{" "}
+            <button type="button" className="leave-retry" onClick={() => setAttempt((n) => n + 1)}>
+              try again
+            </button>.
+          </p>
+        </div>
+      )}
+      <button className="btn block leave-send" disabled={!pdfFile} onClick={send}>
+        {ready && !pdfFile && !pdfFailed ? "Preparing the form…" : "Send Mail"}
+      </button>
+      {/* The one thing a link can't do: attach the file. Said once, after the
+          tap, when the student is about to need it. */}
+      {saved === "saved" && pdfFile && (
+        <p className="leave-saved">
+          Form saved as <strong>{pdfFile.name}</strong>. Attach it in the mail
+          with the paperclip before sending.
+        </p>
+      )}
+      {saved === "cancelled" && (
+        <p className="leave-saved">
+          The form wasn&apos;t saved. Tap Send Mail again and choose <strong>Save to Files</strong>.
+        </p>
       )}
 
       <button
@@ -196,6 +270,17 @@ export default function LeaveMail({
                     <CopyButton copied={copied === "body"} onCopy={() => copy("body", body)} />
                   </div>
                   <pre>{body}</pre>
+                </div>
+                <div className="leave-line">
+                  <div className="leave-line-head">
+                    <span className="leave-line-label">Attachment</span>
+                    <button type="button" className="leave-copy" disabled={!pdfFile} onClick={saveOnly}>
+                      Save
+                    </button>
+                  </div>
+                  <div className="leave-line-value">
+                    {pdfFile ? pdfFile.name : pdfFailed ? "Couldn't prepare the form" : "Preparing the form…"}
+                  </div>
                 </div>
               </>
             ) : (

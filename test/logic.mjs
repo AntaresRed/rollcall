@@ -26,7 +26,9 @@ import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, p
   searchAllPor, postLine, porLabel } from "../src/lib/por.js";
 import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, LEAVE_HOSTELS, BLANK_LEAVE, longDate, clock, hostelOf,
   leaveProblems, leaveBody, leaveSubject, leaveMailto, leaveGmailHref,
-  rememberedPart, startingLeave } from "../src/lib/leavemail.js";
+  rememberedPart, startingLeave, leavePeriod } from "../src/lib/leavemail.js";
+import { formDate, formWhen, formAnswers, formFilename, winAnsi, timesWidth, wrapText,
+  fitBlock, formLayout, jpegInfo, buildPdf } from "../src/lib/leavepdf.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -2052,7 +2054,9 @@ console.log("\nleave mail");
   check("a complete form has no problems", leaveProblems(trip).length === 0);
   const blank = leaveProblems(BLANK_LEAVE);
   check("a blank form lists every required field",
-    blank.length === 1 && LEAVE_FIELDS.filter((f) => !f.optional).every((f) => blank[0].includes(f.label)));
+    blank.length === 1
+    && LEAVE_FIELDS.filter((f) => !f.optional && !f.derived).every((f) => blank[0].includes(f.label)));
+  check("the worked-out period is never asked for", !blank[0].includes("Total period"));
   check("additional info is never demanded", !blank[0].includes("Additional information"));
   check("a departure date without a time is missing",
     leaveProblems({ ...trip, departTime: "" }).some((p) => p.includes("departure")));
@@ -2074,7 +2078,7 @@ console.log("\nleave mail");
 
   const body = leaveBody(trip);
   check("every required field is in the body",
-    LEAVE_FIELDS.filter((f) => !f.optional).every((f) => body.includes(f.label + ":")));
+    LEAVE_FIELDS.filter((f) => !f.optional && !f.derived).every((f) => body.includes(f.label + ":")));
   check("blank additional info is left out entirely", !body.includes("Additional information"));
   check("filled additional info is included",
     leaveBody({ ...trip, info: "Reachable after 8 PM" }).includes("Additional information: Reachable after 8 PM"));
@@ -2087,7 +2091,9 @@ console.log("\nleave mail");
   check("opens by informing, not asking",
     body.startsWith("Respected Sir/Madam,\n\nI am writing to inform you regarding my leave details\n\nDate:"));
   check("no request line before the sign-off", !/grant/i.test(body)
-    && body.includes("6 October 2026, 9:05 AM\n\nThanking you,"));
+    && body.includes("Total period of leave: 4 days\n\nThanking you,"));
+  check("the period follows the return",
+    body.includes("6 October 2026, 9:05 AM\nTotal period of leave: 4 days"));
   check("the dates come last, after the reason",
     body.indexOf("Reason for leave:") < body.indexOf("of departure:")
     && body.indexOf("of departure:") < body.indexOf("of return:"));
@@ -2154,6 +2160,111 @@ console.log("\nleave mail");
     startingLeave(at, { reason: "Going home" }, { reason: "Old" }).reason === "Going home");
   check("the trip store cannot overwrite who you are",
     startingLeave(at, { name: "Me" }, { name: "Someone else" }).name === "Me");
+}
+console.log("\nleave form PDF");
+{
+  const form = {
+    date: "2026-08-30", name: "Debjit Sarkar", reg: "MBA 0178/62", hostel: "LVH", hostelOther: "",
+    room: "220", departDate: "2026-08-30", departTime: "10:30", returnDate: "2026-09-01",
+    returnTime: "18:00", address: "Sugam Sudhir, Kamalgazi, Garia", phone: "8585820504",
+    reason: "Family", info: "",
+  };
+
+  check("period counts calendar days, as the printout does", leavePeriod("2026-08-30", "2026-09-01") === "2 days");
+  check("one day is singular", leavePeriod("2026-08-30", "2026-08-31") === "1 day");
+  check("same day is said in words", leavePeriod("2026-08-30", "2026-08-30") === "Less than a day");
+  check("across a year end", leavePeriod("2026-12-28", "2027-01-03") === "6 days");
+  check("backwards or missing is blank",
+    leavePeriod("2026-09-02", "2026-09-01") === "" && leavePeriod("", "2026-09-01") === "");
+
+  check("form dates are day first", formDate("2026-09-01") === "01/09/2026");
+  check("form times are 24-hour", formWhen("2026-09-01", "18:00") === "01/09/2026 18:00");
+  check("no time, no when", formWhen("2026-09-01", "") === "");
+
+  const answers = formAnswers(form);
+  check("reg. no. is printed exactly as typed", answers.reg === "MBA 0178/62");
+  check("enclosures are the additional info", formAnswers({ ...form, info: " 2 tickets " }).info === "2 tickets");
+  check("\"Other\" prints what was typed", formAnswers({ ...form, hostel: "Other", hostelOther: "MDC" }).hostel === "MDC");
+
+  check("file named for the student and the departure",
+    formFilename(form) === "Leave Application - Debjit Sarkar - 30-08-2026.pdf");
+  check("characters a filename can't hold are dropped",
+    formFilename({ ...form, name: 'A/B: "C"' }) === "Leave Application - A B C - 30-08-2026.pdf");
+
+  check("ASCII passes through WinAnsi", winAnsi("Ab 1").join() === "65,98,32,49");
+  check("curly quotes and dashes map to their WinAnsi codes",
+    winAnsi("’–“").join() === "146,150,147");
+  check("the rupee sign becomes Rs", winAnsi("₹500").join() === "82,115,53,48,48");
+  check("a character Times can't draw becomes ?", winAnsi("ক").join() === "63");
+
+  check("Times widths match the standard metrics", timesWidth("Hello", 1000) === 722 + 444 + 278 + 278 + 500);
+  const wrapped = wrapText("one two three four", [timesWidth("one two", 10)], 10);
+  check("wraps at spaces", wrapped.join("|") === "one two|three|four");
+  check("keeps the student's own line breaks", wrapText("a\nb", [500], 9).join("|") === "a|b");
+  check("cuts a word longer than the line",
+    wrapText("abcdefghij", [timesWidth("abcd", 10)], 10).every((l) => timesWidth(l, 10) <= timesWidth("abcd", 10)));
+  const fitted = fitBlock("word ".repeat(200), [100], 2);
+  check("an overflowing block ends in an ellipsis on its last line",
+    fitted.lines.length === 2 && fitted.lines[1].endsWith("…") && fitted.size === 7);
+  check("a short block keeps full size", fitBlock("Family", [300], 3).size === 9);
+
+  const runs = formLayout(form);
+  const at = (str) => runs.find((r) => r.str === str);
+  check("every answer on the printout lands on the page",
+    ["30/08/2026", "Debjit Sarkar", "MBA 0178/62", "LVH", "220", "30/08/2026 10:30",
+      "01/09/2026 18:00", "2 days", "Sugam Sudhir, Kamalgazi, Garia", "8585820504", "Family"]
+      .every((s) => at(s)));
+  check("each sits where the printout puts it",
+    at("Debjit Sarkar").x === 254.7 && at("Debjit Sarkar").y === 225
+    && at("Family").x === 227.7 && at("Family").y === 366.75);
+  check("blank enclosures print nothing", runs.length === 11);
+  check("nothing runs off the right edge", runs.every((r) => r.x + timesWidth(r.str, r.size) <= 526));
+  const long = formLayout({ ...form, hostel: "Other", hostelOther: "Married Students' Quarters, Block C, Joka" });
+  const hostelRun = long.find((r) => r.y === 242.25 && r.x === 265.4);
+  check("a long hostel shrinks rather than running into Room No.",
+    hostelRun.size < 9 && hostelRun.x + timesWidth(hostelRun.str, hostelRun.size) <= 374);
+  const infoRuns = formLayout({ ...form, info: "1. Invitation card\n2. Train ticket\n3. Letter" })
+    .filter((r) => r.y >= 402.5);
+  check("enclosures wrap back under their label",
+    infoRuns.length === 3 && infoRuns[0].x === 256 && infoRuns[1].x === 104);
+  check("enclosures stay clear of the signature",
+    infoRuns.every((r) => r.x + timesWidth(r.str, r.size) <= 385));
+
+  // A JPEG in name only: the frame header the builder reads, and nothing else.
+  const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x04, 0x00, 0x00,
+    0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x10, 0x00, 0x20, 0x01, 0x01, 0x11, 0x00, 0xff, 0xd9]);
+  check("reads a JPEG's size past its other segments",
+    JSON.stringify(jpegInfo(jpeg)) === JSON.stringify({ height: 16, width: 32, components: 1 }));
+  check("not a JPEG, no info", jpegInfo(new Uint8Array([1, 2, 3])) === null);
+
+  const pdf = buildPdf({
+    form: jpeg,
+    signature: { jpeg, x: 400, y: 395, w: 100, h: 20 },
+    runs: formLayout({ ...form, reason: "Sister's (big) wedding \\ reception" }),
+    title: "Leave Application - Debjit Sarkar",
+  });
+  const raw = Array.from(pdf, (b) => String.fromCharCode(b)).join("");
+  check("starts as a PDF and ends as one", raw.startsWith("%PDF-1.4") && raw.trimEnd().endsWith("%%EOF"));
+  const xrefAt = Number(/startxref\n(\d+)/.exec(raw)[1]);
+  check("startxref points at the table", raw.slice(xrefAt, xrefAt + 4) === "xref");
+  const offsets = [...raw.slice(xrefAt).matchAll(/^(\d{10}) 00000 n $/gm)].map((m) => Number(m[1]));
+  check("every table entry points at its object",
+    offsets.length === 8 && offsets.every((o, i) => raw.startsWith(`${i + 1} 0 obj`, o)));
+  const lengthsRight = [...raw.matchAll(/\/Length (\d+)[^]*?stream\n/g)].every((m) => {
+    const start = m.index + m[0].length;
+    return raw.slice(start + Number(m[1]), start + Number(m[1]) + 10) === "\nendstream";
+  });
+  check("every stream is exactly as long as it says", lengthsRight);
+  check("brackets and backslashes in answers are escaped",
+    raw.includes("(Sister's \\(big\\) wedding \\\\ reception) Tj"));
+  check("the answers are Times-Roman", raw.includes("/BaseFont /Times-Roman /Encoding /WinAnsiEncoding"));
+  check("a grey form is drawn grey", raw.includes("/ColorSpace /DeviceGray"));
+  const noSig = Array.from(buildPdf({ form: jpeg, runs: [] }), (b) => String.fromCharCode(b)).join("");
+  check("no signature, nothing drawn for one", !noSig.includes("/Sig Do") && noSig.includes("/Form Do"));
+  survives("refuses a form image that isn't a JPEG", () => {
+    try { buildPdf({ form: new Uint8Array([0]), runs: [] }); throw new Error("accepted"); }
+    catch (e) { if (e.message === "accepted") throw e; }
+  });
 }
 
 console.log(`\n${fail === 0 ? "all logic checks passed" : fail + " FAILURES"}`);

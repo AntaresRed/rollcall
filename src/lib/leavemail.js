@@ -39,6 +39,8 @@ export const LEAVE_FIELDS = [
   { key: "info", label: "Additional information", optional: true },
   { key: "departure", label: "Date and expected time of departure" },
   { key: "return", label: "Date and expected time of return" },
+  // Worked out from the two dates, so never asked for and never "missing".
+  { key: "period", label: "Total period of leave", derived: true },
 ];
 
 /**
@@ -89,6 +91,27 @@ const when = (date, time) => {
 
 const text = (v) => String(v ?? "").trim();
 
+const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * Calendar days from the departure date to the return date — 30 August to
+ * 1 September is "2 days", as on the printout the office already accepts.
+ * Blank until both dates are in. UTC so a daylight-saving change on the
+ * phone can't make a day 23 hours long.
+ */
+export function leavePeriod(departDate, returnDate) {
+  const a = ISO.exec(String(departDate ?? ""));
+  const b = ISO.exec(String(returnDate ?? ""));
+  if (!a || !b) return "";
+  const days = Math.round(
+    (Date.UTC(b[1], b[2] - 1, b[3]) - Date.UTC(a[1], a[2] - 1, a[3])) / 86_400_000,
+  );
+  if (days < 0) return "";
+  if (days === 0) return "Less than a day";
+  return days === 1 ? "1 day" : `${days} days`;
+}
+
+
 /** The hostel as the mail should name it, "Other" resolved to what was typed. */
 export const hostelOf = (form) =>
   (form?.hostel === "Other" ? text(form?.hostelOther) : text(form?.hostel));
@@ -105,6 +128,7 @@ export function leaveValues(form) {
     room: text(f.room),
     departure: when(f.departDate, f.departTime),
     return: when(f.returnDate, f.returnTime),
+    period: leavePeriod(f.departDate, f.returnDate),
     address: text(f.address),
     reason: text(f.reason),
     info: text(f.info),
@@ -121,7 +145,7 @@ export function leaveValues(form) {
 export function leaveProblems(form) {
   const v = leaveValues(form);
   const missing = LEAVE_FIELDS
-    .filter((fl) => !fl.optional && !v[fl.key])
+    .filter((fl) => !fl.optional && !fl.derived && !v[fl.key])
     .map((fl) => fl.label);
   const problems = missing.length ? [`Still needed: ${missing.join(", ")}.`] : [];
   // Ten digits at least, whatever else is typed around them: a number the
@@ -172,7 +196,7 @@ export function leaveSubject(form) {
 export function leaveBody(form) {
   const v = leaveValues(form);
   const lines = LEAVE_FIELDS
-    .filter((fl) => !fl.optional || v[fl.key])
+    .filter((fl) => (!fl.optional && !fl.derived) || v[fl.key])
     .map((fl) => {
       const value = v[fl.key];
       return value.includes("\n") ? `${fl.label}:\n${value}` : `${fl.label}: ${value}`;
