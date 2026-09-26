@@ -9,6 +9,11 @@
  * its line. The printout is kept in rollcall-resources as
  * "Leave Application Form (template).pdf".
  *
+ * The form image is that printout's background with one change: the
+ * "Copy to" list at the foot of the page is painted out, below the last
+ * dashed rule. The student emails the form rather than routing paper copies,
+ * so the list describes a distribution that doesn't happen.
+ *
  * Written by hand rather than through a PDF library. The file is one page:
  * two JPEGs and a dozen lines of Times, which is a couple of hundred lines to
  * write and none to download — a library would be the bulk of this feature's

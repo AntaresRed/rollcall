@@ -235,12 +235,11 @@ export default function LeaveMail({
           Download form
         </button>
       </div>
-      {/* The one thing a link can't do: attach the file. Said once, after the
-          tap, when the student is about to need it. */}
+      {/* Names the file, so it can be found again from the mail's attach
+          picker — a link can't attach it for them. */}
       {saved === "saved" && pdfFile && (
         <p className="leave-saved">
-          Form saved as <strong>{pdfFile.name}</strong>. Attach it in the mail
-          with the paperclip before sending.
+          Leave form saved as <strong>{pdfFile.name}</strong>
         </p>
       )}
       {saved === "cancelled" && (
