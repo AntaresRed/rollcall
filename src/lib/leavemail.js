@@ -228,6 +228,25 @@ export function leaveMailto(form) {
 }
 
 /**
+ * The Gmail app's own compose screen, on iOS.
+ *
+ * A mailto link on an iPhone opens whatever the default mail app is, and for
+ * most students that is Apple Mail with no account in it — they live in the
+ * Gmail app. Gmail answers to its own scheme regardless of the default, with
+ * the same four fields filled in. If Gmail isn't installed the link goes
+ * nowhere, which is why the screen offers the mailto link beside it.
+ */
+export function leaveGmailAppHref(form) {
+  const q = [
+    `to=${encodeURIComponent(LEAVE_TO.join(","))}`,
+    `cc=${encodeURIComponent(LEAVE_CC.join(","))}`,
+    `subject=${encodeURIComponent(leaveSubject(form))}`,
+    `body=${encodeURIComponent(leaveBody(form))}`,
+  ].join("&");
+  return `googlegmail://co?${q}`;
+}
+
+/**
  * Gmail's compose window, in the student's institute account.
  *
  * `authuser` is what makes this worth offering over the mailto link: someone

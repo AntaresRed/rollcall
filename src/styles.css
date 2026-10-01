@@ -3645,6 +3645,15 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   color: var(--slate);
 }
 .leave-saved strong { color: var(--ink); overflow-wrap: anywhere; }
+.leave-ask {
+  margin: 14px 0 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.leave-ask + .leave-acts { margin-top: 6px; }
 .leave-retry {
   border: 0;
   background: none;

@@ -97,7 +97,7 @@ comment on table public.feature_events is
 --   pay              <shop>:app | <shop>:qr | <shop>:copy — the UPI button,
 --                    the QR shown, the UPI id copied; not a completed payment
 --   original_menu    night:<canteen> | tuck:<shop> — the photographs opened
---   leave_mail       send | save-pdf
+--   leave_mail       send | save-pdf | open-gmail | open-mail-app (the iOS app choice)
 --   calendar_export  (no detail)
 --
 -- Attendance marks and reschedules are not here: their own tables already

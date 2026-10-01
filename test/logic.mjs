@@ -25,7 +25,7 @@ import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize,
   searchAllPor, postLine, porLabel } from "../src/lib/por.js";
 import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, LEAVE_HOSTELS, BLANK_LEAVE, longDate, clock, hostelOf,
-  leaveProblems, leaveBody, leaveSubject, leaveMailto, leaveGmailHref,
+  leaveProblems, leaveBody, leaveSubject, leaveMailto, leaveGmailHref, leaveGmailAppHref,
   rememberedPart, startingLeave, leavePeriod } from "../src/lib/leavemail.js";
 import { formDate, formWhen, formAnswers, formFilename, winAnsi, timesWidth, wrapText,
   fitBlock, formLayout, jpegInfo, buildPdf } from "../src/lib/leavepdf.js";
@@ -2119,6 +2119,13 @@ console.log("\nleave mail");
     && gmail.searchParams.get("su") === leaveSubject(trip) && gmail.searchParams.get("body") === body);
   check("Gmail spaces are %20, never +", !leaveGmailHref(trip, "").includes("+")
     && new URL(leaveGmailHref({ ...trip, reason: "1+1 days" }, "")).searchParams.get("body").includes("1+1 days"));
+  const app = leaveGmailAppHref(trip);
+  check("the Gmail app link uses Gmail's own scheme", app.startsWith("googlegmail://co?"));
+  const appQ = new URLSearchParams(app.split("?")[1]);
+  check("the Gmail app link carries to, cc, subject and body",
+    appQ.get("to") === LEAVE_TO.join(",") && appQ.get("cc") === LEAVE_CC.join(",")
+    && appQ.get("subject") === leaveSubject(trip) && appQ.get("body") === body);
+  check("the Gmail app link writes spaces as %20", !app.includes("+"));
   check("no account, no authuser", !new URL(leaveGmailHref(trip, "")).searchParams.has("authuser"));
 
   const kept = rememberedPart(trip);

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   LEAVE_TO, LEAVE_CC, LEAVE_HOSTELS, BLANK_LEAVE, loadLeave, saveLeave,
-  leaveProblems, leaveSubject, leaveBody, leaveMailto, leaveGmailHref,
+  leaveProblems, leaveSubject, leaveBody, leaveMailto, leaveGmailHref, leaveGmailAppHref,
 } from "../lib/leavemail";
 import { isIOS, isAndroid } from "../lib/platform";
 import { makeLeavePdf } from "../lib/leavepdf";
@@ -67,36 +67,45 @@ export default function LeaveMail({
   const pdfFile = pdf?.key === formKey ? pdf.file : null;
   const pdfFailed = pdf?.key === formKey && pdf.error;
 
-  const [saved, setSaved] = useState("");        // "" | "saved" | "cancelled"
+  // Which form was last saved, by key: a form edited after saving has to be
+  // saved again before it is the one worth attaching.
+  const [savedKey, setSavedKey] = useState(null);
+  const savedThis = Boolean(pdfFile) && savedKey === formKey;
 
-  // One button, two routes. On a phone the mail app: Gmail's web compose
-  // opens in a browser tab there, not in the Gmail app. On a laptop Gmail in
+  // One button, three routes. Android: the mail app — Gmail's web compose
+  // opens in a browser tab there, not in the Gmail app. A laptop: Gmail in
   // the institute account, because mailto there usually lands in a desktop
-  // client nobody ever set up.
+  // client nobody ever set up. iOS: see below.
   const ios = isIOS();
   const phone = ios || isAndroid();
 
+  // Always a plain download now, never the share sheet. The sheet offered
+  // Mail and Gmail as places to "save" to, and a student who picked one got
+  // a mail with the form attached and nobody to send it to — and then the
+  // app opened a second, addressed one without the form. A download goes to
+  // Files › Downloads, which is where the attach picker in Gmail and Mail
+  // both look.
+  const save = () => {
+    deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share: false });
+    setSavedKey(formKey);
+  };
+
   /**
    * Save the form, then open the mail. Links cannot attach anything, so the
-   * student attaches the saved PDF themselves — the note that appears says
-   * so. On iOS the save is the share sheet ("Save to Files"), because a plain
-   * download from a Home Screen app has nowhere useful to land; everywhere
-   * else it is an ordinary download, started before the mail opens so both
-   * happen inside the one tap.
+   * student attaches the saved PDF themselves.
+   *
+   * On iOS that is two taps, not one. Safari asks before it downloads, and
+   * leaving for another app in the same moment talks over that question; and
+   * an app opened a beat after the tap, rather than by it, may not open at
+   * all. So the first tap saves, and the buttons become a question — which
+   * app to send it from — whose answer is the second tap. Elsewhere both
+   * happen in the one tap, the download first.
    */
-  const send = async () => {
+  const send = () => {
     if (!pdfFile) return;
     track("leave_mail", "send");
-    const save = (share) => deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share });
-    if (ios) {
-      const how = await save(true);
-      if (how === "cancelled") { setSaved("cancelled"); return; }
-      setSaved("saved");
-      window.location.href = leaveMailto(form);
-      return;
-    }
-    save(false);
-    setSaved("saved");
+    save();
+    if (ios) return;
     if (phone) {
       // A beat for the download to register before the mail app takes over.
       setTimeout(() => { window.location.href = leaveMailto(form); }, 400);
@@ -108,8 +117,10 @@ export default function LeaveMail({
   const saveOnly = () => {
     if (!pdfFile) return;
     track("leave_mail", "save-pdf");
-    deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share: ios });
+    save();
   };
+
+  const sendLabel = ready && !pdfFile && !pdfFailed ? "Preparing…" : "Send Mail";
 
   return (
     <>
@@ -229,26 +240,47 @@ export default function LeaveMail({
           </p>
         </div>
       )}
-      {/* Side by side: the form on its own is worth having too — to print,
-          to send again later, or to hand over in person. */}
-      <div className="leave-acts">
-        <button className="btn leave-send" disabled={!pdfFile} onClick={send}>
-          {ready && !pdfFile && !pdfFailed ? "Preparing…" : "Send Mail"}
-        </button>
-        <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
-          Download form
-        </button>
-      </div>
+      {ios && savedThis ? (
+        // Asked rather than guessed. A mailto link opens whatever the iPhone's
+        // default is — Apple Mail, for most, with no account in it — while
+        // most students live in Gmail, which has its own way in. Both are
+        // plain links, so the app opens from the tap itself.
+        <>
+          <p className="leave-ask">Send the mail from</p>
+          <div className="leave-acts">
+            <a
+              className="btn leave-send"
+              href={leaveGmailAppHref(form)}
+              onClick={() => track("leave_mail", "open-gmail")}
+            >
+              Gmail
+            </a>
+            <a
+              className="btn ghost leave-send"
+              href={leaveMailto(form)}
+              onClick={() => track("leave_mail", "open-mail-app")}
+            >
+              Mail app
+            </a>
+          </div>
+        </>
+      ) : (
+        // Side by side: the form on its own is worth having too — to print,
+        // to send again later, or to hand over in person.
+        <div className="leave-acts">
+          <button className="btn leave-send" disabled={!pdfFile} onClick={send}>
+            {sendLabel}
+          </button>
+          <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
+            Download form
+          </button>
+        </div>
+      )}
       {/* Names the file, so it can be found again from the mail's attach
           picker — a link can't attach it for them. */}
-      {saved === "saved" && pdfFile && (
+      {savedThis && (
         <p className="leave-saved">
           Leave form saved as <strong>{pdfFile.name}</strong>
-        </p>
-      )}
-      {saved === "cancelled" && (
-        <p className="leave-saved">
-          The form wasn&apos;t saved. Tap Send Mail again and choose <strong>Save to Files</strong>.
         </p>
       )}
 
