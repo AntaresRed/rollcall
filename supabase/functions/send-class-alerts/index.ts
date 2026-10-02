@@ -30,7 +30,7 @@ import webpush from "npm:web-push@3.6.7";
  * bare 500 turned up and there was no way to tell a deploy artefact from a
  * real fault.
  */
-const BUILD = "2026-08-31a";
+const BUILD = "2026-10-02a";
 
 const SWEEP_MINUTES = 5; // must match the cron interval
 
@@ -424,14 +424,23 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
     }));
   }
 
-  // Claim each (class, date) atomically — the insert fails if another sweep
-  // already sent it, which is our dedupe.
+  // Claim each (class, date) atomically — a row comes back only if this sweep
+  // inserted it, which is our dedupe. ON CONFLICT DO NOTHING rather than a
+  // plain insert: every alert is due on about six sweeps of its window, and
+  // the five losing inserts each logged a unique-violation error in Postgres,
+  // burying real errors under expected ones.
   const claimed: Due[] = [];
   for (const d of due) {
-    const { error } = await admin
+    const { data, error } = await admin
       .from("alert_log")
-      .insert({ class_id: d.cls.id, class_date: d.date });
-    if (!error) {
+      .upsert(
+        { class_id: d.cls.id, class_date: d.date },
+        { onConflict: "class_id,class_date", ignoreDuplicates: true },
+      )
+      .select("class_id");
+    // A duplicate is no longer an error, so one that does arrive is real.
+    if (error) console.error("alert_log claim failed", d.cls.id, d.date, error.message);
+    if (!error && data?.length) {
       claimed.push(d);
       // Owed back until this alert reaches a device or is deliberately
       // released below.
