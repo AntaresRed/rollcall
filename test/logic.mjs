@@ -26,7 +26,7 @@ import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, p
   searchAllPor, postLine, porLabel } from "../src/lib/por.js";
 import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, LEAVE_HOSTELS, BLANK_LEAVE, longDate, clock, hostelOf,
   leaveProblems, leaveBody, leaveSubject, leaveMailto, leaveGmailHref, leaveGmailAppHref,
-  rememberedPart, startingLeave, leavePeriod } from "../src/lib/leavemail.js";
+  MAIL_APPS, mailAppOf, leaveAppHref, loadMailApp, rememberedPart, startingLeave, leavePeriod } from "../src/lib/leavemail.js";
 import { formDate, formWhen, formAnswers, formFilename, winAnsi, timesWidth, wrapText,
   fitBlock, formLayout, jpegInfo, buildPdf } from "../src/lib/leavepdf.js";
 import catalogue from "../src/data/catalogue.json";
@@ -2126,6 +2126,12 @@ console.log("\nleave mail");
     appQ.get("to") === LEAVE_TO.join(",") && appQ.get("cc") === LEAVE_CC.join(",")
     && appQ.get("subject") === leaveSubject(trip) && appQ.get("body") === body);
   check("the Gmail app link writes spaces as %20", !app.includes("+"));
+  check("the remembered app opens its own link",
+    leaveAppHref(trip, "gmail") === app && leaveAppHref(trip, "mail") === leaveMailto(trip));
+  check("only a known app is taken back from storage",
+    Object.keys(MAIL_APPS).every((k) => mailAppOf(k) === k)
+    && [null, undefined, "", "outlook", "toString", 1].every((v) => mailAppOf(v) === null));
+  check("no storage, no remembered app", loadMailApp() === null);
   check("no account, no authuser", !new URL(leaveGmailHref(trip, "")).searchParams.has("authuser"));
 
   const kept = rememberedPart(trip);

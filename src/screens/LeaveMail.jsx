@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   LEAVE_TO, LEAVE_CC, LEAVE_HOSTELS, BLANK_LEAVE, loadLeave, saveLeave,
-  leaveProblems, leaveSubject, leaveBody, leaveMailto, leaveGmailHref, leaveGmailAppHref,
+  leaveProblems, leaveSubject, leaveBody, leaveMailto, leaveGmailHref, leaveAppHref,
+  MAIL_APPS, loadMailApp, saveMailApp,
 } from "../lib/leavemail";
-import { isIOS, isAndroid } from "../lib/platform";
+import { isIOS, isAndroid, isStandalone } from "../lib/platform";
 import { makeLeavePdf } from "../lib/leavepdf";
 import { deliverFile } from "../lib/deliver";
 import { track } from "../lib/track";
@@ -68,9 +69,12 @@ export default function LeaveMail({
   const pdfFailed = pdf?.key === formKey && pdf.error;
 
   // Which form was last saved, by key: a form edited after saving has to be
-  // saved again before it is the one worth attaching.
+  // saved again before it is the one worth attaching. A share sheet backed
+  // out of is keyed the same way, so its note goes once the form changes.
   const [savedKey, setSavedKey] = useState(null);
+  const [cancelledKey, setCancelledKey] = useState(null);
   const savedThis = Boolean(pdfFile) && savedKey === formKey;
+  const cancelledThis = !savedThis && cancelledKey === formKey;
 
   // One button, three routes. Android: the mail app — Gmail's web compose
   // opens in a browser tab there, not in the Gmail app. A laptop: Gmail in
@@ -79,14 +83,37 @@ export default function LeaveMail({
   const ios = isIOS();
   const phone = ios || isAndroid();
 
-  // Always a plain download now, never the share sheet. The sheet offered
-  // Mail and Gmail as places to "save" to, and a student who picked one got
-  // a mail with the form attached and nobody to send it to — and then the
-  // app opened a second, addressed one without the form. A download goes to
-  // Files › Downloads, which is where the attach picker in Gmail and Mail
-  // both look.
-  const save = () => {
-    deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share: false });
+  // Installed to the Home Screen, iOS ignores `download` and opens the PDF in
+  // a viewer instead, with nothing saved — so there, and only there, the
+  // form goes through the share sheet, whose Save to Files does save it.
+  // A Safari tab keeps the plain download, which lands in Files › Downloads.
+  //
+  // The sheet also offers Gmail and Mail, and picking one makes a mail with
+  // the form and nobody to send it to. That is why nothing opens on its own
+  // after the sheet: the app the mail is written in is always a second tap,
+  // so the worst a wrong pick does is one stray draft.
+  const sheet = ios && isStandalone();
+
+  // Which app the iPhone sends from: asked on first use, then remembered.
+  // `choosing` is the question on screen — the first time, or after Change.
+  const [mailApp, setMailApp] = useState(() => (ios ? loadMailApp() : null));
+  const [choosing, setChoosing] = useState(false);
+  const choose = (app) => {
+    track("leave_mail", `choose-${app}`);
+    saveMailApp(app);
+    setMailApp(app);
+    setChoosing(false);
+  };
+
+  // Nothing awaits before the download starts, so a caller that opens a
+  // window afterwards is still inside the tap. Only the sheet is awaited,
+  // and only to learn whether it was backed out of.
+  const save = async () => {
+    const how = await deliverFile(pdfFile.name, pdfFile, pdfFile.type, { share: sheet });
+    if (how === "cancelled") {
+      setCancelledKey(formKey);
+      return;
+    }
     setSavedKey(formKey);
   };
 
@@ -97,9 +124,9 @@ export default function LeaveMail({
    * On iOS that is two taps, not one. Safari asks before it downloads, and
    * leaving for another app in the same moment talks over that question; and
    * an app opened a beat after the tap, rather than by it, may not open at
-   * all. So the first tap saves, and the buttons become a question — which
-   * app to send it from — whose answer is the second tap. Elsewhere both
-   * happen in the one tap, the download first.
+   * all. So the first tap saves, and the button becomes "Open Gmail" (or
+   * the Mail app), a plain link whose tap opens it. Elsewhere both happen in
+   * the one tap, the download first.
    */
   const send = () => {
     if (!pdfFile) return;
@@ -240,37 +267,45 @@ export default function LeaveMail({
           </p>
         </div>
       )}
-      {ios && savedThis ? (
+      {ios && choosing ? (
         // Asked rather than guessed. A mailto link opens whatever the iPhone's
         // default is — Apple Mail, for most, with no account in it — while
-        // most students live in Gmail, which has its own way in. Both are
-        // plain links, so the app opens from the tap itself.
+        // most students live in Gmail, which has its own way in.
         <>
           <p className="leave-ask">Send the mail from</p>
           <div className="leave-acts">
-            <a
-              className="btn leave-send"
-              href={leaveGmailAppHref(form)}
-              onClick={() => track("leave_mail", "open-gmail")}
-            >
-              Gmail
-            </a>
-            <a
-              className="btn ghost leave-send"
-              href={leaveMailto(form)}
-              onClick={() => track("leave_mail", "open-mail-app")}
-            >
-              Mail app
-            </a>
+            <button className="btn leave-send" onClick={() => choose("gmail")}>
+              {MAIL_APPS.gmail}
+            </button>
+            <button className="btn ghost leave-send" onClick={() => choose("mail")}>
+              {MAIL_APPS.mail}
+            </button>
           </div>
         </>
       ) : (
         // Side by side: the form on its own is worth having too — to print,
         // to send again later, or to hand over in person.
         <div className="leave-acts">
-          <button className="btn leave-send" disabled={!pdfFile} onClick={send}>
-            {sendLabel}
-          </button>
+          {ios && !mailApp ? (
+            // Not disabled while the form is unfinished: the question has
+            // nothing to do with the form, and is better out of the way early.
+            <button className="btn leave-send" onClick={() => setChoosing(true)}>
+              Choose app to send mail
+            </button>
+          ) : ios && savedThis ? (
+            // A plain link, so the app opens from the tap itself.
+            <a
+              className="btn leave-send"
+              href={leaveAppHref(form, mailApp)}
+              onClick={() => track("leave_mail", mailApp === "gmail" ? "open-gmail" : "open-mail-app")}
+            >
+              Open {MAIL_APPS[mailApp]}
+            </a>
+          ) : (
+            <button className="btn leave-send" disabled={!pdfFile} onClick={send}>
+              {sendLabel}
+            </button>
+          )}
           <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
             Download form
           </button>
@@ -281,6 +316,28 @@ export default function LeaveMail({
       {savedThis && (
         <p className="leave-saved">
           Leave form saved as <strong>{pdfFile.name}</strong>
+        </p>
+      )}
+      {sheet && cancelledThis && (
+        <p className="leave-saved">
+          The form wasn&apos;t saved. Tap {mailApp ? "Send Mail" : "Download form"} again
+          and choose <strong>Save to Files</strong>.
+        </p>
+      )}
+      {/* Said before the sheet opens, not after: it is the one place a wrong
+          pick is easy to make, and Save to Files is far down its list. */}
+      {sheet && mailApp && !choosing && !savedThis && !cancelledThis && pdfFile && (
+        <p className="leave-saved">
+          Send Mail saves the form first. In the list that opens, choose{" "}
+          <strong>Save to Files</strong>.
+        </p>
+      )}
+      {ios && mailApp && !choosing && (
+        <p className="leave-saved">
+          Sending from {MAIL_APPS[mailApp]} ·{" "}
+          <button type="button" className="leave-retry" onClick={() => setChoosing(true)}>
+            Change
+          </button>
         </p>
       )}
 
