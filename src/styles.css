@@ -2785,6 +2785,22 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   color: var(--mute);
   padding-top: 2px;
 }
+/* Serving times: four short pairs, so two columns keep the box small enough
+   that the week still starts above the fold. */
+.mess-timings {
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 9px 13px 10px;
+  margin-bottom: 12px;
+}
+.mess-timings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+}
+.mess-timings .mess-meal { display: block; padding-top: 0; }
+/* As the mess prints it, "8 AM to 10:30 AM". */
+.mess-time { font-size: 13px; white-space: nowrap; }
 .mess-everyday .mess-meal { display: inline; margin-right: 6px; }
 .mess-items { font-size: 13.5px; line-height: 1.5; }
 

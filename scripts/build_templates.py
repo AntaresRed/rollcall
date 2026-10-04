@@ -121,6 +121,14 @@ def day_mess():
         "'Breakfast: ... Lunch: ...' to split it per meal; anything else is "
         "kept whole and shown as one note.",
         "",
+        "Serving times (optional):",
+        "Below the week, a 'Meal | Timings' block: a row whose cell reads "
+        "'Timings' starts it, and each row under it is a meal name and its "
+        "time. The times are shown in a box above the week, exactly as "
+        "written. 'Evening Snacks' counts as Snacks. A label that is not one "
+        "of the four meals stops the build — a night canteen's hours go in "
+        "the night menu workbook. Leave a time blank to publish none.",
+        "",
         "What the app does with blanks:",
         "An empty meal cell is allowed and is reported as a warning when the "
         "build runs. It will show as an empty meal in the app.",
@@ -140,6 +148,9 @@ def day_mess():
             rows.append(["Everyday offering---->",
                          "Breakfast: Bread, Butter, Jam, Boiled Eggs "
                          "Lunch: Salad, Curd, Plain Rice", "", "", ""])
+        rows += [[""] * 5, ["Meal", "Timings"],
+                 ["Breakfast", "8 AM to 10 AM"], ["Lunch", ""],
+                 ["Snacks", ""], ["Dinner", ""]]
         sheet(wb, f"{tag} Day Mess Menu",
               ["Day", "Breakfast", "Lunch", "Snacks", "Dinner"],
               rows, widths=[22, 34, 34, 26, 34],

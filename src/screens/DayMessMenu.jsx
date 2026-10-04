@@ -49,6 +49,22 @@ export default function DayMessMenu({ onBack, now = new Date(), embedded = false
         ))}
       </div>
 
+      {/* The same every day, so stated once above the week rather than in
+          every day's gutter. Only where the mess publishes them — WH, today. */}
+      {hostel?.timings && Object.keys(hostel.timings).length > 0 && (
+        <div className="mess-timings">
+          <div className="mess-everyday-head">Timings</div>
+          <div className="mess-timings-grid">
+            {MEALS.filter((m) => hostel.timings[m]).map((m) => (
+              <div key={m}>
+                <span className="mess-meal">{m}</span>
+                <span className="mess-time">{hostel.timings[m]}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Served every day, so it belongs above the week rather than repeated
           seven times inside it. Only OH publishes one. */}
       {hostel?.everyday && Object.keys(hostel.everyday).length > 0 && (

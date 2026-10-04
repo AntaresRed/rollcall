@@ -32,6 +32,12 @@ A row containing 'Everyday offering' is treated as food served regardless of the
 
 
 
+**Serving times (optional):**
+
+Below the week, a 'Meal | Timings' block: a row whose cell reads 'Timings' starts it, and each row under it is a meal name and its time. The times are shown in a box above the week, exactly as written. 'Evening Snacks' counts as Snacks. A label that is not one of the four meals stops the build — a night canteen's hours go in the night menu workbook. Leave a time blank to publish none.
+
+
+
 **What the app does with blanks:**
 
 An empty meal cell is allowed and is reported as a warning when the build runs. It will show as an empty meal in the app.

@@ -10,6 +10,7 @@
       "id": "nh",
       "name": "NH",
       "everyday": {},
+      "timings": {},
       "days": [
         {
           "day": "Monday",
@@ -85,6 +86,7 @@
         "Snacks": "Tea/Coffee/Rasna, Bread Butter Jam",
         "Dinner": "Salad, Roti, Steamed Rice"
       },
+      "timings": {},
       "days": [
         {
           "day": "Monday",
@@ -155,6 +157,7 @@
       "id": "lvh",
       "name": "LVH",
       "everyday": {},
+      "timings": {},
       "days": [
         {
           "day": "Monday",
@@ -225,13 +228,19 @@
       "id": "wh",
       "name": "WH",
       "everyday": {},
+      "timings": {
+        "Breakfast": "8 AM to 10:30 AM",
+        "Lunch": "1 PM to 2:30 PM",
+        "Snacks": "5 PM to 6:30 PM",
+        "Dinner": "8 PM to 9:30 PM"
+      },
       "days": [
         {
           "day": "Monday",
           "meals": {
             "Breakfast": "Vada, Aloo Paratha, Sambhar, Chutney, Curd, Tea, Coffee, Milk, Bread Butter Jam",
-            "Lunch": "Kadhai Paneer/Paneer Pasanda, Aloo Gobhi Methi Dry, Lal Saag, Sambhar, Egg Curry, Fish Curry, Curd, Roti, Rice, Fried Rice",
-            "Snacks": "Corn Chaat, Bread Butter Jam, Tea, Coffee",
+            "Lunch": "Kadhai Paneer/Paneer Pasanda, Aloo Gobhi Methi Dry, Lal Sakalu Bhaji, Sambhar, Egg Curry, Fish Curry, Curd, Roti, Rice, Fried Rice",
+            "Snacks": "Momos, Bread Butter Jam, Tea, Coffee",
             "Dinner": "Veg Kofta, Veg Tawa Sabji, Chilli Soyabean, Veg Tadka, Egg Tadka, Rumali Roti, Roti, Rice, Fried Rice, Kheer"
           }
         },
@@ -256,7 +265,7 @@
         {
           "day": "Thursday",
           "meals": {
-            "Breakfast": "Aloo Paratha, Sewai Upma, Tea, Coffee, Milk, Bread Butter Jam",
+            "Breakfast": "Aloo Paratha, Pav Bhaji, Tea, Coffee, Milk, Bread Butter Jam",
             "Lunch": "Kadhi Pakoda, Kala Chana Masala, Mix Veg Dry, Dal, Curd, Roti, Rice, Fried Rice, Papad",
             "Snacks": "Samosa Chaat, Bread Butter Jam, Tea, Coffee",
             "Dinner": "Dal Puri/Bhature, Chole Masala, Veg Pasta, Baingan Bharta, Moong Masoor Dal, Roti, Rice, Khichdi, Fruit Custard"
@@ -268,13 +277,13 @@
             "Breakfast": "Poha, Idli, Sambhar, Chutney, Bread Butter Jam, Tea, Coffee, Milk",
             "Lunch": "Baingan Masala, Veg 65, Palak Paneer, Dal Fry, Sambhar, Curd, Roti, Rice, Fried Rice",
             "Snacks": "Papdi Chaat, Bread Butter Jam, Tea, Coffee",
-            "Dinner": "Paneer Tikka/Paneer Tikka Masala, Chicken Gravy/Tandoori Chicken, Dal Makhni, Potato Sabji, Mix Veg, Roti, Corn Rice, Butter Naan, Gajar/Moong Dal Halwa"
+            "Dinner": "Paneer Tikka/Paneer Tikka Masala, Chicken Gravy/Tandoori Chicken, Dal Makhni, Potal Aloo Sabji, Mix Veg, Roti, Corn Rice, Butter Naan, Gajar/Moong Dal Halwa"
           }
         },
         {
           "day": "Saturday",
           "meals": {
-            "Breakfast": "Upma, Chole Bhature, Bread Butter Jam, Tea, Coffee, Milk",
+            "Breakfast": "Cheela, Chole Bhature, Bread Butter Jam, Tea, Coffee, Milk",
             "Lunch": "Paneer Kofta, Egg Curry, Aloo Gobhi Gravy Sabji, Plain Dal, Kakrol Aloo Bhaji, Rice, Roti, Fried Rice",
             "Snacks": "Fruit Chaat, Bread Butter Jam, Tea, Coffee",
             "Dinner": "Aloo Paratha, Rajma, Paneer Bhurji, Aloo Shimla Mirch, Khaja/Dahi Bada, Dal, Rice, Roti"

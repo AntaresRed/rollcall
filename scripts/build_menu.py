@@ -19,6 +19,12 @@ Two things the sheets do that a naive reader would lose:
   * Hostels can share a menu — LVH and WH are identical today. They still get
     their own entry, because they are separate messes that happen to agree
     this term, and merging them would need undoing the moment one changes.
+
+A sheet may also carry its serving times, as a "Meal | Timings" block below
+the week. Labels are matched to a meal by name ("Evening Snacks" is Snacks),
+and one that names no meal stops the build rather than being dropped — a
+night canteen's hours belong in the night menu workbook, not here. A hostel
+that publishes no times simply has none; they are never borrowed from another.
 """
 
 import json
@@ -34,6 +40,7 @@ DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday",
 MEALS = ["Breakfast", "Lunch", "Snacks", "Dinner"]
 
 EVERYDAY = re.compile(r"every\s*day\s*offering", re.I)
+TIMINGS = re.compile(r"timings?", re.I)
 
 
 def norm(v):
@@ -91,13 +98,29 @@ def read_sheet(ws):
         die(f"{ws.title}: no column for {', '.join(missing)} "
             f"(header reads {header})")
 
-    days, everyday = [], {}
+    days, everyday, timings = [], {}, {}
+    tcol = None             # the Timings column, once its header is seen
     for r in rows[1:]:
         label = r[0]
         if EVERYDAY.search(" ".join(r)):
             everyday = split_everyday(" ".join(x for x in r if x))
             continue
+        hit = next((i for i, x in enumerate(r) if TIMINGS.fullmatch(x)), None)
+        if hit is not None:
+            tcol = hit
+            continue
         match = next((d for d in DAYS if d.lower() == label.lower()), None)
+        if not match and tcol is not None:
+            meal = [m for m in MEALS if re.search(rf"\b{m}\b", label, re.I)]
+            if len(meal) != 1:
+                die(f"{ws.title}: timing row '{label}' names no single meal "
+                    f"of {MEALS}")
+            if meal[0] in timings:
+                die(f"{ws.title}: two timing rows for {meal[0]}")
+            when = r[tcol] if tcol < len(r) else ""
+            if when:        # a blank time is not published, not an error
+                timings[meal[0]] = when
+            continue
         if not match:
             continue        # a stray note or a blank spacer row
         days.append({
@@ -110,18 +133,19 @@ def read_sheet(ws):
         die(f"{ws.title}: expected {DAYS}, found {got}")
 
     empty = [f"{d['day']} {m}" for d in days for m in MEALS if not d["meals"][m]]
-    return days, everyday, empty
+    return days, everyday, timings, empty
 
 
 def build(path):
     wb = openpyxl.load_workbook(path, data_only=True)
     hostels, warnings = [], []
     for name in wb.sheetnames:
-        days, everyday, empty = read_sheet(wb[name])
+        days, everyday, timings, empty = read_sheet(wb[name])
         hostels.append({
             "id": hostel_of(name).lower(),
             "name": hostel_of(name),
             "everyday": everyday,
+            "timings": timings,
             "days": days,
         })
         for e in empty:
@@ -148,6 +172,8 @@ if __name__ == "__main__":
         if h["everyday"]:
             n = len(h["everyday"])
             extra = f", plus an everyday note ({n} part{'' if n == 1 else 's'})"
+        if h["timings"]:
+            extra += f", timings for {', '.join(h['timings'])}"
         print(f"   {h['name']:<5} {len(h['days'])} days{extra}")
 
     # Hostels sharing a menu is legitimate but worth saying out loud, so a

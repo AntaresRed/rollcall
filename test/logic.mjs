@@ -1811,6 +1811,17 @@ console.log("day mess menu");
     Boolean(oh) && Object.keys(oh.everyday).length === 4 && !oh.everyday._all);
   check("and the others do not invent one",
     HOSTELS.filter(h => h.id !== "oh").every(h => Object.keys(h.everyday).length === 0));
+
+  // Serving times are WH's own. LVH's menu was copied from WH's, which makes
+  // its times the likeliest thing to be copied next — and a wrong closing
+  // time sends someone to a shut mess.
+  const wh = HOSTELS.find(h => h.id === "wh");
+  check("WH publishes a time for every meal",
+    Boolean(wh) && MEALS.every(m => wh.timings[m]?.length > 0));
+  check("timings only ever name a meal",
+    HOSTELS.every(h => Object.keys(h.timings).every(m => MEALS.includes(m))));
+  check("no other hostel has borrowed WH's times",
+    HOSTELS.filter(h => h.id !== "wh").every(h => Object.keys(h.timings).length === 0));
 }
 
 console.log("");
