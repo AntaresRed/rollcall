@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>IIMPresent</title>
+  </head>
+  <body style="font:15px/1.5 system-ui,sans-serif;color:#565E66;margin:20vh auto;max-width:320px;text-align:center">
+    Back to the leave mail…
+    <!--
+      Where Google sends the student after asking for Gmail permission, with
+      the token in the fragment. A page of its own, outside the app, so the
+      app's sign-in never sees a Google access token in its address bar and
+      mistakes it for one of its own.
+
+      It does nothing with the token but hand it over: the fragment goes into
+      sessionStorage exactly as received, and src/lib/gmaildraft.js checks the
+      state and reads it. Then the address bar is replaced, so the token is
+      neither in history nor on screen.
+    -->
+    <script>
+      try {
+        sessionStorage.setItem("iimpresent.gmail.callback", JSON.stringify(location.hash));
+      } catch (e) {
+        /* the app will say the permission didn't come back */
+      }
+      location.replace("/?leave=draft");
+    </script>
+  </body>
+</html>

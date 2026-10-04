@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LEAVE_TO, LEAVE_CC, LEAVE_HOSTELS, BLANK_LEAVE, loadLeave, saveLeave,
-  leaveProblems, leaveSubject, leaveBody, leaveMailto, leaveGmailHref, leaveAppHref,
-  MAIL_APPS, loadMailApp, saveMailApp,
+  leaveProblems, leaveSubject, leaveBody, leaveMailto, leaveGmailHref, leaveGmailAppHref,
 } from "../lib/leavemail";
 import { isIOS, isAndroid, isStandalone } from "../lib/platform";
 import { makeLeavePdf } from "../lib/leavepdf";
 import { deliverFile } from "../lib/deliver";
 import { track } from "../lib/track";
+import {
+  GOOGLE_CLIENT_ID, askGoogle, takeRoundTrip, finishRoundTrip, heldToken, dropToken,
+  mimeMessage, rawOf, saveDraft, lastDraft, gmailOpenHref,
+} from "../lib/gmaildraft";
 
 /**
  * The leave mail — leave of more than a day, reported to the offices the
@@ -19,7 +22,7 @@ import { track } from "../lib/track";
  * and they are there for the day the handover doesn't behave.
  */
 export default function LeaveMail({
-  email = "", accountName = "", onBack, initial = null, openDraft = false,
+  email = "", accountName = "", onBack, initial = null, openDraft = false, tester = false,
 }) {
   // `initial` bypasses the stored form, and `openDraft` unfolds the draft.
   // Only the smoke test passes either — it has no storage and cannot click,
@@ -79,7 +82,7 @@ export default function LeaveMail({
   // One button, three routes. Android: the mail app — Gmail's web compose
   // opens in a browser tab there, not in the Gmail app. A laptop: Gmail in
   // the institute account, because mailto there usually lands in a desktop
-  // client nobody ever set up. iOS: see below.
+  // client nobody ever set up. iOS: the Gmail app, see below.
   const ios = isIOS();
   const phone = ios || isAndroid();
 
@@ -88,22 +91,11 @@ export default function LeaveMail({
   // form goes through the share sheet, whose Save to Files does save it.
   // A Safari tab keeps the plain download, which lands in Files › Downloads.
   //
-  // The sheet also offers Gmail and Mail, and picking one makes a mail with
-  // the form and nobody to send it to. That is why nothing opens on its own
-  // after the sheet: the app the mail is written in is always a second tap,
-  // so the worst a wrong pick does is one stray draft.
+  // The sheet also offers Gmail, and picking it makes a mail with the form
+  // and nobody to send it to. That is why nothing opens on its own after the
+  // sheet: the addressed mail is always a second tap, so the worst a wrong
+  // pick does is one stray draft.
   const sheet = ios && isStandalone();
-
-  // Which app the iPhone sends from: asked on first use, then remembered.
-  // `choosing` is the question on screen — the first time, or after Change.
-  const [mailApp, setMailApp] = useState(() => (ios ? loadMailApp() : null));
-  const [choosing, setChoosing] = useState(false);
-  const choose = (app) => {
-    track("leave_mail", `choose-${app}`);
-    saveMailApp(app);
-    setMailApp(app);
-    setChoosing(false);
-  };
 
   // Nothing awaits before the download starts, so a caller that opens a
   // window afterwards is still inside the tap. Only the sheet is awaited,
@@ -124,9 +116,9 @@ export default function LeaveMail({
    * On iOS that is two taps, not one. Safari asks before it downloads, and
    * leaving for another app in the same moment talks over that question; and
    * an app opened a beat after the tap, rather than by it, may not open at
-   * all. So the first tap saves, and the button becomes "Open Gmail" (or
-   * the Mail app), a plain link whose tap opens it. Elsewhere both happen in
-   * the one tap, the download first.
+   * all. So the first tap saves, and the button becomes "Open Gmail", a
+   * plain link whose tap opens it. Elsewhere both happen in the one tap, the
+   * download first.
    */
   const send = () => {
     if (!pdfFile) return;
@@ -148,6 +140,81 @@ export default function LeaveMail({
   };
 
   const sendLabel = ready && !pdfFile && !pdfFailed ? "Preparing…" : "Send Mail";
+
+  /* ---------- the Gmail draft — testers only, for now ----------
+     Everything but the Send: the mail goes into the student's own Drafts,
+     addressed, written and with the form attached. Needs Google's
+     permission, so it stays behind `is_tester` until the app is approved for
+     it; the Google project's Testing mode limits it to named accounts too.
+     See src/lib/gmaildraft.js. */
+  const canDraft = tester && Boolean(GOOGLE_CLIENT_ID);
+  // The old way, for a student whose draft didn't happen — Google refused,
+  // or Gmail did. Only for this visit; next time the draft is tried again.
+  const [classic, setClassic] = useState(false);
+  const draftRoute = canDraft && !classic;
+  const platform = ios ? "ios" : isAndroid() ? "android" : "web";
+
+  // What a trip to Google's permission page left behind, read once.
+  const [trip] = useState(() => (canDraft ? takeRoundTrip() : { pending: false }));
+  const [made, setMade] = useState(() => (canDraft ? lastDraft() : null));
+  const [busy, setBusy] = useState(false);
+  const [draftError, setDraftError] = useState(() => (trip.error ? tripMessage(trip.error) : ""));
+  const madeThis = made?.key === formKey ? made : null;
+
+  const makeDraft = async ({ afterTrip = false } = {}) => {
+    if (!pdfFile || busy) return;
+    const token = heldToken(email);
+    if (!token) {
+      track("leave_mail", "draft-ask");
+      askGoogle(email);
+      return;
+    }
+    setBusy(true);
+    setDraftError("");
+    try {
+      const bytes = new Uint8Array(await pdfFile.arrayBuffer());
+      const raw = rawOf(mimeMessage({
+        to: LEAVE_TO, cc: LEAVE_CC, subject, body,
+        file: { name: pdfFile.name, type: pdfFile.type, bytes },
+      }));
+      setMade(await saveDraft(token, raw, formKey));
+      track("leave_mail", "draft");
+    } catch (err) {
+      if (err?.status === 401 && !afterTrip) {
+        // The hour ran out: ask again, which comes back here and retries.
+        // Expected, so not counted as a failure.
+        dropToken();
+        askGoogle(email);
+        return;
+      }
+      track("leave_mail", "draft-error");
+      if (err?.status === 401 || err?.status === 403) dropToken();
+      setDraftError(err?.status === 401 || err?.status === 403
+        ? "Gmail didn't accept the permission. Try again, and choose Allow on Google's page."
+        : "Couldn't reach Gmail. Check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Back from Google with a draft owed: make it as soon as the form PDF is
+  // ready again. The ref, not state, keeps a double-run effect (React's
+  // development checks do exactly that) from making two.
+  const owed = useRef(trip.pending && !trip.error);
+  useEffect(() => {
+    if (!owed.current || !pdfFile) return;
+    owed.current = false;
+    finishRoundTrip();
+    makeDraft({ afterTrip: true });
+    // makeDraft reads the current render's form, which is the one wanted.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfFile]);
+  useEffect(() => { if (trip.error) finishRoundTrip(); }, [trip.error]);
+
+  const draftLabel = ready && !pdfFile && !pdfFailed ? "Preparing…"
+    : busy ? "Creating draft…"
+    : made && !madeThis ? "Update Gmail draft"
+    : "Create Gmail draft";
 
   return (
     <>
@@ -267,78 +334,124 @@ export default function LeaveMail({
           </p>
         </div>
       )}
-      {ios && choosing ? (
-        // Asked rather than guessed. A mailto link opens whatever the iPhone's
-        // default is — Apple Mail, for most, with no account in it — while
-        // most students live in Gmail, which has its own way in.
+      {draftRoute && (
         <>
-          <p className="leave-ask">Send the mail from</p>
           <div className="leave-acts">
-            <button className="btn leave-send" onClick={() => choose("gmail")}>
-              {MAIL_APPS.gmail}
-            </button>
-            <button className="btn ghost leave-send" onClick={() => choose("mail")}>
-              {MAIL_APPS.mail}
+            {madeThis ? (
+              // A link, so the app opens from the tap itself. On a laptop it
+              // goes straight into the draft, in a tab of its own.
+              <a
+                className="btn leave-send"
+                href={gmailOpenHref({ platform, email, messageId: madeThis.messageId })}
+                {...(platform === "web" ? { target: "_blank", rel: "noopener" } : {})}
+                onClick={() => track("leave_mail", "draft-open")}
+              >
+                Open Gmail
+              </a>
+            ) : (
+              <button
+                className="btn leave-send"
+                disabled={!pdfFile || busy}
+                onClick={() => makeDraft()}
+              >
+                {draftLabel}
+              </button>
+            )}
+            <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
+              Download form
             </button>
           </div>
-        </>
-      ) : (
-        // Side by side: the form on its own is worth having too — to print,
-        // to send again later, or to hand over in person.
-        <div className="leave-acts">
-          {ios && !mailApp ? (
-            // Not disabled while the form is unfinished: the question has
-            // nothing to do with the form, and is better out of the way early.
-            <button className="btn leave-send" onClick={() => setChoosing(true)}>
-              Choose app to send mail
-            </button>
-          ) : ios && savedThis ? (
-            // A plain link, so the app opens from the tap itself.
-            <a
-              className="btn leave-send"
-              href={leaveAppHref(form, mailApp)}
-              onClick={() => track("leave_mail", mailApp === "gmail" ? "open-gmail" : "open-mail-app")}
-            >
-              Open {MAIL_APPS[mailApp]}
-            </a>
-          ) : (
-            <button className="btn leave-send" disabled={!pdfFile} onClick={send}>
-              {sendLabel}
-            </button>
+          {madeThis ? (
+            <p className="leave-saved">
+              <strong>Draft ready in Gmail</strong>, addressed and with the form
+              attached.{" "}
+              {platform === "web"
+                ? "Check it and press Send."
+                : "In Gmail, open Drafts, tap the leave mail and press Send."}
+            </p>
+          ) : busy ? null : made ? (
+            <p className="leave-saved">
+              The form has changed since the draft was made. Update it, and the
+              draft in Gmail is replaced.
+            </p>
+          ) : !draftError && (
+            <p className="leave-saved">
+              The mail goes into your Gmail Drafts with the form attached. You
+              press Send there. The first time, Google asks you to allow this.
+            </p>
           )}
-          <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
-            Download form
-          </button>
-        </div>
+          {draftError && (
+            <div className="leave-pending">
+              <p>
+                {draftError}{" "}
+                <button type="button" className="leave-retry" onClick={() => setClassic(true)}>
+                  Send it the usual way
+                </button>
+              </p>
+            </div>
+          )}
+          {savedThis && (
+            <p className="leave-saved">
+              Leave form saved as <strong>{pdfFile.name}</strong>
+            </p>
+          )}
+        </>
       )}
-      {/* Names the file, so it can be found again from the mail's attach
-          picker — a link can't attach it for them. */}
-      {savedThis && (
-        <p className="leave-saved">
-          Leave form saved as <strong>{pdfFile.name}</strong>
-        </p>
-      )}
-      {sheet && cancelledThis && (
-        <p className="leave-saved">
-          The form wasn&apos;t saved. Tap {mailApp ? "Send Mail" : "Download form"} again
-          and choose <strong>Save to Files</strong>.
-        </p>
-      )}
-      {/* Said before the sheet opens, not after: it is the one place a wrong
-          pick is easy to make, and Save to Files is far down its list. */}
-      {sheet && mailApp && !choosing && !savedThis && !cancelledThis && pdfFile && (
-        <p className="leave-saved">
-          Send Mail saves the form first. In the list that opens, choose{" "}
-          <strong>Save to Files</strong>.
-        </p>
-      )}
-      {ios && mailApp && !choosing && (
-        <p className="leave-saved">
-          Sending from {MAIL_APPS[mailApp]} ·{" "}
-          <button type="button" className="leave-retry" onClick={() => setChoosing(true)}>
-            Change
-          </button>
-        </p>
+      {!draftRoute && (
+        <>
+          {/* Side by side: the form on its own is worth having too — to print,
+              to send again later, or to hand over in person. */}
+          <div className="leave-acts">
+            {ios && savedThis ? (
+              // Gmail only, by decision: the mail goes from the institute account,
+              // and that lives in the Gmail app. A plain link, so the app opens
+              // from the tap itself.
+              <a
+                className="btn leave-send"
+                href={leaveGmailAppHref(form)}
+                onClick={() => track("leave_mail", "open-gmail")}
+              >
+                Open Gmail
+              </a>
+            ) : (
+              <button className="btn leave-send" disabled={!pdfFile} onClick={send}>
+                {sendLabel}
+              </button>
+            )}
+            <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
+              Download form
+            </button>
+          </div>
+          {/* Names the file, so it can be found again from the mail's attach
+              picker — a link can't attach it for them. */}
+          {savedThis && (
+            <p className="leave-saved">
+              Leave form saved as <strong>{pdfFile.name}</strong>
+            </p>
+          )}
+          {/* The Gmail app opens in whichever account was used last, and a link
+              can't pick one — so it is said, not assumed. */}
+          {ios && savedThis && (
+            <p className="leave-saved">
+              In Gmail, attach the form and check <strong>From</strong> is your
+              @email.iimcal.ac.in address.
+            </p>
+          )}
+          {sheet && cancelledThis && (
+            <p className="leave-saved">
+              The form wasn&apos;t saved. Tap Send Mail again and choose{" "}
+              <strong>Save to Files</strong>.
+            </p>
+          )}
+          {/* Said before the sheet opens, not after: it is the one place a wrong
+              pick is easy to make, and Save to Files is far down its list. */}
+          {sheet && !savedThis && !cancelledThis && pdfFile && (
+            <p className="leave-saved">
+              Send Mail saves the form first. In the list that opens, choose{" "}
+              <strong>Save to Files</strong>.
+            </p>
+          )}
+        </>
       )}
 
       <button
@@ -387,6 +500,13 @@ export default function LeaveMail({
       )}
     </>
   );
+}
+
+/** What to say when the trip to Google's permission page came back wrong. */
+function tripMessage(error) {
+  return error === "access_denied"
+    ? "Google's permission wasn't given, so no draft was made."
+    : "Google's permission page didn't come back properly. Try Create Gmail draft again.";
 }
 
 /** The optional marker sits on the label's own line, where the eye already

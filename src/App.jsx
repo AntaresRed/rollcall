@@ -99,6 +99,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authError, setAuthError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isTester, setIsTester] = useState(false);
   // Null once boot has finished means no schedule is published for this
   // student's year — see the boot block for why that is a screen of its own.
   const [cohort, setCohort] = useState(null);
@@ -174,6 +175,9 @@ export default function App() {
         const profile = await loadProfile().catch(() => null);
         const mine = profile?.cohort_year ?? cohortOf(current.user?.email);
         setIsAdmin(Boolean(profile?.is_admin));
+        // Missing until supabase/prototype-gate.sql has run, which reads as
+        // "not a tester" — the safe way round.
+        setIsTester(Boolean(profile?.is_tester));
         setCohort(mine);
 
         const [c, a, t, o, published] = await Promise.all([
@@ -338,6 +342,21 @@ export default function App() {
     params.delete("focus");
     const rest = params.toString();
     window.history.replaceState({}, "", rest ? `${window.location.pathname}?${rest}` : window.location.pathname);
+  }, [ready]);
+
+  // Back from Google's Gmail permission page (public/gmail-callback.html
+  // sends the student to /?leave=draft): reopen the leave mail, which picks
+  // up the draft it was asked for. Not tracked as an "open" — the student
+  // didn't open it, they came back to it.
+  useEffect(() => {
+    if (!ready) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("leave") !== "draft") return;
+    params.delete("leave");
+    const rest = params.toString();
+    window.history.replaceState({}, "", rest ? `${window.location.pathname}?${rest}` : window.location.pathname);
+    setTab("utils");
+    setSubScreen("leave");
   }, [ready]);
 
   const turnOnAlerts = async () => {
@@ -750,6 +769,7 @@ export default function App() {
           <LeaveMail
             email={session.user?.email ?? ""}
             accountName={session.user?.user_metadata?.full_name ?? session.user?.user_metadata?.name ?? ""}
+            tester={isTester}
             onBack={() => setSubScreen(null)}
           />
         )}

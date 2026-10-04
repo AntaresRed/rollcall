@@ -1366,8 +1366,15 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
     animation: draw 0.62s cubic-bezier(0.65, 0, 0.35, 1) 0.12s forwards;
   }
 }
+/* Reduce Motion asks for no movement, not for no sign of life. A splash
+   frozen solid read as a stuck app, so nothing moves here but the bar
+   breathes where it sits and the tick fades in. */
 @media (prefers-reduced-motion: reduce) {
-  .splash-bar span { transform: translateX(44px); }
+  .splash-bar span {
+    transform: translateX(44px);
+    animation: breathe 1.6s ease-in-out infinite;
+  }
+  .mark-draw .mark-tick { animation: appear 0.5s ease-out 0.12s both; }
 }
 
 @keyframes sweep {
@@ -1376,6 +1383,13 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 }
 @keyframes draw {
   to { stroke-dashoffset: 0; }
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 1; }
+}
+@keyframes appear {
+  from { opacity: 0; }
 }
 
 /* placeholder while a lazily-loaded screen arrives — deliberately quiet,
@@ -3661,15 +3675,6 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   color: var(--slate);
 }
 .leave-saved strong { color: var(--ink); overflow-wrap: anywhere; }
-.leave-ask {
-  margin: 14px 0 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--mute);
-}
-.leave-ask + .leave-acts { margin-top: 6px; }
 .leave-retry {
   border: 0;
   background: none;

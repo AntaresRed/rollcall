@@ -8,6 +8,10 @@
  * letter. So the mail opens in Gmail or the phone's mail app, already
  * written, and the student presses Send — they see exactly what goes out,
  * from which account, before it does.
+ *
+ * Testers can instead have the whole mail, form attached, put in their Gmail
+ * Drafts — which does take that permission, asked for only then. See
+ * gmaildraft.js.
  */
 
 export const LEAVE_TO = ["pgpoffice@iimcal.ac.in", "aso@iimcal.ac.in"];
@@ -233,8 +237,8 @@ export function leaveMailto(form) {
  * A mailto link on an iPhone opens whatever the default mail app is, and for
  * most students that is Apple Mail with no account in it — they live in the
  * Gmail app. Gmail answers to its own scheme regardless of the default, with
- * the same four fields filled in. If Gmail isn't installed the link goes
- * nowhere, which is why the screen offers the mailto link beside it.
+ * the same four fields filled in. Gmail is the only route on iOS, by
+ * decision; without the app installed, the screen's Copy buttons are the way.
  */
 export function leaveGmailAppHref(form) {
   const q = [
@@ -245,21 +249,6 @@ export function leaveGmailAppHref(form) {
   ].join("&");
   return `googlegmail://co?${q}`;
 }
-
-/**
- * The apps an iPhone can be sent to, by the name the screen gives them. Asked
- * once and remembered, because the answer is the same app every time.
- */
-export const MAIL_APPS = { gmail: "Gmail", mail: "Mail app" };
-
-/** A stored choice, or null for anything that isn't one — an older shape, or
- *  a value from a build that offered something since withdrawn. */
-export const mailAppOf = (v) =>
-  (typeof v === "string" && Object.prototype.hasOwnProperty.call(MAIL_APPS, v) ? v : null);
-
-/** The link that opens the chosen app with the mail written. */
-export const leaveAppHref = (form, app) =>
-  (app === "gmail" ? leaveGmailAppHref(form) : leaveMailto(form));
 
 /**
  * Gmail's compose window, in the student's institute account.
@@ -344,7 +333,6 @@ export function startingLeave(now, remembered, trip = null, accountName = "") {
    exist at all in the smoke test. */
 const WHO = "iimpresent.leave.who";
 const TRIP = "iimpresent.leave.trip";
-const APP = "iimpresent.leave.app";
 
 const store = (which) => {
   try {
@@ -380,6 +368,3 @@ export function saveLeave(form, now = new Date()) {
   write("local", WHO, rememberedPart(form));
   write("session", TRIP, trip);
 }
-
-export const loadMailApp = () => mailAppOf(read("local", APP));
-export const saveMailApp = (app) => write("local", APP, mailAppOf(app));

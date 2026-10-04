@@ -48,6 +48,7 @@ await build({
     "import.meta.env.VITE_SUPABASE_URL": '"https://smoke.supabase.co"',
     "import.meta.env.VITE_SUPABASE_ANON_KEY": '"smoke"',
     "import.meta.env.VITE_VAPID_PUBLIC_KEY": '"smoke"',
+    "import.meta.env.VITE_GOOGLE_CLIENT_ID": '"smoke.apps.googleusercontent.com"',
   },
 });
 

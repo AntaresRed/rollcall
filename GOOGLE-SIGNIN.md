@@ -67,6 +67,46 @@ select id, email, created_at from auth.users where email is null;
 delete from auth.users where email is null;
 ```
 
+## 5. Gmail drafts for the leave mail (testers only, 10 min)
+
+The leave mail can put the finished mail — addressed, written, the form
+attached — straight into a student's Gmail Drafts. That needs Google's
+`gmail.compose` permission, which Google classes as **restricted**: an
+unverified app asking for it shows a warning and admits 100 accounts at most.
+So for now it is a tester feature (`profiles.is_tester`).
+
+**Use a separate Google Cloud project for it.** Sign-in's project is
+published, and must stay published for the batch to sign in. A project in
+*Testing* lets only its named test users through — so the Gmail permission
+lives in a project of its own, left in Testing, and sign-in is untouched.
+
+1. **console.cloud.google.com → New Project** → `IIMPresent Gmail drafts`.
+2. **APIs & Services → Library → Gmail API → Enable.**
+3. **OAuth consent screen**: External, app name `IIMPresent`, leave it in
+   **Testing**. **Data access → Add scope** →
+   `https://www.googleapis.com/auth/gmail.compose`. Under **Test users**, add
+   each tester's institute address.
+4. **Credentials → Create Credentials → OAuth client ID → Web application**
+   - **Authorised JavaScript origins:**
+     ```
+     https://rollcall-seven-theta.vercel.app
+     http://localhost:5173
+     ```
+   - **Authorised redirect URIs** — the app's own callback page this time:
+     ```
+     https://rollcall-seven-theta.vercel.app/gmail-callback.html
+     http://localhost:5173/gmail-callback.html
+     ```
+5. Copy the **Client ID** (no secret is used) into `VITE_GOOGLE_CLIENT_ID` —
+   in Vercel's environment variables and your local `.env` — and redeploy.
+6. Make sure `supabase/prototype-gate.sql` has been run, and the tester's
+   profile has `is_tester = true`.
+
+Without `VITE_GOOGLE_CLIENT_ID`, or for anyone who isn't a tester, the leave
+mail works exactly as before. Releasing it to the batch needs either Google's
+verification of that project for `gmail.compose`, or the institute's Google
+Workspace admin marking the client ID as trusted.
+
 ---
 
 ## How the restriction actually works

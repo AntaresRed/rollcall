@@ -181,6 +181,14 @@ const cases = [
         departDate: "2026-10-02", departTime: "18:00", returnDate: "2026-10-06", returnTime: "21:30",
         address: "12 Park Street\nKolkata 700016", reason: "Family function", info: "",
       }} />],
+  // A tester sees the Gmail draft in place of Send Mail.
+  ["LeaveMail / tester, Gmail draft", <LeaveMail key="lmt" email="abc2027@email.iimcal.ac.in"
+      tester onBack={noop} initial={{
+        date: "2026-09-25", name: "A Student", reg: "0001/01", phone: "9876543210",
+        hostel: "NH", room: "12",
+        departDate: "2026-10-02", departTime: "18:00", returnDate: "2026-10-06", returnTime: "21:30",
+        address: "12 Park Street", reason: "Family function",
+      }} />],
   // An older stored shape: fields missing entirely rather than blank.
   ["LeaveMail / partial form, draft open", <LeaveMail key="lmp" openDraft initial={{ name: "A Student" }} />],
   ["DayMessMenu", <DayMessMenu key="dm" onBack={noop} now={now} />],

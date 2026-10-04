@@ -26,9 +26,11 @@ import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, p
   searchAllPor, postLine, porLabel } from "../src/lib/por.js";
 import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, LEAVE_HOSTELS, BLANK_LEAVE, longDate, clock, hostelOf,
   leaveProblems, leaveBody, leaveSubject, leaveMailto, leaveGmailHref, leaveGmailAppHref,
-  MAIL_APPS, mailAppOf, leaveAppHref, loadMailApp, rememberedPart, startingLeave, leavePeriod } from "../src/lib/leavemail.js";
+  rememberedPart, startingLeave, leavePeriod } from "../src/lib/leavemail.js";
 import { formDate, formWhen, formAnswers, formFilename, winAnsi, timesWidth, wrapText,
   fitBlock, formLayout, jpegInfo, buildPdf } from "../src/lib/leavepdf.js";
+import { GMAIL_SCOPE, authUrl, callbackUrl, readCallback, heldToken, takeRoundTrip,
+  mimeMessage, rawOf, gmailOpenHref } from "../src/lib/gmaildraft.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -2137,12 +2139,6 @@ console.log("\nleave mail");
     appQ.get("to") === LEAVE_TO.join(",") && appQ.get("cc") === LEAVE_CC.join(",")
     && appQ.get("subject") === leaveSubject(trip) && appQ.get("body") === body);
   check("the Gmail app link writes spaces as %20", !app.includes("+"));
-  check("the remembered app opens its own link",
-    leaveAppHref(trip, "gmail") === app && leaveAppHref(trip, "mail") === leaveMailto(trip));
-  check("only a known app is taken back from storage",
-    Object.keys(MAIL_APPS).every((k) => mailAppOf(k) === k)
-    && [null, undefined, "", "outlook", "toString", 1].every((v) => mailAppOf(v) === null));
-  check("no storage, no remembered app", loadMailApp() === null);
   check("no account, no authuser", !new URL(leaveGmailHref(trip, "")).searchParams.has("authuser"));
 
   const kept = rememberedPart(trip);
@@ -2184,6 +2180,82 @@ console.log("\nleave mail");
     startingLeave(at, { reason: "Going home" }, { reason: "Old" }).reason === "Going home");
   check("the trip store cannot overwrite who you are",
     startingLeave(at, { name: "Me" }, { name: "Someone else" }).name === "Me");
+}
+console.log("\nleave mail as a Gmail draft");
+{
+  const url = new URL(authUrl({
+    clientId: "id.apps.googleusercontent.com", redirectUri: "https://app.test/gmail-callback.html",
+    email: "abc2027@email.iimcal.ac.in", state: "s1",
+  }));
+  const q = url.searchParams;
+  check("the permission page asks for drafts, as a token, back to the callback",
+    url.origin === "https://accounts.google.com" && q.get("scope") === GMAIL_SCOPE
+    && q.get("response_type") === "token" && q.get("redirect_uri") === "https://app.test/gmail-callback.html");
+  check("it puts the institute account first", q.get("login_hint") === "abc2027@email.iimcal.ac.in");
+  check("it carries the state", q.get("state") === "s1");
+  check("no account, no login hint", !new URL(authUrl({ clientId: "x", redirectUri: "y", email: "", state: "s" }))
+    .searchParams.has("login_hint"));
+  check("the callback page sits on the app's own origin",
+    callbackUrl("https://app.test") === "https://app.test/gmail-callback.html");
+
+  const t0 = 1_000_000;
+  const good = readCallback("#state=s1&access_token=tok&expires_in=3599&token_type=Bearer", "s1", t0);
+  check("a matching state gives the token", good.token === "tok");
+  check("the token is let go a minute early", good.expiresAt === t0 + 3539_000);
+  check("a state that doesn't match is refused",
+    readCallback("#state=evil&access_token=tok", "s1", t0).error === "state");
+  check("no state sent, nothing accepted", readCallback("#state=s1&access_token=tok", null, t0).error === "state");
+  check("Google's refusal comes through",
+    readCallback("#state=s1&error=access_denied", "s1", t0).error === "access_denied");
+  check("a state with no token is not a token", readCallback("#state=s1", "s1", t0).error === "no_token");
+  check("no storage, no held token", heldToken("abc2027@email.iimcal.ac.in") === null);
+  check("no storage, nothing owed", takeRoundTrip().pending === false);
+
+  // Literal bytes, not the real form: this is about the envelope, not the PDF.
+  const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0xff, 0x00, 0x0a]);
+  const mime = mimeMessage({
+    to: ["a@x.in", "b@x.in"], cc: ["c@x.in"],
+    subject: "Leave application – A Student – 3 Oct to 6 Oct 2026",
+    body: "Respected Sir/Madam,\n\nAddress:\n12 Park Street",
+    file: { name: "Leave Application - A Student - 03-10-2026.pdf", type: "application/pdf", bytes: pdfBytes },
+  });
+  const decode = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\r\n/g, "")), (c) => c.charCodeAt(0)));
+  check("addressed to both offices, copied to the third", mime.includes("To: a@x.in, b@x.in\r\n")
+    && mime.includes("Cc: c@x.in\r\n"));
+  const subj = /Subject: =\?UTF-8\?B\?([^?]+)\?=/.exec(mime);
+  check("a subject with an en dash is encoded, and decodes back",
+    Boolean(subj) && decode(subj[1]) === "Leave application – A Student – 3 Oct to 6 Oct 2026");
+  check("an ASCII subject is left as it is",
+    mimeMessage({ to: ["a@x.in"], subject: "Plain", body: "", file: { name: "f.pdf", bytes: pdfBytes } })
+      .includes("Subject: Plain\r\n"));
+  check("no CC, no Cc header",
+    !mimeMessage({ to: ["a@x.in"], subject: "S", body: "", file: { name: "f.pdf", bytes: pdfBytes } }).includes("Cc:"));
+  const parts = mime.split(/\r\n--leave-mail-boundary(?:--)?\r\n/);
+  const textPart = parts.find((p) => p.startsWith("Content-Type: text/plain"));
+  check("the body survives, its lines as CRLF",
+    Boolean(textPart) && decode(textPart.split("\r\n\r\n")[1]) === "Respected Sir/Madam,\r\n\r\nAddress:\r\n12 Park Street");
+  const filePart = parts.find((p) => p.startsWith("Content-Type: application/pdf"));
+  check("the form is attached under its own name",
+    Boolean(filePart) && filePart.includes('filename="Leave Application - A Student - 03-10-2026.pdf"'));
+  check("the attachment's bytes survive exactly",
+    Boolean(filePart) && atob(filePart.split("\r\n\r\n")[1].replace(/\r\n/g, ""))
+      === String.fromCharCode(...pdfBytes));
+  check("every line is CRLF", !/[^\r]\n/.test(mime));
+  check("no line is longer than MIME allows", mime.split("\r\n").every((l) => l.length <= 998));
+  check("a non-ASCII file name gets a plain fallback and the exact name",
+    mimeMessage({ to: ["a@x.in"], subject: "S", body: "", file: { name: "Leave – Ré.pdf", bytes: pdfBytes } })
+      .includes(`filename="Leave _ R_.pdf"; filename*=UTF-8''Leave%20%E2%80%93%20R%C3%A9.pdf`));
+  const raw = rawOf(mime);
+  check("Gmail's raw is URL-safe base64 with no padding", /^[A-Za-z0-9_-]+$/.test(raw));
+  check("and decodes back to the message",
+    atob(raw.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (raw.length % 4)) % 4)) === mime);
+
+  check("on a laptop, Open Gmail goes into the draft in the institute account",
+    gmailOpenHref({ platform: "web", email: "abc2027@email.iimcal.ac.in", messageId: "18f3a" })
+      === "https://mail.google.com/mail/u/abc2027%40email.iimcal.ac.in/#drafts?compose=18f3a");
+  check("on an iPhone it opens the Gmail app", gmailOpenHref({ platform: "ios" }) === "googlegmail://");
+  check("on Android it names the Gmail app to Chrome",
+    gmailOpenHref({ platform: "android" }).includes("package=com.google.android.gm;end"));
 }
 console.log("\nleave form PDF");
 {
