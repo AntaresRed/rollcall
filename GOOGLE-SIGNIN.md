@@ -104,6 +104,15 @@ only.
 4. Copy the **Client ID** (no secret is used; store it as a plain variable,
    not a secret) into `VITE_GOOGLE_CLIENT_ID` — in Vercel's environment
    variables and your local `.env` — and redeploy.
+5. **Google Auth Platform → Audience** must say **In production**. While it
+   says *Testing*, everyone not on the test-user list gets a hard "Access
+   blocked … Error 403: access_denied" for the Gmail permission, with no
+   way through. Publishing asks for **Branding** first: app name
+   `IIMPresent`, support and developer contact email, home page
+   `https://rollcall-seven-theta.vercel.app`, authorised domain
+   `rollcall-seven-theta.vercel.app`. **No logo** — a logo makes Google
+   require verification before it will publish. Don't submit for
+   verification; the "unverified app" warning is the expected result.
 
 Without `VITE_GOOGLE_CLIENT_ID` the leave mail works exactly as before, with
 Send Mail. To turn the draft off, remove the variable and redeploy.
@@ -170,8 +179,10 @@ matters if someone enables alerts from a machine in a different timezone.
 
 ## Things worth knowing
 
-- **Publish the OAuth app before the pilot.** Unpublished means 100 test users
-  and a Google warning screen.
+- **Publish the OAuth app.** In practice the project ran in *Testing* until
+  2026-10-05 and the whole batch signed in anyway: Testing held back the
+  Gmail permission (§5), not plain name-and-email sign-in. It has been
+  published since, for the Gmail draft. Keep it published.
 - **iOS PWAs and OAuth don't always cooperate.** Redirecting to Google can drop
   the student into Safari rather than back into the installed app, leaving the
   session in the wrong place. Test this specifically on an iPhone before you
