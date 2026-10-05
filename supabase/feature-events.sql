@@ -1,4 +1,4 @@
--- ============================================================
+-- =============================================================
 -- Feature usage counts
 --
 -- Most of the app never talks to the server: the menus, the directories and
