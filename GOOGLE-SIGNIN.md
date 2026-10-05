@@ -67,26 +67,30 @@ select id, email, created_at from auth.users where email is null;
 delete from auth.users where email is null;
 ```
 
-## 5. Gmail drafts for the leave mail (testers only, 10 min)
+## 5. Gmail drafts for the leave mail (10 min)
 
 The leave mail can put the finished mail — addressed, written, the form
-attached — straight into a student's Gmail Drafts. That needs Google's
-`gmail.compose` permission, which Google classes as **restricted**: an
-unverified app asking for it shows a warning and admits 100 accounts at most.
-So for now it is a tester feature (`profiles.is_tester`).
+attached — straight into a student's Gmail Drafts, for them to send. That
+needs Google's `gmail.compose` permission, which Google classes as
+**restricted**: an unverified app asking for it shows an "unverified app"
+warning and admits **100 accounts at most**. Past that, Google refuses, the
+draft fails, and the screen offers the ordinary Send Mail instead. Lifting
+both needs the institute's Google Workspace admin to mark the client ID as
+**Trusted** (Admin console → Security → API controls → Manage Third-Party App
+Access), or Google's verification.
 
-**Use a separate Google Cloud project for it.** Sign-in's project is
-published, and must stay published for the batch to sign in. A project in
-*Testing* lets only its named test users through — so the Gmail permission
-lives in a project of its own, left in Testing, and sign-in is untouched.
+It lives in sign-in's own project, as a **second client**. Never edit the
+first one — Supabase's sign-in depends on it. Students only see the Gmail
+permission when they ask for a draft; sign-in still asks for name and email
+only.
 
-1. **console.cloud.google.com → New Project** → `IIMPresent Gmail drafts`.
-2. **APIs & Services → Library → Gmail API → Enable.**
-3. **OAuth consent screen**: External, app name `IIMPresent`, leave it in
-   **Testing**. **Data access → Add scope** →
-   `https://www.googleapis.com/auth/gmail.compose`. Under **Test users**, add
-   each tester's institute address.
-4. **Credentials → Create Credentials → OAuth client ID → Web application**
+1. In the IIMPresent project: **APIs & Services → Library → Gmail API →
+   Enable.**
+2. **Google Auth Platform → Data Access → Add or remove scopes** →
+   `https://www.googleapis.com/auth/gmail.compose`. Optional: if saving pushes
+   for verification, skip it — the app requests the scope itself.
+3. **Google Auth Platform → Clients → Create client → Web application**,
+   named `Gmail drafts`:
    - **Authorised JavaScript origins:**
      ```
      https://rollcall-seven-theta.vercel.app
@@ -97,15 +101,12 @@ lives in a project of its own, left in Testing, and sign-in is untouched.
      https://rollcall-seven-theta.vercel.app/gmail-callback.html
      http://localhost:5173/gmail-callback.html
      ```
-5. Copy the **Client ID** (no secret is used) into `VITE_GOOGLE_CLIENT_ID` —
-   in Vercel's environment variables and your local `.env` — and redeploy.
-6. Make sure `supabase/prototype-gate.sql` has been run, and the tester's
-   profile has `is_tester = true`.
+4. Copy the **Client ID** (no secret is used; store it as a plain variable,
+   not a secret) into `VITE_GOOGLE_CLIENT_ID` — in Vercel's environment
+   variables and your local `.env` — and redeploy.
 
-Without `VITE_GOOGLE_CLIENT_ID`, or for anyone who isn't a tester, the leave
-mail works exactly as before. Releasing it to the batch needs either Google's
-verification of that project for `gmail.compose`, or the institute's Google
-Workspace admin marking the client ID as trusted.
+Without `VITE_GOOGLE_CLIENT_ID` the leave mail works exactly as before, with
+Send Mail. To turn the draft off, remove the variable and redeploy.
 
 ---
 

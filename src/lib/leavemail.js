@@ -9,9 +9,9 @@
  * written, and the student presses Send — they see exactly what goes out,
  * from which account, before it does.
  *
- * Testers can instead have the whole mail, form attached, put in their Gmail
- * Drafts — which does take that permission, asked for only then. See
- * gmaildraft.js.
+ * Where a Google client ID is configured, the whole mail, form attached, can
+ * instead go into the student's Gmail Drafts — which does take a permission,
+ * asked for only then, and still leaves the Send to them. See gmaildraft.js.
  */
 
 export const LEAVE_TO = ["pgpoffice@iimcal.ac.in", "aso@iimcal.ac.in"];

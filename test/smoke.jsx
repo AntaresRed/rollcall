@@ -174,16 +174,17 @@ const cases = [
   ["Utils / contacts group", <Utils key="uc" onOpen={noop} group="contacts" />],
   ["LeaveMail / blank", <LeaveMail key="lm" email="abc2027@email.iimcal.ac.in"
       accountName="A Student" onBack={noop} />],
+  // Gmail draft off: the Send Mail route, which is also its fallback.
   ["LeaveMail / ready to send, draft open", <LeaveMail key="lmr" email="abc2027@email.iimcal.ac.in"
-      onBack={noop} openDraft initial={{
+      onBack={noop} openDraft gmailDraft={false} initial={{
         date: "2026-09-25", name: "A Student", reg: "0001/01", phone: "9876543210",
         hostel: "Other", hostelOther: "Married quarters", room: "12",
         departDate: "2026-10-02", departTime: "18:00", returnDate: "2026-10-06", returnTime: "21:30",
         address: "12 Park Street\nKolkata 700016", reason: "Family function", info: "",
       }} />],
-  // A tester sees the Gmail draft in place of Send Mail.
-  ["LeaveMail / tester, Gmail draft", <LeaveMail key="lmt" email="abc2027@email.iimcal.ac.in"
-      tester onBack={noop} initial={{
+  // With a Google client ID configured, the Gmail draft replaces Send Mail.
+  ["LeaveMail / Gmail draft", <LeaveMail key="lmt" email="abc2027@email.iimcal.ac.in"
+      onBack={noop} initial={{
         date: "2026-09-25", name: "A Student", reg: "0001/01", phone: "9876543210",
         hostel: "NH", room: "12",
         departDate: "2026-10-02", departTime: "18:00", returnDate: "2026-10-06", returnTime: "21:30",

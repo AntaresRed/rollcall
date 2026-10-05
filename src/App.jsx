@@ -99,7 +99,6 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authError, setAuthError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isTester, setIsTester] = useState(false);
   // Null once boot has finished means no schedule is published for this
   // student's year — see the boot block for why that is a screen of its own.
   const [cohort, setCohort] = useState(null);
@@ -175,9 +174,6 @@ export default function App() {
         const profile = await loadProfile().catch(() => null);
         const mine = profile?.cohort_year ?? cohortOf(current.user?.email);
         setIsAdmin(Boolean(profile?.is_admin));
-        // Missing until supabase/prototype-gate.sql has run, which reads as
-        // "not a tester" — the safe way round.
-        setIsTester(Boolean(profile?.is_tester));
         setCohort(mine);
 
         const [c, a, t, o, published] = await Promise.all([
@@ -769,7 +765,6 @@ export default function App() {
           <LeaveMail
             email={session.user?.email ?? ""}
             accountName={session.user?.user_metadata?.full_name ?? session.user?.user_metadata?.name ?? ""}
-            tester={isTester}
             onBack={() => setSubScreen(null)}
           />
         )}

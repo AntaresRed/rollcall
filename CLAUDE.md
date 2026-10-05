@@ -34,7 +34,7 @@ npm run smoke    # tests only
 The app needs `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and
 `VITE_VAPID_PUBLIC_KEY` (see `.env.example`). Screens that need sign-in can't be
 reached locally without them. `VITE_GOOGLE_CLIENT_ID` is optional: it turns on
-the testers' Gmail-draft leave mail (GOOGLE-SIGNIN.md §5). To look at a screen, use the throwaway harness
+the Gmail-draft leave mail for everyone (GOOGLE-SIGNIN.md §5). To look at a screen, use the throwaway harness
 `preview.html` + `src/_preview.jsx` (gitignored), then delete both.
 
 ## Data pipeline

@@ -22,11 +22,14 @@ import {
  * and they are there for the day the handover doesn't behave.
  */
 export default function LeaveMail({
-  email = "", accountName = "", onBack, initial = null, openDraft = false, tester = false,
+  email = "", accountName = "", onBack, initial = null, openDraft = false,
+  gmailDraft = Boolean(GOOGLE_CLIENT_ID),
 }) {
   // `initial` bypasses the stored form, and `openDraft` unfolds the draft.
   // Only the smoke test passes either — it has no storage and cannot click,
-  // and would otherwise never see the finished mail render.
+  // and would otherwise never see the finished mail render. It also turns
+  // `gmailDraft` off, to keep rendering the Send Mail route the app falls
+  // back to.
   const [form, setForm] = useState(() =>
     (initial ? { ...BLANK_LEAVE, ...initial } : loadLeave(new Date(), accountName)));
   const [copied, setCopied] = useState("");
@@ -141,13 +144,15 @@ export default function LeaveMail({
 
   const sendLabel = ready && !pdfFile && !pdfFailed ? "Preparing…" : "Send Mail";
 
-  /* ---------- the Gmail draft — testers only, for now ----------
+  /* ---------- the Gmail draft ----------
      Everything but the Send: the mail goes into the student's own Drafts,
      addressed, written and with the form attached. Needs Google's
-     permission, so it stays behind `is_tester` until the app is approved for
-     it; the Google project's Testing mode limits it to named accounts too.
+     permission, and on for everyone once VITE_GOOGLE_CLIENT_ID is set.
+     Until Google verifies the app or the institute's Workspace admin
+     trusts it, Google shows an "unverified app" warning and admits 100
+     accounts — past that the draft fails and Send Mail is offered instead.
      See src/lib/gmaildraft.js. */
-  const canDraft = tester && Boolean(GOOGLE_CLIENT_ID);
+  const canDraft = gmailDraft;
   // The old way, for a student whose draft didn't happen — Google refused,
   // or Gmail did. Only for this visit; next time the draft is tried again.
   const [classic, setClassic] = useState(false);

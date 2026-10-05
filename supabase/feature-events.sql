@@ -99,8 +99,8 @@ comment on table public.feature_events is
 --   original_menu    night:<canteen> | tuck:<shop> — the photographs opened
 --   leave_mail       send | save-pdf | open-gmail (iOS) | open-mail-app (iOS,
 --                    only before 2026-10-05 — the Mail app is no longer offered) |
---                    draft-ask | draft | draft-open | draft-error (the testers'
---                    Gmail draft: sent to Google, made, opened, failed)
+--                    draft-ask | draft | draft-open | draft-error (the Gmail
+--                    draft: sent to Google, made, opened, failed)
 --   calendar_export  (no detail)
 --
 -- Attendance marks and reschedules are not here: their own tables already
