@@ -2252,7 +2252,9 @@ console.log("\nleave mail as a Gmail draft");
 
   check("on a laptop, Open Gmail goes into the draft in the institute account",
     gmailOpenHref({ platform: "web", email: "abc2027@email.iimcal.ac.in", messageId: "18f3a" })
-      === "https://mail.google.com/mail/u/abc2027%40email.iimcal.ac.in/#drafts?compose=18f3a");
+      === "https://mail.google.com/mail/?authuser=abc2027%40email.iimcal.ac.in#drafts?compose=18f3a");
+  check("never the account in the path, which Gmail answers with a 404",
+    !gmailOpenHref({ platform: "web", email: "abc2027@email.iimcal.ac.in", messageId: "1" }).includes("/u/"));
   check("on an iPhone it opens the Gmail app", gmailOpenHref({ platform: "ios" }) === "googlegmail://");
   check("on Android it names the Gmail app to Chrome",
     gmailOpenHref({ platform: "android" }).includes("package=com.google.android.gm;end"));

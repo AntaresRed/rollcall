@@ -283,6 +283,9 @@ export function gmailOpenHref({ platform, email, messageId }) {
     return "intent://#Intent;action=android.intent.action.MAIN;"
       + "category=android.intent.category.LAUNCHER;package=com.google.android.gm;end";
   }
-  const who = email ? `u/${encodeURIComponent(email)}/` : "";
+  // `authuser`, as leaveGmailHref uses, not a /u/<address>/ path: Gmail
+  // answers an encoded address in the path with "account temporarily
+  // unavailable" (404).
+  const who = email ? `?authuser=${encodeURIComponent(email)}` : "";
   return `https://mail.google.com/mail/${who}#drafts${messageId ? `?compose=${messageId}` : ""}`;
 }
