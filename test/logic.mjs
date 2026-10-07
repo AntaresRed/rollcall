@@ -7,7 +7,7 @@ import {
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
-import { venueNote, NOTED_VENUES } from "../src/lib/venues.js";
+import { BUILDINGS, findRoom, venueNote, searchRooms, floorsOf, roomKey } from "../src/lib/rooms.js";
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
 import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
 import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS,
@@ -485,28 +485,67 @@ console.log("calendar export (.ics)");
 }
 
 console.log("");
-console.log("venue directions");
+console.log("room directions (J Maps)");
 survives("no venue", () => venueNote(null));
 survives("unknown venue", () => venueNote("Somewhere else"));
-check("an unknown venue has no note", venueNote("Tata Hall (East-West Conference room)") === null);
-check("every noted venue resolves", NOTED_VENUES.every((v) => venueNote(v)));
-// The directions are keyed loosely on purpose: the source sheet has spelled
-// the same room several ways across terms, and a note silently vanishing over
-// a hyphen is the failure this guards against.
+check("an unknown venue has no note", venueNote("Somewhere else") === null);
+check("every building has a map to reach it first",
+  BUILDINGS.length === 4 && BUILDINGS.every((b) => /^https:\/\//.test(b.map) && b.rooms.length > 0));
+check("every listed room says how to find it",
+  BUILDINGS.every((b) => b.rooms.every((r) => r.description.length > 10)));
+check("no room is listed twice, in any building",
+  new Set(BUILDINGS.flatMap((b) => b.rooms.map((r) => roomKey(r.room)))).size ===
+  BUILDINGS.reduce((n, b) => n + b.rooms.length, 0));
+// Keyed loosely on purpose: the schedule has spelled one room several ways
+// across terms, and directions vanishing over a hyphen is the failure this
+// guards against.
 check("punctuation and case don't matter",
-  venueNote("l4") === venueNote("L-4") &&
-  venueNote("AMPHI EAST 150") === venueNote("Amphi (East-150)"));
-check("similar room numbers stay distinct",
-  venueNote("L-4") !== venueNote("L-51") && venueNote("L-5") === null);
-// Deliberately shared — the two rooms are the same climb. Asserted so that
-// editing one of them later can't silently leave the pair disagreeing.
-check("L-51 and L-52 share their directions",
+  venueNote("l4") !== null && venueNote("l4") === venueNote("L-4") &&
+  venueNote("AMPHI EAST 150") !== null && venueNote("AMPHI EAST 150") === venueNote("Amphi (East-150)"));
+check("the schedule's names reach the room they mean",
+  findRoom("Amphi (East-150)")?.room === "Amphi 150E" && findRoom("Amphi (West-100)")?.room === "Amphi 100W");
+check("225 is CR-1", findRoom("225")?.room === "CR-1");
+// OAB's L-4 is one digit short of an NAB number. Read as NAB, it would send
+// a first-year to the wrong building.
+check("OAB's L rooms aren't taken for NAB's",
+  findRoom("L-4")?.building.id === "oab" && findRoom("L-21")?.building.id === "nab" &&
+  venueNote("L-5") === null);
+// K and M rooms open off a hallway, E and W off one side of CDPO: any number
+// in the group gets the group's directions, listed or not.
+check("an unlisted room in a hallway still gets its directions",
+  findRoom("K-504")?.building.id === "nab" && venueNote("K-504") === venueNote("K-501") &&
+  findRoom("K-504").floor === "4th" && findRoom("K-504").room === "K-504");
+check("a hallway with no listed rooms is still covered", venueNote("M-503") !== null);
+check("CDPO's E and W sides are covered by number",
+  findRoom("E-210")?.building.id === "cdpo" && venueNote("W-101") !== venueNote("E-101"));
+check("floors a series doesn't reach get nothing",
+  ["W-301", "E-401", "L-41", "N-41"].every((r) => findRoom(r) === null));
+check("rooms sharing a landing share their words",
   venueNote("L-51") !== null && venueNote("L-51") === venueNote("L-52"));
-check("both amphis are noted, and separately",
-  venueNote("Amphi (West-100)") !== null &&
-  venueNote("Amphi (West-100)") !== venueNote("Amphi (East-150)"));
-// A note pointing at a room no course meets in is a note nobody will ever
-// see — most likely the catalogue renamed the venue underneath it.
+
+check("a blank search finds nothing", searchRooms("").length === 0 && searchRooms("   ").length === 0);
+check("a nonsense search finds nothing", searchRooms("zzzznope").length === 0);
+{
+  const rooms = (q) => searchRooms(q).flatMap((g) => g.rooms.map((r) => `${g.building.id}:${r.room}`));
+  check("a room number finds its room", rooms("K-204").includes("nab:K-204"));
+  check("without its hyphen too", rooms("k204").includes("nab:K-204"));
+  check("a prefix finds the corridor", rooms("k5").includes("nab:K-501") && rooms("k5").includes("nab:K-507"));
+  check("an unlisted hallway room is offered", rooms("K-504").includes("nab:K-504"));
+  check("directions are searchable", rooms("tuck").includes("oab:L-1"));
+  check("a building narrows the search",
+    rooms("tata 211").includes("tata:211") && rooms("tata 211").every((r) => r.startsWith("tata:")));
+  check("results come grouped in building order",
+    searchRooms("first").map((g) => g.building.id).join() ===
+    BUILDINGS.map((b) => b.id).filter((id) => searchRooms("first").some((g) => g.building.id === id)).join());
+}
+{
+  const floors = floorsOf(BUILDINGS.find((b) => b.id === "nab"));
+  check("floors start on the ground", floors[0]?.floor === "Ground");
+  check("each floor appears once", new Set(floors.map((f) => f.floor)).size === floors.length);
+  survives("no building", () => floorsOf(null));
+}
+// Every room a class meets in should come with directions. A miss means a new
+// venue arrived with the schedule: add it to the rooms workbook.
 {
   // Both catalogues: the first-year rooms are on its grid, not the second
   // years'. A room is published either as a course-level venue (electives) or
@@ -520,9 +559,9 @@ check("both amphis are noted, and separately",
       }
     }
   }
-  const orphans = NOTED_VENUES.filter((v) => ![...published].some((p) => venueNote(p) === venueNote(v)));
-  if (orphans.length) console.log("       orphaned: " + orphans.join(", "));
-  check("every noted venue is one the catalogue actually uses", orphans.length === 0);
+  const lost = [...published].filter((v) => !venueNote(v));
+  if (lost.length) console.log("       no directions: " + lost.join(", "));
+  check("every class venue has directions", published.size > 0 && lost.length === 0);
 }
 
 console.log("");

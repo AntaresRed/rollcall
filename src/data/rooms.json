@@ -1,0 +1,1719 @@
+{
+  "buildings": [
+    {
+      "id": "nab",
+      "name": "NAB",
+      "map": "https://maps.app.goo.gl/hnuM2NQuAM9Zsdib7",
+      "rooms": [
+        {
+          "room": "K-101",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-102",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-103",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-104",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-105",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-106",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-107",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-108",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-109",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-110",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-111",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "L-11",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the left of the stairs, right if you come from lift."
+        },
+        {
+          "room": "L-12",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the left of the stairs, right if you come from lift."
+        },
+        {
+          "room": "L-13",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the left of the stairs, right if you come from lift."
+        },
+        {
+          "room": "L-14",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the left of the stairs, right if you come from lift."
+        },
+        {
+          "room": "L-15",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the left of the stairs, right if you come from lift."
+        },
+        {
+          "room": "M-102",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-105",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-107",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-108",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-109",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "N-11",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the right of the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-12",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the right of the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-13",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the right of the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-14",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the right of the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-15",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the right of the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-16",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB ground floor, to the right of the stairs, left if you come from lift."
+        },
+        {
+          "room": "Amphi 150E",
+          "floor": "Ground",
+          "name": "",
+          "description": "NAB Ground floor, first Amphi towards the side of Auditorium."
+        },
+        {
+          "room": "K-201",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-202",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-203",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-204",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-205",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-206",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-207",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-208",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-209",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-210",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-211",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "L-21",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, on your left when you climb up the stairs, right if you come from lift."
+        },
+        {
+          "room": "L-22",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, on your left when you climb up the stairs, right if you come from lift."
+        },
+        {
+          "room": "M-201",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-202",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-203",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-204",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-205",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-206",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-207",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-208",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-209",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-210",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-211",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "N-21",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, on your right when you climb up the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-22",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor, on your right when you climb up the stairs, left if you come from lift."
+        },
+        {
+          "room": "Amphi 250",
+          "floor": "1st",
+          "name": "",
+          "description": "NAB first floor towards the side of auditorium, walk up the stairway."
+        },
+        {
+          "room": "K-301",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-302",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-303",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-304",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-305",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-306",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-307",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-308",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-309",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-310",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-311",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "L-31",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, on your left when you climb up the stairs, right if you come from lift."
+        },
+        {
+          "room": "L-32",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, on your left when you climb up the stairs, right if you come from lift."
+        },
+        {
+          "room": "M-301",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-302",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-303",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-304",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-305",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-306",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-307",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-308",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-309",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-310",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-311",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "N-31",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, on your right when you climb up the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-32",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, on your right when you climb up the stairs, left if you come from lift."
+        },
+        {
+          "room": "Amphi 100W",
+          "floor": "2nd",
+          "name": "",
+          "description": "NAB second floor, towards the side of the Auditorium."
+        },
+        {
+          "room": "K-401",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-402",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-403",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-404",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-405",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-406",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-407",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-408",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-409",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-410",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-411",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "M-401",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-402",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-403",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-404",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-405",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-406",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-407",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-408",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-409",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-410",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "M-411",
+          "floor": "3rd",
+          "name": "",
+          "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+        },
+        {
+          "room": "K-501",
+          "floor": "4th",
+          "name": "",
+          "description": "NAB fourth floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-502",
+          "floor": "4th",
+          "name": "",
+          "description": "NAB fourth floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-503",
+          "floor": "4th",
+          "name": "",
+          "description": "NAB fourth floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-505",
+          "floor": "4th",
+          "name": "",
+          "description": "NAB fourth floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "K-507",
+          "floor": "4th",
+          "name": "",
+          "description": "NAB fourth floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+        },
+        {
+          "room": "L-51",
+          "floor": "4th",
+          "name": "",
+          "description": "NAB fourth floor, on your left when you climb up the stairs, right if you come from lift."
+        },
+        {
+          "room": "L-52",
+          "floor": "4th",
+          "name": "",
+          "description": "NAB fourth floor, on your left when you climb up the stairs, right if you come from lift."
+        },
+        {
+          "room": "N-51",
+          "floor": "4th",
+          "name": "NAB PGPEx classroom",
+          "description": "NAB fourth floor, on your right when you climb up the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-52",
+          "floor": "4th",
+          "name": "NAB PGDBA Classroom",
+          "description": "NAB fourth floor, on your right when you climb up the stairs, left if you come from lift."
+        },
+        {
+          "room": "N-53",
+          "floor": "4th",
+          "name": "NAB PGDBA Classroom",
+          "description": "NAB fourth floor, on your right when you climb up the stairs, left if you come from lift."
+        }
+      ]
+    },
+    {
+      "id": "oab",
+      "name": "OAB",
+      "map": "https://maps.app.goo.gl/Mw9otQNqxvzHHJT39",
+      "rooms": [
+        {
+          "room": "L-1",
+          "floor": "Ground",
+          "name": "",
+          "description": "OAB Ground floor, keep walking straight from MBA office, near Tuck Shop (Great chicken cheese sandwich)."
+        },
+        {
+          "room": "L-2",
+          "floor": "Ground",
+          "name": "",
+          "description": "OAB Ground floor, keep walking straight from MBA office, near Tuck Shop (Great chicken cheese sandwich)."
+        },
+        {
+          "room": "L-3",
+          "floor": "Ground",
+          "name": "",
+          "description": "OAB Ground floor, keep walking straight from MBA office, left side of the end."
+        },
+        {
+          "room": "L-4",
+          "floor": "Ground",
+          "name": "",
+          "description": "OAB Ground floor, keep walking straight from MBA office, left side of the end."
+        },
+        {
+          "room": "A-103",
+          "floor": "Ground",
+          "name": "",
+          "description": "OAB Ground floor, walk the \"Wall of Fame\" corridor between L1 & L2 to reach reception --> Classes are opposite to the reception."
+        },
+        {
+          "room": "A-104",
+          "floor": "Ground",
+          "name": "",
+          "description": "OAB Ground floor, walk the \"Wall of Fame\" corridor between L1 & L2 to reach reception --> Classes are opposite to the reception."
+        },
+        {
+          "room": "A-105",
+          "floor": "Ground",
+          "name": "",
+          "description": "OAB Ground floor, walk the \"Wall of Fame\" corridor between L1 & L2 to reach reception --> Classes are opposite to the reception."
+        }
+      ]
+    },
+    {
+      "id": "cdpo",
+      "name": "CDPO Building",
+      "map": "https://maps.app.goo.gl/UWyy6isdAGexWpAk7",
+      "rooms": [
+        {
+          "room": "C-1",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, ground floor, center."
+        },
+        {
+          "room": "C-2",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, ground floor, center."
+        },
+        {
+          "room": "E-101",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-102",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-103",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-104",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-105",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-106",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-107",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-108",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-109",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-110",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-111",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "E-112",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+        },
+        {
+          "room": "W-101",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-102",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-103",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-104",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-105",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-106",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-107",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-108",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-109",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-110",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-111",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "W-112",
+          "floor": "Ground",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+        },
+        {
+          "room": "C-3",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, first floor, center."
+        },
+        {
+          "room": "C-4",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, first floor, center."
+        },
+        {
+          "room": "E-201",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-202",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-203",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-204",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-205",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-206",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-207",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-208",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-209",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "E-211",
+          "floor": "1st",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+        },
+        {
+          "room": "S5A",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        },
+        {
+          "room": "S5B",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        },
+        {
+          "room": "S5C",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        },
+        {
+          "room": "S6A",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        },
+        {
+          "room": "S6B",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        },
+        {
+          "room": "S6C",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        },
+        {
+          "room": "S7A",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        },
+        {
+          "room": "S7B",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        },
+        {
+          "room": "S7C",
+          "floor": "3rd",
+          "name": "",
+          "description": "CDPO building, Enter from Nescafe's side, left side, third floor."
+        }
+      ]
+    },
+    {
+      "id": "tata",
+      "name": "Tata Hall",
+      "map": "https://maps.app.goo.gl/VPFEdz5qWcmQZmxK6",
+      "rooms": [
+        {
+          "room": "111",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "112",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "113",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "114",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "115",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "116",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "117",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "118",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "119",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "120",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, West Wing (left side)."
+        },
+        {
+          "room": "121",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "122",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "123",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "124",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "125",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "126",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "127",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "128",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "129",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "130",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, East Wing (right side)."
+        },
+        {
+          "room": "CMDP Office",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, left of the reception entrance, past the P C Lounge."
+        },
+        {
+          "room": "P C Lounge",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, immediately left of the reception entrance."
+        },
+        {
+          "room": "Reception Entrance",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, the main entrance, in the centre of the building."
+        },
+        {
+          "room": "Guest Lounge",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, immediately right of the reception entrance."
+        },
+        {
+          "room": "LDP Office / Facility Mgmt Office",
+          "floor": "Ground",
+          "name": "",
+          "description": "Tata Hall ground floor, right of the reception entrance, past the Guest Lounge."
+        },
+        {
+          "room": "211",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "212",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "213",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "214",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "215",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "216",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "217",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "218",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "219",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "220",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, West Wing (left side)."
+        },
+        {
+          "room": "221",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, left of Conference Hall CR1."
+        },
+        {
+          "room": "222",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, left of Conference Hall CR1."
+        },
+        {
+          "room": "223",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, left of Conference Hall CR1."
+        },
+        {
+          "room": "224",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, left of Conference Hall CR1."
+        },
+        {
+          "room": "226",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, right of Conference Hall CR1."
+        },
+        {
+          "room": "227",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, right of Conference Hall CR1."
+        },
+        {
+          "room": "228",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, right of Conference Hall CR1."
+        },
+        {
+          "room": "229",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "230",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "231",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "232",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "233",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "234",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "235",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "236",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "237",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "238",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "239",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "240",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "241",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "242",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, East Wing (right side)."
+        },
+        {
+          "room": "Conference Hall (E)",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, the right of the two conference halls, next to Conference Hall (West)."
+        },
+        {
+          "room": "Conference Hall (W)",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, the left of the two conference halls, next to Conference Hall (East)."
+        },
+        {
+          "room": "CR-1",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre, between guest rooms 221-224 and 226-228."
+        },
+        {
+          "room": "Tata Hall (East-West Conference room)",
+          "floor": "1st",
+          "name": "",
+          "description": "Tata Hall first floor, centre: two separate rooms side by side, Conference Hall (West) on the left and Conference Hall (East) on the right."
+        },
+        {
+          "room": "311",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "312",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "313",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "314",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "315",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "316",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "317",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "318",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "319",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "320",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, West Wing (left side)."
+        },
+        {
+          "room": "Suite-321",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, centre, left side (towards the West Wing)."
+        },
+        {
+          "room": "Suite-322",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, centre, left side (towards the West Wing)."
+        },
+        {
+          "room": "Suite-323",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, centre, right side (towards the East Wing)."
+        },
+        {
+          "room": "Suite-324",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, centre, right side (towards the East Wing)."
+        },
+        {
+          "room": "325",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "326",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "327",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "328",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "329",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "330",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "331",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "332",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "333",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        },
+        {
+          "room": "334",
+          "floor": "2nd",
+          "name": "",
+          "description": "Tata Hall second floor, East Wing (right side)."
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "building": "nab",
+      "series": "K",
+      "digit": 1,
+      "floor": "Ground",
+      "description": "NAB ground floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+    },
+    {
+      "building": "nab",
+      "series": "K",
+      "digit": 2,
+      "floor": "1st",
+      "description": "NAB first floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+    },
+    {
+      "building": "nab",
+      "series": "K",
+      "digit": 3,
+      "floor": "2nd",
+      "description": "NAB second floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+    },
+    {
+      "building": "nab",
+      "series": "K",
+      "digit": 4,
+      "floor": "3rd",
+      "description": "NAB third floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+    },
+    {
+      "building": "nab",
+      "series": "K",
+      "digit": 5,
+      "floor": "4th",
+      "description": "NAB fourth floor, at the end of the corridor, go to the left of the stairs, go to the right if you come from lift --> Walk in through the hallway door at the end."
+    },
+    {
+      "building": "nab",
+      "series": "L",
+      "digit": 1,
+      "floor": "Ground",
+      "description": "NAB ground floor, to the left of the stairs, right if you come from lift."
+    },
+    {
+      "building": "nab",
+      "series": "L",
+      "digit": 2,
+      "floor": "1st",
+      "description": "NAB first floor, on your left when you climb up the stairs, right if you come from lift."
+    },
+    {
+      "building": "nab",
+      "series": "L",
+      "digit": 3,
+      "floor": "2nd",
+      "description": "NAB second floor, on your left when you climb up the stairs, right if you come from lift."
+    },
+    {
+      "building": "nab",
+      "series": "L",
+      "digit": 5,
+      "floor": "4th",
+      "description": "NAB fourth floor, on your left when you climb up the stairs, right if you come from lift."
+    },
+    {
+      "building": "nab",
+      "series": "M",
+      "digit": 1,
+      "floor": "Ground",
+      "description": "NAB ground floor, right next to the stairs --> Then walk in through the hallway door."
+    },
+    {
+      "building": "nab",
+      "series": "M",
+      "digit": 2,
+      "floor": "1st",
+      "description": "NAB first floor, right next to the stairs --> Then walk in through the hallway door."
+    },
+    {
+      "building": "nab",
+      "series": "M",
+      "digit": 3,
+      "floor": "2nd",
+      "description": "NAB second floor, right next to the stairs --> Then walk in through the hallway door."
+    },
+    {
+      "building": "nab",
+      "series": "M",
+      "digit": 4,
+      "floor": "3rd",
+      "description": "NAB third floor, right next to the stairs --> Then walk in through the hallway door."
+    },
+    {
+      "building": "nab",
+      "series": "M",
+      "digit": 5,
+      "floor": "4th",
+      "description": "NAB fourth floor, right next to the stairs --> Then walk in through the hallway door."
+    },
+    {
+      "building": "nab",
+      "series": "N",
+      "digit": 1,
+      "floor": "Ground",
+      "description": "NAB ground floor, to the right of the stairs, left if you come from lift."
+    },
+    {
+      "building": "nab",
+      "series": "N",
+      "digit": 2,
+      "floor": "1st",
+      "description": "NAB first floor, on your right when you climb up the stairs, left if you come from lift."
+    },
+    {
+      "building": "nab",
+      "series": "N",
+      "digit": 3,
+      "floor": "2nd",
+      "description": "NAB second floor, on your right when you climb up the stairs, left if you come from lift."
+    },
+    {
+      "building": "nab",
+      "series": "N",
+      "digit": 5,
+      "floor": "4th",
+      "description": "NAB fourth floor, on your right when you climb up the stairs, left if you come from lift."
+    },
+    {
+      "building": "cdpo",
+      "series": "E",
+      "digit": 1,
+      "floor": "Ground",
+      "description": "CDPO building, Enter from Nescafe's side, left side, ground floor."
+    },
+    {
+      "building": "cdpo",
+      "series": "E",
+      "digit": 2,
+      "floor": "1st",
+      "description": "CDPO building, Enter from Nescafe's side, left side, first floor."
+    },
+    {
+      "building": "cdpo",
+      "series": "E",
+      "digit": 3,
+      "floor": "2nd",
+      "description": "CDPO building, Enter from Nescafe's side, left side, second floor."
+    },
+    {
+      "building": "cdpo",
+      "series": "W",
+      "digit": 1,
+      "floor": "Ground",
+      "description": "CDPO building, Enter from Nescafe's side, right side, ground floor."
+    },
+    {
+      "building": "cdpo",
+      "series": "W",
+      "digit": 2,
+      "floor": "1st",
+      "description": "CDPO building, Enter from Nescafe's side, right side, first floor."
+    },
+    {
+      "building": "cdpo",
+      "series": "W",
+      "digit": 4,
+      "floor": "3rd",
+      "description": "CDPO building, Enter from Nescafe's side, right side, third floor."
+    }
+  ],
+  "aliases": {
+    "Amphi (East-150)": "Amphi 150E",
+    "Amphi (West-100)": "Amphi 100W",
+    "225": "CR-1"
+  }
+}

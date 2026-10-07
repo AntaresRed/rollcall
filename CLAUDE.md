@@ -29,7 +29,7 @@ npm run build    # eslint + all tests + vite build — run before saying anythin
 npm run smoke    # tests only
 ```
 
-`npm run build` must end with `71/71 screens rendered` and `all logic checks passed`.
+`npm run build` must end with `73/73 screens rendered` and `all logic checks passed`.
 
 The app needs `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and
 `VITE_VAPID_PUBLIC_KEY` (see `.env.example`). Screens that need sign-in can't be
@@ -47,7 +47,7 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   `build_por.py`, `SECTIONS` / `SPLITS` / `NOT_SPLIT` in `build_tuck.py`,
   `SPLITS` in `build_night_menu.py`, `NAME_FIXES` / `DEAN_NAMES` /
   `STRAY_TITLES` / `ROOM_FIXES` / `EXTRA_PEOPLE` in `build_directory_tsv.py`,
-  and `data/overrides.json` for schedule
+  `ALIASES` in `build_rooms.py`, and `data/overrides.json` for schedule
   amendments. When one goes stale the build fails **on purpose**. Update the
   entry against the source; never weaken the check.
 - Printed cards stay faithful in the workbook, with the card's own row numbers.
@@ -63,6 +63,11 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   (the directory screen) and `build_faculty.py` → `build_catalogue.py`
   (instructor emails); `build_pgp1_catalogue.py` reads `directory.json`.
   Rebuild all four after a directory change.
+- Rooms (J Maps, venue chips, faculty office directions): `Rooms/Campus
+  Rooms.xlsx` → `build_rooms.py` → `rooms.json`, read through `src/lib/rooms.js`.
+  It is the only place a room's directions are written. Rule tabs (`NAB
+  hallways`, `CDPO groups`) cover every number in a series and floor, listed
+  or not. Only `Confirmed` rows ship; a draft stops the build.
 - **Hazard:** `build_catalogue.py` also rewrites
   `supabase/repair-stale-classes.sql`. Never point it at a template.
 

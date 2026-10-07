@@ -36,6 +36,10 @@ const GROUPS = [
     "Leave of more than a day: the mail written and addressed, sent from "
     + "your iimcal account.",
     MailIcon],
+  ["maps", "J Maps",
+    "Find any classroom or office: the building on Google Maps, then the "
+    + "way to the room.",
+    MapIcon],
 ];
 
 /** Behind the first door. */
@@ -152,6 +156,17 @@ function MailIcon() {
             stroke="currentColor" strokeWidth="1.7" />
       <path d="m3.8 7 8.2 6 8.2-6" stroke="currentColor" strokeWidth="1.7"
             strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MapIcon() {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {/* A folded paper map — the mark people already read as "directions". */}
+      <path d="M3.5 6.5 9 4.5l6 2 5.5-2v13l-5.5 2-6-2-5.5 2v-13Z" stroke="currentColor"
+            strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M9 4.5v13M15 6.5v13" stroke="currentColor" strokeWidth="1.7" />
     </svg>
   );
 }

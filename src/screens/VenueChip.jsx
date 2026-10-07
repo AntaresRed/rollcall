@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
-import { venueNote } from "../lib/venues";
+import { findRoom } from "../lib/rooms";
+import { track } from "../lib/track";
 
 /**
  * Where the class is, as a label stuck on the course.
@@ -28,7 +29,7 @@ export default function VenueChip({ venue, className = "" }) {
 
   if (!venue) return null;
 
-  const note = venueNote(venue);
+  const info = findRoom(venue);
   const label = (
     <>
       <PinIcon />
@@ -36,7 +37,7 @@ export default function VenueChip({ venue, className = "" }) {
     </>
   );
 
-  if (!note) {
+  if (!info) {
     return <span className={`venue-chip ${className}`.trim()}>{label}</span>;
   }
 
@@ -56,12 +57,33 @@ export default function VenueChip({ venue, className = "" }) {
                 strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      {open && (
-        <span className="venue-note" id={noteId} role="note">
-          {note}
-        </span>
-      )}
+      {open && <RoomNote info={info} id={noteId} />}
     </>
+  );
+}
+
+/**
+ * The directions to a room, from its building's door. Shared with the
+ * Faculty screen's offices so a room reads the same wherever it is tapped.
+ *
+ * The descriptions start at the building ("NAB first floor, …"), so the way to
+ * the building comes first: the map link is the step before them, and says so.
+ */
+export function RoomNote({ info, id }) {
+  return (
+    <span className="venue-note" id={id} role="note">
+      First reach{" "}
+      <a
+        href={info.building.map}
+        target="_blank"
+        rel="noopener noreferrer"
+        // Leaves the app, so nothing else would count it.
+        onClick={() => track("open", `map-${info.building.id}`)}
+      >
+        {info.building.name} on Google Maps
+      </a>
+      , then: {info.description}
+    </span>
   );
 }
 

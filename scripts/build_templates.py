@@ -707,6 +707,72 @@ the counts it prints at the end.
 """)
 
 
+# ---------------------------------------------------------------- rooms
+
+def rooms():
+    wb = openpyxl.Workbook()
+    guide(wb, "Campus Rooms — how to find a room, for J Maps", [
+        "Read by: scripts/build_rooms.py    Feeds: J Maps, venue chips, faculty rooms",
+        "",
+        "Buildings (one row per building):",
+        "Building must be NAB, OAB, CDPO Building or Tata Hall. Google Maps is "
+        "the link a student opens first — every description starts at the "
+        "building's door. Room tabs lists the tabs holding its rooms, comma "
+        "separated. A building with no link, or a tab no building claims, "
+        "stops the build.",
+        "",
+        "Room tabs (one row per room):",
+        "Room, Floor (Ground, 1st, 2nd, 3rd or 4th), Name (optional), "
+        "Description and Status are read by heading; other columns are yours. "
+        "Only Status 'Confirmed' ships. 'No description (final)' leaves a room "
+        "out on purpose. Any other status with a description is an unfinished "
+        "draft and stops the build, so a draft can never reach the app.",
+        "The same room in two tabs, even spelled differently (K-201 and K201), "
+        "stops the build.",
+        "",
+        "Rule tabs ('NAB hallways', 'CDPO groups'):",
+        "One row per series and floor, with Covers written as 'K-2xx (any)'. "
+        "The app gives that description to any room whose letter and first "
+        "digit match — rooms nobody listed included. The first digit is the "
+        "floor plus one, and a Covers that disagrees with its Floor stops the "
+        "build. A listed room inside a rule must say exactly what the rule "
+        "says, or the build stops: one of them has drifted.",
+        "",
+        "Other names for a room:",
+        "What the class schedule calls a room ('Amphi (East-150)') is not a "
+        "row here. It goes in ALIASES in build_rooms.py, which checks each one "
+        "points at a confirmed room.",
+    ], name="Campus Rooms.template.xlsx")
+
+    link = "https://maps.app.goo.gl/replace-me"
+    sheet(wb, "Buildings", ["Building", "Google Maps", "Room tabs"], [
+        ["NAB", link, "NAB, NAB hallways"],
+        ["OAB", link, "OAB"],
+        ["CDPO Building", link, "CDPO Building, CDPO groups"],
+        ["Tata Hall", link, "Tata Hall"],
+    ], widths=[16, 40, 32])
+    k2 = ("NAB first floor, at the end of the corridor --> "
+          "Walk in through the hallway door at the end.")
+    head = ["Room", "Floor", "Name", "Description", "Status"]
+    # The rooms ALIASES in build_rooms.py point at must exist, or the build
+    # stops — so the example carries them.
+    sheet(wb, "NAB", head, [
+        ["K-201", "1st", "", k2, "Confirmed"],
+        ["Amphi 150E", "Ground", "", "NAB ground floor, first Amphi towards the Auditorium.", "Confirmed"],
+        ["Amphi 100W", "2nd", "", "NAB second floor, towards the Auditorium.", "Confirmed"],
+    ], widths=[12, 8, 20, 60, 22])
+    sheet(wb, "NAB hallways", ["Series", "Floor", "Covers", "Description"],
+          [["K", "1st", "K-2xx (any)", k2]], widths=[8, 8, 16, 60])
+    sheet(wb, "OAB", head, [["L-1", "Ground", "", "OAB ground floor, near the reception.",
+                             "Confirmed"]], widths=[12, 8, 20, 60, 22])
+    sheet(wb, "CDPO Building", head, [], widths=[12, 8, 20, 60, 22])
+    sheet(wb, "CDPO groups", ["Series", "Floor", "Covers", "Description"], [],
+          widths=[8, 8, 16, 60])
+    sheet(wb, "Tata Hall", head, [["CR-1", "1st", "", "Tata Hall first floor, centre.", "Confirmed"]],
+          widths=[12, 8, 20, 60, 22])
+    save(wb, "Campus Rooms.template.xlsx")
+
+
 def index():
     with open(os.path.join(OUT, "README.md"), "w",
               encoding="utf-8", newline="\n") as fh:
@@ -729,6 +795,7 @@ the builder at that.
 | `Day Mess Menu.template.xlsx` | Mess secretary | `build_menu.py` | Day mess tab |
 | `Tuck Shops.template.xlsx` | Tuck shop / mess secretary | `build_tuck.py` | Tuck shops tab |
 | `Night Mess Menu.template.xlsx` | Canteen / mess secretary | `build_night_menu.py` | Night canteen tab |
+| `Campus Rooms.template.xlsx` | You, room by room | `build_rooms.py` | J Maps, venue directions |
 
 Every template has a `.README.md` beside it saying what each sheet and column
 means and what will stop the build.
@@ -803,5 +870,6 @@ if __name__ == "__main__":
     pgp1_schedule()
     faculty_directory()
     course_outline()
+    rooms()
     index()
     print("done.")

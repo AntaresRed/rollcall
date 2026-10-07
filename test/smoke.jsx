@@ -16,6 +16,7 @@ import Profile from "../src/screens/Profile";
 import Reschedule from "../src/screens/Reschedule";
 import TermCalendar from "../src/screens/TermCalendar";
 import Faculty from "../src/screens/Faculty";
+import JMaps from "../src/screens/JMaps";
 import CalendarExport from "../src/screens/CalendarExport";
 import ScheduleAdmin from "../src/screens/ScheduleAdmin";
 import PorDetails from "../src/screens/PorDetails";
@@ -147,6 +148,8 @@ const cases = [
   ["Faculty", <Faculty key="f" classes={classes} onBack={noop} />],
   ["Faculty / no courses picked", <Faculty key="fe" classes={[]} onBack={noop} />],
   ["Faculty / no classes prop at all", <Faculty key="fn" onBack={noop} />],
+  ["JMaps", <JMaps key="jm" onBack={noop} />],
+  ["JMaps / no back button", <JMaps key="jmn" />],
   ["Reschedule", <Reschedule key="r" classes={classes} term={term} overrides={overrides} now={now} onMove={noop} onClear={noop} onBack={noop} />],
   ["Reschedule / no classes", <Reschedule key="re" classes={[]} term={term} overrides={[]} now={now} onMove={noop} onClear={noop} />],
   // A session already moved once, off a date that has since passed — the case

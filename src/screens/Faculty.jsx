@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { facultyDirectory } from "../lib/directory";
+import { findRoom } from "../lib/rooms";
+import { RoomNote } from "./VenueChip";
 
 /**
  * The institute faculty directory — every name, room, extension, direct line
@@ -86,20 +88,7 @@ export default function Faculty({ classes = [], onBack }) {
           )}
 
           {p.offices.map((o, idx) => (
-            <div className="dir-office" key={`${p.name}|${idx}`}>
-              {o.label && <div className="dir-office-label">{o.label} office</div>}
-
-              <dl className="dir-fields">
-                <Field label="Room" value={o.room} />
-                <Field label="Ext" value={o.ext} />
-                <Field
-                  label="Direct"
-                  value={o.direct}
-                  href={o.direct ? `tel:${o.direct.replace(/[^\d+]/g, "")}` : null}
-                />
-                <Field label="Email" value={o.email} href={o.email ? `mailto:${o.email}` : null} wide />
-              </dl>
-            </div>
+            <Office o={o} key={`${p.name}|${idx}`} />
           ))}
         </div>
       ))}
@@ -110,6 +99,57 @@ export default function Faculty({ classes = [], onBack }) {
         </button>
       )}
     </>
+  );
+}
+
+/**
+ * One office. Where directions to the room exist, the room becomes a toggle
+ * for them — the same tuck-away as the venue chip on Today, since someone
+ * walking to a professor's office for the first time needs them once.
+ *
+ * Open, the room field takes the full width: the note is a sentence, and half
+ * a card on a phone would stack it a word or two per line.
+ */
+function Office({ o }) {
+  const [open, setOpen] = useState(false);
+  const noteId = useId();
+  const info = findRoom(o.room);
+
+  const room = info ? (
+    <>
+      <button
+        type="button"
+        className={`dir-room${open ? " open" : ""}`}
+        aria-expanded={open}
+        aria-controls={noteId}
+        aria-label={`${o.room} — how to find it`}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {o.room}
+        <svg className="venue-caret" width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M2.5 4 5 6.5 7.5 4" stroke="currentColor" strokeWidth="1.5"
+                strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && <RoomNote info={info} id={noteId} />}
+    </>
+  ) : o.room;
+
+  return (
+    <div className="dir-office">
+      {o.label && <div className="dir-office-label">{o.label} office</div>}
+
+      <dl className="dir-fields">
+        <Field label="Room" value={room} wide={open} />
+        <Field label="Ext" value={o.ext} />
+        <Field
+          label="Direct"
+          value={o.direct}
+          href={o.direct ? `tel:${o.direct.replace(/[^\d+]/g, "")}` : null}
+        />
+        <Field label="Email" value={o.email} href={o.email ? `mailto:${o.email}` : null} wide />
+      </dl>
+    </div>
   );
 }
 

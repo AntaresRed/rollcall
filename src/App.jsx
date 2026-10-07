@@ -38,6 +38,7 @@ const MessMenu = lazy(() => import("./screens/MessMenu"));
 const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
 const SectionPicker = lazy(() => import("./screens/SectionPicker"));
 const LeaveMail = lazy(() => import("./screens/LeaveMail"));
+const JMaps = lazy(() => import("./screens/JMaps"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -55,6 +56,7 @@ const SUB_SCREEN_BACK = {
   mess: "Back to utils",
   export: "Back to utils",
   leave: "Back to utils",
+  maps: "Back to utils",
   admin: "Back to profile",
 };
 
@@ -767,6 +769,9 @@ export default function App() {
             accountName={session.user?.user_metadata?.full_name ?? session.user?.user_metadata?.name ?? ""}
             onBack={() => setSubScreen(null)}
           />
+        )}
+        {tab === "utils" && subScreen === "maps" && (
+          <JMaps onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && !subScreen && <Utils onOpen={openSub} />}
         {tab === "timetable" && !subScreen && (

@@ -3178,6 +3178,87 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .dir-field dd a:hover { text-decoration: underline; }
 .dir-field dd .muted { color: var(--mute); }
+/* A room with directions reads like the links beside it, plus the caret the
+   venue chip uses, so "tap for more" looks the same across the app. */
+.dir-room {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--signal-deep);
+  cursor: pointer;
+}
+.dir-room.open .venue-caret { transform: rotate(180deg); }
+
+
+/* ---------- J Maps ---------- */
+
+/* Building names are longer than hostel codes; sized to their words rather
+   than split evenly, so "CDPO Building" stays on one line on a phone. */
+.map-tabs { margin-top: 14px; }
+.map-tabs .mess-tab {
+  flex: 1 0 auto;
+  min-width: 0;
+  padding: 8px 10px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* The way to the building, ahead of the way to the room. A card rather than a
+   line of text because it is the one thing on the screen that leaves the app. */
+.map-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  margin: 0 0 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  background: var(--card);
+}
+.map-card-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.map-card-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.map-card-hint { font-size: 12.5px; line-height: 1.4; color: var(--slate); }
+.map-card-go {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.map-card-go:hover { background: var(--signal-deep); }
+
+.map-group + .map-group { margin-top: 18px; }
+.map-group .map-card { margin-top: 12px; }
+
+.map-floor {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin: 18px 0 2px;
+}
+
+.map-room {
+  border-bottom: 1px solid var(--rule);
+  padding: 10px 0;
+}
+.map-room-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.map-room-no { font-family: var(--mono); font-size: 13.5px; font-weight: 600; }
+.map-room-name { font-size: 12px; color: var(--mute); }
+.map-room-desc { margin-top: 3px; font-size: 13px; line-height: 1.45; color: var(--slate); }
+
+.venue-note a { color: var(--signal-deep); }
 
 
 /* ---------- calendar export ---------- */
