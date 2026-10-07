@@ -2295,11 +2295,20 @@ console.log("\nleave mail as a Gmail draft");
   check("never the account in the path, which Gmail answers with a 404",
     !gmailOpenHref({ platform: "web", email: "abc2027@email.iimcal.ac.in", messageId: "1" }).includes("/u/"));
   check("on an iPhone it opens the Gmail app", gmailOpenHref({ platform: "ios" }) === "googlegmail://");
-  // An intent link naming the Gmail app opened the Play Store: Chrome won't
-  // launch an app screen that hasn't declared itself openable from the web.
-  check("on Android it opens the draft itself, as on a laptop, never an intent link",
-    gmailOpenHref({ platform: "android", email: "abc2027@email.iimcal.ac.in", messageId: "18f3a" })
-      === "https://mail.google.com/mail/?authuser=abc2027%40email.iimcal.ac.in#drafts?compose=18f3a");
+  // An intent link naming Gmail's main screen opened the Play Store, and the
+  // bare web address opened Chrome. Android offers Gmail's address to the
+  // app, with the draft on the web to fall back on — never the Play Store.
+  {
+    const a = gmailOpenHref({ platform: "android", email: "abc2027@email.iimcal.ac.in", messageId: "18f3a" });
+    check("on Android it offers Gmail's address to the Gmail app",
+      a.startsWith("intent://mail.google.com/mail/?authuser=abc2027%40email.iimcal.ac.in#Intent;")
+        && a.includes(";scheme=https;") && a.includes(";package=com.google.android.gm;") && a.endsWith(";end"));
+    check("and falls back to the draft on the web, so Chrome never goes to the Play Store",
+      a.includes(`;S.browser_fallback_url=${encodeURIComponent(
+        "https://mail.google.com/mail/?authuser=abc2027%40email.iimcal.ac.in#drafts?compose=18f3a")};`));
+    check("never the app's main screen, which Chrome won't open from a link",
+      !a.includes("LAUNCHER") && !a.includes("action.MAIN"));
+  }
 }
 console.log("\nleave form PDF");
 {

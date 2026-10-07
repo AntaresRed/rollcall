@@ -413,7 +413,7 @@ export default function LeaveMail({
                 {...(platform !== "ios" ? { target: "_blank", rel: "noopener" } : {})}
                 onClick={() => track("leave_mail", "draft-open")}
               >
-                Open Gmail and send the mail
+                Open Gmail drafts and send mail
                 <ArrowIcon />
               </a>
               <button type="button" className="leave-retry leave-alt" onClick={saveOnly}>

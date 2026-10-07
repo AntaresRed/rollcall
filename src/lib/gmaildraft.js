@@ -280,14 +280,17 @@ export async function saveDraft(token, raw, key) {
 export const lastDraft = () => get(DRAFT);
 
 /**
- * Where "Open Gmail" goes. Straight into the draft, in the institute account,
- * on a laptop and on Android. The iPhone app has no link to one draft, so
- * there it opens the app and the screen says where to look.
+ * Where "Open Gmail" goes. On a laptop, straight into the draft, in the
+ * institute account. The iPhone app has no link to one draft, so there it
+ * opens the app and the screen says where to look.
  *
- * Android gets the web address rather than a link that names the Gmail app.
- * Chrome opens an app from a link only if the screen being opened has said
- * the web may open it, and Gmail's main screen hasn't — so an intent link
- * naming the app sent every Android student to its Play Store page instead.
+ * Android asks Chrome to hand Gmail's own address to the Gmail app, and to
+ * open the draft on the web if the app won't take it. Two links it replaced
+ * each went wrong: one naming the app's main screen sent students to the
+ * Play Store, since Chrome launches only screens that say the web may open
+ * them; and the bare web address opened in Chrome, not the app. The fallback
+ * is what keeps the Play Store out of it — Chrome goes there only when a
+ * link that names an app has nowhere else to go.
  */
 export function gmailOpenHref({ platform, email, messageId }) {
   if (platform === "ios") return "googlegmail://";
@@ -295,5 +298,8 @@ export function gmailOpenHref({ platform, email, messageId }) {
   // answers an encoded address in the path with "account temporarily
   // unavailable" (404).
   const who = email ? `?authuser=${encodeURIComponent(email)}` : "";
-  return `https://mail.google.com/mail/${who}#drafts${messageId ? `?compose=${messageId}` : ""}`;
+  const web = `https://mail.google.com/mail/${who}#drafts${messageId ? `?compose=${messageId}` : ""}`;
+  if (platform !== "android") return web;
+  return `intent://mail.google.com/mail/${who}#Intent;scheme=https;`
+    + `package=com.google.android.gm;S.browser_fallback_url=${encodeURIComponent(web)};end`;
 }
