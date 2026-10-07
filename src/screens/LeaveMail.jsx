@@ -150,7 +150,7 @@ export default function LeaveMail({
      permission, and on for everyone once VITE_GOOGLE_CLIENT_ID is set.
      Until Google verifies the app or the institute's Workspace admin
      trusts it, Google shows an "unverified app" warning and admits 100
-     accounts — past that the draft fails and Send Mail is offered instead.
+     accounts — past that the draft fails and Send Mail is offered as an option instead.
      See src/lib/gmaildraft.js. */
   const canDraft = gmailDraft;
   // The old way, for a student whose draft didn't happen — Google refused,
