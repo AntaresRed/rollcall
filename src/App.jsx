@@ -931,8 +931,30 @@ function Masthead({ now, onBack = null, backLabel = "Back" }) {
   const label = now.toLocaleDateString(undefined, {
     weekday: "short", day: "numeric", month: "short",
   });
+
+  // Its height, as --mast-h, for whatever pins itself just under it — J-Maps'
+  // building card. Measured for the same reasons as the tab bar's --nav-h: the
+  // safe-area inset differs by phone, and the wordmark is set in a web font.
+  const bar = useRef(null);
+  useEffect(() => {
+    const el = bar.current;
+    if (!el) return undefined;
+    const publish = () => document.documentElement.style.setProperty(
+      "--mast-h", `${Math.round(el.getBoundingClientRect().height)}px`,
+    );
+    publish();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(publish) : null;
+    ro?.observe(el);
+    window.addEventListener("resize", publish);
+    document.fonts?.ready.then(publish).catch(() => {});
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", publish);
+    };
+  }, []);
+
   return (
-    <header className="masthead">
+    <header className="masthead" ref={bar}>
       <div className="masthead-left">
         {onBack && (
           <button className="masthead-back" onClick={onBack} aria-label={backLabel} title={backLabel}>

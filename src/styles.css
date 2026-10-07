@@ -3248,8 +3248,27 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .map-card-go:hover { background: var(--signal-deep); }
 
+/* Pinned just under the masthead while the rooms scroll beneath it, so the
+   way to the building is a tap away from any room on the list. Searching,
+   each building's card holds only while its own rooms go by, and hands over
+   to the next one's.
+
+   The pin is a strip of paper with the card inside, not the card itself:
+   rows scrolling past would otherwise show in the gap above the card and at
+   its rounded corners. Its top padding is that gap, taken back out of the
+   margin so the card sits where it did. */
+.map-pin {
+  position: sticky;
+  top: var(--mast-h, 52px);
+  z-index: 5;
+  margin-top: -8px;
+  padding-top: 8px;
+  background: var(--paper);
+}
+.map-pin .map-card { box-shadow: 0 6px 12px -8px rgba(17, 21, 26, 0.28); }
+
 .map-group + .map-group { margin-top: 18px; }
-.map-group .map-card { margin-top: 12px; }
+.map-group .map-pin { margin-top: 4px; }
 
 .map-floor {
   font-family: var(--mono);
