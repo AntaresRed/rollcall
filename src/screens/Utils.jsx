@@ -20,26 +20,28 @@ import { track } from "../lib/track";
 /** The institute's own directory. Declared above the lists, which read it. */
 const STUDENT_DIRECTORY = "https://student.iimcal.ac.in/jd/#/";
 
-/** The top level: three doors. */
+/** The top level, most-used first: food and finding a room are daily, the
+    calendar export is a once-a-term job. */
 const GROUPS = [
-  ["contacts", "Faculty and POR Contact Details",
-    "Professors, the council, clubs and captains, and the batch directory.",
-    ContactsIcon],
-  ["export", "Add to Google / Apple calendar",
-    "Put the term's classes into the calendar app you already use.",
-    CalendarIcon],
   ["mess", "Day-Night Mess & Tuck",
     "The week's mess food, plus night canteen and tuck shop menus you can "
     + "order from over WhatsApp.",
     MessIcon],
-  ["leave", "Leave Mail",
-    "Leave of more than a day: the mail written and addressed, sent from "
-    + "your iimcal account.",
-    MailIcon],
   ["maps", "J-Maps",
-    "Find any classroom or office: the building on Google Maps, then the "
-    + "way to the room.",
+    "Door-to-Door navigation for every classroom and admin office in the "
+    + "campus.",
     MapIcon],
+  ["contacts", "Faculty and POR Contact Details",
+    "Professors, the council, clubs and captains, and the batch directory.",
+    ContactsIcon],
+  ["leave", "Leave Mail",
+    // Not "sent": the app only drafts it, and the student presses Send in Gmail.
+    "Leave Mail auto-drafted, official form attached, ready to send from "
+    + "Gmail.",
+    MailIcon],
+  ["export", "Add to Google / Apple calendar",
+    "Put the term's classes into the calendar app you already use.",
+    CalendarIcon],
 ];
 
 /** Behind the first door. */
