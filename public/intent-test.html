@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Gmail link test</title>
+    <!--
+      TEMPORARY. A bench test for the leave mail's "Open Gmail" link on
+      Android: the same links the app has used, with nothing of the app
+      around them, to tell a phone-side change from one of ours. Delete once
+      the question is answered.
+    -->
+    <style>
+      body {
+        margin: 0;
+        padding: 20px 16px 40px;
+        background: #F4F5F2;
+        color: #11151A;
+        font: 15px/1.45 system-ui, -apple-system, sans-serif;
+      }
+      h1 { font-size: 19px; margin: 0 0 4px; }
+      p { margin: 0 0 14px; color: #565E66; }
+      a.test {
+        display: block;
+        margin: 12px 0 0;
+        padding: 14px 16px;
+        border-radius: 10px;
+        background: #11151A;
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      a.test small {
+        display: block;
+        margin-top: 3px;
+        font-weight: 400;
+        font-size: 12.5px;
+        color: #CFD3CC;
+      }
+      .env {
+        margin-top: 24px;
+        padding: 12px 14px;
+        border: 1px solid #CFD3CC;
+        border-radius: 10px;
+        font: 12px/1.5 ui-monospace, monospace;
+        color: #565E66;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Gmail link test</h1>
+    <p>Tap each button, note what opens, then come back here.</p>
+
+    <a class="test" href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.gm;end">
+      1 · The link from before today
+      <small>Gmail app, or the Play Store if it can't</small>
+    </a>
+    <a class="test" href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.gm;S.browser_fallback_url=https%3A%2F%2Fmail.google.com%2Fmail%2F%23drafts;end">
+      2 · Same, with the website fallback (live now)
+      <small>Gmail app, or Gmail in the browser if it can't</small>
+    </a>
+    <a class="test" href="intent://mail.google.com/mail/#Intent;scheme=https;package=com.google.android.gm;S.browser_fallback_url=https%3A%2F%2Fmail.google.com%2Fmail%2F%23drafts;end">
+      3 · Gmail's address, handed to the app
+      <small>Gmail app, or Gmail in the browser if it can't</small>
+    </a>
+    <a class="test" href="mailto:?subject=Link%20test">
+      4 · A plain mailto link
+      <small>Opens a new mail in your mail app; just discard it</small>
+    </a>
+
+    <div class="env" id="env"></div>
+    <script>
+      var standalone = false;
+      try { standalone = matchMedia("(display-mode: standalone)").matches; } catch (e) {}
+      document.getElementById("env").textContent =
+        (standalone ? "Running as the installed app" : "Running in a browser tab")
+        + " · " + navigator.userAgent;
+    </script>
+  </body>
+</html>
