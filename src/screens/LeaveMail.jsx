@@ -193,17 +193,16 @@ export default function LeaveMail({
     return () => window.removeEventListener("pageshow", back);
   }, []);
 
-  // Off to Google, behind the loader. A frame first, so the loader is
-  // painted before the page starts to go.
-  const leaveForGoogle = () => requestAnimationFrame(() => askGoogle(email));
-
   const makeDraft = async ({ afterTrip = false } = {}) => {
     if (!pdfFile || busy) return;
     setStep("drafting");
     const token = heldToken(email);
     if (!token) {
       track("leave_mail", "draft-ask");
-      leaveForGoogle();
+      // Straight from the tap, not a frame later: the loader still paints,
+      // since the page stays up until Google's answers, and a trip started
+      // by a tap is the one an installed Android app keeps as its own.
+      askGoogle(email);
       return;
     }
     setBusy(true);
@@ -229,7 +228,7 @@ export default function LeaveMail({
         // Expected, so not counted as a failure.
         dropToken();
         leaving = true;
-        leaveForGoogle();
+        askGoogle(email);
         return;
       }
       track("leave_mail", "draft-error");
@@ -399,18 +398,17 @@ export default function LeaveMail({
               </p>
               <p className="leave-saved">
                 Addressed, with the form attached.{" "}
-                {platform !== "ios"
+                {platform === "web"
                   ? "Open it, check it and press Send."
                   : "In Gmail, open Drafts, tap the leave mail and press Send."}
               </p>
               {/* A link, so the app opens from the tap itself — a phone opens
-                  another app only straight from a tap. On a laptop and on
-                  Android it goes into the draft, in a tab of its own, so the
-                  app is still where it was left. */}
+                  another app only straight from a tap. On a laptop it goes
+                  into the draft, in a tab of its own. */}
               <a
                 className="btn block leave-open"
                 href={gmailOpenHref({ platform, email, messageId: madeThis.messageId })}
-                {...(platform !== "ios" ? { target: "_blank", rel: "noopener" } : {})}
+                {...(platform === "web" ? { target: "_blank", rel: "noopener" } : {})}
                 onClick={() => track("leave_mail", "draft-open")}
               >
                 Open Gmail drafts and send mail

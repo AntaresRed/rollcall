@@ -281,25 +281,25 @@ export const lastDraft = () => get(DRAFT);
 
 /**
  * Where "Open Gmail" goes. On a laptop, straight into the draft, in the
- * institute account. The iPhone app has no link to one draft, so there it
+ * institute account. The phone apps have no link to one draft, so there it
  * opens the app and the screen says where to look.
  *
- * Android asks Chrome to hand Gmail's own address to the Gmail app, and to
- * open the draft on the web if the app won't take it. Two links it replaced
- * each went wrong: one naming the app's main screen sent students to the
- * Play Store, since Chrome launches only screens that say the web may open
- * them; and the bare web address opened in Chrome, not the app. The fallback
- * is what keeps the Play Store out of it — Chrome goes there only when a
- * link that names an app has nowhere else to go.
+ * On Android, the link that opened the Gmail app before the loader went in,
+ * with one addition: the draft on the web to fall back on. A link naming an
+ * app that Chrome can't open otherwise lands on the app's Play Store page,
+ * which is where students were sent when it stopped working.
  */
 export function gmailOpenHref({ platform, email, messageId }) {
-  if (platform === "ios") return "googlegmail://";
   // `authuser`, as leaveGmailHref uses, not a /u/<address>/ path: Gmail
   // answers an encoded address in the path with "account temporarily
   // unavailable" (404).
   const who = email ? `?authuser=${encodeURIComponent(email)}` : "";
   const web = `https://mail.google.com/mail/${who}#drafts${messageId ? `?compose=${messageId}` : ""}`;
-  if (platform !== "android") return web;
-  return `intent://mail.google.com/mail/${who}#Intent;scheme=https;`
-    + `package=com.google.android.gm;S.browser_fallback_url=${encodeURIComponent(web)};end`;
+  if (platform === "ios") return "googlegmail://";
+  if (platform === "android") {
+    return "intent://#Intent;action=android.intent.action.MAIN;"
+      + "category=android.intent.category.LAUNCHER;package=com.google.android.gm;"
+      + `S.browser_fallback_url=${encodeURIComponent(web)};end`;
+  }
+  return web;
 }
