@@ -7,9 +7,8 @@ import { isIOS, isAndroid, isStandalone } from "../lib/platform";
 import { makeLeavePdf } from "../lib/leavepdf";
 import { deliverFile } from "../lib/deliver";
 import { track } from "../lib/track";
-import Splash from "./Splash";
 import {
-  DRAFT_STEPS, GOOGLE_CLIENT_ID, askGoogle, takeRoundTrip, finishRoundTrip, heldToken, dropToken,
+  GOOGLE_CLIENT_ID, askGoogle, takeRoundTrip, finishRoundTrip, heldToken, dropToken,
   mimeMessage, rawOf, saveDraft, lastDraft, gmailOpenHref,
 } from "../lib/gmaildraft";
 
@@ -167,67 +166,29 @@ export default function LeaveMail({
   const [draftError, setDraftError] = useState(() => (trip.error ? tripMessage(trip.error) : ""));
   const madeThis = made?.key === formKey ? made : null;
 
-  // The loader over the whole screen while the draft is made: a key of
-  // DRAFT_STEPS, or null. Back from Google with a draft owed, it is up from
-  // the first frame, carrying on from the opening screen that said the same.
-  const [step, setStep] = useState(() => (trip.pending && !trip.error ? "drafting" : null));
-  // Bumped when the loader comes down, to bring the outcome — Open Gmail, or
-  // what went wrong — into view. The button sits at the foot of a long form,
-  // and the return from Google lands at the top of it.
-  // A trip that came back refused lands straight on what went wrong.
-  const [landed, setLanded] = useState(() => (trip.error ? 1 : 0));
-  const outcome = useRef(null);
-  useEffect(() => {
-    if (landed) outcome.current?.scrollIntoView({ block: "center" });
-  }, [landed]);
-  const settle = () => {
-    setStep(null);
-    setLanded((n) => n + 1);
-  };
-
-  // Backing out of Google's page can return to this page as it was left —
-  // loader and all, from the back-forward cache — with nothing left to end it.
-  useEffect(() => {
-    const back = (e) => { if (e.persisted) setStep(null); };
-    window.addEventListener("pageshow", back);
-    return () => window.removeEventListener("pageshow", back);
-  }, []);
-
   const makeDraft = async ({ afterTrip = false } = {}) => {
     if (!pdfFile || busy) return;
-    setStep("drafting");
     const token = heldToken(email);
     if (!token) {
       track("leave_mail", "draft-ask");
-      // Straight from the tap, not a frame later: the loader still paints,
-      // since the page stays up until Google's answers, and a trip started
-      // by a tap is the one an installed Android app keeps as its own.
       askGoogle(email);
       return;
     }
     setBusy(true);
     setDraftError("");
-    let leaving = false;
     try {
       const bytes = new Uint8Array(await pdfFile.arrayBuffer());
       const raw = rawOf(mimeMessage({
         to: LEAVE_TO, cc: LEAVE_CC, subject, body,
         file: { name: pdfFile.name, type: pdfFile.type, bytes },
       }));
-      // Each step stays up long enough to be read. Writing the mail takes no
-      // time at all; the upload, which is where the form goes in, takes what
-      // it takes.
-      await pause(STEP_MS);
-      setStep("attaching");
-      const [draft] = await Promise.all([saveDraft(token, raw, formKey), pause(STEP_MS)]);
-      setMade(draft);
+      setMade(await saveDraft(token, raw, formKey));
       track("leave_mail", "draft");
     } catch (err) {
       if (err?.status === 401 && !afterTrip) {
         // The hour ran out: ask again, which comes back here and retries.
         // Expected, so not counted as a failure.
         dropToken();
-        leaving = true;
         askGoogle(email);
         return;
       }
@@ -238,26 +199,21 @@ export default function LeaveMail({
         : "Couldn't reach Gmail. Check your connection and try again.");
     } finally {
       setBusy(false);
-      if (!leaving) settle();
     }
   };
 
   // Back from Google with a draft owed: make it as soon as the form PDF is
   // ready again. The ref, not state, keeps a double-run effect (React's
-  // development checks do exactly that) from making two. A form that can't
-  // be made — it fails its checks, or the PDF won't build — drops the loader
-  // rather than leaving it up forever, and the screen says what's wrong.
+  // development checks do exactly that) from making two.
   const owed = useRef(trip.pending && !trip.error);
   useEffect(() => {
-    if (!owed.current) return;
-    if (ready && !pdfFile && !pdfFailed) return;
+    if (!owed.current || !pdfFile) return;
     owed.current = false;
     finishRoundTrip();
-    if (pdfFile) makeDraft({ afterTrip: true });
-    else settle();
+    makeDraft({ afterTrip: true });
     // makeDraft reads the current render's form, which is the one wanted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, pdfFile, pdfFailed]);
+  }, [pdfFile]);
   useEffect(() => { if (trip.error) finishRoundTrip(); }, [trip.error]);
 
   const draftLabel = ready && !pdfFile && !pdfFailed ? "Preparing…"
@@ -385,65 +341,49 @@ export default function LeaveMail({
       )}
       {draftRoute && (
         <>
-          {step && <Splash message={DRAFT_STEPS[step]} draw={!trip.pending} task />}
-          {madeThis ? (
-            // Done but for the Send, and Open Gmail is the one thing left to
-            // do — so it stands alone, full width and in the signal colour,
-            // with the form's download stepped down to a link beneath it. Two
-            // equal buttons side by side read as a choice, when only one of
-            // them finishes the job.
-            <div className="leave-ready" ref={outcome}>
-              <p className="leave-ready-head">
-                <TickIcon /> Draft ready in Gmail
-              </p>
-              <p className="leave-saved">
-                Addressed, with the form attached.{" "}
-                {platform === "web"
-                  ? "Open it, check it and press Send."
-                  : "In Gmail, open Drafts, tap the leave mail and press Send."}
-              </p>
-              {/* A link, so the app opens from the tap itself — a phone opens
-                  another app only straight from a tap. On a laptop it goes
-                  into the draft, in a tab of its own. */}
+          <div className="leave-acts">
+            {madeThis ? (
+              // A link, so the app opens from the tap itself. On a laptop it
+              // goes straight into the draft, in a tab of its own.
               <a
-                className="btn block leave-open"
+                className="btn leave-send"
                 href={gmailOpenHref({ platform, email, messageId: madeThis.messageId })}
                 {...(platform === "web" ? { target: "_blank", rel: "noopener" } : {})}
                 onClick={() => track("leave_mail", "draft-open")}
               >
-                Open Gmail drafts and send mail
-                <ArrowIcon />
+                Open Gmail
               </a>
-              <button type="button" className="leave-retry leave-alt" onClick={saveOnly}>
-                Download the form as well
+            ) : (
+              <button
+                className="btn leave-send"
+                disabled={!pdfFile || busy}
+                onClick={() => makeDraft()}
+              >
+                {draftLabel}
               </button>
-            </div>
-          ) : (
-            <>
-              <div className="leave-acts" ref={outcome}>
-                <button
-                  className="btn leave-send"
-                  disabled={!pdfFile || busy}
-                  onClick={() => makeDraft()}
-                >
-                  {draftLabel}
-                </button>
-                <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
-                  Download form
-                </button>
-              </div>
-              {busy ? null : made ? (
-                <p className="leave-saved">
-                  The form has changed since the draft was made. Update it, and the
-                  draft in Gmail is replaced.
-                </p>
-              ) : !draftError && (
-                <p className="leave-saved">
-                  The mail goes into your Gmail Drafts with the form attached. You
-                  press Send there. The first time, Google asks you to allow this.
-                </p>
-              )}
-            </>
+            )}
+            <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
+              Download form
+            </button>
+          </div>
+          {madeThis ? (
+            <p className="leave-saved">
+              <strong>Draft ready in Gmail</strong>, addressed and with the form
+              attached.{" "}
+              {platform === "web"
+                ? "Check it and press Send."
+                : "In Gmail, open Drafts, tap the leave mail and press Send."}
+            </p>
+          ) : busy ? null : made ? (
+            <p className="leave-saved">
+              The form has changed since the draft was made. Update it, and the
+              draft in Gmail is replaced.
+            </p>
+          ) : !draftError && (
+            <p className="leave-saved">
+              The mail goes into your Gmail Drafts with the form attached. You
+              press Send there. The first time, Google asks you to allow this.
+            </p>
           )}
           {draftError && (
             <div className="leave-pending">
@@ -566,30 +506,6 @@ export default function LeaveMail({
     </>
   );
 }
-
-function TickIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <circle cx="9" cy="9" r="8" fill="currentColor" />
-      <path d="m5.4 9.2 2.4 2.4 4.8-5.2" stroke="#fff" strokeWidth="1.8"
-            strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-/** Points onward: Open Gmail leaves the app for the last step. */
-function ArrowIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <path d="M3.5 9h11m0 0-4-4m4 4-4 4" stroke="currentColor" strokeWidth="2"
-            strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-/** The least time each of the loader's steps is on show, in milliseconds. */
-const STEP_MS = 700;
-const pause = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 
 /** What to say when the trip to Google's permission page came back wrong. */
 function tripMessage(error) {

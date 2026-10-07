@@ -1339,17 +1339,6 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   color: var(--mute);
 }
 
-/* The leave mail's steps: set clear of the wordmark and motto, and in ink
-   at a readable size, since here the line is the news. public/gmail-callback.html
-   copies this by hand. */
-.splash-msg.splash-task {
-  margin-top: 24px;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--ink);
-}
-
 /* An indeterminate sweep, not a spinner: it says "working" without
    implying a percentage the app doesn't know. */
 .splash-bar {
@@ -3248,27 +3237,8 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .map-card-go:hover { background: var(--signal-deep); }
 
-/* Pinned just under the masthead while the rooms scroll beneath it, so the
-   way to the building is a tap away from any room on the list. Searching,
-   each building's card holds only while its own rooms go by, and hands over
-   to the next one's.
-
-   The pin is a strip of paper with the card inside, not the card itself:
-   rows scrolling past would otherwise show in the gap above the card and at
-   its rounded corners. Its top padding is that gap, taken back out of the
-   margin so the card sits where it did. */
-.map-pin {
-  position: sticky;
-  top: var(--mast-h, 52px);
-  z-index: 5;
-  margin-top: -8px;
-  padding-top: 8px;
-  background: var(--paper);
-}
-.map-pin .map-card { box-shadow: 0 6px 12px -8px rgba(17, 21, 26, 0.28); }
-
 .map-group + .map-group { margin-top: 18px; }
-.map-group .map-pin { margin-top: 4px; }
+.map-group .map-card { margin-top: 12px; }
 
 .map-floor {
   font-family: var(--mono);
@@ -3779,47 +3749,6 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 /* The ghost style is drawn for paper; on a disabled button it would fade to
    nothing, so it keeps its border. */
 .leave-acts .btn.ghost { border-color: var(--rule-strong); }
-/* The finished draft: one thing left to do, said once and loudly. */
-.leave-ready { margin-top: 14px; }
-.leave-ready-head {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ink);
-}
-.leave-ready-head svg { color: var(--present); flex: none; }
-.leave-ready .leave-saved { margin-top: 3px; }
-.btn.leave-open {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 14px 18px;
-  font-size: 15px;
-  text-decoration: none;
-  background: var(--signal);
-  border-color: var(--signal);
-}
-.btn.leave-open:hover { background: var(--signal-deep); border-color: var(--signal-deep); }
-/* Two slow rings as it arrives, then still: enough to catch the eye coming
-   off the loader, not a button that nags for as long as it is on screen. */
-@media (prefers-reduced-motion: no-preference) {
-  .leave-open { animation: beckon 1.4s ease-out 0.2s 2; }
-}
-@keyframes beckon {
-  0%   { box-shadow: 0 0 0 0 rgba(214, 0, 111, 0.45); }
-  100% { box-shadow: 0 0 0 12px rgba(214, 0, 111, 0); }
-}
-.leave-alt {
-  display: block;
-  margin: 12px auto 0;
-  font-size: 13px;
-  color: var(--slate);
-}
 .leave-saved {
   margin: 8px 0 0;
   font-size: 12.5px;
