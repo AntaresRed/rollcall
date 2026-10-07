@@ -69,6 +69,18 @@
       4 · A plain mailto link
       <small>Opens a new mail in your mail app; just discard it</small>
     </a>
+    <a class="test" href="intent://#Intent;scheme=googlegmail;package=com.google.android.gm;S.browser_fallback_url=https%3A%2F%2Fmail.google.com%2Fmail%2F%23drafts;end">
+      5 · Gmail's app address, Android form
+      <small>Gmail app, or Gmail in the browser if it can't</small>
+    </a>
+    <a class="test" href="googlegmail://">
+      6 · Gmail's app address, as the iPhone uses it
+      <small>Gmail app, or nothing / an error if it can't</small>
+    </a>
+    <a class="test" href="intent://mail.google.com/mail/u/0/#Intent;scheme=https;package=com.google.android.gm;S.browser_fallback_url=https%3A%2F%2Fmail.google.com%2Fmail%2F%23drafts;end">
+      7 · Gmail's account address, handed to the app
+      <small>Gmail app, or Gmail in the browser if it can't</small>
+    </a>
 
     <div class="env" id="env"></div>
     <script>
