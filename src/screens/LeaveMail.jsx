@@ -7,8 +7,9 @@ import { isIOS, isAndroid, isStandalone } from "../lib/platform";
 import { makeLeavePdf } from "../lib/leavepdf";
 import { deliverFile } from "../lib/deliver";
 import { track } from "../lib/track";
+import Splash from "./Splash";
 import {
-  GOOGLE_CLIENT_ID, askGoogle, takeRoundTrip, finishRoundTrip, heldToken, dropToken,
+  DRAFT_STEPS, GOOGLE_CLIENT_ID, askGoogle, takeRoundTrip, finishRoundTrip, heldToken, dropToken,
   mimeMessage, rawOf, saveDraft, lastDraft, gmailOpenHref,
 } from "../lib/gmaildraft";
 
@@ -166,30 +167,69 @@ export default function LeaveMail({
   const [draftError, setDraftError] = useState(() => (trip.error ? tripMessage(trip.error) : ""));
   const madeThis = made?.key === formKey ? made : null;
 
+  // The loader over the whole screen while the draft is made: a key of
+  // DRAFT_STEPS, or null. Back from Google with a draft owed, it is up from
+  // the first frame, carrying on from the opening screen that said the same.
+  const [step, setStep] = useState(() => (trip.pending && !trip.error ? "drafting" : null));
+  // Bumped when the loader comes down, to bring the outcome — Open Gmail, or
+  // what went wrong — into view. The button sits at the foot of a long form,
+  // and the return from Google lands at the top of it.
+  // A trip that came back refused lands straight on what went wrong.
+  const [landed, setLanded] = useState(() => (trip.error ? 1 : 0));
+  const outcome = useRef(null);
+  useEffect(() => {
+    if (landed) outcome.current?.scrollIntoView({ block: "center" });
+  }, [landed]);
+  const settle = () => {
+    setStep(null);
+    setLanded((n) => n + 1);
+  };
+
+  // Backing out of Google's page can return to this page as it was left —
+  // loader and all, from the back-forward cache — with nothing left to end it.
+  useEffect(() => {
+    const back = (e) => { if (e.persisted) setStep(null); };
+    window.addEventListener("pageshow", back);
+    return () => window.removeEventListener("pageshow", back);
+  }, []);
+
+  // Off to Google, behind the loader. A frame first, so the loader is
+  // painted before the page starts to go.
+  const leaveForGoogle = () => requestAnimationFrame(() => askGoogle(email));
+
   const makeDraft = async ({ afterTrip = false } = {}) => {
     if (!pdfFile || busy) return;
+    setStep("drafting");
     const token = heldToken(email);
     if (!token) {
       track("leave_mail", "draft-ask");
-      askGoogle(email);
+      leaveForGoogle();
       return;
     }
     setBusy(true);
     setDraftError("");
+    let leaving = false;
     try {
       const bytes = new Uint8Array(await pdfFile.arrayBuffer());
       const raw = rawOf(mimeMessage({
         to: LEAVE_TO, cc: LEAVE_CC, subject, body,
         file: { name: pdfFile.name, type: pdfFile.type, bytes },
       }));
-      setMade(await saveDraft(token, raw, formKey));
+      // Each step stays up long enough to be read. Writing the mail takes no
+      // time at all; the upload, which is where the form goes in, takes what
+      // it takes.
+      await pause(STEP_MS);
+      setStep("attaching");
+      const [draft] = await Promise.all([saveDraft(token, raw, formKey), pause(STEP_MS)]);
+      setMade(draft);
       track("leave_mail", "draft");
     } catch (err) {
       if (err?.status === 401 && !afterTrip) {
         // The hour ran out: ask again, which comes back here and retries.
         // Expected, so not counted as a failure.
         dropToken();
-        askGoogle(email);
+        leaving = true;
+        leaveForGoogle();
         return;
       }
       track("leave_mail", "draft-error");
@@ -199,21 +239,26 @@ export default function LeaveMail({
         : "Couldn't reach Gmail. Check your connection and try again.");
     } finally {
       setBusy(false);
+      if (!leaving) settle();
     }
   };
 
   // Back from Google with a draft owed: make it as soon as the form PDF is
   // ready again. The ref, not state, keeps a double-run effect (React's
-  // development checks do exactly that) from making two.
+  // development checks do exactly that) from making two. A form that can't
+  // be made — it fails its checks, or the PDF won't build — drops the loader
+  // rather than leaving it up forever, and the screen says what's wrong.
   const owed = useRef(trip.pending && !trip.error);
   useEffect(() => {
-    if (!owed.current || !pdfFile) return;
+    if (!owed.current) return;
+    if (ready && !pdfFile && !pdfFailed) return;
     owed.current = false;
     finishRoundTrip();
-    makeDraft({ afterTrip: true });
+    if (pdfFile) makeDraft({ afterTrip: true });
+    else settle();
     // makeDraft reads the current render's form, which is the one wanted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfFile]);
+  }, [ready, pdfFile, pdfFailed]);
   useEffect(() => { if (trip.error) finishRoundTrip(); }, [trip.error]);
 
   const draftLabel = ready && !pdfFile && !pdfFailed ? "Preparing…"
@@ -341,7 +386,8 @@ export default function LeaveMail({
       )}
       {draftRoute && (
         <>
-          <div className="leave-acts">
+          {step && <Splash message={DRAFT_STEPS[step]} draw={!trip.pending} />}
+          <div className="leave-acts" ref={outcome}>
             {madeThis ? (
               // A link, so the app opens from the tap itself. On a laptop it
               // goes straight into the draft, in a tab of its own.
@@ -506,6 +552,10 @@ export default function LeaveMail({
     </>
   );
 }
+
+/** The least time each of the loader's steps is on show, in milliseconds. */
+const STEP_MS = 700;
+const pause = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 
 /** What to say when the trip to Google's permission page came back wrong. */
 function tripMessage(error) {

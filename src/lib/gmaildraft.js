@@ -30,6 +30,13 @@ const PENDING = "iimpresent.gmail.pending";  // a draft was asked for before the
 const CALLBACK = "iimpresent.gmail.callback"; // raw fragment, left by the callback page
 const DRAFT = "iimpresent.gmail.draft";      // { draftId, messageId, key } this session
 
+/**
+ * The loader's two steps, in the order they happen. Drafting covers the trip
+ * to Google and back as well — the app's opening screen says it too, and so
+ * does public/gmail-callback.html, which can't import this and spells it out.
+ */
+export const DRAFT_STEPS = { drafting: "Drafting your mail", attaching: "Attaching leave form" };
+
 /* ---------- storage, inside try: the accessor itself can throw ---------- */
 
 const session = () => {

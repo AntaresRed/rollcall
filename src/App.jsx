@@ -16,6 +16,7 @@ import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
 } from "./lib/push";
 import { track } from "./lib/track";
+import { DRAFT_STEPS } from "./lib/gmaildraft";
 
 import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
@@ -73,6 +74,18 @@ const EMPTY = [];
 /** The least time the opening screen is on show, in milliseconds. */
 const SPLASH_MIN_MS = 1300;
 
+/**
+ * Back from Google's Gmail permission page, with a draft owed
+ * (public/gmail-callback.html sends the student to /?leave=draft).
+ */
+const backForDraft = () => {
+  try {
+    return new URLSearchParams(window.location.search).get("leave") === "draft";
+  } catch {
+    return false;
+  }
+};
+
 /** The tab bar's height, as a CSS variable — see where it is called below. */
 const publishNavHeight = (el) => {
   document.documentElement.style.setProperty(
@@ -90,11 +103,15 @@ export default function App() {
   // there, so it is fetched beside the boot load rather than inside it: a slow
   // or failing query holds up nobody's timetable.
   const [consensus, setConsensus] = useState([]);
-  const [tab, setTab] = useState("today");
+  // Read once, before the address bar is cleaned up below. Coming back for a
+  // draft starts on the leave mail itself rather than switching to it after
+  // boot, so Today never flashes up between the loader and the draft.
+  const [returnForDraft] = useState(backForDraft);
+  const [tab, setTab] = useState(returnForDraft ? "utils" : "today");
   const [now, setNow] = useState(new Date());
   const [alerts, setAlerts] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [subScreen, setSubScreen] = useState(null);
+  const [subScreen, setSubScreen] = useState(returnForDraft ? "leave" : null);
   const [returnTab, setReturnTab] = useState(null);
   const [toast, setToast] = useState("");
   const [fatal, setFatal] = useState("");
@@ -342,10 +359,17 @@ export default function App() {
     window.history.replaceState({}, "", rest ? `${window.location.pathname}?${rest}` : window.location.pathname);
   }, [ready]);
 
-  // Back from Google's Gmail permission page (public/gmail-callback.html
-  // sends the student to /?leave=draft): reopen the leave mail, which picks
-  // up the draft it was asked for. Not tracked as an "open" — the student
-  // didn't open it, they came back to it.
+  // Back from Google's Gmail permission page: the leave mail is already the
+  // screen (see returnForDraft), and it picks up the draft it was asked for.
+  // This clears the address bar, and puts the screen back should anything in
+  // boot have moved it. Not tracked as an "open" — the student didn't open
+  // it, they came back to it.
+  //
+  // The screen's code is fetched alongside boot rather than after it, so the
+  // loader runs straight on instead of pausing on a blank page between the two.
+  useEffect(() => {
+    if (returnForDraft) import("./screens/LeaveMail").catch(() => {});
+  }, [returnForDraft]);
   useEffect(() => {
     if (!ready) return;
     const params = new URLSearchParams(window.location.search);
@@ -582,7 +606,9 @@ export default function App() {
   );
 
   // ---- everything below this line may return early ----
-  if (!ready || splashHeld) return <Splash />;
+  if (!ready || splashHeld) {
+    return <Splash message={returnForDraft ? DRAFT_STEPS.drafting : undefined} />;
+  }
   if (!session) return <SignIn error={authError} />;
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
 
@@ -691,7 +717,13 @@ export default function App() {
           </div>
         )}
 
-        <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
+        {/* The leave mail's loader stands in for it while its code arrives,
+            so a return for a draft never shows a blank page mid-loader. */}
+        <Suspense
+          fallback={returnForDraft && subScreen === "leave"
+            ? <Splash message={DRAFT_STEPS.drafting} draw={false} />
+            : <div className="screen-loading" aria-hidden="true" />}
+        >
         {tab === "today" && (
           <Today
             occurrences={todaysOccurrences}
