@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build src/data/rooms.json — how to find a room, for J Maps and every venue
+Build src/data/rooms.json — how to find a room, for J-Maps and every venue
 chip in the app.
 
     python scripts/build_rooms.py \

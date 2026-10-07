@@ -36,7 +36,7 @@ const GROUPS = [
     "Leave of more than a day: the mail written and addressed, sent from "
     + "your iimcal account.",
     MailIcon],
-  ["maps", "J Maps",
+  ["maps", "J-Maps",
     "Find any classroom or office: the building on Google Maps, then the "
     + "way to the room.",
     MapIcon],

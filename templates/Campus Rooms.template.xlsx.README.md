@@ -1,6 +1,6 @@
-# Campus Rooms — how to find a room, for J Maps
+# Campus Rooms — how to find a room, for J-Maps
 
-Read by: scripts/build_rooms.py    Feeds: J Maps, venue chips, faculty rooms
+Read by: scripts/build_rooms.py    Feeds: J-Maps, venue chips, faculty rooms
 
 
 

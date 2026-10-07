@@ -1,19 +1,19 @@
 import rooms from "../data/rooms.json";
 
 /**
- * How to find a room: J Maps, and the directions behind every venue chip and
+ * How to find a room: J-Maps, and the directions behind every venue chip and
  * faculty office in the app.
  *
  * Generated from the rooms workbook by scripts/build_rooms.py, never written
  * here by hand — it is the one place a description lives, so the venue chip
- * on Today and the row in J Maps cannot say different things about one room.
+ * on Today and the row in J-Maps cannot say different things about one room.
  *
  * Bundled rather than fetched, like the menus: it is small (about 3 KB on the
  * wire), it changes once in a long while, and the moment someone needs it is
  * standing in a corridor.
  */
 
-/** NAB, OAB, CDPO Building, Tata Hall — in the order J Maps shows them. */
+/** NAB, OAB, CDPO Building, Tata Hall — in the order J-Maps shows them. */
 export const BUILDINGS = rooms.buildings;
 
 const byId = new Map(BUILDINGS.map((b) => [b.id, b]));
@@ -74,7 +74,7 @@ export function findRoom(venue) {
 export const venueNote = (venue) => findRoom(venue)?.description ?? null;
 
 /**
- * Rooms matching a search, grouped by building in J Maps' order:
+ * Rooms matching a search, grouped by building in J-Maps' order:
  * `[{ building, rooms }]`. Empty for a blank query.
  *
  * Every word has to match somewhere — the room number (with or without its

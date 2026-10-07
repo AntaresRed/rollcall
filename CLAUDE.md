@@ -63,7 +63,7 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   (the directory screen) and `build_faculty.py` → `build_catalogue.py`
   (instructor emails); `build_pgp1_catalogue.py` reads `directory.json`.
   Rebuild all four after a directory change.
-- Rooms (J Maps, venue chips, faculty office directions): `Rooms/Campus
+- Rooms (J-Maps, venue chips, faculty office directions): `Rooms/Campus
   Rooms.xlsx` → `build_rooms.py` → `rooms.json`, read through `src/lib/rooms.js`.
   It is the only place a room's directions are written. Rule tabs (`NAB
   hallways`, `CDPO groups`) cover every number in a series and floor, listed

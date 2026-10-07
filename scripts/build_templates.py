@@ -711,8 +711,8 @@ the counts it prints at the end.
 
 def rooms():
     wb = openpyxl.Workbook()
-    guide(wb, "Campus Rooms — how to find a room, for J Maps", [
-        "Read by: scripts/build_rooms.py    Feeds: J Maps, venue chips, faculty rooms",
+    guide(wb, "Campus Rooms — how to find a room, for J-Maps", [
+        "Read by: scripts/build_rooms.py    Feeds: J-Maps, venue chips, faculty rooms",
         "",
         "Buildings (one row per building):",
         "Building must be NAB, OAB, CDPO Building or Tata Hall. Google Maps is "
@@ -795,7 +795,7 @@ the builder at that.
 | `Day Mess Menu.template.xlsx` | Mess secretary | `build_menu.py` | Day mess tab |
 | `Tuck Shops.template.xlsx` | Tuck shop / mess secretary | `build_tuck.py` | Tuck shops tab |
 | `Night Mess Menu.template.xlsx` | Canteen / mess secretary | `build_night_menu.py` | Night canteen tab |
-| `Campus Rooms.template.xlsx` | You, room by room | `build_rooms.py` | J Maps, venue directions |
+| `Campus Rooms.template.xlsx` | You, room by room | `build_rooms.py` | J-Maps, venue directions |
 
 Every template has a `.README.md` beside it saying what each sheet and column
 means and what will stop the build.

@@ -3194,7 +3194,7 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .dir-room.open .venue-caret { transform: rotate(180deg); }
 
 
-/* ---------- J Maps ---------- */
+/* ---------- J-Maps ---------- */
 
 /* Building names are longer than hostel codes; sized to their words rather
    than split evenly, so "CDPO Building" stays on one line on a phone. */

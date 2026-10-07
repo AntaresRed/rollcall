@@ -1,6 +1,5 @@
 import { useId, useState } from "react";
 import { findRoom } from "../lib/rooms";
-import { track } from "../lib/track";
 
 /**
  * Where the class is, as a label stuck on the course.
@@ -77,8 +76,6 @@ export function RoomNote({ info, id }) {
         href={info.building.map}
         target="_blank"
         rel="noopener noreferrer"
-        // Leaves the app, so nothing else would count it.
-        onClick={() => track("open", `map-${info.building.id}`)}
       >
         {info.building.name} on Google Maps
       </a>

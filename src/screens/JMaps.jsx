@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
 import { BUILDINGS, floorsOf, searchRooms } from "../lib/rooms";
-import { track } from "../lib/track";
 
 /**
- * J Maps — how to find any room on campus.
+ * J-Maps — how to find any room on campus.
  *
  * Directions here start at a building's door ("NAB first floor, …"), so every
  * view leads with the way to the building: its Google Maps link, and a line
@@ -30,7 +29,7 @@ export default function JMaps({ onBack }) {
 
   return (
     <>
-      <div className="eyebrow">J Maps</div>
+      <div className="eyebrow">J-Maps</div>
 
       <div className="dir-search">
         <SearchIcon />
@@ -119,8 +118,6 @@ function MapLink({ building }) {
         href={building.map}
         target="_blank"
         rel="noopener noreferrer"
-        // Leaves the app, so nothing else would count it.
-        onClick={() => track("open", `map-${building.id}`)}
       >
         Google Maps
         <ExternalIcon />

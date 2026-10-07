@@ -89,8 +89,8 @@ comment on table public.feature_events is
 --   open             app (a cold start), a tab (today, timetable, utils,
 --                    profile), or a sub-screen tapped open (calendar,
 --                    reschedule, attendance, breakdown, contacts, faculty,
---                    por, students, mess, export, leave, admin,
---                    order-history). Returning by a back arrow isn't counted.
+--                    por, students, mess, export, leave, maps (J-Maps),
+--                    admin, order-history). Returning by a back arrow isn't counted.
 --   menu             day | night | tuck — which mess view was shown
 --   order            night:<canteen> | tuck:<shop> — handed to WhatsApp;
 --                    whether it was then sent, nobody can tell

@@ -485,7 +485,7 @@ console.log("calendar export (.ics)");
 }
 
 console.log("");
-console.log("room directions (J Maps)");
+console.log("room directions (J-Maps)");
 survives("no venue", () => venueNote(null));
 survives("unknown venue", () => venueNote("Somewhere else"));
 check("an unknown venue has no note", venueNote("Somewhere else") === null);
