@@ -106,22 +106,25 @@ const count = (groups) => groups.reduce((n, g) => n + g.rooms.length, 0);
 /** The step before every description: get to the building. */
 function MapLink({ building }) {
   return (
-    <div className="map-card">
-      <div className="map-card-text">
-        <span className="map-card-name">{building.name}</span>
-        <span className="map-card-hint">
-          Reach {building.name} first, then follow the directions for your room.
-        </span>
+    // Pinned under the masthead as the rooms scroll by — see .map-pin.
+    <div className="map-pin">
+      <div className="map-card">
+        <div className="map-card-text">
+          <span className="map-card-name">{building.name}</span>
+          <span className="map-card-hint">
+            Reach {building.name} first, then follow the directions for your room.
+          </span>
+        </div>
+        <a
+          className="map-card-go"
+          href={building.map}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Google Maps
+          <ExternalIcon />
+        </a>
       </div>
-      <a
-        className="map-card-go"
-        href={building.map}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Google Maps
-        <ExternalIcon />
-      </a>
     </div>
   );
 }

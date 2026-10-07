@@ -30,6 +30,13 @@ const PENDING = "iimpresent.gmail.pending";  // a draft was asked for before the
 const CALLBACK = "iimpresent.gmail.callback"; // raw fragment, left by the callback page
 const DRAFT = "iimpresent.gmail.draft";      // { draftId, messageId, key } this session
 
+/**
+ * The loader's two steps, in the order they happen. Drafting covers the trip
+ * to Google and back as well — the app's opening screen says it too, and so
+ * does public/gmail-callback.html, which can't import this and spells it out.
+ */
+export const DRAFT_STEPS = { drafting: "Drafting your mail", attaching: "Attaching leave form" };
+
 /* ---------- storage, inside try: the accessor itself can throw ---------- */
 
 const session = () => {
@@ -276,16 +283,23 @@ export const lastDraft = () => get(DRAFT);
  * Where "Open Gmail" goes. On a laptop, straight into the draft, in the
  * institute account. The phone apps have no link to one draft, so there it
  * opens the app and the screen says where to look.
+ *
+ * On Android, the link that opened the Gmail app before the loader went in,
+ * with one addition: the draft on the web to fall back on. A link naming an
+ * app that Chrome can't open otherwise lands on the app's Play Store page,
+ * which is where students were sent when it stopped working.
  */
 export function gmailOpenHref({ platform, email, messageId }) {
-  if (platform === "ios") return "googlegmail://";
-  if (platform === "android") {
-    return "intent://#Intent;action=android.intent.action.MAIN;"
-      + "category=android.intent.category.LAUNCHER;package=com.google.android.gm;end";
-  }
   // `authuser`, as leaveGmailHref uses, not a /u/<address>/ path: Gmail
   // answers an encoded address in the path with "account temporarily
   // unavailable" (404).
   const who = email ? `?authuser=${encodeURIComponent(email)}` : "";
-  return `https://mail.google.com/mail/${who}#drafts${messageId ? `?compose=${messageId}` : ""}`;
+  const web = `https://mail.google.com/mail/${who}#drafts${messageId ? `?compose=${messageId}` : ""}`;
+  if (platform === "ios") return "googlegmail://";
+  if (platform === "android") {
+    return "intent://#Intent;action=android.intent.action.MAIN;"
+      + "category=android.intent.category.LAUNCHER;package=com.google.android.gm;"
+      + `S.browser_fallback_url=${encodeURIComponent(web)};end`;
+  }
+  return web;
 }

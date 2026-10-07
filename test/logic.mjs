@@ -2295,8 +2295,17 @@ console.log("\nleave mail as a Gmail draft");
   check("never the account in the path, which Gmail answers with a 404",
     !gmailOpenHref({ platform: "web", email: "abc2027@email.iimcal.ac.in", messageId: "1" }).includes("/u/"));
   check("on an iPhone it opens the Gmail app", gmailOpenHref({ platform: "ios" }) === "googlegmail://");
-  check("on Android it names the Gmail app to Chrome",
-    gmailOpenHref({ platform: "android" }).includes("package=com.google.android.gm;end"));
+  // The link that opened the Gmail app before the loader went in, plus the
+  // draft on the web to fall back on rather than the Play Store.
+  {
+    const a = gmailOpenHref({ platform: "android", email: "abc2027@email.iimcal.ac.in", messageId: "18f3a" });
+    check("on Android it names the Gmail app to Chrome",
+      a.startsWith("intent://#Intent;action=android.intent.action.MAIN;")
+        && a.includes(";package=com.google.android.gm;") && a.endsWith(";end"));
+    check("and falls back to the draft on the web, never the Play Store",
+      a.includes(`;S.browser_fallback_url=${encodeURIComponent(
+        "https://mail.google.com/mail/?authuser=abc2027%40email.iimcal.ac.in#drafts?compose=18f3a")};`));
+  }
 }
 console.log("\nleave form PDF");
 {
