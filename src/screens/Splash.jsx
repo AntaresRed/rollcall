@@ -42,7 +42,7 @@ export function Mark({ size = 22, animated = false }) {
  * schedule. It states what it's doing rather than spinning silently, and the
  * tick draws itself once — the same gesture the app is about.
  */
-export default function Splash({ message = "Getting your schedule", draw = true }) {
+export default function Splash({ message = "Getting your schedule", draw = true, task = false }) {
   return (
     <div className="splash">
       <div className="splash-mark">
@@ -56,8 +56,10 @@ export default function Splash({ message = "Getting your schedule", draw = true 
       </div>
       <p className="splash-motto">No JST for classes.</p>
       {/* A live region, so a screen reader hears the leave mail's steps
-          change. */}
-      <p className="splash-msg" role="status">{message}</p>
+          change. `task` sets the line apart and louder: there it is news
+          about something the student asked for, not the opening screen's
+          aside. */}
+      <p className={`splash-msg${task ? " splash-task" : ""}`} role="status">{message}</p>
       <div className="splash-bar" aria-hidden="true">
         <span />
       </div>

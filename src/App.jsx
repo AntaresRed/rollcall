@@ -607,7 +607,7 @@ export default function App() {
 
   // ---- everything below this line may return early ----
   if (!ready || splashHeld) {
-    return <Splash message={returnForDraft ? DRAFT_STEPS.drafting : undefined} />;
+    return <Splash message={returnForDraft ? DRAFT_STEPS.drafting : undefined} task={returnForDraft} />;
   }
   if (!session) return <SignIn error={authError} />;
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
@@ -721,7 +721,7 @@ export default function App() {
             so a return for a draft never shows a blank page mid-loader. */}
         <Suspense
           fallback={returnForDraft && subScreen === "leave"
-            ? <Splash message={DRAFT_STEPS.drafting} draw={false} />
+            ? <Splash message={DRAFT_STEPS.drafting} draw={false} task />
             : <div className="screen-loading" aria-hidden="true" />}
         >
         {tab === "today" && (

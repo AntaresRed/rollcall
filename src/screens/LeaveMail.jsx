@@ -386,50 +386,65 @@ export default function LeaveMail({
       )}
       {draftRoute && (
         <>
-          {step && <Splash message={DRAFT_STEPS[step]} draw={!trip.pending} />}
-          <div className="leave-acts" ref={outcome}>
-            {madeThis ? (
-              // A link, so the app opens from the tap itself. On a laptop it
-              // goes straight into the draft, in a tab of its own.
+          {step && <Splash message={DRAFT_STEPS[step]} draw={!trip.pending} task />}
+          {madeThis ? (
+            // Done but for the Send, and Open Gmail is the one thing left to
+            // do — so it stands alone, full width and in the signal colour,
+            // with the form's download stepped down to a link beneath it. Two
+            // equal buttons side by side read as a choice, when only one of
+            // them finishes the job.
+            <div className="leave-ready" ref={outcome}>
+              <p className="leave-ready-head">
+                <TickIcon /> Draft ready in Gmail
+              </p>
+              <p className="leave-saved">
+                Addressed, with the form attached.{" "}
+                {platform === "web"
+                  ? "Open it, check it and press Send."
+                  : "In Gmail, open Drafts, tap the leave mail and press Send."}
+              </p>
+              {/* A link, so the app opens from the tap itself — a phone opens
+                  another app only straight from a tap. On a laptop it goes
+                  into the draft, in a tab of its own. */}
               <a
-                className="btn leave-send"
+                className="btn block leave-open"
                 href={gmailOpenHref({ platform, email, messageId: madeThis.messageId })}
                 {...(platform === "web" ? { target: "_blank", rel: "noopener" } : {})}
                 onClick={() => track("leave_mail", "draft-open")}
               >
-                Open Gmail
+                Open Gmail and send the mail
+                <ArrowIcon />
               </a>
-            ) : (
-              <button
-                className="btn leave-send"
-                disabled={!pdfFile || busy}
-                onClick={() => makeDraft()}
-              >
-                {draftLabel}
+              <button type="button" className="leave-retry leave-alt" onClick={saveOnly}>
+                Download the form as well
               </button>
-            )}
-            <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
-              Download form
-            </button>
-          </div>
-          {madeThis ? (
-            <p className="leave-saved">
-              <strong>Draft ready in Gmail</strong>, addressed and with the form
-              attached.{" "}
-              {platform === "web"
-                ? "Check it and press Send."
-                : "In Gmail, open Drafts, tap the leave mail and press Send."}
-            </p>
-          ) : busy ? null : made ? (
-            <p className="leave-saved">
-              The form has changed since the draft was made. Update it, and the
-              draft in Gmail is replaced.
-            </p>
-          ) : !draftError && (
-            <p className="leave-saved">
-              The mail goes into your Gmail Drafts with the form attached. You
-              press Send there. The first time, Google asks you to allow this.
-            </p>
+            </div>
+          ) : (
+            <>
+              <div className="leave-acts" ref={outcome}>
+                <button
+                  className="btn leave-send"
+                  disabled={!pdfFile || busy}
+                  onClick={() => makeDraft()}
+                >
+                  {draftLabel}
+                </button>
+                <button className="btn ghost leave-send" disabled={!pdfFile} onClick={saveOnly}>
+                  Download form
+                </button>
+              </div>
+              {busy ? null : made ? (
+                <p className="leave-saved">
+                  The form has changed since the draft was made. Update it, and the
+                  draft in Gmail is replaced.
+                </p>
+              ) : !draftError && (
+                <p className="leave-saved">
+                  The mail goes into your Gmail Drafts with the form attached. You
+                  press Send there. The first time, Google asks you to allow this.
+                </p>
+              )}
+            </>
           )}
           {draftError && (
             <div className="leave-pending">
@@ -550,6 +565,26 @@ export default function LeaveMail({
         </button>
       )}
     </>
+  );
+}
+
+function TickIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="8" fill="currentColor" />
+      <path d="m5.4 9.2 2.4 2.4 4.8-5.2" stroke="#fff" strokeWidth="1.8"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Points onward: Open Gmail leaves the app for the last step. */
+function ArrowIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M3.5 9h11m0 0-4-4m4 4-4 4" stroke="currentColor" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
