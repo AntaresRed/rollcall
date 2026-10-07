@@ -28,8 +28,8 @@ const GROUPS = [
     + "order from over WhatsApp.",
     MessIcon],
   ["maps", "J-Maps",
-    "Door-to-Door navigation for every classroom and admin office in the "
-    + "campus.",
+    "Door-to-Door navigation for every classroom, faculty rooms and admin "
+    + "office in the campus.",
     MapIcon],
   ["contacts", "Faculty and POR Contact Details",
     "Professors, the council, clubs and captains, and the batch directory.",
