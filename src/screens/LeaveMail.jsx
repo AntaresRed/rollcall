@@ -399,17 +399,18 @@ export default function LeaveMail({
               </p>
               <p className="leave-saved">
                 Addressed, with the form attached.{" "}
-                {platform === "web"
+                {platform !== "ios"
                   ? "Open it, check it and press Send."
                   : "In Gmail, open Drafts, tap the leave mail and press Send."}
               </p>
               {/* A link, so the app opens from the tap itself — a phone opens
-                  another app only straight from a tap. On a laptop it goes
-                  into the draft, in a tab of its own. */}
+                  another app only straight from a tap. On a laptop and on
+                  Android it goes into the draft, in a tab of its own, so the
+                  app is still where it was left. */}
               <a
                 className="btn block leave-open"
                 href={gmailOpenHref({ platform, email, messageId: madeThis.messageId })}
-                {...(platform === "web" ? { target: "_blank", rel: "noopener" } : {})}
+                {...(platform !== "ios" ? { target: "_blank", rel: "noopener" } : {})}
                 onClick={() => track("leave_mail", "draft-open")}
               >
                 Open Gmail and send the mail

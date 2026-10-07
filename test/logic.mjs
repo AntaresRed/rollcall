@@ -2295,8 +2295,11 @@ console.log("\nleave mail as a Gmail draft");
   check("never the account in the path, which Gmail answers with a 404",
     !gmailOpenHref({ platform: "web", email: "abc2027@email.iimcal.ac.in", messageId: "1" }).includes("/u/"));
   check("on an iPhone it opens the Gmail app", gmailOpenHref({ platform: "ios" }) === "googlegmail://");
-  check("on Android it names the Gmail app to Chrome",
-    gmailOpenHref({ platform: "android" }).includes("package=com.google.android.gm;end"));
+  // An intent link naming the Gmail app opened the Play Store: Chrome won't
+  // launch an app screen that hasn't declared itself openable from the web.
+  check("on Android it opens the draft itself, as on a laptop, never an intent link",
+    gmailOpenHref({ platform: "android", email: "abc2027@email.iimcal.ac.in", messageId: "18f3a" })
+      === "https://mail.google.com/mail/?authuser=abc2027%40email.iimcal.ac.in#drafts?compose=18f3a");
 }
 console.log("\nleave form PDF");
 {

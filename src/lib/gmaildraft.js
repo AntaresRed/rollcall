@@ -280,16 +280,17 @@ export async function saveDraft(token, raw, key) {
 export const lastDraft = () => get(DRAFT);
 
 /**
- * Where "Open Gmail" goes. On a laptop, straight into the draft, in the
- * institute account. The phone apps have no link to one draft, so there it
- * opens the app and the screen says where to look.
+ * Where "Open Gmail" goes. Straight into the draft, in the institute account,
+ * on a laptop and on Android. The iPhone app has no link to one draft, so
+ * there it opens the app and the screen says where to look.
+ *
+ * Android gets the web address rather than a link that names the Gmail app.
+ * Chrome opens an app from a link only if the screen being opened has said
+ * the web may open it, and Gmail's main screen hasn't — so an intent link
+ * naming the app sent every Android student to its Play Store page instead.
  */
 export function gmailOpenHref({ platform, email, messageId }) {
   if (platform === "ios") return "googlegmail://";
-  if (platform === "android") {
-    return "intent://#Intent;action=android.intent.action.MAIN;"
-      + "category=android.intent.category.LAUNCHER;package=com.google.android.gm;end";
-  }
   // `authuser`, as leaveGmailHref uses, not a /u/<address>/ path: Gmail
   // answers an encoded address in the path with "account temporarily
   // unavailable" (404).
