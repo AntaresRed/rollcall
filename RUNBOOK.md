@@ -486,6 +486,31 @@ Compare `sent_at` against the notification's arrival time on the phone. A large
 gap means the push service queued it — that is a delivery problem, not a
 scheduling one, and is what the TTL setting now prevents.
 
+## 8h. A one-off announcement to a cohort
+
+Once: run `supabase/broadcasts.sql`, then
+`supabase functions deploy send-broadcasts --no-verify-jwt`.
+
+Each announcement is a row; the function sends whatever is due. Test on
+yourself first (it only reaches devices with alerts turned on):
+
+```sql
+insert into public.broadcasts (title, body, only_user, send_at, expires_at)
+select 'IIMPresent', 'Test', id, now(), now() + interval '1 hour'
+from auth.users where email = '<your institute address>';
+
+select net.http_post(
+  url := 'https://<PROJECT_REF>.supabase.co/functions/v1/send-broadcasts',
+  headers := '{"Content-Type":"application/json"}'::jsonb, body := '{}'::jsonb);
+
+select id, devices, sent, pruned, failed, note from public.broadcasts order by id desc;
+```
+
+For the real one, insert a row with `cohort_year` (or `all_users = true`) instead of `only_user` and
+schedule a cron job over the minutes around `send_at`. **pg_cron runs in UTC.**
+Every five minutes for an hour gives a failed boot a retry; the claim means
+only one run sends. Unschedule it afterwards with `cron.unschedule('<name>')`.
+
 ## 9. Already deployed before 2026-08-20?
 
 `schema.sql` ends with a guarded migration block. Re-run the whole file in the
