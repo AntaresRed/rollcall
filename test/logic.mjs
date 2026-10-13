@@ -31,6 +31,9 @@ import { formDate, formWhen, formAnswers, formFilename, winAnsi, timesWidth, wra
   fitBlock, formLayout, jpegInfo, buildPdf } from "../src/lib/leavepdf.js";
 import { GMAIL_SCOPE, authUrl, callbackUrl, readCallback, heldToken, takeRoundTrip,
   mimeMessage, rawOf, gmailOpenHref } from "../src/lib/gmaildraft.js";
+// The Edge Function's page reader. It imports nothing, so it runs here too.
+import { formFields, formAction, selectOptions, readGrid, hasPasswordBox, hasOtpField,
+  termKey, decodeEntities, TERM_SELECT } from "../supabase/functions/olt-attendance/parse.ts";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -2410,6 +2413,91 @@ console.log("\nleave form PDF");
   survives("refuses a form image that isn't a JPEG", () => {
     try { buildPdf({ form: new Uint8Array([0]), runs: [] }); throw new Error("accepted"); }
     catch (e) { if (e.message === "accepted") throw e; }
+  });
+}
+
+{
+  console.log("\nOLT page reading");
+  // Shaped like OLT's pages (ASP.NET WebForms), with made-up values. Not a
+  // saved copy: that would carry a real student's record into the repo.
+  const login = `<form method="post" action="./default?typeid=0" id="aspnetForm">
+    <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="abc+/=" />
+    <input type="hidden" name="__EVENTVALIDATION" value="x&amp;y" />
+    <input name="ctl00$Login1$TextBoxIP" type="text" style="display: none;" />
+    <input name="ctl00$Login1$LoginView1$UserName" type="text" class="form-control" />
+    <input name="ctl00$Login1$LoginView1$Password" type="password" id="Password" />
+    <input type="checkbox" name="remember" />
+    <input type="submit" name="ctl00$Login1$btnSendResetLink" value="Submit" />
+  </form>`;
+  const f = Object.fromEntries(formFields(login));
+  check("hidden fields are carried, entities decoded",
+    f.__VIEWSTATE === "abc+/=" && f.__EVENTVALIDATION === "x&y");
+  check("empty text boxes are sent empty", f["ctl00$Login1$TextBoxIP"] === "");
+  check("buttons and unticked boxes are not sent",
+    !("ctl00$Login1$btnSendResetLink" in f) && !("remember" in f));
+  check("a relative action resolves against the page",
+    formAction(login, "https://olt.example/default?typeid=0") === "https://olt.example/default?typeid=0");
+  check("the sign-in page has a password box", hasPasswordBox(login));
+  check("and no one-time-code field", !hasOtpField(login));
+  check("an OTP field is noticed", hasOtpField('<input name="ctl00$Main$txtOTP" type="text">'));
+
+  const attendance = `<form method="post" action="https://olt.example/StudentAttendance">
+    <input type="hidden" name="__VIEWSTATE" value="v" />
+    <select name="${TERM_SELECT}" onchange="javascript:setTimeout('__doPostBack(\\'${TERM_SELECT}\\',\\'\\')', 0)">
+      <option value="Term-IV">Term-IV</option>
+      <option selected="selected" value="Term-V">Term-V</option>
+    </select>
+    <select name="ctl00$Main$ProgTermSubSec1$DropDownListTermNo">
+      <option selected="selected" value=""></option>
+      <option value="Term-VI">Term-VI
+      <option value="Project">Project
+    </select>
+    <table style="width:100%"><tr><td>layout</td><td>only</td></tr></table>
+    <table style="width: 100%"><tr><td><div>
+    <table class="GridViewStyle" id="ctl00_Main_GridView1">
+      <tbody><tr class="HeaderStyle">
+        <th scope="col">Subject</th><th scope="col">Total Classess</th>
+        <th scope="col">Attended</th><th scope="col">Attendance Percentage</th>
+      </tr><tr>
+        <td>R&amp;D   Strategy</td><td>10</td><td>9</td><td>90</td>
+      </tr><tr class="AlternateRowStyle">
+        <td>Pricing</td><td>4</td><td>3</td><td>75</td>
+      </tr><tr><td colspan="4">No records</td></tr>
+    </tbody></table>
+    </div></td></tr></table>
+  </form>`;
+
+  const terms = selectOptions(attendance, TERM_SELECT);
+  check("the term picker is found by name, not by the other term list",
+    terms?.map((o) => o.value).join() === "Term-IV,Term-V");
+  check("its selected term is known", terms?.find((o) => o.selected)?.value === "Term-V");
+  check("options with no closing tag still read",
+    selectOptions(attendance, "ctl00$Main$ProgTermSubSec1$DropDownListTermNo")
+      ?.map((o) => o.text).join() === ",Term-VI,Project");
+  check("a missing select is null, not empty", selectOptions(attendance, "nope") === null);
+
+  const af = Object.fromEntries(formFields(attendance));
+  check("a postback carries every select's current value",
+    af[TERM_SELECT] === "Term-V" && af["ctl00$Main$ProgTermSubSec1$DropDownListTermNo"] === "");
+  check("signed in, there's no password box", !hasPasswordBox(attendance));
+
+  const grid = readGrid(attendance);
+  check("the grid's headings are OLT's own",
+    grid?.columns.join("|") === "Subject|Total Classess|Attended|Attendance Percentage");
+  check("cells are text: entities decoded, spaces collapsed", grid?.rows[0][0] === "R&D Strategy");
+  check("the 'no records' row is not a course", grid?.rows.length === 2);
+  check("no grid on the page is null", readGrid(login) === null);
+  check("a grid with only headings has no rows",
+    readGrid('<table id="ctl00_Main_GridView1"><tr><th>A</th><th>B</th></tr></table>')?.rows.length === 0);
+
+  check("Term-V, TERM 5 and term v are one term",
+    termKey("Term-V") === termKey("TERM 5") && termKey("term v") === "term 5");
+  check("Term-IV is not Term-VI", termKey("Term-IV") !== termKey("Term-VI"));
+  check("numeric entities decode", decodeEntities("&#39;a&#x27;") === "'a'");
+  survives("junk input doesn't throw", () => {
+    for (const v of [undefined, null, "", "<select", "<table id=x>"]) {
+      formFields(v); selectOptions(v, "x"); readGrid(v); hasPasswordBox(v); termKey(v);
+    }
   });
 }
 

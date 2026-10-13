@@ -40,6 +40,7 @@ const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
 const SectionPicker = lazy(() => import("./screens/SectionPicker"));
 const LeaveMail = lazy(() => import("./screens/LeaveMail"));
 const JMaps = lazy(() => import("./screens/JMaps"));
+const OltAttendance = lazy(() => import("./screens/OltAttendance"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -118,6 +119,9 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authError, setAuthError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  // Opens unreleased screens. Only a way in, like isAdmin: the policies on
+  // their tables are what keep the data from anyone without the flag.
+  const [isTester, setIsTester] = useState(false);
   // Null once boot has finished means no schedule is published for this
   // student's year — see the boot block for why that is a screen of its own.
   const [cohort, setCohort] = useState(null);
@@ -193,6 +197,7 @@ export default function App() {
         const profile = await loadProfile().catch(() => null);
         const mine = profile?.cohort_year ?? cohortOf(current.user?.email);
         setIsAdmin(Boolean(profile?.is_admin));
+        setIsTester(Boolean(profile?.is_tester));
         setCohort(mine);
 
         const [c, a, t, o, published] = await Promise.all([
@@ -769,6 +774,11 @@ export default function App() {
             onBack={() => setSubScreen(null)}
           />
         )}
+        {/* The signed-in student's own record, so never offered while
+            viewing as another cohort. */}
+        {tab === "profile" && subScreen === "olt" && isTester && !readOnly && (
+          <OltAttendance email={session.user?.email ?? ""} onBack={() => setSubScreen(null)} />
+        )}
         {tab === "profile" && subScreen === "admin" && isAdmin && (
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
         )}
@@ -833,6 +843,7 @@ export default function App() {
             onChangeCourses={readOnly ? null : startOver}
             onSignOut={handleSignOut}
             onScheduleAdmin={isAdmin && !readOnly ? () => openSub("admin") : null}
+            onOfficialAttendance={isTester && !readOnly ? () => openSub("olt") : null}
           />
         )}
         </Suspense>

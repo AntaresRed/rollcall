@@ -17,6 +17,7 @@ import Reschedule from "../src/screens/Reschedule";
 import TermCalendar from "../src/screens/TermCalendar";
 import Faculty from "../src/screens/Faculty";
 import JMaps from "../src/screens/JMaps";
+import OltAttendance from "../src/screens/OltAttendance";
 import CalendarExport from "../src/screens/CalendarExport";
 import ScheduleAdmin from "../src/screens/ScheduleAdmin";
 import PorDetails from "../src/screens/PorDetails";
@@ -91,6 +92,15 @@ const consensus = [
 ];
 
 const noop = () => {};
+
+// OLT's own headings, misspelling included; the numbers are made up.
+const oltSnap = {
+  term: "Term-V", terms: ["Term-IV", "Term-V"],
+  columns: ["Subject", "Total Classess", "Attended", "Attendance Percentage"],
+  rows: [["Bank Management", "8", "7", "88"], ["Analytics in Practice", "4", "4", "100"]],
+  fetched_at: "2026-10-12T08:00:00Z", attempted_at: "2026-10-12T08:00:00Z",
+  last_error: null, password_saved: true,
+};
 const occ = occurrencesOn(classes, term, isoDate(now), overrides);
 
 // Each case is rendered on its own so one failure doesn't mask the rest.
@@ -148,6 +158,20 @@ const cases = [
   ["Faculty", <Faculty key="f" classes={classes} onBack={noop} />],
   ["Faculty / no courses picked", <Faculty key="fe" classes={[]} onBack={noop} />],
   ["Faculty / no classes prop at all", <Faculty key="fn" onBack={noop} />],
+  ["Profile / tester", <Profile key="pt" session={{ user: { email: "a@email.iimcal.ac.in", user_metadata: {} } }}
+      classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop}
+      onOfficialAttendance={noop} />],
+  // The last case is a grid OLT doesn't draw today: the screen takes its
+  // layout from whatever headings arrive, so a renamed column mustn't break it.
+  ["OltAttendance / never read", <OltAttendance key="o0" email="a2027@email.iimcal.ac.in"
+      initial={null} onBack={noop} />],
+  ["OltAttendance / read, password saved", <OltAttendance key="o1" email="a2027@email.iimcal.ac.in"
+      initial={oltSnap} onBack={noop} />],
+  ["OltAttendance / not saved, last try failed", <OltAttendance key="o2" email="a2027@email.iimcal.ac.in"
+      initial={{ ...oltSnap, password_saved: false, attempted_at: "2026-10-12T09:00:00Z",
+        last_error: "OLT didn't accept that password." }} />],
+  ["OltAttendance / no course or % column", <OltAttendance key="o3" email=""
+      initial={{ ...oltSnap, terms: [], columns: ["A", "B"], rows: [["1", "2"], ["3"]] }} />],
   ["JMaps", <JMaps key="jm" onBack={noop} />],
   ["JMaps / no back button", <JMaps key="jmn" />],
   ["Reschedule", <Reschedule key="r" classes={classes} term={term} overrides={overrides} now={now} onMove={noop} onClear={noop} onBack={noop} />],

@@ -3866,3 +3866,109 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 .leave-draft-toggle:hover { border-color: var(--signal); }
 .leave-draft-wait { color: var(--mute); }
+
+/* ---------- official attendance (OLT) ---------- */
+
+.olt-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.olt-head span {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--slate);
+}
+.olt-row {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.olt-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.olt-pct {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+}
+/* OLT decides how many columns there are, so they flow rather than sit in a
+   fixed grid. */
+.olt-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 6px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.olt-cells div { display: flex; gap: 5px; }
+.olt-cells dt { color: var(--mute); }
+.olt-cells dd { margin: 0; color: var(--ink); }
+.olt-form { margin-top: 18px; }
+.olt-form select {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.olt-check {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--slate);
+}
+.olt-check input { margin-top: 3px; flex: none; }
+.olt-check strong { color: var(--ink); }
+.olt-saved {
+  margin: 0;
+  font-size: 13px;
+  color: var(--slate);
+  text-align: center;
+}
+.olt-link {
+  font: inherit;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--signal);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* A screen still being built, shown only to testers. Loud on purpose: it
+   reads real OLT data with a real password, and a curious tap shouldn't be
+   mistaken for a finished feature. */
+.dev-flag {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--absent);
+}
+.btn.ghost.dev-entry {
+  border-color: var(--absent);
+  background: var(--absent-wash);
+}
+.dev-entry .dev-flag { margin-top: 3px; }
+.dev-flag-banner {
+  margin-bottom: 10px;
+  padding: 8px 11px;
+  border: 1px solid var(--absent);
+  border-radius: 10px;
+  background: var(--absent-wash);
+  text-align: center;
+}

@@ -2,8 +2,7 @@
 -- Prototype gate
 --
 -- Somewhere to put a feature that is finished enough to run against real data
--- but not finished enough for the batch — the MBA office attendance mirror
--- being the one it was built for.
+-- but not finished enough for the batch.
 --
 -- A flag rather than a hardcoded address, for the same reasons as is_admin: a
 -- second tester is one UPDATE rather than a deploy, and because it lives in

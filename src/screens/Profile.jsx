@@ -12,7 +12,7 @@ import Stats from "./Stats";
  */
 export default function Profile({
   session, classes, attendance, onToggleMute, onChangeCourses, onSignOut,
-  onScheduleAdmin,
+  onScheduleAdmin, onOfficialAttendance,
 }) {
   const user = session?.user;
   const meta = user?.user_metadata ?? {};
@@ -86,6 +86,14 @@ export default function Profile({
       <Stats classes={classes} attendance={attendance} onToggleMute={onToggleMute} />
 
       <div className="profile-actions">
+        {/* Testers only, and again only a way in: olt_attendance's policy
+            returns nothing to anyone else. */}
+        {onOfficialAttendance && (
+          <button className="btn ghost block dev-entry" onClick={onOfficialAttendance}>
+            Official attendance (OLT)
+            <span className="dev-flag">DO NOT TOUCH, UNDER DEVELOPMENT</span>
+          </button>
+        )}
         {/* Only rendered for an admin, and only as a way in — the database
             policies are what actually decide who may publish. */}
         {onScheduleAdmin && (

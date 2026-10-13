@@ -1156,3 +1156,36 @@ export async function loadCataloguePayload(id) {
   if (error) throw error;
   return data.payload;
 }
+
+
+// ---------- official attendance from OLT (testers only) ----------
+
+/** The last copy read from OLT, or null if there has never been one. The
+ *  table's policy returns nothing to anyone who isn't a tester. */
+export async function loadOltAttendance() {
+  const { data, error } = await supabase.from("olt_attendance").select("*").maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Calls the olt-attendance function. A non-2xx answer arrives as an error
+ * whose body still has to be read; that body is what the student is shown,
+ * because it says which step failed and whether to retype the password.
+ */
+async function callOlt(body) {
+  const { data, error } = await supabase.functions.invoke("olt-attendance", { body });
+  if (!error) return data;
+
+  let detail = null;
+  try { detail = await error.context?.json?.(); } catch { /* not JSON */ }
+  const err = new Error(detail?.error || "Couldn't reach IIMPresent's server.");
+  err.code = detail?.code ?? null;
+  throw err;
+}
+
+/** Signs in to OLT and reads the term. With no password, the saved one is used. */
+export const refreshOltAttendance = ({ password, remember, term } = {}) =>
+  callOlt({ action: "refresh", password: password || undefined, remember: Boolean(remember), term });
+
+export const forgetOltPassword = () => callOlt({ action: "forget" });
