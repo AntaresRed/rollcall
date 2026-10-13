@@ -32,7 +32,7 @@ import { formDate, formWhen, formAnswers, formFilename, winAnsi, timesWidth, wra
 import { GMAIL_SCOPE, authUrl, callbackUrl, readCallback, heldToken, takeRoundTrip,
   mimeMessage, rawOf, gmailOpenHref } from "../src/lib/gmaildraft.js";
 // The Edge Function's page reader. It imports nothing, so it runs here too.
-import { formFields, formAction, selectOptions, readGrid, hasPasswordBox, hasOtpField,
+import { formFields, formAction, postBackFields, selectOptions, readGrid, hasPasswordBox, hasOtpField,
   termKey, decodeEntities, TERM_SELECT } from "../supabase/functions/olt-attendance/parse.ts";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
@@ -2421,6 +2421,7 @@ console.log("\nleave form PDF");
   // Shaped like OLT's pages (ASP.NET WebForms), with made-up values. Not a
   // saved copy: that would carry a real student's record into the repo.
   const login = `<form method="post" action="./default?typeid=0" id="aspnetForm">
+    <input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
     <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="abc+/=" />
     <input type="hidden" name="__EVENTVALIDATION" value="x&amp;y" />
     <input name="ctl00$Login1$TextBoxIP" type="text" style="display: none;" />
@@ -2437,6 +2438,19 @@ console.log("\nleave form PDF");
     !("ctl00$Login1$btnSendResetLink" in f) && !("remember" in f));
   check("a relative action resolves against the page",
     formAction(login, "https://olt.example/default?typeid=0") === "https://olt.example/default?typeid=0");
+  // The bug that made OLT answer 500: a filter on the "__EVENT" prefix also
+  // dropped __EVENTVALIDATION, and ASP.NET rejects a postback without it.
+  const pb = postBackFields(login, "ctl00$Login1$LoginView1$ButtonLogin",
+    { "ctl00$Login1$LoginView1$UserName": "a2027" });
+  const pbf = Object.fromEntries(pb);
+  check("a postback keeps __EVENTVALIDATION and the view state",
+    pbf.__EVENTVALIDATION === "x&y" && pbf.__VIEWSTATE === "abc+/=");
+  check("a postback names its click once",
+    pbf.__EVENTTARGET === "ctl00$Login1$LoginView1$ButtonLogin" && pbf.__EVENTARGUMENT === ""
+      && pb.filter(([k]) => k === "__EVENTTARGET").length === 1);
+  check("a set field replaces the page's, not duplicates it",
+    pb.filter(([k]) => k === "ctl00$Login1$LoginView1$UserName").length === 1
+      && pbf["ctl00$Login1$LoginView1$UserName"] === "a2027");
   check("the sign-in page has a password box", hasPasswordBox(login));
   check("and no one-time-code field", !hasOtpField(login));
   check("an OTP field is noticed", hasOtpField('<input name="ctl00$Main$txtOTP" type="text">'));

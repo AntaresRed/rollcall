@@ -97,6 +97,25 @@ export function formFields(html: string): [string, string][] {
   return out;
 }
 
+/**
+ * The fields of the page's form posted back as if `target` had been clicked:
+ * everything the page handed out, with `set` laid over it, and the two event
+ * fields naming the click. Only those two are replaced — __EVENTVALIDATION
+ * shares their prefix but is the page's own state, and posting without it
+ * makes ASP.NET reject the click with a 500.
+ */
+export function postBackFields(
+  html: string,
+  target: string,
+  set: Record<string, string> = {},
+): [string, string][] {
+  const fields = formFields(html).filter(([k]) =>
+    !(k in set) && k !== "__EVENTTARGET" && k !== "__EVENTARGUMENT"
+  );
+  fields.push(...Object.entries(set), ["__EVENTTARGET", target], ["__EVENTARGUMENT", ""]);
+  return fields;
+}
+
 export function formAction(html: string, pageUrl: string): string {
   const tag = String(html ?? "").match(/<form\b[^>]*>/i)?.[0];
   const action = tag ? attrsOf(tag).action : "";

@@ -13,7 +13,7 @@
 // ============================================================
 
 import {
-  formAction, formFields, GRID_ID, hasOtpField, hasPasswordBox, LOGIN_BUTTON,
+  formAction, GRID_ID, hasOtpField, hasPasswordBox, LOGIN_BUTTON, postBackFields,
   LOGOFF_BUTTON, readGrid, selectOptions, TERM_SELECT, termKey, USERNAME,
 } from "./parse.ts";
 
@@ -58,6 +58,9 @@ class Session {
   private cookies = new Map<string, string>();
   /** The last page loaded, whose form the sign-off posts back. */
   last: Page | null = null;
+  /** Which step is running, for the log. "OLT answered 500" alone could be
+   *  any of four requests. */
+  step = "start";
 
   private remember(res: Response) {
     for (const line of res.headers.getSetCookie()) {
@@ -83,7 +86,7 @@ class Session {
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
     } catch (err) {
-      throw new OltError("unreachable", `Couldn't reach OLT (${(err as Error).name}).`);
+      throw new OltError("unreachable", `Couldn't reach OLT (${(err as Error).name}) at ${this.step}.`);
     }
   }
 
@@ -109,7 +112,7 @@ class Session {
 
     if (!res.ok) {
       await res.body?.cancel();
-      throw new OltError("unreachable", `OLT answered ${res.status}.`);
+      throw new OltError("unreachable", `OLT answered ${res.status} at ${this.step}.`);
     }
 
     this.last = { url, html: await res.text() };
@@ -118,9 +121,7 @@ class Session {
 
   /** Posts the page's form back as if `target` had been clicked. */
   postBack(page: Page, target: string, set: Record<string, string> = {}): Promise<Page> {
-    const fields = formFields(page.html).filter(([k]) => !(k in set) && !k.startsWith("__EVENT"));
-    fields.push(...Object.entries(set), ["__EVENTTARGET", target], ["__EVENTARGUMENT", ""]);
-    return this.load(formAction(page.html, page.url), fields);
+    return this.load(formAction(page.html, page.url), postBackFields(page.html, target, set));
   }
 
   /** Presses OLT's own "Sign off". Best effort: failing to sign out must not
@@ -128,12 +129,14 @@ class Session {
   async signOut() {
     if (!this.last || hasPasswordBox(this.last.html)) return;
     try {
+      this.step = "signing off";
       await this.postBack(this.last, LOGOFF_BUTTON);
     } catch { /* already gone */ }
   }
 }
 
 async function signIn(session: Session, loginId: string, password: string): Promise<void> {
+  session.step = "the sign-in page";
   const page = await session.load(new URL(LOGIN_PATH, BASE).toString());
   if (!hasPasswordBox(page.html) || !page.html.includes(`name="${USERNAME}"`)) {
     throw new OltError("unreachable", "OLT's sign-in form has changed.");
@@ -146,6 +149,7 @@ async function signIn(session: Session, loginId: string, password: string): Prom
     .match(/name="([^"]+)"/)?.[1];
   if (!passName) throw new OltError("unreachable", "OLT's sign-in form has changed.");
 
+  session.step = "signing in";
   const after = await session.postBack(page, LOGIN_BUTTON, {
     [USERNAME]: loginId,
     [passName]: password,
@@ -164,6 +168,7 @@ export async function readAttendance(
   try {
     await signIn(session, loginId, password);
 
+    session.step = "the attendance page";
     let page = await session.load(new URL(ATTENDANCE_PATH, BASE).toString());
     if (hasPasswordBox(page.html)) {
       throw new OltError("session_lost", "OLT signed in, then asked to sign in again.");
@@ -185,6 +190,7 @@ export async function readAttendance(
     // The picker posts back on change, named by itself, exactly as picking
     // from it in a browser does. Skipped when the page already shows it.
     if (choice !== current || !readGrid(page.html)) {
+      session.step = `picking ${choice.text}`;
       page = await session.postBack(page, TERM_SELECT, { [TERM_SELECT]: choice.value });
     }
 
