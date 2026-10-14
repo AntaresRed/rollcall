@@ -1189,3 +1189,21 @@ export const refreshOltAttendance = ({ password, remember, term } = {}) =>
   callOlt({ action: "refresh", password: password || undefined, remember: Boolean(remember), term });
 
 export const forgetOltPassword = () => callOlt({ action: "forget" });
+
+/**
+ * The number in a term's name: 5 for "Term-V", "Term 5" or "TERM v"; null if
+ * there isn't one. OLT writes terms in Roman numerals and the picker here
+ * asks for a number, so this is how the two are compared.
+ */
+export function termNumber(name) {
+  const m = String(name ?? "").toLowerCase().match(/term[^a-z0-9]*([0-9]+|[ivx]+)\b/);
+  if (!m) return null;
+  if (/^\d+$/.test(m[1])) return Number(m[1]) || null;
+  const roman = { i: 1, v: 5, x: 10 };
+  let n = 0;
+  for (let i = 0; i < m[1].length; i++) {
+    const v = roman[m[1][i]], next = roman[m[1][i + 1]] ?? 0;
+    n += v < next ? -v : v;
+  }
+  return n || null;
+}

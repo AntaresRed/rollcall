@@ -170,6 +170,8 @@ const cases = [
   ["OltAttendance / not saved, last try failed", <OltAttendance key="o2" email="a2027@email.iimcal.ac.in"
       initial={{ ...oltSnap, password_saved: false, attempted_at: "2026-10-12T09:00:00Z",
         last_error: "OLT didn't accept that password." }} />],
+  ["OltAttendance / stored copy has no term", <OltAttendance key="o4" email="a2027@email.iimcal.ac.in"
+      initial={{ ...oltSnap, term: null }} />],
   ["OltAttendance / no course or % column", <OltAttendance key="o3" email=""
       initial={{ ...oltSnap, terms: [], columns: ["A", "B"], rows: [["1", "2"], ["3"]] }} />],
   ["JMaps", <JMaps key="jm" onBack={noop} />],

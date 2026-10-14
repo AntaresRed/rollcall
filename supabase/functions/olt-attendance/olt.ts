@@ -162,7 +162,7 @@ async function signIn(session: Session, loginId: string, password: string): Prom
 export async function readAttendance(
   loginId: string,
   password: string,
-  wantedTerm?: string | null,
+  wantedTerm: string,
 ): Promise<OltAttendance> {
   const session = new Session();
   try {
@@ -176,28 +176,33 @@ export async function readAttendance(
 
     const options = selectOptions(page.html, TERM_SELECT)?.filter((o) => o.value) ?? [];
     if (!options.length) throw new OltError("no_term", "OLT's attendance page has no term picker.");
-    const current = options.find((o) => o.selected);
+    const terms = options.map((o) => o.text);
 
-    // The term asked for; else whatever OLT already shows, which is the
-    // current term; else the last one listed, the newest.
-    const choice = wantedTerm
-      ? options.find((o) => termKey(o.text) === termKey(wantedTerm))
-      : current ?? options.at(-1);
+    // Only ever the term the student asked for. OLT opens on a term of its
+    // own choosing — Term-I, for a second year — so there is no default
+    // here: reading "whatever OLT showed" once handed back the wrong term.
+    const choice = options.find((o) => termKey(o.text) === termKey(wantedTerm));
     if (!choice) {
-      throw new OltError("no_term", `OLT doesn't list "${wantedTerm}".`);
+      throw new OltError("no_term", `OLT doesn't list ${wantedTerm}. It lists ${terms.join(", ")}.`);
     }
 
-    // The picker posts back on change, named by itself, exactly as picking
-    // from it in a browser does. Skipped when the page already shows it.
-    if (choice !== current || !readGrid(page.html)) {
-      session.step = `picking ${choice.text}`;
-      page = await session.postBack(page, TERM_SELECT, { [TERM_SELECT]: choice.value });
+    // Picked every time, even when OLT already shows it, exactly as a
+    // browser does: the picker posts back on change, named by itself.
+    session.step = `picking ${choice.text}`;
+    page = await session.postBack(page, TERM_SELECT, { [TERM_SELECT]: choice.value });
+
+    // And confirmed: the page that came back must say it's showing that term.
+    // A grid for another term, read as this one, is the one mistake that
+    // can't be seen from the screen.
+    const shown = selectOptions(page.html, TERM_SELECT)?.find((o) => o.selected);
+    if (!shown || termKey(shown.text) !== termKey(choice.text)) {
+      throw new OltError("no_term", `OLT showed ${shown?.text ?? "no term"} instead of ${choice.text}.`);
     }
 
     const grid = readGrid(page.html);
     if (!grid) throw new OltError("no_table", `OLT's attendance page had no ${GRID_ID}.`);
 
-    return { term: choice.text, terms: options.map((o) => o.text), ...grid };
+    return { term: choice.text, terms, ...grid };
   } finally {
     await session.signOut();
   }

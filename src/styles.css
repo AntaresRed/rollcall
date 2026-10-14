@@ -3911,7 +3911,8 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .olt-cells div { display: flex; gap: 5px; }
 .olt-cells dt { color: var(--mute); }
 .olt-cells dd { margin: 0; color: var(--ink); }
-.olt-form { margin-top: 18px; }
+.olt-form { margin-top: 4px; }
+.olt-results { margin-top: 22px; }
 .olt-form select {
   width: 100%;
   font: inherit;

@@ -3,7 +3,7 @@ import {
   toMinutes, hhmm, pretty, inSession, breakOn, skipBudget, courseStats,
   expectedSessions, unmarkedSessions, occurrencesOn, attendanceKey, isoDate, weekdayOf,
   catalogueDrift, currentSlotOf, attendanceBreakdown, markableSessions,
-  undecidedReschedules, countedAttendance, rescheduleProposals, proposalKey,
+  undecidedReschedules, countedAttendance, rescheduleProposals, proposalKey, termNumber,
 } from "../src/lib/api.js";
 import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
@@ -2507,6 +2507,16 @@ console.log("\nleave form PDF");
   check("Term-V, TERM 5 and term v are one term",
     termKey("Term-V") === termKey("TERM 5") && termKey("term v") === "term 5");
   check("Term-IV is not Term-VI", termKey("Term-IV") !== termKey("Term-VI"));
+
+  // The screen asks for a number; OLT answers in Roman numerals.
+  check("termNumber reads OLT's names",
+    termNumber("Term-V") === 5 && termNumber("Term-IV") === 4 && termNumber("Term-VI") === 6
+      && termNumber("Term-I") === 1 && termNumber("Term-III") === 3);
+  check("termNumber reads the app's own", termNumber("Term 5") === 5 && termNumber("TERM v") === 5);
+  check("termNumber is null for a non-term", termNumber("Project") === null
+    && termNumber(null) === null && termNumber("") === null);
+  check("what the screen sends, the server matches", termKey("Term 5") === termKey("Term-V")
+    && termKey("Term 1") !== termKey("Term-V"));
   check("numeric entities decode", decodeEntities("&#39;a&#x27;") === "'a'");
   survives("junk input doesn't throw", () => {
     for (const v of [undefined, null, "", "<select", "<table id=x>"]) {

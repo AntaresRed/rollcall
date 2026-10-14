@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { loadOltAttendance, refreshOltAttendance, forgetOltPassword } from "../lib/api";
+import {
+  loadOltAttendance, refreshOltAttendance, forgetOltPassword, termNumber,
+} from "../lib/api";
 
 const fmtWhen = (iso) =>
   iso ? new Date(iso).toLocaleString(undefined, {
@@ -11,8 +13,17 @@ const fmtWhen = (iso) =>
 // Anything else it prints is shown untouched.
 const asPct = (v) => (/^\d+(\.\d+)?$/.test(String(v ?? "").trim()) ? `${String(v).trim()}%` : v);
 
+// Asked as a number, not offered from OLT's own list: on a first visit that
+// list isn't known yet. A term OLT doesn't have comes back as an error naming
+// the ones it does.
+const TERMS = [1, 2, 3, 4, 5, 6];
+
 /**
  * The institute's own attendance record, read from OLT. Tester-only.
+ *
+ * The term and password come first, and the attendance shown is only ever
+ * the term picked. OLT opens on a term of its own choosing, so a read that
+ * didn't name one once showed Term I to someone asking about Term V.
  *
  * Shown as OLT printed it — its column headings, its numbers — and never mixed
  * into the student's own marks. The two are different records, and this one
@@ -28,12 +39,16 @@ export default function OltAttendance({ email, onBack, initial }) {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(Boolean(initial?.password_saved));
   const [typing, setTyping] = useState(false); // replacing a saved password
-  const [term, setTerm] = useState(initial?.term ?? "");
+  const [term, setTerm] = useState(String(termNumber(initial?.term) ?? ""));
 
   useEffect(() => {
     if (initial !== undefined) return;
     loadOltAttendance()
-      .then((s) => { setSnap(s); setTerm(s?.term ?? ""); setRemember(Boolean(s?.password_saved)); })
+      .then((s) => {
+        setSnap(s);
+        setTerm(String(termNumber(s?.term) ?? ""));
+        setRemember(Boolean(s?.password_saved));
+      })
       .catch((err) => setError(err.message || "Couldn't load your OLT attendance."))
       .finally(() => setLoading(false));
   }, [initial]);
@@ -41,19 +56,20 @@ export default function OltAttendance({ email, onBack, initial }) {
   const saved = Boolean(snap?.password_saved);
   const askPassword = !saved || typing;
   const loginId = String(email ?? "").split("@")[0];
+  const ready = Boolean(term) && (!askPassword || Boolean(password));
 
   const refresh = async (e) => {
     e?.preventDefault();
+    if (!ready) return;
     setBusy("refresh");
     setError("");
     try {
       const res = await refreshOltAttendance({
+        term: `Term ${term}`,
         password: askPassword ? password : undefined,
         remember: askPassword ? remember : true,
-        term: term || undefined,
       });
       setSnap(res.snapshot);
-      setTerm(res.snapshot?.term ?? "");
       setPassword("");
       setTyping(false);
     } catch (err) {
@@ -82,8 +98,12 @@ export default function OltAttendance({ email, onBack, initial }) {
     }
   };
 
-  const columns = snap?.columns ?? [];
-  const rows = snap?.rows ?? [];
+  // The stored copy is shown only when it is the term picked. Another term's
+  // numbers under this term's name would be the worst thing this screen
+  // could show.
+  const matches = Boolean(term) && snap?.fetched_at && termNumber(snap.term) === Number(term);
+  const columns = matches ? snap.columns ?? [] : [];
+  const rows = matches ? snap.rows ?? [] : [];
   // OLT's own headings decide the layout: the course column becomes the
   // card's title and a percentage column its big number. Neither is assumed
   // to exist.
@@ -103,50 +123,15 @@ export default function OltAttendance({ email, onBack, initial }) {
 
       {loading && <div className="empty">Loading…</div>}
 
-      {!loading && snap?.fetched_at && (
-        <div className="olt-head">
-          <strong>{snap.term || "OLT"}</strong>
-          <span>Read from OLT {fmtWhen(snap.fetched_at)}</span>
-        </div>
-      )}
-
-      {(error || staleError) && (
-        <div className="notice" style={{ marginBottom: 14 }}>
-          {error || `Last try (${fmtWhen(snap.attempted_at)}): ${snap.last_error}`}
-        </div>
-      )}
-
-      {!loading && rows.length === 0 && !snap?.fetched_at && (
-        <div className="empty">Nothing read from OLT yet.</div>
-      )}
-
-      {rows.map((cells, i) => (
-        <div className="olt-row" key={i}>
-          <div className="olt-row-head">
-            <span className="course">{cells[titleCol] || "—"}</span>
-            {pctCol >= 0 && pctCol !== titleCol && <span className="olt-pct">{asPct(cells[pctCol])}</span>}
-          </div>
-          <dl className="olt-cells">
-            {columns.map((c, j) => (j === titleCol || j === pctCol ? null : (
-              <div key={j}>
-                <dt>{c}</dt>
-                <dd>{cells[j] || "—"}</dd>
-              </div>
-            )))}
-          </dl>
-        </div>
-      ))}
-
       {!loading && (
         <form className="leave-form olt-form" onSubmit={refresh}>
-          {snap?.terms?.length > 1 && (
-            <label className="leave-field">
-              <span>Term</span>
-              <select value={term} onChange={(e) => setTerm(e.target.value)}>
-                {snap.terms.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </label>
-          )}
+          <label className="leave-field">
+            <span>Term</span>
+            <select value={term} onChange={(e) => { setTerm(e.target.value); setError(""); }}>
+              <option value="" disabled>Choose a term</option>
+              {TERMS.map((n) => <option key={n} value={String(n)}>Term {n}</option>)}
+            </select>
+          </label>
 
           {askPassword ? (
             <>
@@ -171,8 +156,10 @@ export default function OltAttendance({ email, onBack, initial }) {
                   unticked and it&apos;s used once, then thrown away.
                 </span>
               </label>
-              <button className="btn block" disabled={busy === "refresh" || !password}>
-                {busy === "refresh" ? "Reading OLT…" : "Read from OLT"}
+              <button className="btn block" disabled={busy === "refresh" || !ready}>
+                {busy === "refresh"
+                  ? "Reading OLT…"
+                  : term ? `Read Term ${term} from OLT` : "Choose a term first"}
               </button>
               {saved && (
                 <button type="button" className="btn ghost block" onClick={() => setTyping(false)}>
@@ -182,8 +169,10 @@ export default function OltAttendance({ email, onBack, initial }) {
             </>
           ) : (
             <>
-              <button className="btn block" disabled={busy === "refresh"}>
-                {busy === "refresh" ? "Reading OLT…" : "Refresh from OLT"}
+              <button className="btn block" disabled={busy === "refresh" || !ready}>
+                {busy === "refresh"
+                  ? "Reading OLT…"
+                  : term ? `Read Term ${term} from OLT` : "Choose a term first"}
               </button>
               <p className="olt-saved">
                 Your OLT password is saved.{" "}
@@ -203,6 +192,46 @@ export default function OltAttendance({ email, onBack, initial }) {
           )}
         </form>
       )}
+
+      {(error || staleError) && (
+        <div className="notice" style={{ marginTop: 14 }}>
+          {error || `Last try (${fmtWhen(snap.attempted_at)}): ${snap.last_error}`}
+        </div>
+      )}
+
+      {matches && (
+        <div className="olt-head olt-results">
+          <strong>{snap.term}</strong>
+          <span>Read from OLT {fmtWhen(snap.fetched_at)}</span>
+        </div>
+      )}
+
+      {!loading && term && !matches && (
+        <div className="empty" style={{ marginTop: 14 }}>
+          Term {term} hasn&apos;t been read from OLT yet.
+        </div>
+      )}
+
+      {matches && rows.length === 0 && (
+        <div className="empty">OLT lists no courses for {snap.term}.</div>
+      )}
+
+      {rows.map((cells, i) => (
+        <div className="olt-row" key={i}>
+          <div className="olt-row-head">
+            <span className="course">{cells[titleCol] || "—"}</span>
+            {pctCol >= 0 && pctCol !== titleCol && <span className="olt-pct">{asPct(cells[pctCol])}</span>}
+          </div>
+          <dl className="olt-cells">
+            {columns.map((c, j) => (j === titleCol || j === pctCol ? null : (
+              <div key={j}>
+                <dt>{c}</dt>
+                <dd>{cells[j] || "—"}</dd>
+              </div>
+            )))}
+          </dl>
+        </div>
+      ))}
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>

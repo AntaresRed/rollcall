@@ -5,7 +5,7 @@
 // public.olt_attendance. Tester-only (profiles.is_tester).
 //
 // From the app, with the student's own session:
-//   { action: "refresh", password?, remember?, term? }
+//   { action: "refresh", term, password?, remember? }
 //   { action: "forget" }
 // From pg_cron, with the service-role key (see olt-attendance.sql):
 //   { action: "nightly" }
@@ -99,7 +99,7 @@ const USER_MESSAGE: Record<string, string> = {
   bad_password: "OLT didn't accept that password.",
   otp_required: "OLT asked for a one-time code, which IIMPresent can't enter for you.",
   session_lost: "Signed in to OLT, but it asked to sign in again on the Attendance page.",
-  no_term: "Couldn't find that term on OLT's attendance page.",
+  no_term: "OLT doesn't list that term.",
   no_table: "OLT's attendance page didn't have a table IIMPresent could read.",
 };
 
@@ -112,7 +112,7 @@ async function refreshFor(
   email: string,
   password: string,
   usedSaved: boolean,
-  term: string | null,
+  term: string,
 ): Promise<{ row?: Record<string, unknown>; error?: string; code?: string; status: number }> {
   const loginId = email.slice(0, -DOMAIN.length);
   const attempted_at = new Date().toISOString();
@@ -142,7 +142,11 @@ async function refreshFor(
 
     if (code === "bad_password" && usedSaved) await forgetPassword(userId);
 
-    const message = USER_MESSAGE[code] ?? "Something went wrong reading OLT.";
+    // A term problem says which terms OLT does list, which is what the
+    // student needs to pick again; the rest stay plain.
+    const message = code === "no_term"
+      ? (err as Error).message
+      : USER_MESSAGE[code] ?? "Something went wrong reading OLT.";
     const { data: saved } = await admin.from("olt_credentials")
       .select("user_id").eq("user_id", userId).maybeSingle();
     await admin.from("olt_attendance").upsert({
@@ -181,9 +185,11 @@ async function nightly() {
     const password = await savedPassword(user_id);
     if (!password) continue;
 
+    // The term the student last read; never one OLT picks for them.
     const { data: last } = await admin.from("olt_attendance")
       .select("term").eq("user_id", user_id).maybeSingle();
-    const r = await refreshFor(user_id, email, password, true, last?.term ?? null);
+    if (!last?.term) continue;
+    const r = await refreshFor(user_id, email, password, true, last.term);
     results[user_id] = r.code ?? "ok";
   }
   return results;
@@ -228,20 +234,21 @@ Deno.serve(async (req) => {
     if (action !== "refresh") return json({ error: "Unknown action." }, 400);
 
     const { data: last } = await admin.from("olt_attendance")
-      .select("attempted_at, term").eq("user_id", user.id).maybeSingle();
+      .select("attempted_at").eq("user_id", user.id).maybeSingle();
     if (last?.attempted_at && Date.now() - Date.parse(last.attempted_at) < MIN_GAP_MS) {
       return json({ error: "Checked OLT under a minute ago. Give it a moment." }, 429);
     }
+
+    // Always named by the student. With no term, OLT shows one of its own
+    // choosing, and that is how Term-I once came back for a Term V question.
+    const term = typeof body.term === "string" ? body.term.trim().slice(0, 40) : "";
+    if (!term) return json({ error: "Choose a term.", code: "need_term" }, 400);
 
     const typed = typeof body.password === "string" && body.password.length > 0
       ? body.password as string
       : null;
     const password = typed ?? await savedPassword(user.id);
     if (!password) return json({ error: "Enter your OLT password.", code: "need_password" }, 400);
-
-    const term = typeof body.term === "string" && body.term.trim()
-      ? body.term.trim()
-      : last?.term ?? null;
 
     const result = await refreshFor(user.id, email, password, !typed, term);
 
