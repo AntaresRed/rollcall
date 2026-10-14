@@ -31,9 +31,9 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SEAL_KEY = Deno.env.get("OLT_PASSWORD_KEY") ?? "";
 const DOMAIN = "@email.iimcal.ac.in";
 
-// Each refresh is a sign-in on an institute system. A minute apart is plenty
-// for a person and stops a stuck button from hammering OLT.
-const MIN_GAP_MS = 60_000;
+// No time limit between reads: nobody re-reads their attendance in a burst,
+// and the screen disables its button while a read runs, which is what stops
+// a double-tap from signing in twice.
 
 const CORS = {
   "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") ?? "*",
@@ -232,12 +232,6 @@ Deno.serve(async (req) => {
     }
 
     if (action !== "refresh") return json({ error: "Unknown action." }, 400);
-
-    const { data: last } = await admin.from("olt_attendance")
-      .select("attempted_at").eq("user_id", user.id).maybeSingle();
-    if (last?.attempted_at && Date.now() - Date.parse(last.attempted_at) < MIN_GAP_MS) {
-      return json({ error: "Checked OLT under a minute ago. Give it a moment." }, 429);
-    }
 
     // Always named by the student. With no term, OLT shows one of its own
     // choosing, and that is how Term-I once came back for a Term V question.
