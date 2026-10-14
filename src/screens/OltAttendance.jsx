@@ -18,6 +18,19 @@ const asPct = (v) => (/^\d+(\.\d+)?$/.test(String(v ?? "").trim()) ? `${String(v
 // the ones it does.
 const TERMS = [1, 2, 3, 4, 5, 6];
 
+/** An eye, struck through when the password is showing — the icon names what
+ *  the next tap does. Same stroke style as the tab icons. */
+function EyeIcon({ off }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="2.8" />
+      {off && <path d="M4 20 20 4" />}
+    </svg>
+  );
+}
+
 /**
  * The institute's own attendance record, read from OLT. Tester-only.
  *
@@ -39,6 +52,7 @@ export default function OltAttendance({ email, onBack, initial }) {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(Boolean(initial?.password_saved));
   const [typing, setTyping] = useState(false); // replacing a saved password
+  const [showPassword, setShowPassword] = useState(false);
   const [term, setTerm] = useState(String(termNumber(initial?.term) ?? ""));
 
   useEffect(() => {
@@ -71,6 +85,8 @@ export default function OltAttendance({ email, onBack, initial }) {
       });
       setSnap(res.snapshot);
       setPassword("");
+      // Hidden again for next time, so it never opens already showing.
+      setShowPassword(false);
       setTyping(false);
     } catch (err) {
       setError(err.message);
@@ -137,12 +153,28 @@ export default function OltAttendance({ email, onBack, initial }) {
             <>
               <label className="leave-field">
                 <span>OLT password for {loginId || "your account"}</span>
-                <input
-                  type="password"
-                  value={password}
-                  autoComplete="current-password"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="olt-pass">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    autoComplete="current-password"
+                    // Shown as typed, a password must not be "corrected" or
+                    // capitalised by the phone's keyboard.
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="olt-eye"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    <EyeIcon off={showPassword} />
+                  </button>
+                </div>
               </label>
               <label className="olt-check">
                 <input

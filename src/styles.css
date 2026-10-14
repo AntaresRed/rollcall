@@ -3923,6 +3923,28 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   background: var(--paper);
   color: var(--ink);
 }
+/* The eye sits inside the box, so the text has to stop short of it. */
+.olt-pass { position: relative; }
+.leave-field .olt-pass input { padding-right: 44px; }
+.olt-eye {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--slate);
+  cursor: pointer;
+  border-radius: 0 10px 10px 0;
+}
+.olt-eye:hover,
+.olt-eye[aria-pressed="true"] { color: var(--ink); }
+.olt-eye:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
 .olt-check {
   display: flex;
   gap: 9px;
