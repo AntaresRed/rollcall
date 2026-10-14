@@ -31,6 +31,13 @@ create table if not exists public.olt_attendance (
   password_saved boolean not null default false
 );
 
+-- Session by session, per course, from OLT's "Datewise Attendance" section:
+-- { "<course as the term table names it>": { sessions: [{ no, date, time,
+-- mark }], attended, total, agrees } | { error } }. Added after the table
+-- first shipped, hence an alter rather than a column above; safe to re-run.
+alter table public.olt_attendance
+  add column if not exists datewise jsonb not null default '{}'::jsonb;
+
 alter table public.olt_attendance enable row level security;
 
 drop policy if exists "own olt attendance" on public.olt_attendance;

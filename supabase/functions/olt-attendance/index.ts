@@ -127,6 +127,7 @@ async function refreshFor(
       terms: got.terms,
       columns: got.columns,
       rows: got.rows,
+      datewise: got.datewise,
       fetched_at: attempted_at,
       attempted_at,
       last_error: null,

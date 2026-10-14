@@ -97,7 +97,25 @@ const noop = () => {};
 const oltSnap = {
   term: "Term-V", terms: ["Term-IV", "Term-V"],
   columns: ["Subject", "Total Classess", "Attended", "Attendance Percentage"],
-  rows: [["Bank Management", "8", "7", "88"], ["Analytics in Practice", "4", "4", "100"]],
+  rows: [["Bank Management", "8", "7", "88"], ["Analytics in Practice", "4", "4", "100"],
+    ["Pricing", "3", "2", "67"], ["Old Snapshot Course", "2", "2", "100"]],
+  // One course with dates, one whose dates failed, one that doesn't add up,
+  // and one with no entry at all (a copy read before dates were).
+  datewise: {
+    "Bank Management": {
+      sessions: Array.from({ length: 8 }, (_, i) => ({
+        no: i + 1, date: `2026-08-${String(i * 3 + 4).padStart(2, "0")}`,
+        time: i % 2 ? "14:30" : "10:15", mark: i === 5 ? "A" : "P",
+      })),
+      attended: "7", total: "8", agrees: true,
+    },
+    "Analytics in Practice": { error: "Couldn't find this course in OLT's date-wise section." },
+    "Pricing": {
+      sessions: [{ no: 1, date: "2026-08-05", time: "08:30", mark: "P" },
+        { no: 2, date: "2026-08-12", time: "08:30", mark: "X" }],
+      attended: "1", total: "2", agrees: false,
+    },
+  },
   fetched_at: "2026-10-12T08:00:00Z", attempted_at: "2026-10-12T08:00:00Z",
   last_error: null, password_saved: true,
 };
@@ -248,6 +266,20 @@ const cases = [
       term={null} now={now} overrides={[]} onBack={noop} />],
   ["AttendanceBreakdown / nothing marked yet", <AttendanceBreakdown key="abn" classes={classes}
       attendance={[]} term={term} now={now} overrides={overrides} onBack={noop} />],
+  // The tester-only OLT section: OLT's copy for this term ("Term-V" against
+  // the app's "Term V"), a copy for another term, and nothing read.
+  ["AttendanceBreakdown / OLT section", <AttendanceBreakdown key="abo" classes={classes}
+      attendance={attendance} term={term} now={now} overrides={overrides} onBack={noop}
+      showOlt oltInitial={oltSnap} />],
+  ["AttendanceBreakdown / OLT read for another term", <AttendanceBreakdown key="abo2" classes={classes}
+      attendance={attendance} term={term} now={now} overrides={overrides}
+      showOlt oltInitial={{ ...oltSnap, term: "Term-IV" }} />],
+  ["AttendanceBreakdown / OLT never read", <AttendanceBreakdown key="abo3" classes={classes}
+      attendance={attendance} term={term} now={now} overrides={overrides}
+      showOlt oltInitial={null} />],
+  ["AttendanceBreakdown / OLT, no term calendar", <AttendanceBreakdown key="abo4" classes={classes}
+      attendance={attendance} term={null} now={now} overrides={[]}
+      showOlt oltInitial={oltSnap} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
   ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],

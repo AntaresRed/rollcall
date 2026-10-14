@@ -3882,22 +3882,22 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
   font-size: 11.5px;
   color: var(--slate);
 }
-.olt-row {
-  padding: 13px 0;
-  border-bottom: 1px solid var(--rule);
+/* OLT's courses reuse the breakdown's cards. One with no dates to open is a
+   plain div, so it keeps the padding a <details> card hands to its parts. */
+.ab-card.olt-card { padding: 14px; }
+.olt-dw-note {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--slate);
 }
-.olt-row-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
+.olt-dw-note.warn { color: var(--warn-ink); }
+/* The breakdown's OLT section, set apart from the student's own cards. */
+.olt-ab {
+  margin-top: 26px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--rule-strong);
 }
-.olt-pct {
-  font-family: var(--mono);
-  font-weight: 600;
-  font-size: 17px;
-  white-space: nowrap;
-}
+.olt-ab .olt-head { margin-top: 4px; }
 /* OLT decides how many columns there are, so they flow rather than sit in a
    fixed grid. */
 .olt-cells {

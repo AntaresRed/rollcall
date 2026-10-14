@@ -13,8 +13,9 @@
 // ============================================================
 
 import {
-  formAction, GRID_ID, hasOtpField, hasPasswordBox, LOGIN_BUTTON, postBackFields,
-  LOGOFF_BUTTON, readGrid, selectOptions, TERM_SELECT, termKey, USERNAME,
+  type Datewise, datewiseAgrees, DW_SUBJECT, DW_TERM, formAction, GRID_ID, hasOtpField,
+  hasPasswordBox, LOGIN_BUTTON, LOGOFF_BUTTON, matchSubject, postBackFields, readDatewise,
+  readGrid, selectOptions, TERM_SELECT, termKey, USERNAME,
 } from "./parse.ts";
 
 const BASE = "https://olt.iimcal.ac.in/";
@@ -40,11 +41,16 @@ export class OltError extends Error {
   }
 }
 
+/** One course's dates, or why they couldn't be read. A failure here never
+ *  fails the read: the term's totals are still worth having. */
+export type DatewiseResult = (Datewise & { agrees: boolean }) | { error: string };
+
 export interface OltAttendance {
   term: string | null;
   terms: string[];
   columns: string[];
   rows: string[][];
+  datewise: Record<string, DatewiseResult>; // keyed by the term table's course name
 }
 
 interface Page {
@@ -159,6 +165,92 @@ async function signIn(session: Session, loginId: string, password: string): Prom
   if (hasOtpField(after.html)) throw new OltError("otp_required", "OLT asked for a one-time code.");
 }
 
+/**
+ * The "Datewise Attendance" section, for each course in the term table.
+ *
+ * Its own term picker first (it is independent of the table above and can sit
+ * on another term), then each course in turn. Only the student's own courses
+ * are asked for: the picker lists every course in the term, thirty-odd, and
+ * reading them all would be thirty-odd requests for nothing.
+ *
+ * Every step is checked the way the term table is — the picker must say it is
+ * showing what was asked for — and a course that can't be read gets a reason
+ * rather than a guess.
+ */
+async function readAllDatewise(
+  session: Session,
+  page: Page,
+  termText: string,
+  grid: { columns: string[]; rows: string[][] },
+): Promise<Record<string, DatewiseResult>> {
+  const out: Record<string, DatewiseResult> = {};
+  const col = (re: RegExp) => grid.columns.findIndex((c) => re.test(c));
+  const subjectCol = Math.max(0, col(/subject|course/i));
+  const attendedCol = col(/^attended$/i);
+  const totalCol = col(/total/i);
+  const courses = grid.rows.map((r) => r[subjectCol]).filter(Boolean);
+  if (!courses.length) return out;
+
+  const failAll = (error: string) => {
+    for (const c of courses) if (!(c in out)) out[c] = { error };
+    return out;
+  };
+
+  const dwTerm = selectOptions(page.html, DW_TERM)
+    ?.find((o) => o.value && termKey(o.text) === termKey(termText));
+  if (!dwTerm) return failAll("OLT's date-wise section doesn't list this term.");
+
+  try {
+    session.step = `date-wise ${termText}`;
+    page = await session.postBack(page, DW_TERM, { [DW_TERM]: dwTerm.value });
+  } catch (err) {
+    return failAll(`Couldn't open OLT's date-wise section (${(err as Error).message}).`);
+  }
+  const shownTerm = selectOptions(page.html, DW_TERM)?.find((o) => o.selected);
+  if (!shownTerm || termKey(shownTerm.text) !== termKey(termText)) {
+    return failAll("OLT's date-wise section showed a different term.");
+  }
+
+  for (const row of grid.rows) {
+    const course = row[subjectCol];
+    if (!course) continue;
+    const hits = matchSubject(selectOptions(page.html, DW_SUBJECT) ?? [], course);
+    if (hits.length !== 1) {
+      out[course] = {
+        error: hits.length
+          ? "OLT's date-wise section lists this course more than once."
+          : "Couldn't find this course in OLT's date-wise section.",
+      };
+      continue;
+    }
+
+    try {
+      session.step = `date-wise ${course}`;
+      page = await session.postBack(page, DW_SUBJECT, { [DW_SUBJECT]: hits[0].value });
+    } catch (err) {
+      // OLT stopped answering. The rest would fail the same way, so say so
+      // once for each of them rather than waiting out every timeout.
+      return failAll(`OLT stopped answering (${(err as Error).message}).`);
+    }
+
+    const shown = selectOptions(page.html, DW_SUBJECT)?.find((o) => o.selected);
+    if (!shown || shown.value !== hits[0].value) {
+      out[course] = { error: "OLT showed a different course." };
+      continue;
+    }
+    const dw = readDatewise(page.html);
+    if (!dw) {
+      out[course] = { error: "OLT showed no dates for this course." };
+      continue;
+    }
+    out[course] = {
+      ...dw,
+      agrees: datewiseAgrees(dw, row[attendedCol] ?? "", row[totalCol] ?? ""),
+    };
+  }
+  return out;
+}
+
 export async function readAttendance(
   loginId: string,
   password: string,
@@ -202,7 +294,9 @@ export async function readAttendance(
     const grid = readGrid(page.html);
     if (!grid) throw new OltError("no_table", `OLT's attendance page had no ${GRID_ID}.`);
 
-    return { term: choice.text, terms, ...grid };
+    const datewise = await readAllDatewise(session, page, choice.text, grid);
+
+    return { term: choice.text, terms, ...grid, datewise };
   } finally {
     await session.signOut();
   }

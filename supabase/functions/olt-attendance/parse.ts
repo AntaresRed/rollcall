@@ -19,6 +19,12 @@ export const USERNAME = "ctl00$Login1$LoginView1$UserName";
 export const LOGIN_BUTTON = "ctl00$Login1$LoginView1$ButtonLogin";
 export const LOGOFF_BUTTON = "ctl00$Login1$LoginView1$ButtonLogOff";
 
+// The "Datewise Attendance" section further down the same page (2026-10-14).
+// Its pickers are its own: it can sit on another term than the table above.
+export const DW_TERM = "ctl00$Main$ProgTermSubSec1$DropDownListTermNo";
+export const DW_SUBJECT = "ctl00$Main$ProgTermSubSec1$DropDownListSubjectName";
+export const DW_GRID_ID = "ctl00_Main_GridViewDatewise";
+
 const NAMED: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
 
 export function decodeEntities(s: string): string {
@@ -138,21 +144,30 @@ export const hasOtpField = (html: string) =>
  * A row whose cell count differs from the heading — the "no records" row a
  * GridView draws across every column — is not data and is dropped.
  */
-export function readGrid(html: string, id = GRID_ID): { columns: string[]; rows: string[][] } | null {
-  // Opening tags first, then the body: OLT draws the grid inside layout
-  // tables, and a single open-to-close match starting at the outer table
-  // swallows the grid's own opening tag. The grid itself never nests one, so
-  // its body runs to the next close.
+/**
+ * The rows of the table with this id, each as its heading or data cells.
+ *
+ * Opening tags first, then the body: OLT draws its grids inside layout
+ * tables, and a single open-to-close match starting at the outer table
+ * swallows the grid's own opening tag. A grid never nests a table, so its
+ * body runs to the next close.
+ */
+function tableRows(html: string, id: string): string[] | null {
   const src = String(html ?? "");
   const open = [...src.matchAll(/<table\b[^>]*>/gi)].find((m) => attrsOf(m[0]).id === id);
   if (!open) return null;
   const from = open.index! + open[0].length;
   const to = src.slice(from).search(/<\/table>/i);
   const inner = to < 0 ? src.slice(from) : src.slice(from, from + to);
+  return [...inner.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)].map((m) => m[1]);
+}
 
-  const trs = [...inner.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)].map((m) => m[1]);
-  const cells = (tr: string, tag: string) =>
-    [...tr.matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, "gi"))].map((m) => textOf(m[1]));
+const cells = (tr: string, tag: "th" | "td") =>
+  [...tr.matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, "gi"))].map((m) => textOf(m[1]));
+
+export function readGrid(html: string, id = GRID_ID): { columns: string[]; rows: string[][] } | null {
+  const trs = tableRows(html, id);
+  if (!trs) return null;
 
   const headIdx = trs.findIndex((tr) => /<th\b/i.test(tr));
   if (headIdx < 0) return null;
@@ -174,4 +189,94 @@ export function termKey(s: string): string {
     .replace(/[^a-z0-9]+/g, " ")
     .trim()
     .replace(/\b(i{1,3}|iv|v|vi{1,3}|ix|x)\b/g, (r) => roman[r] ?? r);
+}
+
+/**
+ * A course's name for matching across OLT's two sections. The term table says
+ * "Pricing"; the date-wise picker says "Pricing (E-512)", and its option value
+ * is a third spelling that sometimes trails spaces. So the code in brackets
+ * goes, "&" reads as "and", and case and punctuation stop mattering.
+ */
+export function courseKey(s: string): string {
+  return decodeEntities(String(s ?? ""))
+    .replace(/\(\s*[A-Za-z]+-\d+[^)]*\)\s*$/, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Every date-wise option naming this course. The caller wants exactly one:
+ *  two would mean two sections under one name, and guessing between them
+ *  would show somebody else's section's dates. */
+export function matchSubject(options: Option[], subject: string): Option[] {
+  const key = courseKey(subject);
+  if (!key) return [];
+  return options.filter((o) => o.value && (courseKey(o.text) === key || courseKey(o.value) === key));
+}
+
+export interface Session {
+  no: number;
+  date: string;  // YYYY-MM-DD
+  time: string;  // HH:MM, 24-hour
+  mark: string;  // as OLT printed it: "P" or "A"
+}
+
+export interface Datewise {
+  sessions: Session[];
+  attended: string; // OLT's own totals, as printed
+  total: string;
+}
+
+// "3<br>05-08-26<br>14:30": session number, day-month-year, 24-hour start.
+// Checked against the saved page: a day above 12 sits first and the month
+// never exceeds 12, and afternoon sessions read 13:00 and later.
+const SESSION_HEAD = /^(\d+)\s+(\d{2})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})$/;
+
+/**
+ * OLT's date-wise grid for one course: a single row — the student's own —
+ * with a column per session, then Attended and Total classes held.
+ * Null when the grid isn't on the page or has no row for the student.
+ */
+export function readDatewise(html: string): Datewise | null {
+  const trs = tableRows(html, DW_GRID_ID);
+  if (!trs) return null;
+  const headTr = trs.find((tr) => /<th\b/i.test(tr));
+  if (!headTr) return null;
+  const heads = cells(headTr, "th");
+  const row = trs.map((tr) => cells(tr, "td")).find((r) => r.length === heads.length);
+  if (!row) return null;
+
+  const sessions: Session[] = [];
+  heads.forEach((h, i) => {
+    const m = h.match(SESSION_HEAD);
+    if (!m) return;
+    sessions.push({
+      no: Number(m[1]),
+      date: `20${m[4]}-${m[3]}-${m[2]}`,
+      time: `${m[5].padStart(2, "0")}:${m[6]}`,
+      mark: row[i].toUpperCase(),
+    });
+  });
+
+  const at = (re: RegExp) => {
+    const i = heads.findIndex((h) => re.test(h));
+    return i >= 0 ? row[i] : "";
+  };
+  return { sessions, attended: at(/^attended$/i), total: at(/total/i) };
+}
+
+/**
+ * Whether one course's date-wise record and its line in the term table tell
+ * the same story: the P's add up to Attended, the sessions to the total, and
+ * both totals equal the term table's. When they don't, the screen says so
+ * rather than quietly preferring one.
+ */
+export function datewiseAgrees(dw: Datewise, termAttended: string, termTotal: string): boolean {
+  const n = (s: string) => (/^\d+$/.test(String(s ?? "").trim()) ? Number(s) : NaN);
+  const present = dw.sessions.filter((s) => s.mark === "P").length;
+  return present === n(dw.attended)
+    && dw.sessions.length === n(dw.total)
+    && n(dw.attended) === n(termAttended)
+    && n(dw.total) === n(termTotal);
 }

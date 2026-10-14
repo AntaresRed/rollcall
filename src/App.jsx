@@ -771,6 +771,9 @@ export default function App() {
             term={viewTerm}
             now={now}
             overrides={viewOverrides}
+            // The signed-in student's own OLT copy, so not while viewing as
+            // another cohort.
+            showOlt={isTester && !readOnly}
             onBack={() => setSubScreen(null)}
           />
         )}

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { attendanceBreakdown, pretty, DAYS, weekdayOf } from "../lib/api";
+import { OltBreakdownSection } from "./OltCourses";
 
 /**
  * Where every session of every course went: attended, missed, or never marked.
@@ -13,6 +14,9 @@ import { attendanceBreakdown, pretty, DAYS, weekdayOf } from "../lib/api";
  */
 export default function AttendanceBreakdown({
   classes, attendance, term, now, overrides = [], onBack,
+  // Testers only: OLT's own record under the student's, for comparison.
+  // `oltInitial` stands in for its load in the smoke test.
+  showOlt = false, oltInitial,
 }) {
   const rows = useMemo(
     () => attendanceBreakdown(classes, attendance, term, now, overrides),
@@ -78,6 +82,8 @@ export default function AttendanceBreakdown({
         "Did not mark" is a gap in your record, not an absence. Edit attendance
         fills them in.
       </p>
+
+      {showOlt && <OltBreakdownSection termLabel={term?.label} initial={oltInitial} />}
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>

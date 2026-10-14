@@ -33,7 +33,8 @@ import { GMAIL_SCOPE, authUrl, callbackUrl, readCallback, heldToken, takeRoundTr
   mimeMessage, rawOf, gmailOpenHref } from "../src/lib/gmaildraft.js";
 // The Edge Function's page reader. It imports nothing, so it runs here too.
 import { formFields, formAction, postBackFields, selectOptions, readGrid, hasPasswordBox, hasOtpField,
-  termKey, decodeEntities, TERM_SELECT } from "../supabase/functions/olt-attendance/parse.ts";
+  termKey, decodeEntities, TERM_SELECT, readDatewise, datewiseAgrees, courseKey, matchSubject,
+} from "../supabase/functions/olt-attendance/parse.ts";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -2518,9 +2519,57 @@ console.log("\nleave form PDF");
   check("what the screen sends, the server matches", termKey("Term 5") === termKey("Term-V")
     && termKey("Term 1") !== termKey("Term-V"));
   check("numeric entities decode", decodeEntities("&#39;a&#x27;") === "'a'");
+  // The date-wise section: one row (the student's own), a column per session
+  // headed "number / dd-mm-yy / hh:mm", then OLT's totals. Made-up values.
+  const datewise = `<table style="width:100%"><tr><td><div>
+    <table class="GridViewStyle" id="ctl00_Main_GridViewDatewise">
+      <tbody><tr class="HeaderStyle">
+        <th scope="col">Roll no</th><th scope="col">Name</th>
+        <th scope="col">1<br>04-08-26<br>10:15</th>
+        <th scope="col">2<br>13-08-26<br>14:30</th>
+        <th scope="col">3<br>02-09-26<br>8:30</th>
+        <th scope="col">Attended</th><th scope="col">Total<br>classes<br>held</th>
+      </tr><tr>
+        <td>MBA/0000/62</td><td>A Student</td><td>P</td><td>A</td><td>p</td><td>2</td><td>3</td>
+      </tr></tbody></table>
+    </div></td></tr></table>`;
+  const dw = readDatewise(datewise);
+  check("date-wise: one session per dated column", dw?.sessions.length === 3);
+  check("date-wise: dates are day-month-year", dw?.sessions[1].date === "2026-08-13");
+  check("date-wise: times are 24-hour and padded",
+    dw?.sessions[1].time === "14:30" && dw?.sessions[2].time === "08:30");
+  check("date-wise: marks read, case ignored", dw?.sessions.map((s) => s.mark).join("") === "PAP");
+  check("date-wise: OLT's totals come from its own columns", dw?.attended === "2" && dw?.total === "3");
+  check("date-wise: roll number and name are not sessions",
+    dw?.sessions.every((s) => s.no >= 1));
+  check("no date-wise grid is null", readDatewise(attendance) === null);
+  check("a date-wise grid with no row for the student is null",
+    readDatewise('<table id="ctl00_Main_GridViewDatewise"><tr><th>Roll no</th><th>1<br>04-08-26<br>10:15</th></tr></table>') === null);
+
+  check("datewise agrees when every count lines up", datewiseAgrees(dw, "2", "3"));
+  check("but not when the term table says otherwise", !datewiseAgrees(dw, "3", "3"));
+  check("nor when the P's don't add up to Attended",
+    !datewiseAgrees({ ...dw, attended: "3" }, "3", "3"));
+
+  // The term table and the date-wise picker name a course differently.
+  const dwOptions = [
+    { value: "", text: "", selected: false },
+    { value: "Pricing  ", text: "Pricing (E-512)", selected: false },
+    { value: "R&D Strategy", text: "R&D Strategy (E-301)", selected: false },
+    { value: "Ethics A", text: "Ethics (C-101-A)", selected: false },
+    { value: "Ethics B", text: "Ethics (C-101-B)", selected: false },
+  ];
+  check("course names match without their code", matchSubject(dwOptions, "Pricing").length === 1);
+  check("& and 'and' are the same", courseKey("R and D Strategy") === courseKey("R&amp;D Strategy (E-301)"));
+  check("two sections under one name are both returned, so neither is guessed",
+    matchSubject(dwOptions, "Ethics").length === 2);
+  check("an unknown course matches nothing", matchSubject(dwOptions, "Astrophysics").length === 0);
+  check("the blank option never matches", matchSubject(dwOptions, "").length === 0);
+
   survives("junk input doesn't throw", () => {
     for (const v of [undefined, null, "", "<select", "<table id=x>"]) {
       formFields(v); selectOptions(v, "x"); readGrid(v); hasPasswordBox(v); termKey(v);
+      readDatewise(v); courseKey(v); matchSubject([], v);
     }
   });
 }

@@ -2,16 +2,12 @@ import { useEffect, useState } from "react";
 import {
   loadOltAttendance, refreshOltAttendance, forgetOltPassword, termNumber,
 } from "../lib/api";
+import OltCourses from "./OltCourses";
 
 const fmtWhen = (iso) =>
   iso ? new Date(iso).toLocaleString(undefined, {
     day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
   }) : null;
-
-// OLT prints the percentage as a bare number ("87") under a heading that says
-// it's a percentage. On its own as the big number, it needs the sign back.
-// Anything else it prints is shown untouched.
-const asPct = (v) => (/^\d+(\.\d+)?$/.test(String(v ?? "").trim()) ? `${String(v).trim()}%` : v);
 
 // Asked as a number, not offered from OLT's own list: on a first visit that
 // list isn't known yet. A term OLT doesn't have comes back as an error naming
@@ -118,13 +114,6 @@ export default function OltAttendance({ email, onBack, initial }) {
   // numbers under this term's name would be the worst thing this screen
   // could show.
   const matches = Boolean(term) && snap?.fetched_at && termNumber(snap.term) === Number(term);
-  const columns = matches ? snap.columns ?? [] : [];
-  const rows = matches ? snap.rows ?? [] : [];
-  // OLT's own headings decide the layout: the course column becomes the
-  // card's title and a percentage column its big number. Neither is assumed
-  // to exist.
-  const titleCol = Math.max(0, columns.findIndex((c) => /course|subject/i.test(c)));
-  const pctCol = columns.findIndex((c) => /%|percent/i.test(c));
   const staleError = snap?.last_error
     && (!snap.fetched_at || snap.attempted_at > snap.fetched_at);
 
@@ -244,26 +233,11 @@ export default function OltAttendance({ email, onBack, initial }) {
         </div>
       )}
 
-      {matches && rows.length === 0 && (
+      {matches && !snap.rows?.length && (
         <div className="empty">OLT lists no courses for {snap.term}.</div>
       )}
 
-      {rows.map((cells, i) => (
-        <div className="olt-row" key={i}>
-          <div className="olt-row-head">
-            <span className="course">{cells[titleCol] || "—"}</span>
-            {pctCol >= 0 && pctCol !== titleCol && <span className="olt-pct">{asPct(cells[pctCol])}</span>}
-          </div>
-          <dl className="olt-cells">
-            {columns.map((c, j) => (j === titleCol || j === pctCol ? null : (
-              <div key={j}>
-                <dt>{c}</dt>
-                <dd>{cells[j] || "—"}</dd>
-              </div>
-            )))}
-          </dl>
-        </div>
-      ))}
+      {matches && <OltCourses snap={snap} />}
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
