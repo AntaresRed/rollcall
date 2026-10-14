@@ -63,6 +63,12 @@ create table if not exists public.olt_credentials (
 alter table public.olt_credentials enable row level security;
 revoke all on public.olt_credentials from anon, authenticated;
 
+-- The API keeps its own list of each table's columns and doesn't always
+-- notice one added after it started. Without this, the datewise column above
+-- failed every write with "Could not find the 'datewise' column … in the
+-- schema cache" until the list caught up.
+notify pgrst, 'reload schema';
+
 -- ============================================================
 -- Optional: refresh everyone with a saved password once a night.
 -- Off by default — every run is one sign-in per saved account on an institute
