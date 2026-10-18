@@ -86,7 +86,8 @@ comment on table public.feature_events is
 -- ============================================================
 -- What gets counted (src/lib/track.js is called from each):
 --
---   open             app (a cold start), a tab (today, timetable, utils,
+--   open             app (a cold start), resume (back to an app that was
+--                    still running in the background), a tab (today, timetable, utils,
 --                    profile), or a sub-screen tapped open (calendar,
 --                    reschedule, attendance, breakdown, contacts, faculty,
 --                    por, students, mess, export, leave, maps (J-Maps),

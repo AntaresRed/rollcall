@@ -300,6 +300,25 @@ export default function App() {
     };
   }, []);
 
+  // ---- count returns to an app that was still running ----
+  // The boot block counts a cold start as `open / app`, but a phone that keeps
+  // the app alive in the background brings it back without booting, so most
+  // returns would go uncounted. This counts those as `open / resume`, kept
+  // apart from launches so the older numbers stay comparable: launches plus
+  // resumes is every time the app came back on screen. A return from a
+  // WhatsApp, UPI or mail hand-off counts too — the student did leave and come
+  // back. Keyed on the boolean, not the session object, because a routine
+  // token refresh replaces the object and would re-attach the listener.
+  const signedIn = Boolean(session);
+  useEffect(() => {
+    if (!signedIn) return undefined;
+    const onReturn = () => {
+      if (document.visibilityState === "visible") track("open", "resume");
+    };
+    document.addEventListener("visibilitychange", onReturn);
+    return () => document.removeEventListener("visibilitychange", onReturn);
+  }, [signedIn]);
+
   const mark = useCallback(async (cls, date, status) => {
     if (readOnlyRef.current) return;
     const k = attendanceKey(cls.subject, date, cls.start_time);

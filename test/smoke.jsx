@@ -117,7 +117,7 @@ const oltSnap = {
     },
   },
   fetched_at: "2026-10-12T08:00:00Z", attempted_at: "2026-10-12T08:00:00Z",
-  last_error: null, password_saved: true,
+  last_error: null,
 };
 const occ = occurrencesOn(classes, term, isoDate(now), overrides);
 
@@ -183,10 +183,10 @@ const cases = [
   // layout from whatever headings arrive, so a renamed column mustn't break it.
   ["OltAttendance / never read", <OltAttendance key="o0" email="a2027@email.iimcal.ac.in"
       initial={null} onBack={noop} />],
-  ["OltAttendance / read, password saved", <OltAttendance key="o1" email="a2027@email.iimcal.ac.in"
+  ["OltAttendance / read", <OltAttendance key="o1" email="a2027@email.iimcal.ac.in"
       initial={oltSnap} onBack={noop} />],
-  ["OltAttendance / not saved, last try failed", <OltAttendance key="o2" email="a2027@email.iimcal.ac.in"
-      initial={{ ...oltSnap, password_saved: false, attempted_at: "2026-10-12T09:00:00Z",
+  ["OltAttendance / last try failed", <OltAttendance key="o2" email="a2027@email.iimcal.ac.in"
+      initial={{ ...oltSnap, attempted_at: "2026-10-12T09:00:00Z",
         last_error: "OLT didn't accept that password." }} />],
   ["OltAttendance / stored copy has no term", <OltAttendance key="o4" email="a2027@email.iimcal.ac.in"
       initial={{ ...oltSnap, term: null }} />],

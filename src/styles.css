@@ -3945,30 +3945,18 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .olt-eye:hover,
 .olt-eye[aria-pressed="true"] { color: var(--ink); }
 .olt-eye:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
-.olt-check {
-  display: flex;
-  gap: 9px;
-  align-items: flex-start;
-  font-size: 13px;
+/* The login ID is shown so the phone can file the password under it, but it
+   can't be changed, so it reads as information rather than a box to fill. */
+.leave-field.olt-login input[readonly] {
+  background: transparent;
+  color: var(--slate);
+  border-style: dashed;
+}
+.olt-pass-note {
+  margin: -4px 0 0;
+  font-size: 12.5px;
   line-height: 1.45;
   color: var(--slate);
-}
-.olt-check input { margin-top: 3px; flex: none; }
-.olt-check strong { color: var(--ink); }
-.olt-saved {
-  margin: 0;
-  font-size: 13px;
-  color: var(--slate);
-  text-align: center;
-}
-.olt-link {
-  font: inherit;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--signal);
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 /* A screen still being built, shown only to testers. Loud on purpose: it
