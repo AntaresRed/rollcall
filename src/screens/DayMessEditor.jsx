@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { loadDatasetHistory, publishDataset } from "../lib/api";
 import {
   MEAL_NAMES, WEEK, MSG, KEEP_VERSIONS, cleanDayMess, validateDayMess, datasetTitle,
-  publishErrorMessage,
+  publishErrorMessage, loadErrorMessage,
 } from "../lib/datasets";
 import { bundledHostel } from "../lib/menu";
 
@@ -44,7 +44,8 @@ export default function DayMessEditor({ scope, onBack, onPublished, onHelp, hist
       .then((rows) => { if (!gone) setVersions(rows); })
       .catch((err) => {
         if (gone) return;
-        setError(err.message || MSG.loadFailed);
+        console.warn("could not load this dataset's history", err);
+        setError(loadErrorMessage(err, MSG.loadFailed));
         setVersions([]);
       });
     return () => { gone = true; };

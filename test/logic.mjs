@@ -11,7 +11,7 @@ import { BUILDINGS, findRoom, venueNote, searchRooms, floorsOf, roomKey } from "
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
 import { hostels, bundledHostel, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
 import { validateDayMess, cleanDayMess, datasetsFrom, datasetTitle, KINDS, WEEK, MSG,
-  publishErrorMessage } from "../src/lib/datasets.js";
+  publishErrorMessage, notSetUp, loadErrorMessage, NOT_SET_UP } from "../src/lib/datasets.js";
 import { setLiveDatasets, setLiveDataset, liveDataset, planSync, applySync, restoreSavedLive,
   saveLive, resetLive } from "../src/lib/live.js";
 import { syncLive } from "../src/lib/livesync.js";
@@ -2153,6 +2153,23 @@ console.log("POR dashboard: cards and messages");
     publishErrorMessage(undefined) === MSG.publishFailed);
   check("every failure says students are unaffected, or how to fix it",
     [MSG.offline, MSG.publishFailed].every(m => /Nothing has changed for students/.test(m)));
+
+  // Before por-dashboard.sql is run. Both errors are copied from what the
+  // live app showed on 2026-10-19, so the wording PostgREST really uses.
+  const noFunction = { code: "PGRST202",
+    message: "Could not find the function public.live_versions without parameters in the schema cache" };
+  const noTable = { code: "PGRST205", message: "Could not find the table 'public.por_access' in the schema cache" };
+  check("a missing function reads as not set up", notSetUp(noFunction));
+  check("so does a missing table", notSetUp(noTable));
+  check("and is recognised by its words alone", notSetUp({ message: noTable.message }));
+  check("both say the same plain thing, so whichever lands last doesn't matter",
+    loadErrorMessage(noFunction, "x") === NOT_SET_UP && loadErrorMessage(noTable, "y") === NOT_SET_UP);
+  check("a dropped connection is not mistaken for missing setup",
+    !notSetUp(new TypeError("Failed to fetch")) &&
+    loadErrorMessage(new TypeError("Failed to fetch"), MSG.loadFailed) === MSG.loadFailed);
+  check("nor is the policy refusing an account",
+    !notSetUp({ code: "42501", message: "permission denied for table por_access" }));
+  survives("no error at all", () => { notSetUp(undefined); loadErrorMessage(null, "x"); });
 
   check("only kinds the app reads back are marked ready",
     Object.entries(KINDS).filter(([, k]) => k.ready).map(([id]) => id).join() === "day-mess");

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { loadAllPorAccess, loadLiveVersions } from "../lib/api";
-import { KINDS, MSG, datasetTitle, datasetsFrom } from "../lib/datasets";
+import { KINDS, MSG, datasetTitle, datasetsFrom, loadErrorMessage } from "../lib/datasets";
 import { setLiveDataset } from "../lib/live";
 import DayMessEditor from "./DayMessEditor";
 import PorHelp from "./PorHelp";
@@ -49,7 +49,9 @@ export default function PorDashboard({
       .then((rows) => { if (!gone) setAccess(rows); })
       .catch((err) => {
         if (gone) return;
-        setError(err.message || "Couldn't load who looks after what.");
+        // The raw error is for whoever debugs it, not for the screen.
+        console.warn("could not load POR access", err);
+        setError(loadErrorMessage(err, "Couldn't load who looks after what. Reload to try again."));
         setAccess([]);
       });
     return () => { gone = true; };
@@ -63,7 +65,8 @@ export default function PorDashboard({
       .then((rows) => { if (!gone) setLive(rows); })
       .catch((err) => {
         if (gone) return;
-        setError(err.message || MSG.loadFailed);
+        console.warn("could not load published versions", err);
+        setError(loadErrorMessage(err, MSG.loadFailed));
         setLive([]);
       });
     return () => { gone = true; };
@@ -139,7 +142,9 @@ export default function PorDashboard({
         {error && <div className="notice" style={{ marginBottom: 14 }}>{error}</div>}
 
         {access === null && <div className="empty">Loading…</div>}
-        {access !== null && datasets.length === 0 && (
+        {/* With an error showing, an empty list is the error's doing, not a
+          sign the account has nothing — so it isn't said twice. */}
+      {access !== null && datasets.length === 0 && !error && (
           <div className="empty">
             {MSG.nothingGranted}
           </div>

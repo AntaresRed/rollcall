@@ -160,7 +160,7 @@ export const MSG = {
   bundled: "Students see the copy built into the app",
   live: "Live · published",
   nothingGranted: "This account hasn't been given anything to look after yet.",
-  loadFailed: "Couldn't load what is published.",
+  loadFailed: "Couldn't load what is published. Check your internet and reload.",
   published: "Published. Students see it the next time they open IIMPresent.",
   restored: "Restored. Students see it the next time they open IIMPresent.",
   cantPublish: "Can't publish yet",
@@ -187,6 +187,24 @@ export function publishErrorMessage(err) {
   if (/failed to fetch|networkerror|network request failed|load failed|timed? ?out/i.test(m)) return MSG.offline;
   return MSG.publishFailed;
 }
+
+/**
+ * Whether an error means supabase/por-dashboard.sql hasn't been run: the
+ * table or function the dashboard asks for doesn't exist. PostgREST says so
+ * as PGRST205 (no such table) or PGRST202 (no such function), Postgres itself
+ * as 42P01 or 42883. Only the admin can meet this — before the file is run,
+ * no account is a POR, so nobody else reaches the dashboard.
+ */
+export const notSetUp = (err) =>
+  ["PGRST202", "PGRST205", "42P01", "42883"].includes(err?.code) ||
+  /schema cache|does not exist/i.test(String(err?.message ?? ""));
+
+export const NOT_SET_UP =
+  "The POR dashboard isn't switched on yet: run supabase/por-dashboard.sql in the Supabase " +
+  "SQL Editor. Students aren't affected; they see the menus built into the app.";
+
+/** What a failed load says on screen: the setup message, or the given one. */
+export const loadErrorMessage = (err, fallback) => (notSetUp(err) ? NOT_SET_UP : fallback);
 
 /** The validator for each kind the app reads from the database. */
 export const VALIDATORS = {
