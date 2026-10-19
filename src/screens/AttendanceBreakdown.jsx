@@ -1,6 +1,10 @@
-import { useMemo } from "react";
-import { attendanceBreakdown, pretty, DAYS, weekdayOf } from "../lib/api";
-import { OltBreakdownSection } from "./OltCourses";
+import { useEffect, useMemo, useState } from "react";
+import {
+  attendanceBreakdown, pretty, DAYS, weekdayOf, isoDate, loadOltAttendance, termNumber,
+} from "../lib/api";
+import { oltCourse, pairSessions } from "../lib/olt";
+import { asPct } from "./OltCourses";
+import OltSync from "./OltSync";
 
 /**
  * Where every session of every course went: attended, missed, or never marked.
@@ -14,14 +18,33 @@ import { OltBreakdownSection } from "./OltCourses";
  */
 export default function AttendanceBreakdown({
   classes, attendance, term, now, overrides = [], onBack,
-  // Testers only: OLT's own record under the student's, for comparison.
-  // `oltInitial` stands in for its load in the smoke test.
-  showOlt = false, oltInitial,
+  // Testers only: OLT's own record beside the student's, session by session,
+  // and the sync that reads it. `email` is the signed-in student's, for the
+  // OLT login ID. `oltInitial` stands in for the load in the smoke test.
+  showOlt = false, email = "", oltInitial,
 }) {
   const rows = useMemo(
     () => attendanceBreakdown(classes, attendance, term, now, overrides),
     [classes, attendance, term, now, overrides],
   );
+
+  const [olt, setOlt] = useState(oltInitial ?? null);
+  const [oltLoading, setOltLoading] = useState(showOlt && oltInitial === undefined);
+  const [oltError, setOltError] = useState("");
+
+  useEffect(() => {
+    if (!showOlt || oltInitial !== undefined) return;
+    loadOltAttendance()
+      .then(setOlt)
+      .catch((err) => setOltError(err.message || "Couldn't load OLT's copy."))
+      .finally(() => setOltLoading(false));
+  }, [showOlt, oltInitial]);
+
+  // OLT's copy is laid beside the marks only when it is this term's. Another
+  // term's dates under this term's courses would pair nothing and say so
+  // misleadingly — every row would read "Not on OLT".
+  const oltNow = showOlt && olt?.fetched_at && termNumber(term?.label) !== null
+    && termNumber(olt.term) === termNumber(term.label) ? olt : null;
 
   // One total line is worth more than eight cards read in sequence, but only
   // when the numbers underneath it mean the same thing — so it is skipped
@@ -74,16 +97,32 @@ export default function AttendanceBreakdown({
 
       {total && <TotalCard total={total} />}
 
+      {showOlt && (
+        <OltSync
+          termLabel={term?.label}
+          email={email}
+          snap={olt}
+          loading={oltLoading}
+          loadError={oltError}
+          onSynced={(s) => { setOlt(s); setOltError(""); }}
+        />
+      )}
+
       {rows.map((r) => (
-        <CourseRow key={r.subject} row={r} />
+        <CourseRow
+          key={r.subject}
+          row={r}
+          // Without a term there are no sessions to put OLT's beside.
+          dual={showOlt && Boolean(term)}
+          olt={oltNow && oltCourse(oltNow, r.subject)}
+          syncedOn={oltNow && isoDate(new Date(oltNow.fetched_at))}
+        />
       ))}
 
       <p className="ab-foot">
         "Did not mark" is a gap in your record, not an absence. Edit attendance
         fills them in.
       </p>
-
-      {showOlt && <OltBreakdownSection termLabel={term?.label} initial={oltInitial} />}
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
@@ -121,7 +160,7 @@ function TotalCard({ total }) {
  * Without a term calendar there are no sessions to list, so the card stays a
  * plain div: a disclosure that opens onto nothing is worse than none.
  */
-function CourseRow({ row: r }) {
+function CourseRow({ row: r, dual = false, olt = null, syncedOn = null }) {
   const summary = (
     <>
       <div className="ab-head">
@@ -137,8 +176,12 @@ function CourseRow({ row: r }) {
       </div>
 
       <Counts present={r.present} absent={r.absent} unmarked={r.unmarked} />
+
+      {dual && syncedOn && <OltLine olt={olt} />}
     </>
   );
+
+  if (dual) return <DualCourse row={r} summary={summary} olt={olt} syncedOn={syncedOn} />;
 
   if (!r.sessions?.length) return <div className="ab-card">{summary}</div>;
 
@@ -172,6 +215,100 @@ function CourseRow({ row: r }) {
             </span>
           </div>
         ))}
+      </div>
+    </details>
+  );
+}
+
+/**
+ * OLT's own totals for the course, under the student's. Printed as OLT
+ * printed them — its percentage is its own sum, not one worked out here.
+ */
+function OltLine({ olt }) {
+  if (!olt) return <div className="ab-olt">OLT has no course by this name.</div>;
+  const dw = olt.datewise;
+  const low = /^\d+(\.\d+)?$/.test(String(olt.pct ?? "").trim()) && Number(olt.pct) < 75;
+  return (
+    <>
+      <div className="ab-olt">
+        <span className="ab-olt-tag">OLT</span>
+        {olt.attended != null && olt.total != null && <span>{olt.attended} of {olt.total} attended</span>}
+        {olt.pct != null && <b className={low ? "low" : ""}>{asPct(olt.pct)}</b>}
+      </div>
+      {dw?.error && <div className="olt-dw-note">OLT dates: {dw.error}</div>}
+      {dw?.sessions?.length > 0 && dw.agrees === false && (
+        <div className="olt-dw-note warn">
+          OLT&apos;s dates don&apos;t add up to its own totals for this course.
+        </div>
+      )}
+    </>
+  );
+}
+
+const OLT_MARK = { P: ["present", "Present"], A: ["absent", "Absent"] };
+
+/**
+ * A course with OLT beside it: one row per meeting, OLT's mark then the
+ * student's. Rows come from both sides — a date only OLT has is a class the
+ * timetable doesn't know about, and one only the student has is a class OLT
+ * hasn't recorded — so neither record can quietly lose a session.
+ *
+ * "Not on OLT" is said only when OLT's dates for the course were actually
+ * read and the session falls on or before the sync. Later than that, OLT
+ * simply hasn't been asked yet, which is a dash, not a claim.
+ */
+function DualCourse({ row: r, summary, olt, syncedOn }) {
+  const dw = olt?.datewise;
+  const oltRead = Array.isArray(dw?.sessions);
+  const pairs = pairSessions(r.sessions, oltRead ? dw.sessions : null);
+
+  if (!pairs.length) return <div className="ab-card olt-card">{summary}</div>;
+
+  return (
+    <details className="ab-card">
+      <summary className="ab-summary">
+        {summary}
+        <span className="ab-more">
+          <ChevronIcon />
+          Date-wise Breakdown
+        </span>
+      </summary>
+
+      <div className="ab-sessions">
+        <div className="ab-session ab-dual ab-cols" aria-hidden="true">
+          <span className="ab-when">Date</span>
+          <span className="ab-col">OLT</span>
+          <span className="ab-col">IIMPresent</span>
+        </div>
+        {pairs.map((p) => {
+          const day = new Date(`${p.date}T00:00:00`);
+          const [oltCls, oltLabel] = p.olt
+            ? OLT_MARK[p.olt.mark] ?? ["unmarked", p.olt.mark || "—"]
+            : oltRead && p.date <= syncedOn ? ["unmarked", "Not on OLT"] : ["none", "—"];
+          const appCls = p.app ? shownStatus(p.app.status) : "none";
+          return (
+            <div
+              className="ab-session ab-dual"
+              key={`${p.date}|${p.app?.start_time ?? ""}|${p.app?.movedFrom ?? ""}|${p.olt?.no ?? ""}`}
+            >
+              <span className="ab-when">
+                <b>{DAYS[weekdayOf(day) - 1]}</b>
+                {" "}
+                {day.toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                {p.app?.movedFrom && <span className="tag signal">moved</span>}
+              </span>
+              <span className={`ab-status ${oltCls}`} aria-label={`OLT: ${oltLabel}`}>
+                {oltLabel}
+              </span>
+              <span
+                className={`ab-status ${appCls}`}
+                aria-label={`IIMPresent: ${p.app ? LABEL[appCls] : "no session"}`}
+              >
+                {p.app ? LABEL[appCls] : "—"}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </details>
   );

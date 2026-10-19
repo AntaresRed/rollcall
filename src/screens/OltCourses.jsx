@@ -1,10 +1,4 @@
-import { useEffect, useState } from "react";
-import { DAYS, weekdayOf, pretty, loadOltAttendance, termNumber } from "../lib/api";
-
-const fmtWhen = (iso) =>
-  iso ? new Date(iso).toLocaleString(undefined, {
-    day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-  }) : null;
+import { DAYS, weekdayOf, pretty } from "../lib/api";
 
 // OLT prints the percentage as a bare number ("87") under a heading that says
 // it's a percentage. On its own as the big number, it needs the sign back.
@@ -110,65 +104,6 @@ export default function OltCourses({ snap }) {
       </details>
     );
   });
-}
-
-/**
- * The OLT section at the foot of Attendance breakdown. Tester-only; it loads
- * its own copy so the breakdown doesn't wait on it.
- *
- * Shown only when the copy is for the term on screen. The breakdown is about
- * this term, and another term's official numbers under it would invite a
- * comparison that means nothing.
- *
- * `initial` skips the load; the smoke test uses it to render each state.
- */
-export function OltBreakdownSection({ termLabel, initial }) {
-  const [snap, setSnap] = useState(initial ?? null);
-  const [loading, setLoading] = useState(initial === undefined);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (initial !== undefined) return;
-    loadOltAttendance()
-      .then(setSnap)
-      .catch((err) => setError(err.message || "Couldn't load OLT's copy."))
-      .finally(() => setLoading(false));
-  }, [initial]);
-
-  const want = termNumber(termLabel);
-  const have = termNumber(snap?.term);
-  const otherTerm = Boolean(snap?.fetched_at) && want !== null && have !== want;
-  const where = "Profile → Official attendance (OLT)";
-
-  return (
-    <section className="olt-ab">
-      <div className="eyebrow">Official (OLT)</div>
-      <div className="dev-flag dev-flag-banner">DO NOT TOUCH, UNDER DEVELOPMENT</div>
-
-      {loading && <div className="empty">Loading…</div>}
-      {error && <div className="notice">{error}</div>}
-
-      {!loading && !error && !snap?.fetched_at && (
-        <div className="empty">Nothing read from OLT yet. Read it from {where}.</div>
-      )}
-
-      {!loading && otherTerm && (
-        <div className="empty">
-          OLT was last read for {snap.term}. Read {termLabel} from {where} to compare.
-        </div>
-      )}
-
-      {!loading && snap?.fetched_at && !otherTerm && (
-        <>
-          <div className="olt-head">
-            <strong>{snap.term}</strong>
-            <span>Read from OLT {fmtWhen(snap.fetched_at)}</span>
-          </div>
-          <OltCourses snap={snap} />
-        </>
-      )}
-    </section>
-  );
 }
 
 function ChevronIcon() {

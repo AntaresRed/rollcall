@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { loadOltAttendance, refreshOltAttendance, termNumber } from "../lib/api";
 import OltCourses from "./OltCourses";
+import { EyeIcon, offerToSave } from "./OltSync";
 
 const fmtWhen = (iso) =>
   iso ? new Date(iso).toLocaleString(undefined, {
@@ -11,34 +12,6 @@ const fmtWhen = (iso) =>
 // list isn't known yet. A term OLT doesn't have comes back as an error naming
 // the ones it does.
 const TERMS = [1, 2, 3, 4, 5, 6];
-
-/** An eye, struck through when the password is showing — the icon names what
- *  the next tap does. Same stroke style as the tab icons. */
-function EyeIcon({ off }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" />
-      <circle cx="12" cy="12" r="2.8" />
-      {off && <path d="M4 20 20 4" />}
-    </svg>
-  );
-}
-
-/**
- * Hands a password OLT has just accepted to the browser's own password
- * manager, which asks the student whether to save it. Chrome supports this;
- * Safari doesn't have the call, and decides for itself from the form's
- * username and current-password fields. Either way the password lives in the
- * phone's keychain, behind its lock — never in IIMPresent's storage or on the
- * server — and nothing breaks if the browser says no.
- */
-async function offerToSave(id, password) {
-  try {
-    if (!window.PasswordCredential || !navigator.credentials?.store) return;
-    await navigator.credentials.store(new window.PasswordCredential({ id, password, name: `OLT — ${id}` }));
-  } catch { /* declined, or not allowed here */ }
-}
 
 /**
  * The institute's own attendance record, read from OLT. Tester-only.

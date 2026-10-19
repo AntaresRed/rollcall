@@ -303,11 +303,29 @@ const cases = [
       term={null} now={now} overrides={[]} onBack={noop} />],
   ["AttendanceBreakdown / nothing marked yet", <AttendanceBreakdown key="abn" classes={classes}
       attendance={[]} term={term} now={now} overrides={overrides} onBack={noop} />],
-  // The tester-only OLT section: OLT's copy for this term ("Term-V" against
-  // the app's "Term V"), a copy for another term, and nothing read.
+  // The tester-only OLT column and sync: OLT's copy for this term ("Term-V"
+  // against the app's "Term V"), a copy for another term, and nothing read.
   ["AttendanceBreakdown / OLT section", <AttendanceBreakdown key="abo" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides} onBack={noop}
-      showOlt oltInitial={oltSnap} />],
+      showOlt email="a2027@email.iimcal.ac.in" oltInitial={oltSnap} />],
+  // A course OLT has dates for that the timetable also has, two meetings on
+  // one day included — the rows that pair rather than stand alone.
+  ["AttendanceBreakdown / OLT paired with the timetable", <AttendanceBreakdown key="abo5"
+      classes={classes} attendance={attendance} term={term} now={now} overrides={overrides}
+      showOlt email="a2027@email.iimcal.ac.in" oltInitial={{
+        ...oltSnap,
+        rows: [...oltSnap.rows, ["Consumption Culture & Markets", "3", "2", "67"]],
+        datewise: { ...oltSnap.datewise, "Consumption Culture & Markets": {
+          sessions: [{ no: 1, date: "2026-08-27", time: "16:15", mark: "P" },
+            { no: 2, date: "2026-09-03", time: "16:15", mark: "P" },
+            { no: 3, date: "2026-09-03", time: "18:00", mark: "A" }],
+          attended: "2", total: "3", agrees: true,
+        } },
+      }} />],
+  ["AttendanceBreakdown / OLT last sync failed", <AttendanceBreakdown key="abo6" classes={classes}
+      attendance={attendance} term={term} now={now} overrides={overrides}
+      showOlt oltInitial={{ ...oltSnap, attempted_at: "2026-10-13T09:00:00Z",
+        last_error: "OLT didn't accept that password." }} />],
   ["AttendanceBreakdown / OLT read for another term", <AttendanceBreakdown key="abo2" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides}
       showOlt oltInitial={{ ...oltSnap, term: "Term-IV" }} />],

@@ -3977,13 +3977,75 @@ button.por-card:hover { border-color: var(--signal); }
   color: var(--slate);
 }
 .olt-dw-note.warn { color: var(--warn-ink); }
-/* The breakdown's OLT section, set apart from the student's own cards. */
-.olt-ab {
-  margin-top: 26px;
-  padding-top: 4px;
-  border-top: 1px dashed var(--rule-strong);
+/* The breakdown's OLT Sync card, between the batch total and the courses.
+   Dashed, so it reads as a tool laid over the page rather than one more
+   course card. */
+.olt-sync {
+  background: var(--card);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 14px;
 }
-.olt-ab .olt-head { margin-top: 4px; }
+.olt-sync-head {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.olt-sync-when {
+  font-size: 13px;
+  color: var(--slate);
+  margin-bottom: 12px;
+}
+.olt-sync-when b { color: var(--ink); font-weight: 600; }
+.olt-sync-note { font-size: 13px; color: var(--mute); }
+.olt-sync-form { display: flex; flex-direction: column; gap: 10px; }
+.olt-sync-form .olt-pass-note { margin: 0; }
+
+/* OLT's totals on a course card, under the student's own counts. */
+.ab-olt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px dashed var(--rule);
+  font-size: 12px;
+  color: var(--slate);
+}
+.ab-olt-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+}
+.ab-olt b {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--present);
+}
+.ab-olt b.low { color: var(--absent); }
+
+/* Two verdicts a row, OLT's then the student's, under headings that line up
+   with them. Fixed widths, so a column reads straight down even when one
+   side says "Did not mark" and the other "—". */
+.ab-dual .ab-status {
+  flex: 0 0 92px;
+  min-width: 0;
+  padding: 3px 4px;
+  font-size: 10px;
+}
+.ab-status.none { color: var(--mute); }
+.ab-cols { padding: 8px 0 6px; }
+.ab-cols span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--mute);
+}
+.ab-cols .ab-col { flex: 0 0 92px; text-align: center; }
 /* OLT decides how many columns there are, so they flow rather than sit in a
    fixed grid. */
 .olt-cells {

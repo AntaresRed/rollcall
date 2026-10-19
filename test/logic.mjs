@@ -39,6 +39,7 @@ import { GMAIL_SCOPE, authUrl, callbackUrl, readCallback, heldToken, takeRoundTr
 import { formFields, formAction, postBackFields, selectOptions, readGrid, hasPasswordBox, hasOtpField,
   termKey, decodeEntities, TERM_SELECT, readDatewise, datewiseAgrees, courseKey, matchSubject,
 } from "../supabase/functions/olt-attendance/parse.ts";
+import { courseKey as appCourseKey, oltCourse, pairSessions } from "../src/lib/olt.js";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -2789,6 +2790,59 @@ console.log("\nleave form PDF");
       readDatewise(v); courseKey(v); matchSubject([], v);
     }
   });
+}
+
+console.log("\nOLT beside the breakdown");
+{
+  // The app keeps its own copy of the function's course-name rule; they must
+  // not drift, or a course pairs on the server and not on screen.
+  for (const name of ["Pricing (E-512)", "R & D Strategy", "Consumption, Culture & Markets",
+    "  Managing Technology for Industry 4.0 ", "Self in Organisations (X-1-A)"]) {
+    check(`the app reads "${name.trim()}" as the function does`, appCourseKey(name) === courseKey(name));
+  }
+
+  const snap = {
+    columns: ["Subject", "Total Classess", "Attended", "Attendance Percentage"],
+    rows: [["Widget Theory", "3", "2", "67"], ["Twice Listed", "1", "1", "100"],
+      ["Twice  Listed", "2", "2", "100"]],
+    datewise: { "Widget Theory": { sessions: [], attended: "2", total: "3", agrees: true } },
+  };
+  const found = oltCourse(snap, "Widget theory");
+  check("a course is found by name, case and spacing aside", found?.name === "Widget Theory");
+  check("and carries OLT's numbers as printed",
+    found?.pct === "67" && found.attended === "2" && found.total === "3");
+  check("and its dates", found?.datewise === snap.datewise["Widget Theory"]);
+  check("a name OLT lists twice is never guessed between", oltCourse(snap, "Twice Listed") === null);
+  check("a course OLT doesn't have is null", oltCourse(snap, "Astrophysics") === null);
+  survives("no copy at all", () => oltCourse(null, "Widget Theory"));
+
+  const app = [
+    { date: "2026-09-03", start_time: "16:15", status: "present" },
+    { date: "2026-09-03", start_time: "18:00", status: "absent" },
+    { date: "2026-09-10", start_time: "16:15", status: null },
+  ];
+  const olt = [
+    // Out of order, and one slot booked a quarter-hour off the timetable.
+    { no: 2, date: "2026-09-03", time: "18:15", mark: "A" },
+    { no: 1, date: "2026-09-03", time: "16:15", mark: "P" },
+    { no: 3, date: "2026-08-27", time: "16:15", mark: "P" },
+  ];
+  const paired = pairSessions(app, olt);
+  const on = (d, t) => paired.find((p) => p.date === d && p.app?.start_time === t);
+  check("same-day meetings pair by the nearest time", on("2026-09-03", "16:15")?.olt?.no === 1
+    && on("2026-09-03", "18:00")?.olt?.no === 2);
+  check("a timetable session OLT lacks stands alone", on("2026-09-10", "16:15")?.olt === null);
+  check("an OLT date the timetable lacks stands alone",
+    paired.some((p) => p.date === "2026-08-27" && p.app === null && p.olt?.no === 3));
+  check("nothing is lost or doubled", paired.length === 4);
+  check("newest first, later meeting first", paired.map((p) => p.date).join() ===
+    "2026-09-10,2026-09-03,2026-09-03,2026-08-27" && paired[1].app.start_time === "18:00");
+  check("one OLT entry on a two-meeting day takes the closer one",
+    pairSessions(app.slice(0, 2), [{ no: 9, date: "2026-09-03", time: "17:55", mark: "P" }])
+      .find((p) => p.olt)?.app?.start_time === "18:00");
+  check("no OLT dates leaves every session unpaired",
+    pairSessions(app, null).every((p) => p.olt === null) && pairSessions(app, null).length === 3);
+  survives("no sessions either side", () => pairSessions(null, undefined));
 }
 
 Promise.all(later).catch((err) => {

@@ -874,6 +874,7 @@ export default function App() {
             // The signed-in student's own OLT copy, so not while viewing as
             // another cohort.
             showOlt={isTester && !readOnly}
+            email={session.user?.email ?? ""}
             onBack={() => setSubScreen(null)}
           />
         )}
