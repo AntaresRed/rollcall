@@ -1,9 +1,6 @@
 /**
  * Handing a file to the student.
  *
- * Extracted from the calendar export, which learned all of this the hard way
- * and is now not the only screen that needs it.
- *
  * The share sheet is tried first because this app is installed to the Home
  * Screen on iOS more often than not, and there an ordinary download lands in
  * Files with no obvious route anywhere useful — whereas the share sheet

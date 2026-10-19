@@ -6,7 +6,7 @@ import { track } from "../lib/track";
  * Five entries in one flat list had become a list you read rather than a menu
  * you scan: three of them were contact directories that belong together, and
  * the two that were not sat between them. So the contacts are one door now,
- * and the top level is a few doors — people, calendar, food, leave — each
+ * and the top level is a few doors — food, maps, people, leave — each
  * with a mark you can recognise before reading the label.
  *
  * Both levels are the same component and the same card, because they are the
@@ -20,8 +20,8 @@ import { track } from "../lib/track";
 /** The institute's own directory. Declared above the lists, which read it. */
 const STUDENT_DIRECTORY = "https://student.iimcal.ac.in/jd/#/";
 
-/** The top level, most-used first: food and finding a room are daily, the
-    calendar export is a once-a-term job. */
+/** The top level, most-used first: food and finding a room are daily, leave
+    mail is an occasional job. */
 const GROUPS = [
   ["mess", "Day-Night Mess & Tuck",
     "The week's mess food, plus night canteen and tuck shop menus you can "
@@ -39,9 +39,6 @@ const GROUPS = [
     "Leave Mail auto-drafted, official form attached, ready to send from "
     + "Gmail.",
     MailIcon],
-  ["export", "Add to Google / Apple calendar",
-    "Put the term's classes into the calendar app you already use.",
-    CalendarIcon],
 ];
 
 /** Behind the first door. */
@@ -121,20 +118,6 @@ function ContactsIcon() {
       <circle cx="12.5" cy="10" r="2.1" stroke="currentColor" strokeWidth="1.7" />
       <path d="M9.4 15.6a3.2 3.2 0 0 1 6.2 0" stroke="currentColor"
             strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CalendarIcon() {
-  return (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3.5" y="5" width="17" height="15.5" rx="2.2"
-            stroke="currentColor" strokeWidth="1.7" />
-      <path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor"
-            strokeWidth="1.7" strokeLinecap="round" />
-      {/* The arrow is the point: this puts classes somewhere else. */}
-      <path d="M12 12.5v5m0 0 2-2m-2 2-2-2" stroke="currentColor"
-            strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

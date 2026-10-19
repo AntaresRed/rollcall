@@ -118,7 +118,7 @@ src/
                       AttendanceBreakdown, SectionPicker,
                       CataloguePreview, MessMenu (Day + Night),
                       Utils (the hub) and what it opens — Faculty,
-                      CalendarExport, PorDetails —
+                      PorDetails —
                       plus ScheduleAdmin, reached from Profile
   data/catalogue.json generated — do not edit by hand (second years)
   data/catalogue-pgp1.json  generated — do not edit by hand (first years)

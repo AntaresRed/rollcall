@@ -3291,58 +3291,7 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 .venue-note a { color: var(--signal-deep); }
 
 
-/* ---------- calendar export ---------- */
-
-.export-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 15px;
-  margin-bottom: 14px;
-  background: var(--card);
-  border: 1px solid var(--rule);
-  border-radius: var(--r);
-}
-.export-figure {
-  flex: 0 0 auto;
-  text-align: center;
-  line-height: 1;
-}
-.export-figure strong {
-  display: block;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-}
-.export-figure span {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--mute);
-}
-.export-detail {
-  min-width: 0;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--ink);
-}
-/* Numbered because these are steps taken in order in another app, where
-   getting the sequence wrong means starting again. */
-.steps {
-  margin: 0 0 4px;
-  padding-left: 20px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--slate);
-}
-.steps li { margin-bottom: 6px; }
-.steps code, .mono {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--ink);
-}
+/* ---------- fine print ---------- */
 
 .fineprint {
   margin-top: 18px;

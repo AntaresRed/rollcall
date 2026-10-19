@@ -102,7 +102,8 @@ comment on table public.feature_events is
 --                    only before 2026-10-05 — the Mail app is no longer offered) |
 --                    draft-ask | draft | draft-open | draft-error (the Gmail
 --                    draft: sent to Google, made, opened, failed)
---   calendar_export  (no detail)
+--   calendar_export  (no detail) — the calendar export was removed on
+--                    2026-10-19; kept in the list so old rows stay valid
 --
 -- Attendance marks and reschedules are not here: their own tables already
 -- count them (attendance.marked_at, session_overrides.created_at).

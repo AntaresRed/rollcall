@@ -18,7 +18,6 @@ import TermCalendar from "../src/screens/TermCalendar";
 import Faculty from "../src/screens/Faculty";
 import JMaps from "../src/screens/JMaps";
 import OltAttendance from "../src/screens/OltAttendance";
-import CalendarExport from "../src/screens/CalendarExport";
 import ScheduleAdmin from "../src/screens/ScheduleAdmin";
 import PorDashboard from "../src/screens/PorDashboard";
 import DayMessEditor from "../src/screens/DayMessEditor";
@@ -215,9 +214,6 @@ const cases = [
         new_start: "08:30", new_end: "10:00", note: null }]}
       now={now} onMove={noop} onClear={noop} onBack={noop} />],
   ["Reschedule / no term", <Reschedule key="rt" classes={classes} term={null} overrides={overrides} now={now} onMove={noop} onClear={noop} />],
-  ["CalendarExport", <CalendarExport key="ce" classes={classes} term={term} overrides={overrides} onBack={noop} />],
-  ["CalendarExport / no courses", <CalendarExport key="cen" classes={[]} term={term} overrides={[]} onBack={noop} />],
-  ["CalendarExport / no term", <CalendarExport key="cet" classes={classes} term={null} overrides={[]} onBack={noop} />],
   ["ScheduleAdmin", <ScheduleAdmin key="sa" onBack={noop} />],
   ["PorDashboard / a mess secretary", <PorDashboard key="pd" email="nhmessrep@email.iimcal.ac.in"
       access={porGrants.filter(g => g.email.startsWith("nh"))} live={[]} onSignOut={noop} />],

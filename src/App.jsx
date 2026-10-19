@@ -33,7 +33,6 @@ const EditAttendance = lazy(() => import("./screens/EditAttendance"));
 const TermCalendar = lazy(() => import("./screens/TermCalendar"));
 const Reschedule = lazy(() => import("./screens/Reschedule"));
 const Faculty = lazy(() => import("./screens/Faculty"));
-const CalendarExport = lazy(() => import("./screens/CalendarExport"));
 const ScheduleAdmin = lazy(() => import("./screens/ScheduleAdmin"));
 const PorDetails = lazy(() => import("./screens/PorDetails"));
 const Utils = lazy(() => import("./screens/Utils"));
@@ -59,7 +58,6 @@ const SUB_SCREEN_BACK = {
   faculty: "Back to contacts",
   por: "Back to contacts",
   mess: "Back to utils",
-  export: "Back to utils",
   leave: "Back to utils",
   maps: "Back to utils",
   admin: "Back to profile",
@@ -901,14 +899,6 @@ export default function App() {
         )}
         {tab === "utils" && subScreen === "por" && (
           <PorDetails onBack={() => setSubScreen("contacts")} />
-        )}
-        {tab === "utils" && subScreen === "export" && (
-          <CalendarExport
-            classes={viewClasses}
-            term={viewTerm}
-            overrides={viewOverrides}
-            onBack={() => setSubScreen(null)}
-          />
         )}
         {/* The student's own address and name, not the viewed cohort's:
             viewing-as changes whose timetable is on screen, never whose

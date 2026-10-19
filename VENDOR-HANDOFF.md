@@ -51,7 +51,7 @@ Four tabs, always visible at the bottom of the screen:
 | --- | --- |
 | **Today's classes** | Today's sessions in order, with Present / Absent buttons and a live marker on whichever class is happening right now. |
 | **Week's Timetable** | The whole week as a grid — time down the side, days across. On a laptop-width screen every day fits side by side; on a phone it scrolls sideways with the time column pinned. Carries a badge when sessions are waiting to be marked. |
-| **Utils** | Reference material — the three directories and the calendar export. Nothing here changes a timetable or an attendance record. |
+| **Utils** | Reference material — the directories, mess menus, J-Maps and leave mail. Nothing here changes a timetable or an attendance record. |
 | **Profile** | Account info, a per-course "skips left" budget, changing picked courses, sign out. The admin-only **Schedule admin** screen (§4a) opens from here too. |
 
 From **Week's Timetable**, four more screens open — the ones that change or
@@ -92,9 +92,6 @@ From **Utils**, four more:
 - **Faculty details** — every IIM Calcutta faculty member (room, extension,
   direct line, email), searchable, with the student's own instructors tagged
   and pinned to the top.
-- **Add to Google / Apple calendar** — downloads a `.ics` file of the
-  student's whole term, with on-screen steps for importing it. It's a
-  one-time snapshot, not a live sync — see §6.
 - **Student contacts** — opens the institute's own student directory at
   <https://student.iimcal.ac.in/jd/#/> in a new tab. It is a link, not a
   screen: the app used to bundle its own copy of the batch's names, roll
@@ -269,9 +266,6 @@ specifically.
   official one.** The app says so on-screen. It exists to help a student
   track where they stand; it has no connection to whatever system the
   institute uses to certify attendance.
-- **Calendar export is a snapshot.** A student who reschedules a class after
-  exporting has to export and re-import again to see the change reflected in
-  their Google or Apple Calendar — it doesn't update itself.
 
 ## 7. Handle it yourself, or bring in a developer?
 

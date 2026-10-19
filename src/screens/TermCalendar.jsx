@@ -58,13 +58,14 @@ export default function TermCalendar({ term, now, onBack }) {
     <>
       <div className="eyebrow">Term calendar</div>
 
-      <p style={{ color: "var(--slate)", fontSize: 14, margin: "0 0 4px" }}>
-        {term.label} runs {fmt(term.term_start)} to {fmt(term.term_end)}.
-      </p>
-      <p style={{ color: "var(--mute)", fontSize: 12.5, margin: "0 0 18px" }}>
-        No alerts fire during the periods marked below, and nothing from them
-        turns up in Catch up.
-      </p>
+      {/* The office moves these dates after publishing, so the dates below
+          are a plan rather than a promise — and a student settling leave or
+          travel against them needs telling so before reading them. */}
+      <div className="banner warn" role="note" style={{ margin: "0 0 18px" }}>
+        <p style={{ color: "var(--warn-ink)", fontWeight: 700 }}>
+          TENTATIVE DATES ONLY. SUBJECT TO CHANGE BY MBA OFFICE.
+        </p>
+      </div>
 
       {rows.map((r) => {
         const current = today >= r.from && today <= r.to;

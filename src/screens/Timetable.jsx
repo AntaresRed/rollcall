@@ -196,7 +196,7 @@ export default function Timetable({
 
       {/* Only what concerns this week's schedule: the two that change or
           explain it, then the two about what was recorded against it. The
-          directories and the calendar export are reference material rather
+          directories are reference material rather
           than the week itself, so they live under Utils; choosing courses is
           an account-level decision and lives on Profile. */}
       <div className="tt-actions">
