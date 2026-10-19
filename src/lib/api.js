@@ -1158,6 +1158,82 @@ export async function loadCataloguePayload(id) {
 }
 
 
+// ---------- POR dashboard ----------
+
+/**
+ * The datasets this account may edit. Filtered to the account's own address
+ * even though the policy already limits it, because the policy also lets the
+ * admin read every grant — and the admin, signing in, should get the student
+ * app, not be mistaken for a mess secretary.
+ *
+ * An error is thrown, not swallowed: the caller decides what a failure means.
+ */
+export async function loadPorAccess(email) {
+  const { data, error } = await supabase
+    .from("por_access")
+    .select("email, kind, scope")
+    .eq("email", String(email ?? "").trim().toLowerCase());
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Every grant, for the admin's copy of the dashboard. */
+export async function loadAllPorAccess() {
+  const { data, error } = await supabase.from("por_access").select("email, kind, scope");
+  if (error) throw error;
+  return data ?? [];
+}
+
+/**
+ * The newest version number of every published dataset, without the data:
+ * a few hundred bytes, which is all most opens need to learn nothing changed.
+ * Throws on failure — a failed request must never be read as "nothing is
+ * published", or every phone would drop what it holds.
+ */
+export async function loadLiveVersions() {
+  const { data, error } = await supabase.rpc("live_versions");
+  if (error) throw error;
+  if (!Array.isArray(data)) throw new Error("live_versions returned no list");
+  return data;
+}
+
+/** The newest version of just these datasets, named "kind:scope". */
+export async function loadLiveDatasets(keys) {
+  const { data, error } = await supabase.rpc("live_datasets", { p_keys: keys });
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** One dataset's published versions, newest first — at most the five the
+ *  database keeps. Owner-only by policy. */
+export async function loadDatasetHistory(kind, scope, limit = 20) {
+  const { data, error } = await supabase
+    .from("dataset_versions")
+    .select("id, payload, restored_from, created_by_email, created_at")
+    .eq("kind", kind)
+    .eq("scope", scope)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
+/**
+ * Publish: live for every student from their next open. Who and when are
+ * stamped by the database, and the payload is checked there again.
+ */
+export async function publishDataset(kind, scope, payload, { restoredFrom = null } = {}) {
+  const { data, error } = await supabase
+    .from("dataset_versions")
+    .insert({ kind, scope, payload, restored_from: restoredFrom })
+    .select("id, payload, restored_from, created_by_email, created_at")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+
 // ---------- official attendance from OLT (testers only) ----------
 
 /** The last copy read from OLT, or null if there has never been one. The

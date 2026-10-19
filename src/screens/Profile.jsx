@@ -12,7 +12,7 @@ import Stats from "./Stats";
  */
 export default function Profile({
   session, classes, attendance, onToggleMute, onChangeCourses, onSignOut,
-  onScheduleAdmin, onOfficialAttendance,
+  onScheduleAdmin, onOfficialAttendance, onPorDashboard,
 }) {
   const user = session?.user;
   const meta = user?.user_metadata ?? {};
@@ -99,6 +99,11 @@ export default function Profile({
         {onScheduleAdmin && (
           <button className="btn ghost block" onClick={onScheduleAdmin}>
             Schedule admin
+          </button>
+        )}
+        {onPorDashboard && (
+          <button className="btn ghost block" onClick={onPorDashboard}>
+            POR dashboard
           </button>
         )}
         {onChangeCourses && (

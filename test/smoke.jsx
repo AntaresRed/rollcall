@@ -20,6 +20,10 @@ import JMaps from "../src/screens/JMaps";
 import OltAttendance from "../src/screens/OltAttendance";
 import CalendarExport from "../src/screens/CalendarExport";
 import ScheduleAdmin from "../src/screens/ScheduleAdmin";
+import PorDashboard from "../src/screens/PorDashboard";
+import DayMessEditor from "../src/screens/DayMessEditor";
+import PorHelp from "../src/screens/PorHelp";
+import { bundledHostel } from "../src/lib/menu";
 import PorDetails from "../src/screens/PorDetails";
 import Utils from "../src/screens/Utils";
 import DayMessMenu from "../src/screens/DayMessMenu";
@@ -122,6 +126,14 @@ const oltSnap = {
 const occ = occurrencesOn(classes, term, isoDate(now), overrides);
 
 // Each case is rendered on its own so one failure doesn't mask the rest.
+// Who looks after what, as por-dashboard.sql grants it.
+const porGrants = [
+  { email: "nhmessrep@email.iimcal.ac.in", kind: "day-mess", scope: "nh" },
+  { email: "nhmessrep@email.iimcal.ac.in", kind: "night-canteen", scope: "nh" },
+  { email: "whrep@email.iimcal.ac.in", kind: "tuck", scope: "tagore" },
+  { email: "pgprep@email.iimcal.ac.in", kind: "schedule", scope: "pgp2" },
+];
+
 const cases = [
   ["Splash", <Splash key="s" />],
   ["SignIn", <SignIn key="si" error={null} />],
@@ -164,7 +176,7 @@ const cases = [
       }))} onToggleMute={noop} />],
   ["Profile / admin", <Profile key="pa" session={{ user: { email: "a@email.iimcal.ac.in", user_metadata: {} } }}
       classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop}
-      onScheduleAdmin={noop} />],
+      onScheduleAdmin={noop} onPorDashboard={noop} />],
   ["Profile", <Profile key="p" session={{ user: {
       email: "anuja2027@email.iimcal.ac.in",
       user_metadata: { full_name: "Anuja Sharma", avatar_url: "https://example.test/a.jpg" },
@@ -207,6 +219,31 @@ const cases = [
   ["CalendarExport / no courses", <CalendarExport key="cen" classes={[]} term={term} overrides={[]} onBack={noop} />],
   ["CalendarExport / no term", <CalendarExport key="cet" classes={classes} term={null} overrides={[]} onBack={noop} />],
   ["ScheduleAdmin", <ScheduleAdmin key="sa" onBack={noop} />],
+  ["PorDashboard / a mess secretary", <PorDashboard key="pd" email="nhmessrep@email.iimcal.ac.in"
+      access={porGrants.filter(g => g.email.startsWith("nh"))} live={[]} onSignOut={noop} />],
+  ["PorDashboard / a menu already live", <PorDashboard key="pdl" email="nhmessrep@email.iimcal.ac.in"
+      access={porGrants.filter(g => g.email.startsWith("nh"))}
+      live={[{ kind: "day-mess", scope: "nh", payload: bundledHostel("nh"), published_at: "2026-10-18T09:30:00Z" }]}
+      onSignOut={noop} />],
+  ["PorDashboard / the admin's, everyone's", <PorDashboard key="pda" email="anuja2027@email.iimcal.ac.in"
+      access={porGrants} live={[]} onBack={noop} />],
+  ["PorDashboard / nothing granted", <PorDashboard key="pdn" email="x@email.iimcal.ac.in"
+      access={[]} live={[]} onSignOut={noop} />],
+  ["DayMessEditor / nothing published yet", <DayMessEditor key="dme" scope="nh" history={[]} onBack={noop} onHelp={noop} />],
+  ["PorDashboard / the guide open", <PorDashboard key="pdh" email="nhmessrep@email.iimcal.ac.in"
+      access={porGrants.filter(g => g.email.startsWith("nh"))} live={[]} help onSignOut={noop} />],
+  ["PorHelp / a mess secretary", <PorHelp key="ph" email="nhmessrep@email.iimcal.ac.in"
+      kinds={["day-mess", "night-canteen"]} onBack={noop} />],
+  ["PorHelp / nothing editable yet", <PorHelp key="php" email="pgprep@email.iimcal.ac.in"
+      kinds={["schedule", "faculty"]} onBack={noop} />],
+  ["PorHelp / no grants, no way back", <PorHelp key="phn" />],
+  ["DayMessEditor / with history", <DayMessEditor key="dmh" scope="oh" onBack={noop} history={[
+      { id: 3, payload: bundledHostel("oh"), restored_from: 1,
+        created_by_email: "ohmessrep@email.iimcal.ac.in", created_at: "2026-10-18T09:30:00Z" },
+      { id: 2, payload: bundledHostel("wh"), restored_from: null,
+        created_by_email: "ohmessrep@email.iimcal.ac.in", created_at: "2026-10-17T09:30:00Z" },
+    ]} />],
+  ["DayMessEditor / a hostel the app doesn't have", <DayMessEditor key="dmz" scope="zz" history={[]} onBack={noop} />],
   // The admin preview renders the real Today and Timetable from a payload the
   // admin is not enrolled in — a section-shaped one, and an elective one.
   ["CataloguePreview / sections", <CataloguePreview key="cpv" payload={pgp1}

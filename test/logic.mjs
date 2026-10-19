@@ -9,7 +9,12 @@ import { facultyDirectory, facultyCount } from "../src/lib/directory.js";
 import { buildTimetableIcs, exportSequence, icsFilename } from "../src/lib/ics.js";
 import { BUILDINGS, findRoom, venueNote, searchRooms, floorsOf, roomKey } from "../src/lib/rooms.js";
 import { validateCatalogue, diffCatalogues, setActiveCatalogue, activeCatalogue } from "../src/lib/catalogue.js";
-import { HOSTELS, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
+import { hostels, bundledHostel, MEALS, weekOf, todayName, hostelById } from "../src/lib/menu.js";
+import { validateDayMess, cleanDayMess, datasetsFrom, datasetTitle, KINDS, WEEK, MSG,
+  publishErrorMessage } from "../src/lib/datasets.js";
+import { setLiveDatasets, setLiveDataset, liveDataset, planSync, applySync, restoreSavedLive,
+  saveLive, resetLive } from "../src/lib/live.js";
+import { syncLive } from "../src/lib/livesync.js";
 import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS,
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, textOf, isRepeat, dayLabel, clockOf, byDay, prune,
@@ -1804,6 +1809,7 @@ console.log("final message");
 console.log("");
 console.log("day mess menu");
 {
+  const HOSTELS = hostels();
   check("every hostel has a full week",
     HOSTELS.length > 0 && HOSTELS.every(h => h.days.length === 7));
   check("every day names every meal",
@@ -1867,6 +1873,289 @@ console.log("day mess menu");
     HOSTELS.every(h => Object.keys(h.timings).every(m => MEALS.includes(m))));
   check("no other hostel has borrowed WH's times",
     HOSTELS.filter(h => h.id !== "wh").every(h => Object.keys(h.timings).length === 0));
+}
+
+console.log("");
+console.log("POR dashboard: day mess menus");
+{
+  // A literal week, not a real hostel's: real menus get edited, and a test
+  // built on one quietly stops testing anything when they do.
+  const week = (fill = "Idli") => WEEK.map(day => ({
+    day, meals: { Breakfast: fill, Lunch: "Dal", Snacks: "Tea", Dinner: "Roti" },
+  }));
+  const good = { id: "zz", name: "ZZ", everyday: {}, timings: { Lunch: "1 to 2" }, days: week() };
+  const errs = (h, scope = "zz") => validateDayMess(h, scope).errors.join(" | ");
+
+  check("a whole week passes", validateDayMess(good, "zz").ok);
+  check("every bundled hostel would be accepted as it stands",
+    ["nh", "oh", "lvh", "wh"].every(id => validateDayMess(bundledHostel(id), id).ok));
+
+  check("a missing day is named",
+    /Missing: Sunday/.test(errs({ ...good, days: good.days.slice(0, 6) })));
+  check("a day twice over is refused even when all seven are present",
+    !validateDayMess({ ...good, days: [...good.days, good.days[0]] }, "zz").ok);
+  check("a menu published under another hostel's name is refused",
+    /not "nh"/.test(errs(good, "nh")));
+  check("a fifth meal is refused",
+    /"Brunch" is not one of the four/.test(errs({ ...good,
+      days: good.days.map((d, i) => (i ? d : { ...d, meals: { ...d.meals, Brunch: "x" } })) })));
+  check("a field the screen doesn't read is refused",
+    /Unexpected field/.test(errs({ ...good, phone: "9876543210" })));
+  check("an essay in one meal is refused",
+    /too long/.test(errs({ ...good, days: week("x".repeat(601)) })));
+  check("a timing that is really a paragraph is refused",
+    /Timings Lunch is too long/.test(errs({ ...good, timings: { Lunch: "x".repeat(61) } })));
+  check("a timing against something that isn't a meal is refused",
+    /Timings: "Supper"/.test(errs({ ...good, timings: { Supper: "9 PM" } })));
+  check("no hostel name is refused", /no hostel name/.test(errs({ ...good, name: "  " })));
+
+  const blank = validateDayMess({ ...good, days: week("") }, "zz");
+  check("an empty meal is allowed", blank.ok);
+  check("but said, by day and meal", /7 meals are empty.*Mon Breakfast/.test(blank.warnings.join()));
+
+  survives("junk doesn't throw", () => {
+    for (const v of [undefined, null, "", [], { days: "x" }, { days: [null] }, { everyday: [] }]) {
+      validateDayMess(v, "zz");
+    }
+  });
+
+  // What the form holds on its way to being published.
+  const messy = cleanDayMess({
+    id: "zz", name: " ZZ ",
+    everyday: { Breakfast: "  Tea ", Lunch: "   " },
+    timings: { Dinner: "", Snacks: " 5 PM " },
+    days: [...week().reverse().slice(0, 6), { day: "Monday", meals: { Breakfast: " Poha " } }],
+  });
+  check("strings are trimmed", messy.name === "ZZ" && messy.everyday.Breakfast === "Tea");
+  check("blank every-day and timing lines are dropped, not kept as empty boxes",
+    !("Lunch" in messy.everyday) && Object.keys(messy.timings).join() === "Snacks");
+  check("the week comes out Monday first whatever order it went in",
+    messy.days.map(d => d.day).join() === WEEK.join());
+  check("a meal left out comes back as blank, so the day still names all four",
+    messy.days[0].meals.Breakfast === "Poha" && messy.days[0].meals.Lunch === "");
+  check("and a cleaned menu passes", validateDayMess(messy, "zz").ok);
+
+  // What students are shown once something is live.
+  const nh = { ...good, id: "nh", name: "NH", days: week("Live dosa") };
+  setLiveDatasets([
+    { kind: "day-mess", scope: "nh", payload: nh },
+    // Says it is OH's but fails the checks: the bundle must win.
+    { kind: "day-mess", scope: "oh", payload: { ...nh, id: "oh", days: [] } },
+    // A kind this app does not read yet is ignored, not half-shown.
+    { kind: "tuck", scope: "tagore", payload: { anything: true } },
+    // A hostel the app has nowhere to show.
+    { kind: "day-mess", scope: "zz", payload: good },
+  ]);
+  const shown = hostels();
+  check("a published menu replaces the bundled one",
+    shown.find(h => h.id === "nh").days[0].meals.Breakfast === "Live dosa");
+  check("a hostel nobody published stays as built",
+    shown.find(h => h.id === "wh") === bundledHostel("wh"));
+  check("a published menu that fails the checks falls back to the bundle",
+    shown.find(h => h.id === "oh") === bundledHostel("oh"));
+  check("an unknown kind is not held", liveDataset("tuck", "tagore") === null);
+  check("a hostel the bundle doesn't have is not invented",
+    shown.length === 4 && !shown.some(h => h.id === "zz"));
+  check("hostelById sees the live menu", hostelById("nh").days[0].meals.Breakfast === "Live dosa");
+
+  setLiveDataset({ kind: "day-mess", scope: "wh", payload: { ...nh, id: "wh", name: "WH" } });
+  check("publishing on this device shows at once, without a reload",
+    hostelById("wh").days[0].meals.Breakfast === "Live dosa");
+
+  setLiveDatasets([]);
+  check("clearing goes back to the bundle", hostelById("nh") === bundledHostel("nh"));
+  survives("no rows at all", () => { setLiveDatasets(null); setLiveDatasets(undefined); });
+
+  // ---- nothing published: exactly today's app ----
+  // The dashboard ships before anyone publishes. Until then a student must get
+  // the very objects the bundle holds, not copies that merely look the same.
+  resetLive();
+  check("with nothing published, every hostel is the bundled object itself",
+    ["nh", "oh", "lvh", "wh"].every(id => hostelById(id) === bundledHostel(id)));
+  check("an empty version list asks for nothing and drops nothing",
+    JSON.stringify(planSync([])) === JSON.stringify({ fetch: [], drop: [] }));
+  applySync({ rows: [], drop: [] });
+  check("and leaves the menus as built", hostelById("nh") === bundledHostel("nh"));
+
+  // ---- syncing against the version list ----
+  const v = (scope, version_id, kind = "day-mess") => ({ kind, scope, version_id });
+  const row = (scope, version_id, fill = "Synced") => ({
+    kind: "day-mess", scope, version_id,
+    payload: { ...good, id: scope, name: scope.toUpperCase(), days: week(fill) },
+  });
+
+  check("a phone holding nothing fetches what is published",
+    planSync([v("nh", 7), v("wh", 3)]).fetch.join() === "day-mess:nh,day-mess:wh");
+  check("a kind this app can't show is never fetched",
+    planSync([v("tagore", 2, "tuck")]).fetch.length === 0);
+  survives("a version list with junk in it", () => planSync([null, {}, { kind: "day-mess" }, 7]));
+  check("and junk asks for nothing", planSync([null, {}, { kind: "day-mess" }]).fetch.length === 0);
+
+  applySync({ rows: [row("nh", 7), row("wh", 3)] });
+  check("what was fetched is shown", hostelById("nh").days[0].meals.Breakfast === "Synced");
+  check("the same versions again fetch nothing",
+    planSync([v("nh", 7), v("wh", 3)]).fetch.length === 0);
+  check("only the dataset whose version moved is fetched",
+    planSync([v("nh", 8), v("wh", 3)]).fetch.join() === "day-mess:nh");
+  check("a restore is a new version, so it is fetched like any change",
+    planSync([v("nh", 9), v("wh", 3)]).fetch.join() === "day-mess:nh");
+  const gone = planSync([v("wh", 3)]);
+  check("a dataset the server no longer lists is dropped", gone.drop.join() === "day-mess:nh");
+  applySync({ drop: gone.drop });
+  check("and goes back to the bundled copy", hostelById("nh") === bundledHostel("nh"));
+
+  // A payload this app refuses is remembered, so every return to the app
+  // doesn't download it again — until a newer version replaces it.
+  applySync({ rows: [{ ...row("oh", 4), payload: { id: "oh", days: [] } }] });
+  check("a refused download leaves the bundled copy", hostelById("oh") === bundledHostel("oh"));
+  check("and is not fetched again at the same version", !planSync([v("oh", 4)]).fetch.length);
+  check("but is at the next", planSync([v("oh", 5)]).fetch.join() === "day-mess:oh");
+
+  // ---- the copy saved on the phone ----
+  const store = () => {
+    const m = new Map();
+    return { getItem: k => m.get(k) ?? null, setItem: (k, x) => m.set(k, String(x)), m };
+  };
+  const phone = store();
+  saveLive(phone);
+  resetLive();
+  check("a fresh start begins from the bundle", hostelById("wh") === bundledHostel("wh"));
+  restoreSavedLive(phone);
+  check("and the saved copy is shown before any request",
+    hostelById("wh").days[0].meals.Breakfast === "Synced");
+  check("with its version, so nothing is downloaded again", planSync([v("wh", 3)]).fetch.length === 0);
+
+  resetLive();
+  const bad = store();
+  bad.setItem("iimpresent-live-v1", "{not json");
+  survives("a corrupted saved copy", () => restoreSavedLive(bad));
+  check("is ignored", hostelById("wh") === bundledHostel("wh"));
+  bad.setItem("iimpresent-live-v1", JSON.stringify({ items: [
+    { kind: "day-mess", scope: "wh", version_id: 1, payload: { id: "wh", days: "old shape" } },
+  ] }));
+  restoreSavedLive(bad);
+  check("so is a saved copy in a shape this app no longer accepts",
+    hostelById("wh") === bundledHostel("wh"));
+
+  // Merely touching localStorage can throw in a locked-down browser.
+  const hostile = { getItem() { throw new Error("SecurityError"); }, setItem() { throw new Error("QuotaExceeded"); } };
+  survives("a store that throws on read", () => restoreSavedLive(hostile));
+  survives("a store that throws on write", () => saveLive(hostile));
+  survives("no store at all", () => { restoreSavedLive(null); saveLive(null); });
+
+  const one = store();
+  applySync({ rows: [row("nh", 7)] });
+  saveLive(one);
+  applySync({ rows: [row("nh", 8, "Newer")] });
+  saveLive(one);
+  check("the phone keeps one copy per dataset, the newest",
+    JSON.parse(one.m.get("iimpresent-live-v1")).items.length === 1 &&
+    JSON.parse(one.m.get("iimpresent-live-v1")).items[0].version_id === 8);
+  resetLive();
+}
+
+// Asynchronous, and the suite is bundled as CommonJS, which has no top-level
+// await: so this runs as a promise the summary at the end waits for.
+const later = [];
+later.push((async () => {
+console.log("");
+console.log("POR dashboard: syncing with the server");
+  // The failures that matter most are the ones before por-dashboard.sql has
+  // even been run: every request fails, and students must see today's app.
+  const week = (fill) => WEEK.map(day => ({
+    day, meals: { Breakfast: fill, Lunch: "Dal", Snacks: "Tea", Dinner: "Roti" },
+  }));
+  const row = (scope, version_id, fill) => ({
+    kind: "day-mess", scope, version_id,
+    payload: { id: scope, name: scope.toUpperCase(), everyday: {}, timings: {}, days: week(fill) },
+  });
+  const missing = () => Promise.reject(Object.assign(new Error("Could not find the function public.live_versions"), { code: "PGRST202" }));
+  const noStore = { getItem: () => null, setItem: () => {} };
+  let asked = null;
+
+  resetLive();
+  let threw = false;
+  await syncLive(undefined, { loadVersions: missing, storage: noStore }).catch(() => { threw = true; });
+  check("before the SQL is run, the version request fails loudly to its caller", threw);
+  check("and every hostel is still exactly as built",
+    ["nh", "oh", "lvh", "wh"].every(id => hostelById(id) === bundledHostel(id)));
+
+  await syncLive(undefined, {
+    loadVersions: async () => [],
+    loadDatasets: async (keys) => { asked = keys; return []; },
+    storage: noStore,
+  });
+  check("with the SQL run but nothing published, nothing is downloaded", asked === null);
+  check("and the menus are still as built", hostelById("nh") === bundledHostel("nh"));
+
+  await syncLive(undefined, {
+    loadVersions: async () => [{ kind: "day-mess", scope: "nh", version_id: 3 }],
+    loadDatasets: async (keys) => { asked = keys; return [row("nh", 3, "Published")]; },
+    storage: noStore,
+  });
+  check("the first publish downloads just that dataset", asked.join() === "day-mess:nh");
+  check("and students see it", hostelById("nh").days[0].meals.Breakfast === "Published");
+
+  asked = null;
+  await syncLive(undefined, {
+    loadVersions: async () => [{ kind: "day-mess", scope: "nh", version_id: 3 }],
+    loadDatasets: async (keys) => { asked = keys; return []; },
+    storage: noStore,
+  });
+  check("the next check, nothing changed, downloads nothing", asked === null);
+
+  threw = false;
+  await syncLive(undefined, { loadVersions: missing, storage: noStore }).catch(() => { threw = true; });
+  check("a failed check keeps what the phone holds",
+    threw && hostelById("nh").days[0].meals.Breakfast === "Published");
+
+  threw = false;
+  await syncLive(undefined, {
+    loadVersions: async () => [{ kind: "day-mess", scope: "nh", version_id: 4 }],
+    loadDatasets: () => Promise.reject(new TypeError("Failed to fetch")),
+    storage: noStore,
+  }).catch(() => { threw = true; });
+  check("so does a download that fails halfway",
+    threw && hostelById("nh").days[0].meals.Breakfast === "Published");
+  check("and the changed version is asked for again next time",
+    planSync([{ kind: "day-mess", scope: "nh", version_id: 4 }]).fetch.join() === "day-mess:nh");
+  resetLive();
+})());
+
+console.log("");
+console.log("POR dashboard: cards and messages");
+{
+  // The dashboard's list of cards.
+  const cards = datasetsFrom([
+    { email: "a", kind: "tuck", scope: "tagore" },
+    { email: "a", kind: "day-mess", scope: "nh" },
+    { email: "b", kind: "day-mess", scope: "nh" },
+  ]);
+  check("one card per dataset, however many accounts share it", cards.length === 2);
+  check("what can be edited today comes first", cards[0].kind === "day-mess");
+  check("titles read as words", datasetTitle("day-mess", "lvh") === "Day mess menu · LVH" &&
+    datasetTitle("por-contacts", "all") === "POR contacts");
+  // What a POR is told when a publish fails. The guide quotes these, and
+  // tells them what to do about each, so the mapping has to hold.
+  check("the policy refusing the account says so",
+    publishErrorMessage({ code: "42501", message: "new row violates row-level security policy" }) === MSG.notAllowed);
+  check("and is recognised by its words alone",
+    publishErrorMessage({ message: "permission denied for table dataset_versions" }) === MSG.notAllowed);
+  check("the server's own check is passed through, since it was written to be read",
+    publishErrorMessage({ code: "P0001", message: "Monday has no meals." }) ===
+      `${MSG.rejected} Monday has no meals.`);
+  check("Chrome losing the network reads as offline",
+    publishErrorMessage(new TypeError("Failed to fetch")) === MSG.offline);
+  check("and Safari's way of saying it",
+    publishErrorMessage(new TypeError("Load failed")) === MSG.offline);
+  check("anything else is the general failure, not a stack trace",
+    publishErrorMessage(new Error("duplicate key value")) === MSG.publishFailed &&
+    publishErrorMessage(undefined) === MSG.publishFailed);
+  check("every failure says students are unaffected, or how to fix it",
+    [MSG.offline, MSG.publishFailed].every(m => /Nothing has changed for students/.test(m)));
+
+  check("only kinds the app reads back are marked ready",
+    Object.entries(KINDS).filter(([, k]) => k.ready).map(([id]) => id).join() === "day-mess");
 }
 
 console.log("");
@@ -2574,5 +2863,10 @@ console.log("\nleave form PDF");
   });
 }
 
-console.log(`\n${fail === 0 ? "all logic checks passed" : fail + " FAILURES"}`);
-process.exit(fail ? 1 : 0);
+Promise.all(later).catch((err) => {
+  fail++;
+  console.log("  FAIL an asynchronous check threw\n       " + (err?.stack || err));
+}).then(() => {
+  console.log(`\n${fail === 0 ? "all logic checks passed" : fail + " FAILURES"}`);
+  process.exit(fail ? 1 : 0);
+});

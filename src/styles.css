@@ -3352,6 +3352,129 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 }
 
 
+/* ---------- POR dashboard ---------- */
+
+.por-cards { display: flex; flex-direction: column; gap: 10px; }
+
+/* The whole card is the target: a mess secretary on a phone should not have
+   to find a small "Edit" link inside it. */
+.por-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 13px 14px;
+}
+button.por-card { cursor: pointer; }
+button.por-card:hover { border-color: var(--signal); }
+/* Granted but not editable yet: present, so the owner knows it is coming,
+   and visibly not a button. */
+.por-card.off { background: transparent; border-style: dashed; }
+.por-card.off .por-card-title { color: var(--slate); }
+.por-card-text { flex: 1 1 auto; min-width: 0; }
+.por-card-title { display: block; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.por-card-meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--mute);
+  overflow-wrap: anywhere;
+}
+.por-card-go { flex: 0 0 auto; font-size: 22px; line-height: 1; color: var(--mute); }
+
+/* One part of a form: the timings, the every-day items, one day of the week. */
+.por-block {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px 14px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.por-h {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.por-hint { margin: -2px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--mute); }
+/* Four short timings, two to a row, until the phone is too narrow to read
+   "8 AM to 10:30 AM" in half its width. */
+.por-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 360px) { .por-grid { grid-template-columns: 1fr; } }
+.por-publish { margin-top: 16px; }
+
+/* The guide. Read on a phone by someone who has never seen the dashboard, so
+   the steps are numbered big enough to keep your place in. */
+.por-p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.por-steps,
+.por-list {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.por-steps li::marker { font-weight: 700; color: var(--signal-deep); }
+.por-list { gap: 6px; }
+/* A message quoted exactly as the screen shows it, so it can be matched by
+   eye against what is in front of you. */
+.por-quote {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 0 5px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.por-faq-group {
+  margin: 16px 0 6px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.por-faq {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+}
+.por-faq summary {
+  cursor: pointer;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  list-style: none;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+.por-faq summary::-webkit-details-marker { display: none; }
+.por-faq summary::after { content: "+"; flex: 0 0 auto; color: var(--mute); font-weight: 400; }
+.por-faq[open] summary::after { content: "−"; }
+.por-faq[open] summary { border-bottom: 1px solid var(--rule); }
+.por-faq-a { padding: 11px 14px 13px; font-size: 13.5px; line-height: 1.55; }
+.por-faq-a .por-list { margin-top: 8px; }
+
 /* ---------- schedule admin ---------- */
 
 .admin-live {

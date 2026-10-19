@@ -29,7 +29,7 @@ npm run build    # eslint + all tests + vite build — run before saying anythin
 npm run smoke    # tests only
 ```
 
-`npm run build` must end with `83/83 screens rendered` and `all logic checks passed`.
+`npm run build` must end with `94/94 screens rendered` and `all logic checks passed`.
 
 The app needs `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and
 `VITE_VAPID_PUBLIC_KEY` (see `.env.example`). Screens that need sign-in can't be
@@ -68,6 +68,18 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   It is the only place a room's directions are written. Rule tabs (`NAB
   hallways`, `CDPO groups`) cover every number in a series and floor, listed
   or not. Only `Confirmed` rows ship; a draft stops the build.
+- **POR dashboard** (`supabase/por-dashboard.sql`): role accounts listed in
+  `por_access` (nhmessrep@, pgprep@ …) sign in to the dashboard and nothing
+  else, and publish over the bundled JSON. Every publish is a new row in
+  `dataset_versions`; restoring = republishing, and the database keeps the
+  newest 5 per dataset (`KEEP_VERSIONS` in `src/lib/datasets.js` matches).
+  Students ask `live_versions()` (numbers only) and download through
+  `live_datasets(keys)` just what changed; `src/lib/live.js` holds and saves
+  one copy per dataset on the phone. Precedence: fetched > saved > bundled.
+  A kind is accepted only once it has a checker in both
+  `stamp_dataset_version()` and `VALIDATORS`. Only `day-mess` does today. A
+  published version overrides a later rebuild of the same item, so check
+  `live_versions()` before assuming a JSON edit shows.
 - **Hazard:** `build_catalogue.py` also rewrites
   `supabase/repair-stale-classes.sql`. Never point it at a template.
 

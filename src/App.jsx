@@ -6,8 +6,10 @@ import {
   loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
   loadPublishedCatalogue, loadProfile, cohortOf,
   loadPublishedCohorts, loadCataloguePayload, countedAttendance,
-  loadRescheduleConsensus,
+  loadRescheduleConsensus, loadPorAccess, loadLiveVersions,
 } from "./lib/api";
+import { restoreSavedLive } from "./lib/live";
+import { syncLive } from "./lib/livesync";
 import {
   setActiveCatalogue, catalogueKind, catalogueCohort,
   classesFromCatalogue, termFromCatalogue, sectionsOf,
@@ -41,6 +43,7 @@ const SectionPicker = lazy(() => import("./screens/SectionPicker"));
 const LeaveMail = lazy(() => import("./screens/LeaveMail"));
 const JMaps = lazy(() => import("./screens/JMaps"));
 const OltAttendance = lazy(() => import("./screens/OltAttendance"));
+const PorDashboard = lazy(() => import("./screens/PorDashboard"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -60,6 +63,7 @@ const SUB_SCREEN_BACK = {
   leave: "Back to utils",
   maps: "Back to utils",
   admin: "Back to profile",
+  pordash: "Back to profile",
 };
 
 const TABS = [
@@ -126,6 +130,11 @@ export default function App() {
   // student's year — see the boot block for why that is a screen of its own.
   const [cohort, setCohort] = useState(null);
   const [noSchedule, setNoSchedule] = useState(false);
+  // The datasets this account looks after, when it is a POR's role account.
+  // Set, it replaces the whole app with the dashboard.
+  const [porAccess, setPorAccess] = useState(null);
+  // When published menus were last fetched. See "pick up what PORs publish".
+  const liveCheckedAt = useRef(0);
   // Admin only. When set, the whole app renders as a student of another
   // cohort: { cohort, label, payload, section }. Everything that writes is
   // switched off while it is — see `readOnly` below.
@@ -167,24 +176,45 @@ export default function App() {
         // thrown error, so it has to be read before anything else.
         setAuthError(readAuthError());
 
+        // Menus published from the POR dashboard that this phone saved last
+        // time. Read from the phone, so they are there before any request,
+        // with no signal at all; nothing saved means the bundled copies.
+        restoreSavedLive();
+
         const current = await getSession();
         setSession(current);
         if (!current) {
           setReady(true);
           return;
         }
-        // A cold start, not every return to the app: a Home Screen app brought
-        // back from the background resumes without running this again.
-        track("open", "app");
 
-        // Nothing below blocks first paint. Service-worker registration and
-        // the push-subscription check both wait on `serviceWorker.ready`,
-        // which can take seconds on a cold start and has no bearing on
-        // whether the schedule can be drawn.
+        // Started before anything else is asked, as it always has been, and
+        // nothing below waits for it. Service-worker registration and the
+        // push-subscription check both wait on `serviceWorker.ready`, which
+        // can take seconds on a cold start and has no bearing on whether the
+        // schedule can be drawn.
         registerServiceWorker()
           .then(() => alertsActive())
           .then(setAlerts)
           .catch(() => setAlerts(false));
+
+        // A POR's role account gets the dashboard and nothing else, so that is
+        // settled before anything a student needs is fetched. Asked alongside
+        // the profile, which every student needs anyway, so it costs no extra
+        // round trip. A failure reads as "not a POR": the student app is the
+        // safe default, and the database still refuses a publish either way.
+        const [access, profile] = await Promise.all([
+          loadPorAccess(current.user?.email).catch(() => []),
+          loadProfile().catch(() => null),
+        ]);
+        if (access.length) {
+          setPorAccess(access);
+          return;
+        }
+
+        // A cold start, not every return to the app: a Home Screen app brought
+        // back from the background resumes without running this again.
+        track("open", "app");
 
         // Which year the student is in has to be settled before the term or
         // the schedule can be fetched, because both are published per cohort
@@ -194,16 +224,28 @@ export default function App() {
         // The address is the fallback for the stored value: it is the same
         // rule the database uses, so the two cannot disagree, and it keeps a
         // student working if their profile row is missing.
-        const profile = await loadProfile().catch(() => null);
         const mine = profile?.cohort_year ?? cohortOf(current.user?.email);
         setIsAdmin(Boolean(profile?.is_admin));
         setIsTester(Boolean(profile?.is_tester));
         setCohort(mine);
 
-        const [c, a, t, o, published] = await Promise.all([
+        const [c, a, t, o, published, versions] = await Promise.all([
           loadClasses(), loadAttendance(), loadTerm(mine), loadOverrides(),
           loadPublishedCatalogue(mine),
+          // Which version of each POR-published dataset is live: numbers
+          // only, a few hundred bytes. Its own catch, and null rather than
+          // [] — a failed request is not "nothing published", and the phone
+          // keeps what it has. Before por-dashboard.sql is run this fails
+          // every time, and the student sees the bundled menus, as before.
+          loadLiveVersions().catch(() => null),
         ]);
+        liveCheckedAt.current = Date.now();
+        // Whatever changed downloads in the background. Nothing on the first
+        // screen reads it, so first paint doesn't wait for it.
+        if (versions) {
+          syncLive(versions).catch((err) =>
+            console.warn("could not update published menus; keeping this phone's copies", err?.message));
+        }
 
         // The published schedule has to be in place before the first screen
         // renders: the catalogue lookups are module state, so swapping them
@@ -309,7 +351,8 @@ export default function App() {
   // WhatsApp, UPI or mail hand-off counts too — the student did leave and come
   // back. Keyed on the boolean, not the session object, because a routine
   // token refresh replaces the object and would re-attach the listener.
-  const signedIn = Boolean(session);
+  // A POR's role account is not a student using the app, so isn't counted.
+  const signedIn = Boolean(session) && !porAccess;
   useEffect(() => {
     if (!signedIn) return undefined;
     const onReturn = () => {
@@ -345,6 +388,26 @@ export default function App() {
       say("That didn't save. Try again.");
     }
   }, []);
+
+  // ---- pick up what PORs publish while the app sits open ----
+  // Boot asks once, but a phone that keeps the app alive in the background
+  // never boots again, and would go on showing a menu the mess secretary
+  // replaced days ago. So it is asked again when the student comes back — not
+  // on a timer — and at most once in thirty minutes however often they flick
+  // between apps; a menu does not change by the minute. Each ask is the
+  // version list only, unless something actually changed. A screen already
+  // open keeps what it drew; the next one opened reads the new copy.
+  useEffect(() => {
+    if (!signedIn) return undefined;
+    const onReturn = () => {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - liveCheckedAt.current < 30 * 60_000) return;
+      liveCheckedAt.current = Date.now();
+      syncLive().catch(() => { /* keeps this phone's copies; next return tries again */ });
+    };
+    document.addEventListener("visibilitychange", onReturn);
+    return () => document.removeEventListener("visibilitychange", onReturn);
+  }, [signedIn]);
 
   // ---- "Mark present" straight from a notification ----
   useEffect(() => {
@@ -636,6 +699,26 @@ export default function App() {
   if (!session) return <SignIn error={authError} />;
   if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
 
+  // A POR's role account. No tabs and no student screens: the dashboard is
+  // the whole app for it.
+  if (porAccess) {
+    return (
+      <div className="shell">
+        <Masthead now={now} />
+        <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
+          <PorDashboard
+            email={session.user?.email ?? ""}
+            access={porAccess}
+            onSignOut={async () => {
+              if (!confirm("Sign out of the POR dashboard?")) return;
+              await signOut();
+            }}
+          />
+        </Suspense>
+      </div>
+    );
+  }
+
   // A student whose year has no schedule yet. Deliberately ahead of the
   // course picker: with no catalogue of their own there is nothing to pick,
   // and the bundled fallback belongs to the other year.
@@ -804,6 +887,9 @@ export default function App() {
         {tab === "profile" && subScreen === "admin" && isAdmin && (
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
         )}
+        {tab === "profile" && subScreen === "pordash" && isAdmin && (
+          <PorDashboard email={session.user?.email ?? ""} onBack={() => setSubScreen(null)} />
+        )}
         {tab === "utils" && subScreen === "contacts" && (
           <Utils onOpen={openSub} group="contacts" />
         )}
@@ -865,6 +951,7 @@ export default function App() {
             onChangeCourses={readOnly ? null : startOver}
             onSignOut={handleSignOut}
             onScheduleAdmin={isAdmin && !readOnly ? () => openSub("admin") : null}
+            onPorDashboard={isAdmin && !readOnly ? () => openSub("pordash") : null}
             onOfficialAttendance={isTester && !readOnly ? () => openSub("olt") : null}
           />
         )}

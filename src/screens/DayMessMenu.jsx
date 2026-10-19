@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { HOSTELS, MEALS, hostelById, weekOf, todayName } from "../lib/menu";
+import { hostels, MEALS, hostelById, weekOf, todayName } from "../lib/menu";
 
 /**
  * What the mess is serving, by hostel.
@@ -15,6 +15,7 @@ import { HOSTELS, MEALS, hostelById, weekOf, todayName } from "../lib/menu";
  * findable once you have scrolled.
  */
 export default function DayMessMenu({ onBack, now = new Date(), embedded = false }) {
+  const HOSTELS = useMemo(() => hostels(), []);
   const [id, setId] = useState(HOSTELS[0]?.id ?? null);
 
   const hostel = useMemo(() => hostelById(id), [id]);
