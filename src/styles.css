@@ -3415,6 +3415,20 @@ button.por-card:hover { border-color: var(--signal); }
 @media (max-width: 360px) { .por-grid { grid-template-columns: 1fr; } }
 .por-publish { margin-top: 16px; }
 
+/* The admin's "see the dashboard as" switch. */
+.por-viewas { margin-bottom: 14px; }
+.por-viewas select {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.por-viewas select:focus { outline: none; border-color: var(--signal); }
+
 /* The guide. Read on a phone by someone who has never seen the dashboard, so
    the steps are numbered big enough to keep your place in. */
 .por-p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink); }

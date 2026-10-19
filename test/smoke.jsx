@@ -226,7 +226,11 @@ const cases = [
       live={[{ kind: "day-mess", scope: "nh", payload: bundledHostel("nh"), published_at: "2026-10-18T09:30:00Z" }]}
       onSignOut={noop} />],
   ["PorDashboard / the admin's, everyone's", <PorDashboard key="pda" email="anuja2027@email.iimcal.ac.in"
-      access={porGrants} live={[]} onBack={noop} />],
+      admin access={porGrants} live={[]} onBack={noop} />],
+  ["PorDashboard / the admin previewing a mess rep", <PorDashboard key="pdv" email="anuja2027@email.iimcal.ac.in"
+      admin previewAs="nhmessrep@email.iimcal.ac.in" access={porGrants} live={[]} onBack={noop} />],
+  ["PorDashboard / previewing, with the guide open", <PorDashboard key="pdvh" email="anuja2027@email.iimcal.ac.in"
+      admin previewAs="pgprep@email.iimcal.ac.in" help access={porGrants} live={[]} onBack={noop} />],
   ["PorDashboard / nothing granted", <PorDashboard key="pdn" email="x@email.iimcal.ac.in"
       access={[]} live={[]} onSignOut={noop} />],
   ["DayMessEditor / nothing published yet", <DayMessEditor key="dme" scope="nh" history={[]} onBack={noop} onHelp={noop} />],

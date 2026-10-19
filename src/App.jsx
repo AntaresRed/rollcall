@@ -888,7 +888,7 @@ export default function App() {
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
         )}
         {tab === "profile" && subScreen === "pordash" && isAdmin && (
-          <PorDashboard email={session.user?.email ?? ""} onBack={() => setSubScreen(null)} />
+          <PorDashboard admin email={session.user?.email ?? ""} onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "contacts" && (
           <Utils onOpen={openSub} group="contacts" />
