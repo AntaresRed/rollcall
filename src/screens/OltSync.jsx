@@ -125,16 +125,12 @@ export function RememberNote() {
   return (
     <ul className="olt-remember-how">
       <li>
-        Encrypted with AES-256 before it&apos;s stored. The key lives apart from
-        the database, so the database only ever holds scrambled text, which no one, including IIMPresent owner can't read.
+        Encrypted with AES-256 before it&apos;s stored anywhere, so what&apos;s
+        stored is scrambled text, never your actual password.
       </li>
       <li>
         No screen, table or export shows it, to you, to anyone running
         IIMPresent, or to anyone else. Nothing ever sends it back to the app.
-      </li>
-      <li>
-        Unlocked only for the moment a sync signs in to OLT. If OLT turns it
-        down, it&apos;s deleted straight away.
       </li>
       <li>Change or delete it any time from Profile.</li>
     </ul>
