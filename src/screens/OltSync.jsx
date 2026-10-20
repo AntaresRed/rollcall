@@ -121,9 +121,13 @@ export function OltPasswordField({ loginId, value, onChange, label = "OLT passwo
  * has to unlock it to sign in to OLT, so whoever controls the server's code
  * could. What it says instead — no screen, table or export shows it — is true.
  */
-export function RememberNote() {
+export function RememberNote({ id, inProfile = false }) {
   return (
-    <ul className="olt-remember-how">
+    <ul className="olt-remember-how" id={id}>
+      {/* First and marked: it's the answer to "what if I change my mind",
+          which is what stops most people ticking a box like this. Left out
+          on Profile itself, where it would be pointing at the page it's on. */}
+      {!inProfile && <li className="olt-remember-key">Change or delete it any time from Profile.</li>}
       <li>
         Encrypted with AES-256 before it&apos;s stored anywhere, so what&apos;s
         stored is scrambled text, never your actual password.
@@ -132,20 +136,66 @@ export function RememberNote() {
         No screen, table or export shows it, to you, to anyone running
         IIMPresent, or to anyone else. Nothing ever sends it back to the app.
       </li>
-      <li>Change or delete it any time from Profile.</li>
     </ul>
   );
 }
 
+function InfoIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5.5" />
+      <circle cx="12" cy="7.6" r="0.6" fill="currentColor" />
+    </svg>
+  );
+}
+
+/**
+ * The tick, with its explanation folded away behind an (i). Ticking it opens
+ * the explanation, so nobody agrees to have a password kept without the
+ * promise in front of them; unticking leaves it where it is.
+ */
 function RememberBox({ checked, onChange }) {
+  const [open, setOpen] = useState(false);
+  const noteId = "olt-remember-how";
+
   return (
     <div className={`olt-remember${checked ? " on" : ""}`}>
-      <label className="olt-remember-tick">
-        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-        <span>Remember my password</span>
-      </label>
-      <RememberNote />
+      <div className="olt-remember-row">
+        <label className="olt-remember-tick">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => {
+              onChange(e.target.checked);
+              if (e.target.checked) setOpen(true);
+            }}
+          />
+          <span>Remember my password</span>
+        </label>
+        <button
+          type="button"
+          className={`olt-info${open ? " on" : ""}`}
+          aria-label="How a remembered password is kept"
+          aria-expanded={open}
+          aria-controls={noteId}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <InfoIcon />
+        </button>
+      </div>
+      {open && <RememberNote id={noteId} />}
     </div>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m5 12.5 4.5 4.5L19 7.5" />
+    </svg>
   );
 }
 
@@ -157,12 +207,13 @@ function RememberBox({ checked, onChange }) {
  * Returns the form's fields and a `submit(term)` that reads OLT and reports
  * back through `onSnap`.
  */
-export function useOltRead({ email, saved, onSnap, showLogin = false }) {
+export function useOltRead({ email, saved, onSnap, showLogin = false, justSynced = false }) {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [warning, setWarning] = useState("");
+  const [synced, setSynced] = useState(justSynced);
   const loginId = loginIdOf(email);
 
   const submit = async (term) => {
@@ -170,11 +221,13 @@ export function useOltRead({ email, saved, onSnap, showLogin = false }) {
     setBusy(true);
     setError("");
     setWarning("");
+    setSynced(false);
     try {
       const res = await refreshOltAttendance({
         term, password: saved ? undefined : password, remember: !saved && remember,
       });
       onSnap(res.snapshot);
+      setSynced(true);
       if (res.warning) setWarning(res.warning);
       // Only once OLT has accepted it, so a typo is never offered for saving.
       // Not when IIMPresent is keeping it: the phone would then hold a second
@@ -206,7 +259,7 @@ export function useOltRead({ email, saved, onSnap, showLogin = false }) {
     </>
   );
 
-  return { fields, submit, busy, error, warning, ready: saved || Boolean(password) };
+  return { fields, submit, busy, error, warning, synced, ready: saved || Boolean(password) };
 }
 
 /**
@@ -224,10 +277,14 @@ export function useOltRead({ email, saved, onSnap, showLogin = false }) {
  * The copy itself belongs to the breakdown, which lays it beside the
  * student's marks; this only reports and replaces it.
  */
-export default function OltSync({ termLabel, email, snap, loading, loadError, onSynced }) {
+export default function OltSync({
+  termLabel, email, snap, loading, loadError, onSynced,
+  // Starts in the just-synced state; only the smoke test and previews set it.
+  justSynced = false,
+}) {
   const n = termNumber(termLabel);
   const saved = Boolean(snap?.password_saved);
-  const read = useOltRead({ email, saved, onSnap: onSynced });
+  const read = useOltRead({ email, saved, onSnap: onSynced, justSynced });
 
   const thisTerm = Boolean(snap?.fetched_at) && n !== null && termNumber(snap.term) === n;
   const staleError = !read.error && snap?.last_error
@@ -261,6 +318,15 @@ export default function OltSync({ termLabel, email, snap, loading, loadError, on
         </form>
       )}
 
+      {/* Says where to look, because the sync changes nothing on this card
+          except a date — the new numbers land in the cards below it and on
+          Profile's OLT screen, out of sight of the button that was tapped. */}
+      {read.synced && (
+        <div className="olt-synced" role="status">
+          <CheckIcon />
+          <span>OLT attendance synced in Breakdown (subjects below) and Profile sections.</span>
+        </div>
+      )}
       {read.warning && <div className="olt-sync-warn">{read.warning}</div>}
       {(read.error || loadError || staleError) && (
         <div className="notice" style={{ marginTop: 12 }}>
@@ -336,7 +402,7 @@ export function OltPasswordSettings({ email, initial }) {
           <OltPasswordField loginId={loginIdOf(email)} value={password}
             label={saved ? "New OLT password" : "OLT password"}
             onChange={(v) => { setPassword(v); setError(""); }} />
-          <RememberNote />
+          <RememberNote inProfile />
           <div className="olt-pw-acts">
             <button className="btn olt-sync-go" disabled={busy || !password}>
               {busy ? "Checking with OLT…" : "Save password"}

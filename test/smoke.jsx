@@ -32,6 +32,7 @@ import OrderHistory from "../src/screens/OrderHistory";
 import NoSchedule from "../src/screens/NoSchedule";
 import TuckShops from "../src/screens/TuckShops";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
+import OltSync from "../src/screens/OltSync";
 import CoursePicker from "../src/screens/CoursePicker";
 import SectionPicker from "../src/screens/SectionPicker";
 import CataloguePreview from "../src/screens/CataloguePreview";
@@ -317,6 +318,9 @@ const cases = [
   ["AttendanceBreakdown / OLT section", <AttendanceBreakdown key="abo" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides} onBack={noop}
       showOlt email="a2027@email.iimcal.ac.in" oltInitial={oltSnap} />],
+  // The line that says where a sync's numbers went.
+  ["OltSync / just synced", <OltSync key="osj" termLabel="Term V" email="a2027@email.iimcal.ac.in"
+      snap={{ ...oltSnap, password_saved: true }} loading={false} loadError="" onSynced={noop} justSynced />],
   ["AttendanceBreakdown / OLT password saved", <AttendanceBreakdown key="abo7" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides}
       showOlt email="a2027@email.iimcal.ac.in" oltInitial={{ ...oltSnap, password_saved: true }} />],

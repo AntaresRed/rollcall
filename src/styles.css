@@ -4081,24 +4081,49 @@ button.por-card:hover { border-color: var(--signal); }
 }
 .olt-saved svg { flex: 0 0 auto; color: var(--present); }
 
-/* The tick and what it promises, in one box: the promise is the reason to
-   tick it, so it sits where the decision is made, not behind a link. */
+/* The tick and what it promises, in one box. The promise folds away behind
+   the (i) so the form stays short, and opens by itself on ticking. */
 .olt-remember {
   background: #fff;
   border: 1px solid #F0B3D2;
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 6px 6px 6px 12px;
 }
 .olt-remember.on { border-color: var(--signal); }
+.olt-remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .olt-remember-tick {
   display: flex;
   align-items: center;
   gap: 9px;
+  padding: 4px 0;
   font-size: 14px;
   font-weight: 600;
   color: var(--ink);
   cursor: pointer;
 }
+/* A real tap target, not just the 18px glyph. */
+.olt-info {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--signal-deep);
+  cursor: pointer;
+}
+.olt-info:hover,
+.olt-info.on { background: var(--signal-wash); }
+.olt-info:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
 .olt-remember-tick input {
   width: 18px;
   height: 18px;
@@ -4106,7 +4131,7 @@ button.por-card:hover { border-color: var(--signal); }
   accent-color: var(--signal);
 }
 .olt-remember-how {
-  margin: 8px 0 0;
+  margin: 6px 6px 6px 0;
   padding-left: 18px;
   font-size: 12px;
   line-height: 1.45;
@@ -4114,6 +4139,33 @@ button.por-card:hover { border-color: var(--signal); }
 }
 .olt-remember-how li { margin-bottom: 3px; }
 .olt-remember-how li:last-child { margin-bottom: 0; }
+/* The way back out, marked so it's read first. */
+.olt-remember-how li.olt-remember-key {
+  list-style: none;
+  margin: 0 0 7px -18px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: var(--signal-wash);
+  color: var(--signal-deep);
+  font-weight: 600;
+}
+
+/* After a sync: where the new numbers went. */
+.olt-synced {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #A9D4C3;
+  border-radius: 10px;
+  background: var(--present-wash);
+  color: var(--present);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.olt-synced svg { flex: 0 0 auto; margin-top: 1px; }
 
 /* Profile's "OLT password". */
 .olt-pw {
