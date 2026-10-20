@@ -83,7 +83,13 @@ export default function Stats({ classes, attendance, onToggleMute }) {
               <span>
                 {r.present} attended · {r.absent} missed
               </span>
-              {r.pct !== null && <span>{r.pct}% so far</span>}
+              {/* Coloured against this course's own line, which isn't always
+                  75%: a course that needs 80 is in trouble at 78. */}
+              {r.pct !== null && (
+                <span className={`pct-badge${r.pct < r.min_pct ? " low" : ""}`}>
+                  {r.pct}%<small>so far</small>
+                </span>
+              )}
             </div>
 
             {onToggleMute && (

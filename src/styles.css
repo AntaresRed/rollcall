@@ -1019,6 +1019,7 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 
 .budget-foot {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-top: 9px;
@@ -1027,6 +1028,34 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   color: var(--slate);
 }
 .tag.quiet { background: var(--rule); color: var(--slate); }
+
+/* A course's attendance so far, as a chip in the colours the rest of the app
+   uses for attended and missed — green at or above the course's line, red
+   below it — so it is the first thing read on the card's last line. */
+.pct-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--present-wash);
+  color: var(--present);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.pct-badge small {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.pct-badge.low { background: var(--absent-wash); color: var(--absent); }
 
 /* ---------- sessions grouped by day (Edit attendance, Reschedule) ---------- */
 
@@ -1617,6 +1646,11 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   margin-top: 3px;
 }
 .ps-cell.warn strong { color: var(--absent); }
+/* The attended cell, tinted by which side of the line it's on. */
+.ps-cell.pct { background: var(--present-wash); }
+.ps-cell.pct strong { color: var(--present); font-size: 24px; }
+.ps-cell.pct.low { background: var(--absent-wash); }
+.ps-cell.pct.low strong { color: var(--absent); }
 
 .profile-actions {
   display: flex;
@@ -1747,12 +1781,17 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 }
 .ab-pct {
   flex: 0 0 auto;
-  font-family: var(--mono);
-  font-size: 13px;
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--present-wash);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--present);
 }
-.ab-pct.low { color: var(--absent); }
+.ab-pct.low { background: var(--absent-wash); color: var(--absent); }
 .ab-sub {
   font-family: var(--mono);
   font-size: 11px;
@@ -4128,12 +4167,15 @@ button.por-card:hover { border-color: var(--signal); }
   color: var(--mute);
 }
 .ab-olt b {
-  font-family: var(--mono);
-  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--present-wash);
+  font-size: 13px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--present);
 }
-.ab-olt b.low { color: var(--absent); }
+.ab-olt b.low { background: var(--absent-wash); color: var(--absent); }
 
 /* Two verdicts a row, OLT's then the student's, under headings that line up
    with them. Fixed widths, so a column reads straight down even when one

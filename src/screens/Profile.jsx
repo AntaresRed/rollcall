@@ -76,7 +76,9 @@ export default function Profile({
             <strong>{summary.courses}</strong>
             <span>{summary.courses === 1 ? "course" : "courses"}</span>
           </div>
-          <div className="ps-cell">
+          {/* The one cell tinted by how it's going: of the three, it is the
+              number the 75% line is drawn against. */}
+          <div className={`ps-cell${summary.pct === null ? "" : summary.pct < 75 ? " pct low" : " pct"}`}>
             <strong>{summary.pct === null ? "—" : `${summary.pct}%`}</strong>
             <span>attended</span>
           </div>

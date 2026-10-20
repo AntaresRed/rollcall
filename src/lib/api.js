@@ -350,6 +350,8 @@ export function courseStats(classes, attendance) {
       // the first case, not the second.
       instructors: c.course_code ? instructorsFor(c.course_code, c.section) : undefined,
       venue: venueOf(c),
+      // The course's own line, for colouring its percentage against.
+      min_pct: Number(c.min_pct ?? 75),
       ...skipBudget(c),
       present: 0,
       absent: 0,
