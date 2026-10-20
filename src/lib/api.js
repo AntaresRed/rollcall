@@ -1260,10 +1260,17 @@ async function callOlt(body) {
   throw err;
 }
 
-/** Signs in to OLT and reads the term. The password is used for this one
- *  sign-in; nothing on the server keeps it. */
-export const refreshOltAttendance = ({ password, term } = {}) =>
-  callOlt({ action: "refresh", password, term });
+/** Signs in to OLT and reads the term. With no password, the one the student
+ *  asked the server to remember is used; with one and `remember`, it is kept
+ *  once OLT has accepted it. */
+export const refreshOltAttendance = ({ password, remember, term } = {}) =>
+  callOlt({ action: "refresh", password: password || undefined, remember: Boolean(remember), term });
+
+/** Checks a password with OLT, then keeps it. Profile's "change" — nothing
+ *  is read, so no term is needed. */
+export const saveOltPassword = (password) => callOlt({ action: "save", password });
+
+export const forgetOltPassword = () => callOlt({ action: "forget" });
 
 /**
  * The number in a term's name: 5 for "Term-V", "Term 5" or "TERM v"; null if

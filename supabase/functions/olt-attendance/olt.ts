@@ -251,6 +251,18 @@ async function readAllDatewise(
   return out;
 }
 
+/** Signs in and straight back out, to learn whether OLT takes this password —
+ *  so a password is only ever saved once OLT has accepted it. Throws the
+ *  same OltError a read would. */
+export async function checkPassword(loginId: string, password: string): Promise<void> {
+  const session = new Session();
+  try {
+    await signIn(session, loginId, password);
+  } finally {
+    await session.signOut();
+  }
+}
+
 export async function readAttendance(
   loginId: string,
   password: string,

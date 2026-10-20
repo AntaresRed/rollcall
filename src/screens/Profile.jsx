@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { courseStats } from "../lib/api";
 import Stats from "./Stats";
+import { OltPasswordSettings } from "./OltSync";
 
 /**
  * Account, attendance overview, and the way out.
@@ -13,6 +14,9 @@ import Stats from "./Stats";
 export default function Profile({
   session, classes, attendance, onToggleMute, onChangeCourses, onSignOut,
   onScheduleAdmin, onOfficialAttendance, onPorDashboard,
+  // Testers only: the remembered OLT password, to change or delete.
+  // `oltInitial` stands in for its load in the smoke test.
+  oltPassword = false, oltInitial,
 }) {
   const user = session?.user;
   const meta = user?.user_metadata ?? {};
@@ -94,6 +98,7 @@ export default function Profile({
             <span className="dev-flag">DO NOT TOUCH, UNDER DEVELOPMENT</span>
           </button>
         )}
+        {oltPassword && <OltPasswordSettings email={user?.email ?? ""} initial={oltInitial} />}
         {/* Only rendered for an admin, and only as a way in — the database
             policies are what actually decide who may publish. */}
         {onScheduleAdmin && (

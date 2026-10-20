@@ -3978,20 +3978,39 @@ button.por-card:hover { border-color: var(--signal); }
 }
 .olt-dw-note.warn { color: var(--warn-ink); }
 /* The breakdown's OLT Sync card, between the batch total and the courses.
-   Dashed, so it reads as a tool laid over the page rather than one more
-   course card. */
+   In the accent colour, and the only thing on the page that is: every other
+   card is the student's own record, and this is the one place that reaches
+   out to another system — so it reads as the thing to act on, not one more
+   course. */
 .olt-sync {
-  background: var(--card);
-  border: 1px dashed var(--rule-strong);
+  background: var(--signal-wash);
+  border: 1.5px solid var(--signal);
   border-radius: var(--r);
   padding: 14px;
   margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(214, 0, 111, 0.10);
 }
 .olt-sync-head {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--signal-deep);
+  margin-bottom: 10px;
 }
+.olt-sync-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--signal);
+  color: #fff;
+}
+.olt-sync .dev-flag-banner { background: #fff; }
 .olt-sync-when {
   font-size: 13px;
   color: var(--slate);
@@ -4000,7 +4019,95 @@ button.por-card:hover { border-color: var(--signal); }
 .olt-sync-when b { color: var(--ink); font-weight: 600; }
 .olt-sync-note { font-size: 13px; color: var(--mute); }
 .olt-sync-form { display: flex; flex-direction: column; gap: 10px; }
-.olt-sync-form .olt-pass-note { margin: 0; }
+/* White boxes on the pink, so they still read as places to type. */
+.olt-sync .leave-field input { background: #fff; border-color: #F0B3D2; }
+.btn.olt-sync-go {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+.btn.olt-sync-go:hover:not(:disabled) { background: var(--signal-deep); border-color: var(--signal-deep); }
+.olt-sync-warn {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--warn-ink);
+}
+
+/* "Password saved": the whole of the form once there is one. */
+.olt-saved {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--slate);
+}
+.olt-saved svg { flex: 0 0 auto; color: var(--present); }
+
+/* The tick and what it promises, in one box: the promise is the reason to
+   tick it, so it sits where the decision is made, not behind a link. */
+.olt-remember {
+  background: #fff;
+  border: 1px solid #F0B3D2;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.olt-remember.on { border-color: var(--signal); }
+.olt-remember-tick {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.olt-remember-tick input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--signal);
+}
+.olt-remember-how {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--slate);
+}
+.olt-remember-how li { margin-bottom: 3px; }
+.olt-remember-how li:last-child { margin-bottom: 0; }
+
+/* Profile's "OLT password". */
+.olt-pw {
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--card);
+  padding: 12px 14px;
+}
+.olt-pw-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+.olt-pw-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 10px;
+  font-size: 13px;
+  color: var(--slate);
+}
+.olt-pw-state svg { flex: 0 0 auto; color: var(--present); }
+.olt-pw .olt-remember-how { margin: 0; }
+.olt-pw-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.olt-pw-acts .btn { flex: 1 1 0; }
+.btn.ghost.olt-pw-del-start { color: var(--absent); }
+.btn.olt-pw-delete { background: var(--absent); border-color: var(--absent); }
+.olt-pw-confirm p { margin: 0 0 10px; font-size: 13px; color: var(--ink); }
+.olt-pw-done { margin-top: 10px; font-size: 13px; color: var(--present); }
 
 /* OLT's totals on a course card, under the student's own counts. */
 .ab-olt {
@@ -4099,12 +4206,6 @@ button.por-card:hover { border-color: var(--signal); }
   background: transparent;
   color: var(--slate);
   border-style: dashed;
-}
-.olt-pass-note {
-  margin: -4px 0 0;
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: var(--slate);
 }
 
 /* A screen still being built, shown only to testers. Loud on purpose: it

@@ -190,12 +190,21 @@ const cases = [
   ["Profile / tester", <Profile key="pt" session={{ user: { email: "a@email.iimcal.ac.in", user_metadata: {} } }}
       classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop}
       onOfficialAttendance={noop} />],
+  // The remembered OLT password: kept, and not.
+  ["Profile / tester, OLT password saved", <Profile key="pto" session={{ user: { email: "a2027@email.iimcal.ac.in", user_metadata: {} } }}
+      classes={classes} attendance={attendance} onToggleMute={noop} onSignOut={noop}
+      onOfficialAttendance={noop} oltPassword oltInitial={{ password_saved: true }} />],
+  ["Profile / tester, no OLT password", <Profile key="ptn" session={{ user: { email: "a2027@email.iimcal.ac.in", user_metadata: {} } }}
+      classes={classes} attendance={attendance} onToggleMute={noop} onSignOut={noop}
+      onOfficialAttendance={noop} oltPassword oltInitial={null} />],
   // The last case is a grid OLT doesn't draw today: the screen takes its
   // layout from whatever headings arrive, so a renamed column mustn't break it.
   ["OltAttendance / never read", <OltAttendance key="o0" email="a2027@email.iimcal.ac.in"
       initial={null} onBack={noop} />],
   ["OltAttendance / read", <OltAttendance key="o1" email="a2027@email.iimcal.ac.in"
       initial={oltSnap} onBack={noop} />],
+  ["OltAttendance / password saved", <OltAttendance key="o5" email="a2027@email.iimcal.ac.in"
+      initial={{ ...oltSnap, password_saved: true }} onBack={noop} />],
   ["OltAttendance / last try failed", <OltAttendance key="o2" email="a2027@email.iimcal.ac.in"
       initial={{ ...oltSnap, attempted_at: "2026-10-12T09:00:00Z",
         last_error: "OLT didn't accept that password." }} />],
@@ -308,6 +317,9 @@ const cases = [
   ["AttendanceBreakdown / OLT section", <AttendanceBreakdown key="abo" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides} onBack={noop}
       showOlt email="a2027@email.iimcal.ac.in" oltInitial={oltSnap} />],
+  ["AttendanceBreakdown / OLT password saved", <AttendanceBreakdown key="abo7" classes={classes}
+      attendance={attendance} term={term} now={now} overrides={overrides}
+      showOlt email="a2027@email.iimcal.ac.in" oltInitial={{ ...oltSnap, password_saved: true }} />],
   // A course OLT has dates for that the timetable also has, two meetings on
   // one day included — the rows that pair rather than stand alone.
   ["AttendanceBreakdown / OLT paired with the timetable", <AttendanceBreakdown key="abo5"

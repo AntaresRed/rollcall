@@ -944,6 +944,7 @@ export default function App() {
             onScheduleAdmin={isAdmin && !readOnly ? () => openSub("admin") : null}
             onPorDashboard={isAdmin && !readOnly ? () => openSub("pordash") : null}
             onOfficialAttendance={isTester && !readOnly ? () => openSub("olt") : null}
+            oltPassword={isTester && !readOnly}
           />
         )}
         </Suspense>

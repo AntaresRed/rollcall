@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { loadOltAttendance, refreshOltAttendance, termNumber } from "../lib/api";
+import { loadOltAttendance, termNumber } from "../lib/api";
 import OltCourses from "./OltCourses";
-import { EyeIcon, offerToSave } from "./OltSync";
+import { useOltRead } from "./OltSync";
 
 const fmtWhen = (iso) =>
   iso ? new Date(iso).toLocaleString(undefined, {
@@ -16,12 +16,13 @@ const TERMS = [1, 2, 3, 4, 5, 6];
 /**
  * The institute's own attendance record, read from OLT. Tester-only.
  *
- * The term and password come first, and the attendance shown is only ever
- * the term picked. OLT opens on a term of its own choosing, so a read that
- * didn't name one once showed Term I to someone asking about Term V.
+ * The term comes first, and the attendance shown is only ever the term
+ * picked. OLT opens on a term of its own choosing, so a read that didn't name
+ * one once showed Term I to someone asking about Term V.
  *
- * The password is asked for every time and kept nowhere by the app. The
- * fields are marked up so the phone's password manager can fill it in.
+ * The password works as on the breakdown's OLT Sync, through the same form:
+ * asked for, with "Remember my password", until one is saved; after that,
+ * just the button.
  *
  * Shown as OLT printed it — its column headings, its numbers — and never mixed
  * into the student's own marks. The two are different records, and this one
@@ -32,11 +33,11 @@ const TERMS = [1, 2, 3, 4, 5, 6];
 export default function OltAttendance({ email, onBack, initial }) {
   const [snap, setSnap] = useState(initial ?? null);
   const [loading, setLoading] = useState(initial === undefined);
-  const [busy, setBusy] = useState("");
-  const [error, setError] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [term, setTerm] = useState(String(termNumber(initial?.term) ?? ""));
+  const read = useOltRead({
+    email, saved: Boolean(snap?.password_saved), onSnap: setSnap, showLogin: true,
+  });
 
   useEffect(() => {
     if (initial !== undefined) return;
@@ -45,40 +46,18 @@ export default function OltAttendance({ email, onBack, initial }) {
         setSnap(s);
         setTerm(String(termNumber(s?.term) ?? ""));
       })
-      .catch((err) => setError(err.message || "Couldn't load your OLT attendance."))
+      .catch((err) => setLoadError(err.message || "Couldn't load your OLT attendance."))
       .finally(() => setLoading(false));
   }, [initial]);
 
-  const loginId = String(email ?? "").split("@")[0];
-  const ready = Boolean(term) && Boolean(password);
-
-  const refresh = async (e) => {
-    e?.preventDefault();
-    if (!ready) return;
-    setBusy("refresh");
-    setError("");
-    try {
-      const res = await refreshOltAttendance({ term: `Term ${term}`, password });
-      setSnap(res.snapshot);
-      // Only once OLT has accepted it, so a typo is never offered for saving.
-      if (loginId) offerToSave(loginId, password);
-      setPassword("");
-      // Hidden again for next time, so it never opens already showing.
-      setShowPassword(false);
-    } catch (err) {
-      setError(err.message);
-      const s = await loadOltAttendance().catch(() => null);
-      if (s) setSnap(s);
-    } finally {
-      setBusy("");
-    }
-  };
+  const ready = Boolean(term) && read.ready;
+  const error = read.error || loadError;
 
   // The stored copy is shown only when it is the term picked. Another term's
   // numbers under this term's name would be the worst thing this screen
   // could show.
   const matches = Boolean(term) && snap?.fetched_at && termNumber(snap.term) === Number(term);
-  const staleError = snap?.last_error
+  const staleError = !error && snap?.last_error
     && (!snap.fetched_at || snap.attempted_at > snap.fetched_at);
 
   return (
@@ -93,70 +72,31 @@ export default function OltAttendance({ email, onBack, initial }) {
       {loading && <div className="empty">Loading…</div>}
 
       {!loading && (
-        <form className="leave-form olt-form" onSubmit={refresh}>
+        <form
+          className="leave-form olt-form"
+          onSubmit={(e) => { e.preventDefault(); if (ready) read.submit(`Term ${term}`); }}
+        >
           <label className="leave-field">
             <span>Term</span>
-            <select value={term} onChange={(e) => { setTerm(e.target.value); setError(""); }}>
+            <select value={term} onChange={(e) => setTerm(e.target.value)}>
               <option value="" disabled>Choose a term</option>
               {TERMS.map((n) => <option key={n} value={String(n)}>Term {n}</option>)}
             </select>
           </label>
 
-          {/* The username half of the pair. Read-only, since the login ID is
-              always the signed-in student's own, but present and marked so
-              the phone files the password under it ("OLT — anuja2027")
-              rather than as a nameless password for this site. */}
-          <label className="leave-field olt-login">
-            <span>OLT login ID</span>
-            <input
-              type="text"
-              name="username"
-              value={loginId}
-              autoComplete="username"
-              readOnly
-            />
-          </label>
+          {read.fields}
 
-          <label className="leave-field">
-            <span>OLT password</span>
-            <div className="olt-pass">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={password}
-                autoComplete="current-password"
-                // Shown as typed, a password must not be "corrected" or
-                // capitalised by the phone's keyboard.
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="olt-eye"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                aria-pressed={showPassword}
-                onClick={() => setShowPassword((v) => !v)}
-              >
-                <EyeIcon off={showPassword} />
-              </button>
-            </div>
-          </label>
-          <p className="olt-pass-note">
-            IIMPresent doesn&apos;t keep your password. Your phone can save it for
-            you and fill it in next time.
-          </p>
-          <button className="btn block" disabled={busy === "refresh" || !ready}>
-            {busy === "refresh"
+          <button className="btn block" disabled={read.busy || !ready}>
+            {read.busy
               ? "Reading OLT…"
               : !term ? "Choose a term first"
-              : !password ? "Enter your OLT password"
+              : !read.ready ? "Enter your OLT password"
               : `Read Term ${term} from OLT`}
           </button>
         </form>
       )}
 
+      {read.warning && <div className="olt-sync-warn">{read.warning}</div>}
       {(error || staleError) && (
         <div className="notice" style={{ marginTop: 14 }}>
           {error || `Last try (${fmtWhen(snap.attempted_at)}): ${snap.last_error}`}
