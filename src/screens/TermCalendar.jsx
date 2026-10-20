@@ -63,7 +63,7 @@ export default function TermCalendar({ term, now, onBack }) {
           travel against them needs telling so before reading them. */}
       <div className="banner warn" role="note" style={{ margin: "0 0 18px" }}>
         <p style={{ color: "var(--warn-ink)", fontWeight: 700 }}>
-          TENTATIVE DATES ONLY. SUBJECT TO CHANGE BY MBA OFFICE.
+          Tentative dates only, subject to change by MBA office.
         </p>
       </div>
 

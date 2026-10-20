@@ -126,7 +126,7 @@ export function RememberNote() {
     <ul className="olt-remember-how">
       <li>
         Encrypted with AES-256 before it&apos;s stored. The key lives apart from
-        the database, so the database only ever holds scrambled text.
+        the database, so the database only ever holds scrambled text, which no one, including IIMPresent owner can't read.
       </li>
       <li>
         No screen, table or export shows it, to you, to anyone running
