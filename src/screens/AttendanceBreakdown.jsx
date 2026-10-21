@@ -64,10 +64,15 @@ export default function AttendanceBreakdown({
     );
   }, [rows]);
 
+  // OLT Sync is tester-only, so only testers are told it's here.
+  const title = showOlt
+    ? "Date-wise attendance breakdown & OLT Sync"
+    : "Date-wise attendance breakdown";
+
   if (!rows.length) {
     return (
       <>
-        <div className="eyebrow">Attendance breakdown</div>
+        <div className="eyebrow">{title}</div>
         <div className="empty">Pick your courses and the split appears here.</div>
         {onBack && (
           <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
@@ -80,7 +85,7 @@ export default function AttendanceBreakdown({
 
   return (
     <>
-      <div className="eyebrow">Attendance breakdown</div>
+      <div className="eyebrow">{title}</div>
       <p className="screen-note">
         Every session so far this term, by course.
       </p>

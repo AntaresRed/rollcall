@@ -931,6 +931,9 @@ export default function App() {
             onShowBreakdown={() => openSub("breakdown")}
             onShowAttendance={() => openSub("attendance")}
             pendingCount={pendingCount}
+            // Same condition as the breakdown's showOlt, so the button only
+            // promises OLT Sync when the screen has it.
+            oltSync={isTester && !readOnly}
           />
         )}
         {tab === "profile" && !subScreen && (

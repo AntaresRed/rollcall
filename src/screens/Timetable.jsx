@@ -20,7 +20,7 @@ const fmtWhen = (iso) =>
  */
 export default function Timetable({
   classes, now, term, overrides = [], consensus = [], onShowCalendar, onReschedule,
-  onShowBreakdown, onShowAttendance, onMove, pendingCount = 0,
+  onShowBreakdown, onShowAttendance, onMove, pendingCount = 0, oltSync = false,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -215,7 +215,8 @@ export default function Timetable({
         )}
         {onShowBreakdown && (
           <button className="btn ghost" onClick={onShowBreakdown}>
-            Attendance breakdown
+            {/* Short forms of the screen's heading, kept to fit the row. */}
+            {oltSync ? "Date-wise & OLT Sync" : "Date-wise attendance"}
           </button>
         )}
         {onShowAttendance && (
