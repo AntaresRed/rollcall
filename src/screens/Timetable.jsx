@@ -202,7 +202,7 @@ export default function Timetable({
       <div className="tt-actions">
         {onReschedule && (
           <button className="btn ghost" onClick={onReschedule}>
-            Reschedule
+            Reschedule Classes
             {waitingForDate > 0 && (
               <span className="tag signal" style={{ marginLeft: 6 }}>{waitingForDate}</span>
             )}
@@ -221,7 +221,7 @@ export default function Timetable({
         )}
         {onShowAttendance && (
           <button className="btn ghost" onClick={onShowAttendance}>
-            Edit attendance
+            Edit Attendance
             {pendingCount > 0 && (
               <span className="tag signal" style={{ marginLeft: 6 }}>{pendingCount}</span>
             )}
