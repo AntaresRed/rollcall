@@ -35,7 +35,7 @@ export default function Today({ occurrences, attendance, now, onMark, readOnly =
       <>
         <div className="eyebrow">{DAY_LONG[today]}</div>
         <div className="empty">
-          Nothing scheduled today. Your next class shows up here automatically.
+          No classes scheduled for today. 
         </div>
       </>
     );
