@@ -1595,6 +1595,80 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   font-weight: 600;
   letter-spacing: -0.01em;
 }
+img.profile-avatar { display: block; }
+
+/* The DP is the way into the picker, with a pencil so it reads as tappable —
+   a plain picture gives no hint that it does anything. */
+.profile-avatar-btn {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+}
+.profile-avatar-edit {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  color: var(--slate);
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 14px 8px;
+}
+.avatar-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--slate);
+  font-size: 12px;
+}
+.avatar-choice-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--rule);
+}
+/* Ink, not the signal colour: magenta is kept for "now", and a picked
+   picture isn't that. */
+.avatar-choice.sel .avatar-choice-img { box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--ink); }
+.avatar-choice.sel { color: var(--ink); font-weight: 600; }
+.avatar-choice:disabled { opacity: 0.6; cursor: progress; }
+.avatar-only {
+  margin-top: -4px;
+  max-width: 76px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  /* Even lines, so a two-word name at the end isn't split onto its own. */
+  text-wrap: balance;
+  color: var(--mute);
+}
+.avatar-error {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--absent-wash);
+  color: var(--absent);
+  font-size: 13px;
+}
 
 .profile-name {
   font-size: 17px;

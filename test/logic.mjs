@@ -40,6 +40,9 @@ import { formFields, formAction, postBackFields, selectOptions, readGrid, hasPas
   termKey, decodeEntities, TERM_SELECT, readDatewise, datewiseAgrees, courseKey, matchSubject,
 } from "../supabase/functions/olt-attendance/parse.ts";
 import { courseKey as appCourseKey, oltCourse, pairSessions } from "../src/lib/olt.js";
+import { AVATARS, avatarByKey, avatarSvg, avatarSrc, usableExclusive, exclusiveSrc } from "../src/lib/avatars.js";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -2843,6 +2846,69 @@ console.log("\nOLT beside the breakdown");
   check("no OLT dates leaves every session unpaired",
     pairSessions(app, null).every((p) => p.olt === null) && pairSessions(app, null).length === 3);
   survives("no sessions either side", () => pairSessions(null, undefined));
+}
+
+console.log("\nanimal DPs");
+{
+  const keys = AVATARS.map((a) => a.key);
+  check("every DP has a key, a name and a colour",
+    AVATARS.every((a) => /^[a-z]+$/.test(a.key) && a.name && /^#[0-9A-F]{6}$/i.test(a.bg) && a.art));
+  check("no two DPs share a key", new Set(keys).size === keys.length);
+  check("Monty comes first", keys[0] === "monty" && avatarByKey("monty").name === "Monty");
+  // A template slip — a constant misspelt inside `${}` — draws nothing and
+  // throws nothing; it only shows up as the word in the markup.
+  check("no DP drawing has a hole in it",
+    AVATARS.every((a) => !/undefined|null|NaN|\$\{/.test(avatarSvg(a))));
+  check("a picked DP is an SVG data URI",
+    keys.every((k) => avatarSrc(k)?.startsWith("data:image/svg+xml,%3Csvg%20xmlns")));
+  // Null, and a key a newer build knows but this one doesn't, both fall back
+  // to the Google photo.
+  check("no pick draws nothing of ours", avatarSrc(null) === null && avatarSrc(undefined) === null);
+  check("an unknown key draws nothing of ours", avatarSrc("dragon") === null && avatarByKey("dragon") === null);
+  for (const v of [{}, [], 5, "", "MONTY", "__proto__", "constructor"])
+    check("avatarSrc(" + JSON.stringify(v) + ") is null", avatarSrc(v) === null);
+
+  // The database refuses any key not in its check constraint, so the two
+  // lists must match exactly: one in the app but not the database fails on
+  // save, and the reverse is a key nothing can draw.
+  const sql = readFileSync(path.join(process.cwd(), "supabase/profile-avatar.sql"), "utf8");
+  const listed = sql.match(/avatar in \(([^)]*)\)/)?.[1].match(/'([a-z]+)'/g)?.map((s) => s.slice(1, -1)) ?? [];
+  check("profile-avatar.sql allows exactly the DPs the app draws",
+    listed.length === keys.length && [...listed].sort().join() === [...keys].sort().join());
+
+  // One-person DPs: anything not shaped like the table promises is dropped.
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"/>';
+  const good = { key: "only-dot", name: "Dot", svg };
+  check("a well-formed one-person DP is kept", usableExclusive([good]).length === 1);
+  check("one-person DPs that aren't well-formed are dropped", usableExclusive([
+    { ...good, key: "dot" }, { ...good, key: "only-Dot" }, { ...good, key: "only-" },
+    { ...good, name: "" }, { ...good, svg: "<script>alert(1)</script>" }, { ...good, svg: 5 },
+    null, "only-dot", {},
+  ]).length === 0);
+  for (const v of [null, undefined, {}, "x", 5])
+    check("usableExclusive(" + JSON.stringify(v) + ") is empty", usableExclusive(v).length === 0);
+  check("a one-person DP keeps its own caption",
+    usableExclusive([{ ...good, caption: "For Dot" }])[0].caption === "For Dot");
+  check("no caption, or a blank or odd one, reads \"Just for you\"",
+    [undefined, null, "", "  ", 5, {}].every((caption) =>
+      usableExclusive([{ ...good, caption }])[0]?.caption === "Just for you"));
+  check("a one-person DP is an SVG data URI", exclusiveSrc(good).startsWith("data:image/svg+xml,%3Csvg%20xmlns"));
+  check("a one-person key never draws as a shared animal", avatarSrc("only-dot") === null);
+  check("profile-avatar.sql accepts the only- keys the app expects",
+    /avatar ~ '\^only-\[a-z0-9-\]\{1,40\}\$'/.test(sql));
+
+  // The kitten as it goes into the database: the shape the table's check and
+  // usableExclusive both demand, with no unfilled template left in it.
+  const kittenSql = readFileSync(path.join(process.cwd(), "supabase/avatar-kitten.sql"), "utf8");
+  const kitten = kittenSql.match(/'(only-[a-z0-9-]+)',\s*'([^']+)',\s*'([^']+)',\s*'([^']+)',\s*\$svg\$([\s\S]*?)\$svg\$/);
+  check("avatar-kitten.sql holds one well-formed DP", Boolean(kitten) &&
+    usableExclusive([{ key: kitten[1], name: kitten[3], caption: kitten[4], svg: kitten[5] }]).length === 1 &&
+    kitten[5].length < 20000 && !/undefined|NaN|\$\{/.test(kitten[5]) && kitten[5].trim().endsWith("</svg>"));
+  // The database refuses a caption longer than this, and the whole insert with it.
+  check("the kitten's caption fits the column", Boolean(kitten) && kitten[4].length <= 24);
+  check("the kitten is set on the account it was made for",
+    Boolean(kitten) && kittenSql.includes(`lower(u.email) = '${kitten[2]}'`) &&
+    kittenSql.includes(`set avatar = '${kitten[1]}'`));
 }
 
 Promise.all(later).catch((err) => {

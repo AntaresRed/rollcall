@@ -1040,6 +1040,33 @@ export async function setAlertAfterMinutes(mins) {
   await supabase.from("profiles").update({ alert_after_mins: mins }).eq("id", user.id);
 }
 
+/**
+ * The animal DP the student picked, or null to go back to their Google photo.
+ *
+ * Asks for the row back so that a missing profile row is an error rather
+ * than an update that quietly matched nothing and left the old picture.
+ */
+export async function setProfileAvatar(key) {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar: key })
+    .eq("id", user.id)
+    .select("avatar")
+    .single();
+  if (error) throw error;
+}
+
+/**
+ * DPs drawn for the signed-in student alone. The table's policy returns only
+ * their own rows, so for almost everyone this is an empty list.
+ */
+export async function loadExclusiveAvatars() {
+  const { data, error } = await supabase.from("exclusive_avatars").select("key, name, caption, svg");
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function loadProfile() {
   const { data: { user } } = await supabase.auth.getUser();
   const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();

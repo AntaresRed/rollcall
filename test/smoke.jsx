@@ -185,6 +185,28 @@ const cases = [
       classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
   ["Profile / no session", <Profile key="ps" session={null}
       classes={[]} attendance={[]} onChangeCourses={noop} onSignOut={noop} />],
+  // The animal DP: picked, picking, and a key from a newer build, which
+  // must fall back to the Google photo rather than a blank circle.
+  ["Profile / animal DP", <Profile key="pav" session={{ user: { email: "a2027@email.iimcal.ac.in", user_metadata: {} } }}
+      avatarKey="monty" onChangeAvatar={noop}
+      classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
+  ["Profile / choosing a DP", <Profile key="pap" session={{ user: {
+      email: "a2027@email.iimcal.ac.in",
+      user_metadata: { full_name: "Anuja Sharma", avatar_url: "https://example.test/a.jpg" },
+    } }} avatarKey="owl" onChangeAvatar={noop} startPicking
+      classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
+  ["Profile / unknown DP key", <Profile key="pau" session={{ user: { email: "a2027@email.iimcal.ac.in", user_metadata: {} } }}
+      avatarKey="dragon" onChangeAvatar={noop} startPicking
+      classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
+  // A DP made for one student: worn and in the picker; and worn but not
+  // (yet) loaded, which must show the Google photo, not a broken image.
+  ["Profile / one-person DP", <Profile key="pax" session={{ user: { email: "a2027@email.iimcal.ac.in", user_metadata: {} } }}
+      avatarKey="only-dot" onChangeAvatar={noop} startPicking exclusiveInitial={[{ key: "only-dot", name: "Dot",
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4"/></svg>' }]}
+      classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
+  ["Profile / one-person DP not loaded", <Profile key="pay" session={{ user: { email: "a2027@email.iimcal.ac.in", user_metadata: {} } }}
+      avatarKey="only-dot" onChangeAvatar={noop} exclusiveInitial={null}
+      classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
   ["Faculty", <Faculty key="f" classes={classes} onBack={noop} />],
   ["Faculty / no courses picked", <Faculty key="fe" classes={[]} onBack={noop} />],
   ["Faculty / no classes prop at all", <Faculty key="fn" onBack={noop} />],

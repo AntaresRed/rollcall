@@ -1,7 +1,15 @@
-import { useMemo, useState } from "react";
-import { courseStats } from "../lib/api";
+import { useEffect, useMemo, useState } from "react";
+import { courseStats, loadExclusiveAvatars } from "../lib/api";
 import Stats from "./Stats";
 import { OltPasswordSettings } from "./OltSync";
+import { AVATARS, avatarSrc, usableExclusive, exclusiveSrc } from "../lib/avatars";
+import { track } from "../lib/track";
+
+// The one-person DPs, kept for the rest of the launch so that coming back to
+// this tab doesn't flash the Google photo before the kitten (or whatever it
+// is) arrives again. Keyed by address, so a different account signing in on
+// the same phone never sees the last one's.
+let exclusiveCache = { email: null, rows: [] };
 
 /**
  * Account, attendance overview, and the way out.
@@ -17,12 +25,45 @@ export default function Profile({
   // Testers only: the remembered OLT password, to change or delete.
   // `oltInitial` stands in for its load in the smoke test.
   oltPassword = false, oltInitial,
+  // The animal DP from profiles.avatar, and how to change it — null while
+  // viewing as another cohort, when nothing on this tab writes.
+  // `startPicking` opens the picker for the smoke test.
+  avatarKey = null, onChangeAvatar = null, startPicking = false,
+  // DPs made for this student alone; `exclusiveInitial` stands in for their
+  // load in the smoke test.
+  exclusiveInitial,
 }) {
   const user = session?.user;
   const meta = user?.user_metadata ?? {};
   const name = meta.full_name || meta.name || user?.email?.split("@")[0] || "Student";
   const avatar = meta.avatar_url || meta.picture || null;
   const [avatarFailed, setAvatarFailed] = useState(false);
+
+  const email = user?.email ?? null;
+  const [exclusive, setExclusive] = useState(() => usableExclusive(
+    exclusiveInitial ?? (exclusiveCache.email === email ? exclusiveCache.rows : [])));
+  useEffect(() => {
+    if (exclusiveInitial !== undefined || !email) return undefined;
+    let live = true;
+    // A failure, or a database without the table yet, is simply "none":
+    // the student keeps every other choice.
+    loadExclusiveAvatars()
+      .then((rows) => {
+        exclusiveCache = { email, rows };
+        if (live) setExclusive(usableExclusive(rows));
+      })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [email, exclusiveInitial]);
+
+  // Null for a key this build can't draw, as well as for no pick: either way
+  // the Google photo is what shows, so it's also what the picker marks.
+  const mine = exclusive.find((x) => x.key === avatarKey);
+  const picked = avatarSrc(avatarKey) ?? (mine ? exclusiveSrc(mine) : null);
+  const current = picked ? avatarKey : null;
+  const [picking, setPicking] = useState(startPicking);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const rows = useMemo(() => courseStats(classes, attendance), [classes, attendance]);
 
@@ -37,24 +78,66 @@ export default function Profile({
     .join("")
     .toUpperCase();
 
+  // The Google photo, or the initials when there is none that loads. Drawn on
+  // the card and again as the picker's first choice.
+  const googleFace = (className) => (avatar && !avatarFailed ? (
+    <img
+      className={className}
+      src={avatar}
+      alt=""
+      referrerPolicy="no-referrer"
+      onError={() => setAvatarFailed(true)}
+    />
+  ) : (
+    <div className={`${className} profile-avatar-fallback`} aria-hidden="true">
+      {initials || "?"}
+    </div>
+  ));
+
+  const face = picked
+    ? <img className="profile-avatar" src={picked} alt="" />
+    : googleFace("profile-avatar");
+
+  const openPicker = () => {
+    track("open", "avatar");
+    setSaveError("");
+    setPicking(true);
+  };
+
+  // The picker closes only once the pick has saved, so the card never shows
+  // a picture the database didn't take — on the next open it would quietly
+  // go back to the old one.
+  const choose = async (key) => {
+    if (key === current) { setPicking(false); return; }
+    setSaving(true);
+    setSaveError("");
+    try {
+      await onChangeAvatar(key);
+      setPicking(false);
+    } catch {
+      setSaveError("Couldn't save your picture. Check your connection and try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <>
       <div className="eyebrow">Profile</div>
 
       <div className="profile-card">
-        {avatar && !avatarFailed ? (
-          <img
-            className="profile-avatar"
-            src={avatar}
-            alt=""
-            referrerPolicy="no-referrer"
-            onError={() => setAvatarFailed(true)}
-          />
-        ) : (
-          <div className="profile-avatar profile-avatar-fallback" aria-hidden="true">
-            {initials || "?"}
-          </div>
-        )}
+        {onChangeAvatar ? (
+          <button type="button" className="profile-avatar-btn"
+                  aria-label="Change profile picture" onClick={openPicker}>
+            {face}
+            <span className="profile-avatar-edit" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 20h4L19 9l-4-4L4 16z" />
+              </svg>
+            </span>
+          </button>
+        ) : face}
 
         <div style={{ minWidth: 0, flex: 1 }}>
           <div className="profile-name">{name}</div>
@@ -105,6 +188,53 @@ export default function Profile({
       </div>
 
       <p className="made-by">Made by Anuj Kapse</p>
+
+      {picking && onChangeAvatar && (
+        <div
+          className="modal-back"
+          onClick={(e) => { if (e.target === e.currentTarget && !saving) setPicking(false); }}
+        >
+          <div className="modal avatar-modal" role="dialog" aria-modal="true"
+               aria-label="Choose a profile picture">
+            <div className="modal-head">
+              <span>Choose a picture</span>
+              <button className="modal-x" aria-label="Close" disabled={saving}
+                      onClick={() => setPicking(false)}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              {saveError && <p className="avatar-error">{saveError}</p>}
+              <div className="avatar-grid">
+                <button type="button" className={`avatar-choice${current === null ? " sel" : ""}`}
+                        aria-pressed={current === null} disabled={saving} onClick={() => choose(null)}>
+                  {googleFace("avatar-choice-img")}
+                  <span>Google photo</span>
+                </button>
+                {exclusive.map((x) => (
+                  <button key={x.key} type="button"
+                          className={`avatar-choice${current === x.key ? " sel" : ""}`}
+                          aria-pressed={current === x.key} disabled={saving}
+                          onClick={() => choose(x.key)}>
+                    <img className="avatar-choice-img" src={exclusiveSrc(x)} alt="" />
+                    <span>{x.name}</span>
+                    <span className="avatar-only">{x.caption}</span>
+                  </button>
+                ))}
+                {AVATARS.map((a) => (
+                  <button key={a.key} type="button"
+                          className={`avatar-choice${current === a.key ? " sel" : ""}`}
+                          aria-pressed={current === a.key} disabled={saving}
+                          onClick={() => choose(a.key)}>
+                    <img className="avatar-choice-img" src={avatarSrc(a.key)} alt="" />
+                    <span>{a.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

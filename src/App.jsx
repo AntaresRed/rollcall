@@ -4,7 +4,7 @@ import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
   attendanceKey, isoDate, unmarkedSessions,
   loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
-  loadPublishedCatalogue, loadProfile, cohortOf,
+  loadPublishedCatalogue, loadProfile, setProfileAvatar, cohortOf,
   loadPublishedCohorts, loadCataloguePayload, countedAttendance,
   loadRescheduleConsensus, loadPorAccess, loadLiveVersions,
 } from "./lib/api";
@@ -124,6 +124,8 @@ export default function App() {
   // Opens unreleased screens. Only a way in, like isAdmin: the policies on
   // their tables are what keep the data from anyone without the flag.
   const [isTester, setIsTester] = useState(false);
+  // The animal DP picked on the Profile tab; null is the Google photo.
+  const [avatar, setAvatar] = useState(null);
   // Null once boot has finished means no schedule is published for this
   // student's year — see the boot block for why that is a screen of its own.
   const [cohort, setCohort] = useState(null);
@@ -225,6 +227,7 @@ export default function App() {
         const mine = profile?.cohort_year ?? cohortOf(current.user?.email);
         setIsAdmin(Boolean(profile?.is_admin));
         setIsTester(Boolean(profile?.is_tester));
+        setAvatar(profile?.avatar ?? null);
         setCohort(mine);
 
         const [c, a, t, o, published, versions] = await Promise.all([
@@ -635,6 +638,13 @@ export default function App() {
     };
   }, [nav]);
 
+  // Shown only once the database has taken it. A failure throws back to the
+  // picker, which says so and keeps the old picture on the card.
+  const changeAvatar = useCallback(async (key) => {
+    await setProfileAvatar(key);
+    setAvatar(key);
+  }, []);
+
   const handleSignOut = useCallback(async () => {
     if (!confirm("Sign out of IIMPresent? Your timetable and attendance stay on the server.")) return;
     await signOut();
@@ -926,6 +936,8 @@ export default function App() {
         {tab === "profile" && !subScreen && (
           <Profile
             session={session}
+            avatarKey={avatar}
+            onChangeAvatar={readOnly ? null : changeAvatar}
             classes={viewClasses}
             attendance={viewAttendance}
             onChangeCourses={readOnly ? null : startOver}
