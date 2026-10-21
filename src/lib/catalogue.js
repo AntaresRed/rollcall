@@ -135,7 +135,6 @@ export function classesFromCatalogue(payload, section = null) {
           credits: c.credits,
           total_classes: c.total_classes,
           min_pct: c.min_pct,
-          muted: false,
           confirmed: true,
         });
       });

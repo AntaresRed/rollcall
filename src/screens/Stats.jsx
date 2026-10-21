@@ -31,7 +31,7 @@ function formatInstructors(list) {
  * more" is the question students are actually asking; the percentage is the
  * long way round to the same answer.
  */
-export default function Stats({ classes, attendance, onToggleMute }) {
+export default function Stats({ classes, attendance }) {
   const rows = useMemo(() => courseStats(classes, attendance), [classes, attendance]);
 
   if (!rows.length) {
@@ -60,7 +60,6 @@ export default function Stats({ classes, attendance, onToggleMute }) {
                 <div className="budget-name">{r.subject}</div>
                 <div className="budget-sub">
                   {instructorLine ?? `${r.credits} cr · ${r.total_classes} classes · ${r.min_pct}% needed`}
-                  {r.muted && <span className="tag quiet" style={{ marginLeft: 6 }}>muted</span>}
                 </div>
                 {r.venue && (
                   <div className="budget-venue"><VenueChip venue={r.venue} /></div>
@@ -91,17 +90,6 @@ export default function Stats({ classes, attendance, onToggleMute }) {
                 </span>
               )}
             </div>
-
-            {onToggleMute && (
-              <button
-                className="mark"
-                style={{ marginTop: 10 }}
-                aria-pressed={r.muted}
-                onClick={() => onToggleMute(r.subject, !r.muted)}
-              >
-                {r.muted ? "Unmute alerts" : "Mute alerts"}
-              </button>
-            )}
           </div>
         );
       })}

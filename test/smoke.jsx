@@ -166,37 +166,37 @@ const cases = [
         subject: cls.subject, class_date: date, start_time: cls.start_time, status: "present",
       }))} term={term} overrides={overrides} now={new Date("2026-08-24T09:00:00")}
       onMark={noop} onBack={noop} />],
-  ["Stats", <Stats key="st" classes={classes} attendance={attendance} onToggleMute={noop} />],
-  ["Stats / nothing marked", <Stats key="ste" classes={classes} attendance={[]} onToggleMute={noop} />],
+  ["Stats", <Stats key="st" classes={classes} attendance={attendance} />],
+  ["Stats / nothing marked", <Stats key="ste" classes={classes} attendance={[]} />],
   ["Stats / over budget", <Stats key="sto" classes={classes} attendance={
       Array.from({ length: 9 }, (_, i) => ({
         id: `x${i}`, subject: "Consumption Culture & Markets", class_id: "c1",
         class_date: `2026-09-${String(i + 1).padStart(2, "0")}`,
         start_time: "16:15", status: "absent",
-      }))} onToggleMute={noop} />],
+      }))} />],
   ["Profile / admin", <Profile key="pa" session={{ user: { email: "a@email.iimcal.ac.in", user_metadata: {} } }}
-      classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop}
+      classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop}
       onScheduleAdmin={noop} onPorDashboard={noop} />],
   ["Profile", <Profile key="p" session={{ user: {
       email: "anuja2027@email.iimcal.ac.in",
       user_metadata: { full_name: "Anuja Sharma", avatar_url: "https://example.test/a.jpg" },
-    } }} classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
+    } }} classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
   ["Profile / no avatar or name", <Profile key="pn" session={{ user: { email: "x@email.iimcal.ac.in", user_metadata: {} } }}
-      classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
+      classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
   ["Profile / no session", <Profile key="ps" session={null}
-      classes={[]} attendance={[]} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop} />],
+      classes={[]} attendance={[]} onChangeCourses={noop} onSignOut={noop} />],
   ["Faculty", <Faculty key="f" classes={classes} onBack={noop} />],
   ["Faculty / no courses picked", <Faculty key="fe" classes={[]} onBack={noop} />],
   ["Faculty / no classes prop at all", <Faculty key="fn" onBack={noop} />],
   ["Profile / tester", <Profile key="pt" session={{ user: { email: "a@email.iimcal.ac.in", user_metadata: {} } }}
-      classes={classes} attendance={attendance} onToggleMute={noop} onChangeCourses={noop} onSignOut={noop}
+      classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop}
       onOfficialAttendance={noop} />],
   // The remembered OLT password: kept, and not.
   ["Profile / tester, OLT password saved", <Profile key="pto" session={{ user: { email: "a2027@email.iimcal.ac.in", user_metadata: {} } }}
-      classes={classes} attendance={attendance} onToggleMute={noop} onSignOut={noop}
+      classes={classes} attendance={attendance} onSignOut={noop}
       onOfficialAttendance={noop} oltPassword oltInitial={{ password_saved: true }} />],
   ["Profile / tester, no OLT password", <Profile key="ptn" session={{ user: { email: "a2027@email.iimcal.ac.in", user_metadata: {} } }}
-      classes={classes} attendance={attendance} onToggleMute={noop} onSignOut={noop}
+      classes={classes} attendance={attendance} onSignOut={noop}
       onOfficialAttendance={noop} oltPassword oltInitial={null} />],
   // The last case is a grid OLT doesn't draw today: the screen takes its
   // layout from whatever headings arrive, so a renamed column mustn't break it.
@@ -370,7 +370,7 @@ const cases = [
   ["Today / malformed rows", <Today key="tm" occurrences={[
       { cls: { id: "z1", subject: "Broken" }, date: isoDate(now), movedFrom: null },
     ]} attendance={[]} now={now} onMark={noop} />],
-  ["Stats / class with no credit fields", <Stats key="stm" classes={[{ id: "z", subject: "Bare" }]} attendance={[]} onToggleMute={noop} />],
+  ["Stats / class with no credit fields", <Stats key="stm" classes={[{ id: "z", subject: "Bare" }]} attendance={[]} />],
 ];
 
 let failed = 0;

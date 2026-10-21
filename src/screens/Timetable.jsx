@@ -169,7 +169,7 @@ export default function Timetable({
                               {c.room || "—"}
                               {c.section ? ` · ${c.section}` : ""}
                             </div>
-                            {(PHASE_LABEL[c.term_phase] || c.muted || c._dateCount) && (
+                            {(PHASE_LABEL[c.term_phase] || c._dateCount) && (
                               <div className="tt-tags">
                                 {c._dateCount ? (
                                   <span className="tag signal">
@@ -179,7 +179,6 @@ export default function Timetable({
                                 {PHASE_LABEL[c.term_phase] && (
                                   <span className="tag">{PHASE_LABEL[c.term_phase]}</span>
                                 )}
-                                {c.muted && <span className="tag quiet">muted</span>}
                               </div>
                             )}
                           </div>
@@ -216,7 +215,7 @@ export default function Timetable({
         {onShowBreakdown && (
           <button className="btn ghost" onClick={onShowBreakdown}>
             {/* Short forms of the screen's heading, kept to fit the row. */}
-            {oltSync ? "Date-wise & OLT Sync" : "Date-wise attendance"}
+            {oltSync ? "Date-wise status & OLT Sync" : "Date-wise attendance"}
           </button>
         )}
         {onShowAttendance && (

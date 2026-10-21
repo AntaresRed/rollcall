@@ -63,7 +63,6 @@ export default function OltAttendance({ email, onBack, initial }) {
   return (
     <>
       <div className="eyebrow">Official attendance</div>
-      <div className="dev-flag dev-flag-banner">DO NOT TOUCH, UNDER DEVELOPMENT</div>
       <p className="screen-note">
         The institute&apos;s own record, read from OLT. It&apos;s separate from
         the classes you mark here, and only you can see it.

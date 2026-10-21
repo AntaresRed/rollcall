@@ -101,8 +101,8 @@ export async function loadClasses() {
 }
 
 // Fields on a saved class row that the catalogue owns, and may correct after a
-// student has already picked the course. Deliberately excludes `muted` and
-// `confirmed`, which belong to the student, and the three fields that make up
+// student has already picked the course. Deliberately excludes `confirmed`,
+// which belongs to the student, and the three fields that make up
 // the reconcile key below, which cannot drift by definition.
 const CATALOGUE_FIELDS = [
   "day_of_week", "end_time", "course_code", "section",
@@ -176,12 +176,11 @@ export async function saveTimetable(rows) {
     credits: r.credits ?? 3.0,
     total_classes: r.total_classes ?? 20,
     min_pct: r.min_pct ?? 75,
-    muted: r.muted ?? false,
     confirmed: true,
   }));
   const wantedKeys = new Set(wanted.map(key));
 
-  // A row that already exists keeps its id — and its mute setting.
+  // A row that already exists keeps its id.
   const toInsert = wanted.filter((r) => !currentByKey.has(key(r)));
   const toDelete = (current ?? []).filter((r) => !wantedKeys.has(key(r))).map((r) => r.id);
 
@@ -355,7 +354,6 @@ export function courseStats(classes, attendance) {
       ...skipBudget(c),
       present: 0,
       absent: 0,
-      muted: Boolean(c.muted),
     });
   }
 
@@ -378,19 +376,6 @@ export function courseStats(classes, attendance) {
       };
     })
     .sort((a, b) => a.skipsLeft - b.skipsLeft);
-}
-
-// ---------- mute ----------
-
-/** Mute every meeting of a course at once — students think in courses. */
-export async function setCourseMuted(subject, muted) {
-  const { data: { user } } = await supabase.auth.getUser();
-  const { error } = await supabase
-    .from("classes")
-    .update({ muted })
-    .eq("user_id", user.id)
-    .eq("subject", subject);
-  if (error) throw error;
 }
 
 // ---------- rescheduling ----------

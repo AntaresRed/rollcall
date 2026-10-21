@@ -298,7 +298,6 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
     fetchAll<Record<string, string>>((from, to) =>
       admin.from("classes").select("*")
         .eq("confirmed", true)
-        .eq("muted", false)          // per-course mute
         .range(from, to)),
   ]);
 
@@ -397,7 +396,7 @@ async function sweep(started: number, pending: Pending): Promise<Response> {
     if (String(o.new_date).slice(0, 10) !== now.date) continue;
 
     const base = classById.get(String(o.class_id));
-    if (!base || base.muted) continue;
+    if (!base) continue;
 
     const startTime = o.new_start
       ? String(o.new_start).slice(0, 5)

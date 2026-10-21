@@ -7,12 +7,12 @@ import { OltPasswordSettings } from "./OltSync";
  * Account, attendance overview, and the way out.
  *
  * The per-course detail is the same component the Attendance tab used; what's
- * added above it is the summary a student actually wants at a glance — how
- * many courses are close to the line — and confirmation of which account
+ * added above it is the one number a student wants at a glance — how many
+ * courses are close to the line — and confirmation of which account
  * they're signed in with, which matters on a shared laptop.
  */
 export default function Profile({
-  session, classes, attendance, onToggleMute, onChangeCourses, onSignOut,
+  session, classes, attendance, onChangeCourses, onSignOut,
   onScheduleAdmin, onOfficialAttendance, onPorDashboard,
   // Testers only: the remembered OLT password, to change or delete.
   // `oltInitial` stands in for its load in the smoke test.
@@ -26,17 +26,9 @@ export default function Profile({
 
   const rows = useMemo(() => courseStats(classes, attendance), [classes, attendance]);
 
-  const summary = useMemo(() => {
-    const attended = rows.reduce((n, r) => n + r.present, 0);
-    const counted = rows.reduce((n, r) => n + r.present + r.absent, 0);
-    return {
-      courses: rows.length,
-      pct: counted ? Math.round((attended / counted) * 100) : null,
-      // "Close to the line" is one skip or fewer — the point at which the
-      // next missed class starts to matter.
-      atRisk: rows.filter((r) => r.skipsLeft <= 1).length,
-    };
-  }, [rows]);
+  // "Close to the line" is one skip or fewer — the point at which the next
+  // missed class starts to matter.
+  const atRisk = useMemo(() => rows.filter((r) => r.skipsLeft <= 1).length, [rows]);
 
   const initials = name
     .split(/\s+/)
@@ -70,34 +62,21 @@ export default function Profile({
         </div>
       </div>
 
-      {summary.courses > 0 && (
-        <div className="profile-summary">
-          <div className="ps-cell">
-            <strong>{summary.courses}</strong>
-            <span>{summary.courses === 1 ? "course" : "courses"}</span>
-          </div>
-          {/* The one cell tinted by how it's going: of the three, it is the
-              number the 75% line is drawn against. */}
-          <div className={`ps-cell${summary.pct === null ? "" : summary.pct < 75 ? " pct low" : " pct"}`}>
-            <strong>{summary.pct === null ? "—" : `${summary.pct}%`}</strong>
-            <span>attended</span>
-          </div>
-          <div className={`ps-cell${summary.atRisk ? " warn" : ""}`}>
-            <strong>{summary.atRisk}</strong>
-            <span>near the line</span>
-          </div>
+      {rows.length > 0 && (
+        <div className={`profile-summary${atRisk ? " warn" : ""}`}>
+          <strong>{atRisk}</strong>
+          <span>{atRisk === 1 ? "course" : "courses"} near the line</span>
         </div>
       )}
 
-      <Stats classes={classes} attendance={attendance} onToggleMute={onToggleMute} />
+      <Stats classes={classes} attendance={attendance} />
 
       <div className="profile-actions">
         {/* Testers only, and again only a way in: olt_attendance's policy
             returns nothing to anyone else. */}
         {onOfficialAttendance && (
-          <button className="btn ghost block dev-entry" onClick={onOfficialAttendance}>
+          <button className="btn ghost block" onClick={onOfficialAttendance}>
             Official attendance (OLT)
-            <span className="dev-flag">DO NOT TOUCH, UNDER DEVELOPMENT</span>
           </button>
         )}
         {oltPassword && <OltPasswordSettings email={user?.email ?? ""} initial={oltInitial} />}

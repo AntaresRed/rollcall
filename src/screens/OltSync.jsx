@@ -296,7 +296,6 @@ export default function OltSync({
         <span className="olt-sync-mark"><SyncIcon /></span>
         <span>OLT Sync</span>
       </div>
-      <div className="dev-flag dev-flag-banner">DO NOT TOUCH, UNDER DEVELOPMENT</div>
 
       <div className="olt-sync-when">
         {loading ? "Loading…"
@@ -389,7 +388,6 @@ export function OltPasswordSettings({ email, initial }) {
     <section className="olt-pw">
       <div className="olt-pw-head">
         <span>OLT password</span>
-        <span className="dev-flag">UNDER DEVELOPMENT</span>
       </div>
       <div className="olt-pw-state">
         {saved === null ? "Loading…"

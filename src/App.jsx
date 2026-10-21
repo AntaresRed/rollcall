@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } fro
 import { supabase, getSession, signOut, readAuthError } from "./lib/supabase";
 import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
-  attendanceKey, isoDate, setCourseMuted, unmarkedSessions,
+  attendanceKey, isoDate, unmarkedSessions,
   loadOverrides, rescheduleSession, clearOverride, occurrencesOn,
   loadPublishedCatalogue, loadProfile, cohortOf,
   loadPublishedCohorts, loadCataloguePayload, countedAttendance,
@@ -479,19 +479,6 @@ export default function App() {
     }
   };
 
-  const toggleMute = useCallback(async (subject, muted) => {
-    if (readOnlyRef.current) return;
-    setClasses((prev) =>
-      prev.map((c) => (c.subject === subject ? { ...c, muted } : c)));
-    try {
-      await setCourseMuted(subject, muted);
-      say(muted ? "Alerts muted for this course" : "Alerts back on");
-    } catch {
-      setClasses(await loadClasses());
-      say("Couldn't change that. Try again.");
-    }
-  }, []);
-
   const moveSession = useCallback(async (cls, originalDate, change) => {
     if (readOnlyRef.current) return;
     try {
@@ -941,7 +928,6 @@ export default function App() {
             session={session}
             classes={viewClasses}
             attendance={viewAttendance}
-            onToggleMute={readOnly ? null : toggleMute}
             onChangeCourses={readOnly ? null : startOver}
             onSignOut={handleSignOut}
             onScheduleAdmin={isAdmin && !readOnly ? () => openSub("admin") : null}

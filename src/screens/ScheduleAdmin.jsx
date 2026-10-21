@@ -311,8 +311,7 @@ export default function ScheduleAdmin({ onBack }) {
         Publishing sets the term dates and break weeks for every student, and
         corrects the saved rows of anyone who has already picked these courses —
         phase, venue, credit rules and end time. It never adds or removes a
-        course from anybody's timetable, and never touches attendance or a
-        student's own mute settings.
+        course from anybody's timetable, and never touches attendance.
       </p>
 
       {onBack && (

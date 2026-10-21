@@ -76,7 +76,6 @@ export default function Today({ occurrences, attendance, now, onMark, readOnly =
                     <VenueChip venue={venueOf(c)} />
                     {phase && <span className="tag">{phase}</span>}
                     {live && <span className="tag signal">In session</span>}
-                    {c.muted && <span className="tag quiet">muted</span>}
                     {movedFrom && <span className="tag signal">rescheduled</span>}
                   </div>
 
