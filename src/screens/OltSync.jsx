@@ -298,22 +298,26 @@ export default function OltSync({
   const read = useOltRead({ email, saved, onSnap: onSynced, justSynced });
 
   const thisTerm = Boolean(snap?.fetched_at) && n !== null && termNumber(snap.term) === n;
+  const otherTerm = Boolean(snap?.fetched_at) && !thisTerm;
   const staleError = !read.error && snap?.last_error
     && (!snap.fetched_at || snap.attempted_at > snap.fetched_at);
 
   return (
     <section className="olt-sync">
+      {/* When it was last read sits in the heading row, so the card opens on
+          the two facts that matter — what this is and how fresh — in one line. */}
       <div className="olt-sync-head">
         <span className="olt-sync-mark"><SyncIcon /></span>
         <span>OLT Sync</span>
+        <span className="olt-sync-when">
+          <small>{otherTerm ? `Last synced · ${snap.term}` : "Last synced"}</small>
+          <b>{loading ? "Loading…" : snap?.fetched_at ? fmtSynced(snap.fetched_at) : "Not yet"}</b>
+        </span>
       </div>
 
-      <div className="olt-sync-when">
-        {loading ? "Loading…"
-          : thisTerm ? <>Last synced <b>{fmtSynced(snap.fetched_at)}</b></>
-          : snap?.fetched_at ? <>Last synced for {snap.term}, {fmtSynced(snap.fetched_at)}. Sync to read {termLabel}.</>
-          : "Not synced yet"}
-      </div>
+      {otherTerm && n !== null && !loading && (
+        <div className="olt-sync-note" style={{ marginBottom: 10 }}>Sync to read {termLabel}.</div>
+      )}
 
       {n === null ? (
         <div className="olt-sync-note">
@@ -321,10 +325,14 @@ export default function OltSync({
         </div>
       ) : !loading && (
         <form className="olt-sync-form" onSubmit={(e) => { e.preventDefault(); read.submit(`Term ${n}`); }}>
-          {read.fields}
+          {/* With a password saved, the form is only the button, and the line
+              saying it's saved reads as a footnote to it rather than as a
+              step before it. */}
+          {!saved && read.fields}
           <button className="btn block olt-sync-go" disabled={read.busy || !read.ready}>
             {read.busy ? "Syncing…" : "Sync now"}
           </button>
+          {saved && read.fields}
         </form>
       )}
 

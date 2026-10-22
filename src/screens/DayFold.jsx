@@ -9,13 +9,15 @@
  * brings the keyboard, ARIA and open/closed handling with it. Every date
  * starts shut, so a screen opens as a list of dates to choose from.
  */
-export default function DayFold({ day, date, tally = null, children }) {
+// `heading` and `aside` rather than day and date: Edit attendance leads with
+// the day and Reschedule with the date, so which comes first is the caller's.
+export default function DayFold({ heading, aside, tally = null, children }) {
   return (
     <details className="daylist fold">
       <summary className="daylist-date">
         <div className="daylist-day">
-          {day}
-          <span>{date}</span>
+          {heading}
+          <span>{aside}</span>
         </div>
         {tally}
         <svg className="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true">

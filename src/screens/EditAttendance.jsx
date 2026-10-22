@@ -96,8 +96,8 @@ export default function EditAttendance({
       {byDate.map(([date, items]) => (
         <DayFold
           key={date}
-          day={label(date)}
-          date={date}
+          heading={label(date)}
+          aside={date}
           tally={<Tally items={items} />}
         >
           {items.map(({ cls, movedFrom, status }) => (

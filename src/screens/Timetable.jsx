@@ -196,25 +196,12 @@ export default function Timetable({
         </div>
       </div>
 
-      {/* Only what concerns this week's schedule: the two that change or
-          explain it, then the two about what was recorded against it. The
-          directories are reference material rather
-          than the week itself, so they live under Utils; choosing courses is
-          an account-level decision and lives on Profile. */}
+      {/* Only what concerns this week's schedule: the two about what was
+          recorded against it on top, as the ones reached for most, then the
+          two that explain or change it. The directories are reference
+          material rather than the week itself, so they live under Utils;
+          choosing courses is an account-level decision and lives on Profile. */}
       <div className="tt-actions">
-        {onReschedule && (
-          <button className="btn ghost" onClick={onReschedule}>
-            Reschedule Classes
-            {waitingForDate > 0 && (
-              <span className="tag signal" style={{ marginLeft: 6 }}>{waitingForDate}</span>
-            )}
-          </button>
-        )}
-        {onShowCalendar && (
-          <button className="btn ghost" onClick={onShowCalendar}>
-            Term calendar
-          </button>
-        )}
         {onShowBreakdown && (
           <button
             className={`btn ghost${oltSync && oltMismatches > 0 ? " has-bang" : ""}`}
@@ -238,6 +225,19 @@ export default function Timetable({
             Edit Attendance
             {pendingCount > 0 && (
               <span className="tag signal" style={{ marginLeft: 6 }}>{pendingCount}</span>
+            )}
+          </button>
+        )}
+        {onShowCalendar && (
+          <button className="btn ghost" onClick={onShowCalendar}>
+            Term calendar
+          </button>
+        )}
+        {onReschedule && (
+          <button className="btn ghost" onClick={onReschedule}>
+            Reschedule Classes
+            {waitingForDate > 0 && (
+              <span className="tag signal" style={{ marginLeft: 6 }}>{waitingForDate}</span>
             )}
           </button>
         )}

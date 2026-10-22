@@ -4208,7 +4208,7 @@ button.por-card:hover { border-color: var(--signal); }
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--signal-deep);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .olt-sync-mark {
   display: inline-flex;
@@ -4220,10 +4220,29 @@ button.por-card:hover { border-color: var(--signal); }
   background: var(--signal);
   color: #fff;
 }
+/* Right-aligned in the heading row, label over value, so a long date wraps
+   neither into the title nor onto a line of its own. */
 .olt-sync-when {
-  font-size: 13px;
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: right;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0;
   color: var(--slate);
-  margin-bottom: 12px;
+  min-width: 0;
+  white-space: normal;
+}
+.olt-sync-head { white-space: nowrap; }   /* "OLT Sync" never breaks */
+.olt-sync-when small {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--mute);
 }
 .olt-sync-when b { color: var(--ink); font-weight: 600; }
 .olt-sync-note { font-size: 13px; color: var(--mute); }

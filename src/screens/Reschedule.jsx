@@ -140,9 +140,10 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
   const renderDay = ([date, items]) => (
     <DayFold
       key={date}
-      day={date === today ? "Today" : DAY_LONG[weekdayOf(new Date(`${date}T00:00:00`))]}
-      // The heading already names the day, so its date leaves the weekday out.
-      date={new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+      // Date first, then the day. The date is what a reschedule notice gives,
+      // so it's what the student scans this list for.
+      heading={new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+      aside={date === today ? "Today" : DAY_LONG[weekdayOf(new Date(`${date}T00:00:00`))]}
       tally={<DayTally items={items} />}
     >
 
