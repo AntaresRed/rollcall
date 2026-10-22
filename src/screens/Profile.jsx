@@ -21,6 +21,9 @@ let exclusiveCache = { email: null, rows: [] };
  */
 export default function Profile({
   session, classes, attendance, onChangeCourses, onSignOut,
+  // Needed so the budgets count only marks on sessions that were held — the
+  // same count the breakdown shows.
+  term = null, now, overrides = [],
   onScheduleAdmin, onOfficialAttendance, onPorDashboard,
   // Testers only: the remembered OLT password, to change or delete.
   // `oltInitial` stands in for its load in the smoke test.
@@ -65,7 +68,10 @@ export default function Profile({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
-  const rows = useMemo(() => courseStats(classes, attendance), [classes, attendance]);
+  const rows = useMemo(
+    () => courseStats(classes, attendance, term, now ?? new Date(), overrides),
+    [classes, attendance, term, now, overrides],
+  );
 
   // "Close to the line" is one skip or fewer — the point at which the next
   // missed class starts to matter.
@@ -152,7 +158,7 @@ export default function Profile({
         </div>
       )}
 
-      <Stats classes={classes} attendance={attendance} />
+      <Stats classes={classes} attendance={attendance} term={term} now={now} overrides={overrides} />
 
       <div className="profile-actions">
         {/* Testers only, and again only a way in: olt_attendance's policy

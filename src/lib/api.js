@@ -333,8 +333,17 @@ export function skipBudget({ total_classes = 20, min_pct = 75 } = {}) {
   return { total, mustAttend, allowedAbsences: Math.max(0, total - mustAttend) };
 }
 
-/** Per-course rollup used by both the Attendance screen and the Today header. */
-export function courseStats(classes, attendance) {
+/**
+ * Per-course rollup behind Profile's skip budgets.
+ *
+ * The marks are counted the way the breakdown counts them — joined onto the
+ * sessions the term actually held — rather than by counting rows. Counting
+ * rows kept every mark left on a date no class meets any more (a slot later
+ * moved, a time the timetable changed), so Profile could show four misses
+ * where the breakdown, and the student, knew of two. With no term calendar
+ * both fall back to the rows, so they still agree.
+ */
+export function courseStats(classes, attendance, term = null, now = new Date(), overrides = []) {
   const bySubject = new Map();
 
   for (const c of classes) {
@@ -357,11 +366,11 @@ export function courseStats(classes, attendance) {
     });
   }
 
-  for (const a of attendance) {
-    const row = bySubject.get(a.subject);
+  for (const b of attendanceBreakdown(classes, attendance, term, now, overrides)) {
+    const row = bySubject.get(b.subject);
     if (!row) continue;
-    if (a.status === "present") row.present += 1;
-    else if (a.status === "absent") row.absent += 1;
+    row.present = b.present;
+    row.absent = b.absent;
   }
 
   return [...bySubject.values()]
@@ -946,13 +955,15 @@ export function attendanceBreakdown(
     for (const { cls, date, movedFrom } of expectedSessions(
       classes, term, { from: term.term_start, to: today }, overrides,
     )) {
-      // Today's classes join the count only once they have actually ended,
-      // matching how unmarkedSessions decides the same question.
-      if (date === today && toMinutes(hhmm(cls.end_time)) > nowMinutes) continue;
+      const mark = status.get(attendanceKey(cls.subject, date, cls.start_time)) ?? null;
+      // An unmarked class today joins the count only once it has actually
+      // ended, matching how unmarkedSessions decides the same question. One
+      // already marked counts at once: Profile's budgets come from here, and
+      // marking yourself absent mid-class should spend the skip then.
+      if (mark === null && date === today && toMinutes(hhmm(cls.end_time)) > nowMinutes) continue;
       const row = rows.get(cls.subject);
       if (!row) continue;
       row.expected += 1;
-      const mark = status.get(attendanceKey(cls.subject, date, cls.start_time)) ?? null;
       row.sessions.push({
         // The class row itself, so a session can be marked from here — OLT
         // Sync fills gaps and fixes mismatches straight from this list.

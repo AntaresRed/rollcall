@@ -31,8 +31,11 @@ function formatInstructors(list) {
  * more" is the question students are actually asking; the percentage is the
  * long way round to the same answer.
  */
-export default function Stats({ classes, attendance }) {
-  const rows = useMemo(() => courseStats(classes, attendance), [classes, attendance]);
+export default function Stats({ classes, attendance, term = null, now, overrides = [] }) {
+  const rows = useMemo(
+    () => courseStats(classes, attendance, term, now ?? new Date(), overrides),
+    [classes, attendance, term, now, overrides],
+  );
 
   if (!rows.length) {
     return (

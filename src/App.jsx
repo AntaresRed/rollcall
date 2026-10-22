@@ -1004,6 +1004,9 @@ export default function App() {
             onChangeAvatar={readOnly ? null : changeAvatar}
             classes={viewClasses}
             attendance={viewAttendance}
+            term={viewTerm}
+            now={now}
+            overrides={viewOverrides}
             onChangeCourses={readOnly ? null : startOver}
             onSignOut={handleSignOut}
             onScheduleAdmin={isAdmin && !readOnly ? () => openSub("admin") : null}

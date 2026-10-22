@@ -340,6 +340,31 @@ check("a moved session is flagged as moved",
 check("no term means no session list to show",
   bdNoTerm.every(r => r.sessions === null));
 
+// A class marked while it is still running counts at once; unmarked, it waits.
+const bdLive = attendanceBreakdown(cls, [
+  { subject: "W", class_date: "2026-09-07", start_time: "10:15", status: "absent" },
+], term, new Date("2026-09-07T10:30:00"), []);
+check("a marked class in progress is counted",
+  bdLive.find(r => r.subject === "W").absent === 1 &&
+  bdLive.find(r => r.subject === "W").expected === 3);
+
+// Profile's budgets and the breakdown must report the same misses. Marks on a
+// vacated date, on a time the class doesn't meet, and before term all belong
+// to no session the term held.
+const stray = [
+  { subject: "W", class_date: "2026-08-24", start_time: "10:15", status: "absent" },
+  { subject: "W", class_date: "2026-08-31", start_time: "10:15", status: "absent" },
+  { subject: "W", class_date: "2026-09-07", start_time: "14:00", status: "absent" },
+  { subject: "W", class_date: "2026-03-02", start_time: "10:15", status: "absent" },
+];
+const strayMoves = [{ class_id: "w", original_date: "2026-08-31", new_date: "2026-09-14", new_start: "10:15" }];
+const csTerm = courseStats(cls, stray, term, bdNow, strayMoves).find(r => r.subject === "W");
+const bdTerm = attendanceBreakdown(cls, stray, term, bdNow, strayMoves).find(r => r.subject === "W");
+check("Profile counts only marks on sessions held", csTerm.absent === 1);
+check("Profile and the breakdown agree on misses", csTerm.absent === bdTerm.absent);
+check("no term: Profile still counts every mark",
+  courseStats(cls, stray).find(r => r.subject === "W").absent === 4);
+
 console.log("\nkeys");
 check("attendanceKey normalises seconds",
   attendanceKey("X", "2026-09-10", "16:15:00") === attendanceKey("X", "2026-09-10", "16:15"));
