@@ -1073,7 +1073,35 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   padding-bottom: 6px;
   margin-bottom: 10px;
 }
-.daylist-date span { color: var(--mute); letter-spacing: 0.04em; }
+.daylist-date > span,
+.daylist-day > span { color: var(--mute); letter-spacing: 0.04em; }
+
+/* Edit attendance folds each date: a term's worth of open days is a long
+   scroll to reach the one that needs changing. Reschedule keeps the flat list. */
+.daylist.fold { margin-bottom: 0; }
+.daylist.fold[open] { margin-bottom: 14px; }
+.daylist.fold > summary {
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 10px;
+  margin-bottom: 0;
+  cursor: pointer;
+  list-style: none;          /* Firefox's marker */
+}
+.daylist.fold > summary::-webkit-details-marker { display: none; }
+.daylist.fold > summary:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.daylist.fold[open] > summary { margin-bottom: 4px; }
+.daylist-day { display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; }
+.daylist-tally {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--slate);
+}
+.daylist-chevron { flex: 0 0 auto; color: var(--mute); transition: transform 0.16s; }
+.daylist.fold[open] > summary .daylist-chevron { transform: rotate(180deg); }
 
 .daylist-row {
   display: grid;
