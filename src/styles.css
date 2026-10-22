@@ -1789,6 +1789,89 @@ img.profile-avatar { display: block; }
    leaving a gap beside it. */
 .tt-actions .btn { width: 100%; }
 .tt-actions .btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* OLT disagrees with a mark: a red "!" pinned to the button's top-left
+   corner, half outside it, the way an app icon carries a notification. */
+.tt-actions .btn.has-bang { position: relative; }
+.tt-bang {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--absent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+/* Top of the breakdown: classes OLT and the student marked differently. */
+.ab-mismatch {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--absent);
+  border-radius: var(--r);
+  background: var(--absent-wash);
+}
+.ab-mismatch-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--absent);
+}
+.ab-mismatch-bang {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--absent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+.ab-mismatch ul { list-style: none; margin: 10px 0 0; padding: 0; }
+.ab-mismatch li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid #edcdcb;
+  font-size: 13px;
+  color: var(--ink);
+}
+.ab-mismatch-what { min-width: 0; }
+.ab-mismatch-what b { font-weight: 600; }
+.ab-mismatch-marks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--slate);
+}
+/* Each source stays beside its own mark; a narrow row wraps between them. */
+.ab-mismatch-marks > span { white-space: nowrap; margin-right: 8px; }
+.ab-mismatch-marks .ab-status { min-width: 0; margin-left: 3px; }
+.btn.ab-mismatch-fix {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  background: var(--absent);
+  border-color: var(--absent);
+}
 
 
 /* ---------- attendance breakdown ---------- */

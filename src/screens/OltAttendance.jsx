@@ -30,13 +30,18 @@ const TERMS = [1, 2, 3, 4, 5, 6];
  *
  * `initial` skips the first load; the smoke test uses it to render each state.
  */
-export default function OltAttendance({ email, onBack, initial }) {
+export default function OltAttendance({ email, onBack, initial, onRead }) {
   const [snap, setSnap] = useState(initial ?? null);
   const [loading, setLoading] = useState(initial === undefined);
   const [loadError, setLoadError] = useState("");
   const [term, setTerm] = useState(String(termNumber(initial?.term) ?? ""));
   const read = useOltRead({
-    email, saved: Boolean(snap?.password_saved), onSnap: setSnap, showLogin: true,
+    email,
+    saved: Boolean(snap?.password_saved),
+    // Handed on to App as well, which keeps the breakdown's copy current and
+    // fills unmarked classes when this read is for the current term.
+    onSnap: (s, fresh) => { setSnap(s); return onRead?.(s, fresh); },
+    showLogin: true,
   });
 
   useEffect(() => {

@@ -106,3 +106,47 @@ export function pairSessions(appSessions, oltSessions) {
   const startOf = (r) => minutes(r.app ? r.app.start_time : r.olt.time);
   return out.sort((a, b) => b.date.localeCompare(a.date) || startOf(b) - startOf(a));
 }
+
+// OLT's two marks in the app's words. Anything else it prints is no verdict,
+// and is left alone rather than guessed at.
+const OLT_STATUS = { P: "present", A: "absent" };
+
+/**
+ * Where the student's record and OLT's meet, session by session, split into
+ * what a sync should fill in and what it should only point out.
+ *
+ * - `fill`: a meeting the student left unmarked that OLT has marked. The
+ *   student asked for these to take OLT's mark, Present or Absent.
+ * - `mismatches`: a meeting both have marked, differently. Never changed
+ *   without the student — one of the two records is wrong, and only the
+ *   student knows which.
+ *
+ * Only meetings the two sides pair up (see pairSessions) are considered: a
+ * date only OLT has belongs to no class in the timetable, so there is nothing
+ * to mark. `rows` is attendanceBreakdown's output, whose sessions carry their
+ * class row; `snap` must already be the copy for the term those rows are in.
+ */
+export function compareWithOlt(rows, snap) {
+  const fill = [];
+  const mismatches = [];
+  if (!snap) return { fill, mismatches };
+
+  for (const r of rows ?? []) {
+    const dw = oltCourse(snap, r.subject)?.datewise;
+    if (!Array.isArray(dw?.sessions) || !r.sessions?.length) continue;
+
+    for (const p of pairSessions(r.sessions, dw.sessions)) {
+      if (!p.app || !p.olt || !p.app.cls) continue;
+      const olt = OLT_STATUS[String(p.olt.mark ?? "").toUpperCase()];
+      if (!olt) continue;
+      // The retired "cancelled" reads as unmarked, as it does on screen.
+      const app = p.app.status === "present" || p.app.status === "absent" ? p.app.status : null;
+      const entry = { subject: r.subject, date: p.date, cls: p.app.cls, olt, app };
+      if (!app) fill.push(entry);
+      else if (app !== olt) mismatches.push(entry);
+    }
+  }
+  // Across courses, newest first: the list is read as "what's wrong lately".
+  mismatches.sort((a, b) => b.date.localeCompare(a.date) || a.subject.localeCompare(b.subject));
+  return { fill, mismatches };
+}

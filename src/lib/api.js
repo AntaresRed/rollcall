@@ -954,6 +954,9 @@ export function attendanceBreakdown(
       row.expected += 1;
       const mark = status.get(attendanceKey(cls.subject, date, cls.start_time)) ?? null;
       row.sessions.push({
+        // The class row itself, so a session can be marked from here — OLT
+        // Sync fills gaps and fixes mismatches straight from this list.
+        cls,
         date,
         start_time: hhmm(cls.start_time),
         status: mark,

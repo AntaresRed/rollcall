@@ -7,7 +7,9 @@ import {
   loadPublishedCatalogue, loadProfile, setProfileAvatar, cohortOf,
   loadPublishedCohorts, loadCataloguePayload, countedAttendance,
   loadRescheduleConsensus, loadPorAccess, loadLiveVersions,
+  loadOltAttendance, termNumber, attendanceBreakdown,
 } from "./lib/api";
+import { compareWithOlt } from "./lib/olt";
 import { restoreSavedLive } from "./lib/live";
 import { syncLive } from "./lib/livesync";
 import {
@@ -124,6 +126,11 @@ export default function App() {
   // Opens unreleased screens. Only a way in, like isAdmin: the policies on
   // their tables are what keep the data from anyone without the flag.
   const [isTester, setIsTester] = useState(false);
+  // Testers only: the last copy read from OLT. Held here rather than by the
+  // breakdown because the Timetable's button marks mismatches with it too.
+  // undefined while loading, null when there is none.
+  const [oltSnap, setOltSnap] = useState(undefined);
+  const [oltError, setOltError] = useState("");
   // The animal DP picked on the Profile tab; null is the Google photo.
   const [avatar, setAvatar] = useState(null);
   // Null once boot has finished means no schedule is published for this
@@ -682,6 +689,57 @@ export default function App() {
     [readOnly, viewClasses, viewAttendance, viewTerm, now, viewOverrides],
   );
 
+  // ---- OLT: the tester's official copy, laid against their marks ----
+  useEffect(() => {
+    if (!isTester) return undefined;
+    let gone = false;
+    loadOltAttendance()
+      .then((snap) => { if (!gone) setOltSnap(snap ?? null); })
+      .catch((err) => {
+        if (gone) return;
+        setOltSnap(null);
+        setOltError(err.message || "Couldn't load OLT's copy.");
+      });
+    return () => { gone = true; };
+  }, [isTester]);
+
+  // OLT's copy counts only when it is this term's: another term's dates pair
+  // with nothing here.
+  const oltForTerm = useCallback(
+    (snap, t) => (snap?.fetched_at && termNumber(t?.label) !== null
+      && termNumber(snap.term) === termNumber(t.label) ? snap : null),
+    [],
+  );
+
+  const oltCheck = useMemo(() => {
+    const snap = isTester && !readOnly ? oltForTerm(oltSnap, viewTerm) : null;
+    if (!snap) return null;
+    return compareWithOlt(
+      attendanceBreakdown(viewClasses, viewAttendance, viewTerm, now, viewOverrides), snap,
+    );
+  }, [isTester, readOnly, oltForTerm, oltSnap, viewClasses, viewAttendance, viewTerm, now, viewOverrides]);
+
+  /**
+   * Every OLT read comes back through here, from the breakdown's OLT Sync and
+   * from Profile's OLT screen alike. A fresh read for this term fills in each
+   * class the student left unmarked with OLT's mark — Present or Absent, as
+   * the owner asked — and says how many it filled. Marks the student made
+   * are never touched here; where those disagree with OLT, the breakdown
+   * lists them and the student decides.
+   */
+  const applyOltRead = useCallback((snap, fresh) => {
+    setOltSnap(snap ?? null);
+    setOltError("");
+    const current = fresh && !readOnlyRef.current ? oltForTerm(snap, term) : null;
+    if (!current) return 0;
+    const { fill } = compareWithOlt(
+      attendanceBreakdown(classes, countedAttendance(attendance, overrides, classes), term, new Date(), overrides),
+      current,
+    );
+    for (const f of fill) mark(f.cls, f.date, f.olt);
+    return fill.length;
+  }, [oltForTerm, classes, attendance, overrides, term, mark]);
+
   const todaysOccurrences = useMemo(
     () => occurrencesOn(viewClasses, viewTerm, isoDate(now), viewOverrides),
     [viewClasses, viewTerm, now, viewOverrides],
@@ -872,13 +930,18 @@ export default function App() {
             // another cohort.
             showOlt={isTester && !readOnly}
             email={session.user?.email ?? ""}
+            olt={oltSnap}
+            oltError={oltError}
+            onOltRead={applyOltRead}
+            onMark={readOnly ? null : mark}
             onBack={() => setSubScreen(null)}
           />
         )}
         {/* The signed-in student's own record, so never offered while
             viewing as another cohort. */}
         {tab === "profile" && subScreen === "olt" && isTester && !readOnly && (
-          <OltAttendance email={session.user?.email ?? ""} onBack={() => setSubScreen(null)} />
+          <OltAttendance email={session.user?.email ?? ""} onRead={applyOltRead}
+            onBack={() => setSubScreen(null)} />
         )}
         {tab === "profile" && subScreen === "admin" && isAdmin && (
           <ScheduleAdmin onBack={() => setSubScreen(null)} />
@@ -931,6 +994,7 @@ export default function App() {
             // Same condition as the breakdown's showOlt, so the button only
             // promises OLT Sync when the screen has it.
             oltSync={isTester && !readOnly}
+            oltMismatches={oltCheck?.mismatches.length ?? 0}
           />
         )}
         {tab === "profile" && !subScreen && (

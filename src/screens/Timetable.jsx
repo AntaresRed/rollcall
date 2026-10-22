@@ -21,6 +21,9 @@ const fmtWhen = (iso) =>
 export default function Timetable({
   classes, now, term, overrides = [], consensus = [], onShowCalendar, onReschedule,
   onShowBreakdown, onShowAttendance, onMove, pendingCount = 0, oltSync = false,
+  // Classes OLT and the student have marked differently; any at all puts a
+  // red mark on the button that leads to the list of them.
+  oltMismatches = 0,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
@@ -213,7 +216,19 @@ export default function Timetable({
           </button>
         )}
         {onShowBreakdown && (
-          <button className="btn ghost" onClick={onShowBreakdown}>
+          <button
+            className={`btn ghost${oltSync && oltMismatches > 0 ? " has-bang" : ""}`}
+            onClick={onShowBreakdown}
+          >
+            {oltSync && oltMismatches > 0 && (
+              <span
+                className="tt-bang"
+                role="img"
+                aria-label={`OLT disagrees with ${oltMismatches} ${oltMismatches === 1 ? "mark" : "marks"}`}
+              >
+                !
+              </span>
+            )}
             {/* Short forms of the screen's heading, kept to fit the row. */}
             {oltSync ? "Date-wise status & OLT Sync" : "Date-wise attendance"}
           </button>

@@ -153,6 +153,9 @@ const cases = [
   ["Timetable / all four actions", <Timetable key="tta" classes={classes} now={now} term={term}
       overrides={overrides} onShowCalendar={noop} onReschedule={noop} onShowBreakdown={noop}
       onShowAttendance={noop} pendingCount={3} />],
+  ["Timetable / OLT disagrees with marks", <Timetable key="ttm" classes={classes} now={now} term={term}
+      overrides={overrides} onShowCalendar={noop} onReschedule={noop} onShowBreakdown={noop}
+      onShowAttendance={noop} oltSync oltMismatches={2} />],
   ["Timetable / empty", <Timetable key="tte" classes={[]} now={now} term={term} />],
   ["Timetable / during a break", <Timetable key="ttb" classes={classes} now={new Date("2026-10-21T10:00:00")} term={term} overrides={[]} />],
   ["EditAttendance", <EditAttendance key="cu" classes={classes} attendance={attendance} term={term} overrides={overrides} now={now} onMark={noop} />],
@@ -339,18 +342,18 @@ const cases = [
   // against the app's "Term V"), a copy for another term, and nothing read.
   ["AttendanceBreakdown / OLT section", <AttendanceBreakdown key="abo" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides} onBack={noop}
-      showOlt email="a2027@email.iimcal.ac.in" oltInitial={oltSnap} />],
+      showOlt email="a2027@email.iimcal.ac.in" olt={oltSnap} />],
   // The line that says where a sync's numbers went.
   ["OltSync / just synced", <OltSync key="osj" termLabel="Term V" email="a2027@email.iimcal.ac.in"
-      snap={{ ...oltSnap, password_saved: true }} loading={false} loadError="" onSynced={noop} justSynced />],
+      snap={{ ...oltSnap, password_saved: true }} loading={false} loadError="" onSynced={noop} justSynced={{ filled: 3 }} />],
   ["AttendanceBreakdown / OLT password saved", <AttendanceBreakdown key="abo7" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides}
-      showOlt email="a2027@email.iimcal.ac.in" oltInitial={{ ...oltSnap, password_saved: true }} />],
+      showOlt email="a2027@email.iimcal.ac.in" olt={{ ...oltSnap, password_saved: true }} />],
   // A course OLT has dates for that the timetable also has, two meetings on
   // one day included — the rows that pair rather than stand alone.
   ["AttendanceBreakdown / OLT paired with the timetable", <AttendanceBreakdown key="abo5"
       classes={classes} attendance={attendance} term={term} now={now} overrides={overrides}
-      showOlt email="a2027@email.iimcal.ac.in" oltInitial={{
+      showOlt email="a2027@email.iimcal.ac.in" olt={{
         ...oltSnap,
         rows: [...oltSnap.rows, ["Consumption Culture & Markets", "3", "2", "67"]],
         datewise: { ...oltSnap.datewise, "Consumption Culture & Markets": {
@@ -360,19 +363,35 @@ const cases = [
           attended: "2", total: "3", agrees: true,
         } },
       }} />],
+  // OLT says Absent where the student marked Present: the list at the top,
+  // with and without a way to take OLT's mark (none while viewing as).
+  ["AttendanceBreakdown / OLT disagrees with a mark", <AttendanceBreakdown key="abo8"
+      classes={classes} attendance={attendance} term={term} now={now} overrides={overrides}
+      showOlt email="a2027@email.iimcal.ac.in" onMark={noop} olt={{
+        ...oltSnap,
+        rows: [...oltSnap.rows, ["Consumption Culture & Markets", "2", "0", "0"]],
+        datewise: { ...oltSnap.datewise, "Consumption Culture & Markets": {
+          sessions: [{ no: 1, date: "2026-09-03", time: "16:15", mark: "A" },
+            { no: 2, date: "2026-09-03", time: "18:00", mark: "P" }],
+          attended: "1", total: "2", agrees: true,
+        } },
+      }} />],
+  ["AttendanceBreakdown / OLT still loading", <AttendanceBreakdown key="abo9" classes={classes}
+      attendance={attendance} term={term} now={now} overrides={overrides}
+      showOlt email="a2027@email.iimcal.ac.in" />],
   ["AttendanceBreakdown / OLT last sync failed", <AttendanceBreakdown key="abo6" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides}
-      showOlt oltInitial={{ ...oltSnap, attempted_at: "2026-10-13T09:00:00Z",
+      showOlt olt={{ ...oltSnap, attempted_at: "2026-10-13T09:00:00Z",
         last_error: "OLT didn't accept that password." }} />],
   ["AttendanceBreakdown / OLT read for another term", <AttendanceBreakdown key="abo2" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides}
-      showOlt oltInitial={{ ...oltSnap, term: "Term-IV" }} />],
+      showOlt olt={{ ...oltSnap, term: "Term-IV" }} />],
   ["AttendanceBreakdown / OLT never read", <AttendanceBreakdown key="abo3" classes={classes}
       attendance={attendance} term={term} now={now} overrides={overrides}
-      showOlt oltInitial={null} />],
+      showOlt olt={null} />],
   ["AttendanceBreakdown / OLT, no term calendar", <AttendanceBreakdown key="abo4" classes={classes}
       attendance={attendance} term={null} now={now} overrides={[]}
-      showOlt oltInitial={oltSnap} />],
+      showOlt olt={oltSnap} />],
   ["TermCalendar", <TermCalendar key="tc" term={term} now={now} onBack={noop} />],
   ["TermCalendar / no term", <TermCalendar key="tce" term={null} now={now} />],
   ["CoursePicker", <CoursePicker key="cp" existing={classes} onSaved={noop} />],

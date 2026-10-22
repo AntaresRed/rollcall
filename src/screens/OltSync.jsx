@@ -205,14 +205,18 @@ function CheckIcon() {
  * and nothing at all when something is — a saved password means one tap.
  *
  * Returns the form's fields and a `submit(term)` that reads OLT and reports
- * back through `onSnap`.
+ * back through `onSnap(snapshot, fresh)`. `fresh` is true only for a read
+ * that just succeeded — the one time a sync may act on what it found — and
+ * false for the copy picked up after a failure. On a fresh read `onSnap` may
+ * return how many classes it filled in, which the "synced" note reports.
  */
-export function useOltRead({ email, saved, onSnap, showLogin = false, justSynced = false }) {
+export function useOltRead({ email, saved, onSnap, showLogin = false, justSynced = null }) {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [warning, setWarning] = useState("");
+  // null, or { filled } once a read has succeeded.
   const [synced, setSynced] = useState(justSynced);
   const loginId = loginIdOf(email);
 
@@ -221,13 +225,13 @@ export function useOltRead({ email, saved, onSnap, showLogin = false, justSynced
     setBusy(true);
     setError("");
     setWarning("");
-    setSynced(false);
+    setSynced(null);
     try {
       const res = await refreshOltAttendance({
         term, password: saved ? undefined : password, remember: !saved && remember,
       });
-      onSnap(res.snapshot);
-      setSynced(true);
+      const filled = onSnap(res.snapshot, true);
+      setSynced({ filled: typeof filled === "number" ? filled : 0 });
       if (res.warning) setWarning(res.warning);
       // Ticked, read fine, yet the server doesn't say it kept the password:
       // a server older than the tick ignores it without a word, and the box
@@ -246,7 +250,7 @@ export function useOltRead({ email, saved, onSnap, showLogin = false, justSynced
       // The function records the failed try — and, if OLT refused a saved
       // password, deletes it — so pick that up: the box comes back.
       const s = await loadOltAttendance().catch(() => null);
-      if (s) onSnap(s);
+      if (s) onSnap(s, false);
     } finally {
       setBusy(false);
     }
@@ -285,8 +289,9 @@ export function useOltRead({ email, saved, onSnap, showLogin = false, justSynced
  */
 export default function OltSync({
   termLabel, email, snap, loading, loadError, onSynced,
-  // Starts in the just-synced state; only the smoke test and previews set it.
-  justSynced = false,
+  // Starts in the just-synced state ({ filled }); only the smoke test and
+  // previews set it.
+  justSynced = null,
 }) {
   const n = termNumber(termLabel);
   const saved = Boolean(snap?.password_saved);
@@ -329,7 +334,12 @@ export default function OltSync({
       {read.synced && (
         <div className="olt-synced" role="status">
           <CheckIcon />
-          <span>OLT attendance synced in Breakdown (subjects below) and Profile sections.</span>
+          <span>
+            OLT attendance synced in Breakdown (subjects below) and Profile sections.
+            {read.synced.filled > 0 && (
+              <> Filled in {read.synced.filled} unmarked {read.synced.filled === 1 ? "class" : "classes"} from OLT.</>
+            )}
+          </span>
         </div>
       )}
       {read.warning && <div className="olt-sync-warn">{read.warning}</div>}

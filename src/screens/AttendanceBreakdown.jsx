@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
-  attendanceBreakdown, pretty, DAYS, weekdayOf, isoDate, loadOltAttendance, termNumber,
+  attendanceBreakdown, pretty, DAYS, weekdayOf, isoDate, termNumber,
 } from "../lib/api";
-import { oltCourse, pairSessions } from "../lib/olt";
+import { oltCourse, pairSessions, compareWithOlt } from "../lib/olt";
 import { asPct } from "./OltCourses";
 import OltSync from "./OltSync";
 
@@ -20,31 +20,27 @@ export default function AttendanceBreakdown({
   classes, attendance, term, now, overrides = [], onBack,
   // Testers only: OLT's own record beside the student's, session by session,
   // and the sync that reads it. `email` is the signed-in student's, for the
-  // OLT login ID. `oltInitial` stands in for the load in the smoke test.
-  showOlt = false, email = "", oltInitial,
+  // OLT login ID. App holds the copy — the Timetable's mismatch mark reads it
+  // too — so `olt` is undefined while it loads, null when there is none.
+  // `onOltRead(snapshot, fresh)` hands a read back, filling gaps on a fresh
+  // one; `onMark` is how a mismatch takes OLT's mark.
+  showOlt = false, email = "", olt, oltError = "", onOltRead = () => 0, onMark,
 }) {
   const rows = useMemo(
     () => attendanceBreakdown(classes, attendance, term, now, overrides),
     [classes, attendance, term, now, overrides],
   );
 
-  const [olt, setOlt] = useState(oltInitial ?? null);
-  const [oltLoading, setOltLoading] = useState(showOlt && oltInitial === undefined);
-  const [oltError, setOltError] = useState("");
-
-  useEffect(() => {
-    if (!showOlt || oltInitial !== undefined) return;
-    loadOltAttendance()
-      .then(setOlt)
-      .catch((err) => setOltError(err.message || "Couldn't load OLT's copy."))
-      .finally(() => setOltLoading(false));
-  }, [showOlt, oltInitial]);
-
   // OLT's copy is laid beside the marks only when it is this term's. Another
   // term's dates under this term's courses would pair nothing and say so
   // misleadingly — every row would read "Not on OLT".
   const oltNow = showOlt && olt?.fetched_at && termNumber(term?.label) !== null
     && termNumber(olt.term) === termNumber(term.label) ? olt : null;
+
+  const mismatches = useMemo(
+    () => (oltNow ? compareWithOlt(rows, oltNow).mismatches : []),
+    [rows, oltNow],
+  );
 
   // One total line is worth more than eight cards read in sequence, but only
   // when the numbers underneath it mean the same thing — so it is skipped
@@ -90,6 +86,8 @@ export default function AttendanceBreakdown({
         Every session so far this term, by course.
       </p>
 
+      {mismatches.length > 0 && <Mismatches list={mismatches} onMark={onMark} />}
+
       {!term && (
         <div className="banner warn" style={{ marginTop: 0, marginBottom: 16 }}>
           <p>
@@ -106,10 +104,10 @@ export default function AttendanceBreakdown({
         <OltSync
           termLabel={term?.label}
           email={email}
-          snap={olt}
-          loading={oltLoading}
+          snap={olt ?? null}
+          loading={olt === undefined && !oltError}
           loadError={oltError}
-          onSynced={(s) => { setOlt(s); setOltError(""); }}
+          onSynced={onOltRead}
         />
       )}
 
@@ -135,6 +133,51 @@ export default function AttendanceBreakdown({
         </button>
       )}
     </>
+  );
+}
+
+const fmtDay = (iso) => {
+  const day = new Date(`${iso}T00:00:00`);
+  return `${DAYS[weekdayOf(day) - 1]} ${day.toLocaleDateString(undefined, { day: "numeric", month: "short" })}`;
+};
+const WORD = { present: "Present", absent: "Absent" };
+
+/**
+ * Classes both records have marked, differently — first on the screen,
+ * because one of the two is wrong and this is the place it gets noticed.
+ *
+ * Nothing changes on its own: the student may be right and OLT wrong. Each
+ * line offers to take OLT's mark, one tap per class, and drops off the list
+ * once the two agree.
+ */
+function Mismatches({ list, onMark }) {
+  return (
+    <section className="ab-mismatch" role="alert">
+      <div className="ab-mismatch-head">
+        <span className="ab-mismatch-bang" aria-hidden="true">!</span>
+        <span>
+          OLT and IIMPresent disagree on {list.length} {list.length === 1 ? "class" : "classes"}
+        </span>
+      </div>
+      <ul>
+        {list.map((m) => (
+          <li key={`${m.subject}|${m.date}|${m.cls.start_time}`}>
+            <div className="ab-mismatch-what">
+              <b>{fmtDay(m.date)}</b> · {m.subject}
+              <div className="ab-mismatch-marks">
+                <span>OLT <span className={`ab-status ${m.olt}`}>{WORD[m.olt]}</span></span>
+                <span>IIMPresent <span className={`ab-status ${m.app}`}>{WORD[m.app]}</span></span>
+              </div>
+            </div>
+            {onMark && (
+              <button className="btn ab-mismatch-fix" onClick={() => onMark(m.cls, m.date, m.olt)}>
+                Use OLT&apos;s mark
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

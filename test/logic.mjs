@@ -39,7 +39,7 @@ import { GMAIL_SCOPE, authUrl, callbackUrl, readCallback, heldToken, takeRoundTr
 import { formFields, formAction, postBackFields, selectOptions, readGrid, hasPasswordBox, hasOtpField,
   termKey, decodeEntities, TERM_SELECT, readDatewise, datewiseAgrees, courseKey, matchSubject,
 } from "../supabase/functions/olt-attendance/parse.ts";
-import { courseKey as appCourseKey, oltCourse, pairSessions } from "../src/lib/olt.js";
+import { courseKey as appCourseKey, oltCourse, pairSessions, compareWithOlt } from "../src/lib/olt.js";
 import { AVATARS, avatarByKey, avatarSvg, avatarSrc, usableExclusive, exclusiveSrc } from "../src/lib/avatars.js";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -2846,6 +2846,55 @@ console.log("\nOLT beside the breakdown");
   check("no OLT dates leaves every session unpaired",
     pairSessions(app, null).every((p) => p.olt === null) && pairSessions(app, null).length === 3);
   survives("no sessions either side", () => pairSessions(null, undefined));
+}
+
+console.log("\nOLT filling gaps and spotting mismatches");
+{
+  const W = { id: "w1", subject: "Widget Theory", start_time: "10:15" };
+  const at = (date, status) => ({ cls: W, date, start_time: "10:15", status });
+  const rows = [{
+    subject: "Widget Theory",
+    sessions: [
+      at("2026-09-01", null),        // OLT P → filled present
+      at("2026-09-02", null),        // OLT A → filled absent
+      at("2026-09-03", "present"),   // OLT A → mismatch
+      at("2026-09-04", "absent"),    // OLT P → mismatch
+      at("2026-09-05", "present"),   // OLT P → agrees, left alone
+      at("2026-09-06", "cancelled"), // retired status, OLT P → filled
+      at("2026-09-07", null),        // OLT prints "L" → no verdict, left alone
+      at("2026-09-08", null),        // not on OLT → left alone
+    ],
+  }];
+  const s = (no, date, mark) => ({ no, date, time: "10:15", mark });
+  const snap = {
+    columns: ["Subject", "Attended", "Total"],
+    rows: [["Widget Theory", "5", "8"]],
+    datewise: { "Widget Theory": { sessions: [
+      s(1, "2026-09-01", "P"), s(2, "2026-09-02", "A"), s(3, "2026-09-03", "A"),
+      s(4, "2026-09-04", "P"), s(5, "2026-09-05", "P"), s(6, "2026-09-06", "p"),
+      s(7, "2026-09-07", "L"), s(9, "2026-08-31", "P"),
+    ] } },
+  };
+  const { fill, mismatches } = compareWithOlt(rows, snap);
+  const pick = (list, d) => list.find((x) => x.date === d);
+  check("an unmarked class OLT has Present is filled present", pick(fill, "2026-09-01")?.olt === "present");
+  check("an unmarked class OLT has Absent is filled absent", pick(fill, "2026-09-02")?.olt === "absent");
+  check("a retired 'cancelled' reads as unmarked", pick(fill, "2026-09-06")?.olt === "present");
+  check("a fill carries the class row to mark it with", pick(fill, "2026-09-01")?.cls === W);
+  check("exactly those three are filled", fill.length === 3);
+  check("present here, absent on OLT, is a mismatch",
+    pick(mismatches, "2026-09-03")?.app === "present" && pick(mismatches, "2026-09-03")?.olt === "absent");
+  check("absent here, present on OLT, is a mismatch", pick(mismatches, "2026-09-04")?.olt === "present");
+  check("agreement and unknown marks raise nothing", mismatches.length === 2);
+  check("mismatches newest first", mismatches[0].date === "2026-09-04");
+  check("a date only OLT has fills nothing", !pick(fill, "2026-08-31"));
+  check("no copy, nothing to do", (() => {
+    const r = compareWithOlt(rows, null);
+    return r.fill.length === 0 && r.mismatches.length === 0;
+  })());
+  check("a course OLT lacks is skipped",
+    compareWithOlt([{ ...rows[0], subject: "Astrophysics" }], snap).fill.length === 0);
+  survives("rows without sessions", () => compareWithOlt([{ subject: "Widget Theory", sessions: null }], snap));
 }
 
 console.log("\nanimal DPs");
