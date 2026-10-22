@@ -229,6 +229,12 @@ export function useOltRead({ email, saved, onSnap, showLogin = false, justSynced
       onSnap(res.snapshot);
       setSynced(true);
       if (res.warning) setWarning(res.warning);
+      // Ticked, read fine, yet the server doesn't say it kept the password:
+      // a server older than the tick ignores it without a word, and the box
+      // simply coming back next time looked like the tick did nothing.
+      else if (!saved && remember && res.snapshot?.password_saved !== true) {
+        setWarning("Synced, but your password wasn't saved, so you'll need to type it again next time.");
+      }
       // Only once OLT has accepted it, so a typo is never offered for saving.
       // Not when IIMPresent is keeping it: the phone would then hold a second
       // copy the student didn't ask for.
