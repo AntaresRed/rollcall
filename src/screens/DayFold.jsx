@@ -6,13 +6,12 @@
  * day that needs changing when every date is open.
  *
  * A `<details>`, for the reasons the breakdown's course cards are one: it
- * brings the keyboard, ARIA and open/closed handling with it. `defaultOpen`
- * is only read on the first render — pass a value that doesn't change, or a
- * date will snap shut under the student's thumb when its contents do.
+ * brings the keyboard, ARIA and open/closed handling with it. Every date
+ * starts shut, so a screen opens as a list of dates to choose from.
  */
-export default function DayFold({ day, date, tally = null, defaultOpen = false, children }) {
+export default function DayFold({ day, date, tally = null, children }) {
   return (
-    <details className="daylist fold" open={defaultOpen}>
+    <details className="daylist fold">
       <summary className="daylist-date">
         <div className="daylist-day">
           {day}

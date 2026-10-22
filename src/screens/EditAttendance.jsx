@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { markableSessions, pretty, toMinutes, hhmm, DAY_LONG, weekdayOf, isoDate } from "../lib/api";
 import DayFold from "./DayFold";
 
@@ -17,16 +17,12 @@ import DayFold from "./DayFold";
  * a fact yet and a button offering to record one is inviting a guess.
  */
 
-// The term ends up around ninety sessions, which is a long screen to hand
-// somebody who almost always wants last week. Recent dates are shown and the
-// rest waits behind a count.
-const FIRST_DAYS = 10;
-
+// The term ends up around ninety sessions. Every date is listed, newest first
+// and folded shut (DayFold), so the whole term is one short scroll; it used to
+// show ten days and hide the rest behind a "Show earlier" button.
 export default function EditAttendance({
   classes, attendance, term, overrides = [], now, onMark, onBack, readOnly = false,
 }) {
-  const [showAll, setShowAll] = useState(false);
-
   const sessions = useMemo(
     () => markableSessions(classes, attendance, term, now, 28, overrides),
     [classes, attendance, term, now, overrides],
@@ -39,15 +35,10 @@ export default function EditAttendance({
       list.push(item);
       groups.set(item.date, list);
     }
-    return [...groups.entries()];
+    return [...groups.entries()].sort((a, b) => b[0].localeCompare(a[0]));
   }, [sessions]);
 
   const unmarked = sessions.filter((s) => s.status === null).length;
-
-  // The dates with something still to mark start open. Taken once, at first
-  // render, because DayFold only reads it then.
-  const [openAtStart] = useState(() =>
-    new Set(sessions.filter((s) => s.status === null).map((s) => s.date)));
 
   // Today's class can appear here while it is still running, which is worth
   // saying: otherwise a row for a class you are sitting in reads as a mistake.
@@ -84,10 +75,6 @@ export default function EditAttendance({
     );
   }
 
-  const shown = showAll ? byDate : byDate.slice(0, FIRST_DAYS);
-  const hiddenDays = byDate.length - shown.length;
-  const hiddenRows = sessions.length - shown.reduce((n, [, items]) => n + items.length, 0);
-
   const label = (iso) => {
     const d = new Date(`${iso}T00:00:00`);
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -106,15 +93,13 @@ export default function EditAttendance({
         {unmarked > 0 && ` ${unmarked} not marked yet.`}
       </p>
 
-      {shown.map(([date, items]) => (
+      {byDate.map(([date, items]) => (
         <DayFold
           key={date}
           day={label(date)}
           date={date}
           tally={<Tally items={items} />}
-          defaultOpen={openAtStart.has(date)}
         >
-
           {items.map(({ cls, movedFrom, status }) => (
             // movedFrom is part of the identity, not decoration. A class
             // pushed from one Monday to the next lands on a date it already
@@ -156,12 +141,6 @@ export default function EditAttendance({
           ))}
         </DayFold>
       ))}
-
-      {hiddenDays > 0 && (
-        <button className="btn ghost block" onClick={() => setShowAll(true)}>
-          Show earlier — {hiddenRows} {hiddenRows === 1 ? "session" : "sessions"}
-        </button>
-      )}
 
       {back}
     </>

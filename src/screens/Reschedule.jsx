@@ -45,7 +45,6 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
   const [editing, setEditing] = useState(null);   // `${scope}:${classId}|${originalDate}`
   const [form, setForm] = useState({ date: "", start: "", undecided: false });
   const [busy, setBusy] = useState(false);
-  const [showPast, setShowPast] = useState(false);
 
   const today = isoDate(now);
   // The whole term, start to end. This used to be three weeks either side of
@@ -82,9 +81,9 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
       .sort((a, b) => a.original_date.localeCompare(b.original_date));
   }, [overrides, classes]);
 
-  // One pass over the window, split at today. Past days read newest-first —
-  // the class you're most likely to be entering is the one that just
-  // happened, not one from three weeks ago.
+  // One pass over the window, split at today, each half nearest-first: the
+  // next class to move is the one coming up, and the one most likely to be
+  // entered after the fact is the one that just happened.
   const [pastByDate, upcomingByDate] = useMemo(() => {
     const groups = new Map();
     for (const item of sessions) {
@@ -99,12 +98,6 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
     ];
   }, [sessions, today]);
 
-  const pastCount = pastByDate.reduce((n, [, items]) => n + items.length, 0);
-
-  // Every date folds shut except the next one with classes — usually the one
-  // being changed. Taken once, at first render, because DayFold only reads it
-  // then.
-  const [openAtStart] = useState(() => upcomingByDate[0]?.[0] ?? null);
 
   // `originalDate` identifies the override; `date`/`start` only seed the form,
   // and are where the meeting currently sits — a session already moved once
@@ -151,7 +144,6 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
       // The heading already names the day, so its date leaves the weekday out.
       date={new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
       tally={<DayTally items={items} />}
-      defaultOpen={date === openAtStart}
     >
 
       {items.map(({ cls, movedFrom }) => {
@@ -310,28 +302,6 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
         </>
       )}
 
-      {pastCount > 0 && (
-        <>
-          <button
-            className="disclosure"
-            aria-expanded={showPast}
-            onClick={() => setShowPast((v) => !v)}
-          >
-            <span className={`disclosure-caret${showPast ? " open" : ""}`} aria-hidden="true" />
-            {showPast ? "Hide earlier classes" : "Earlier classes"}
-            <span className="tag quiet">{pastCount}</span>
-          </button>
-          {showPast && (
-            <>
-              <p className="screen-note" style={{ marginTop: 10 }}>
-                {wholeTerm ? "Since the start of term." : "The last three weeks."}
-              </p>
-              {pastByDate.map(renderDay)}
-            </>
-          )}
-        </>
-      )}
-
       <div className="eyebrow">{wholeTerm ? "Rest of the term" : "Next three weeks"}</div>
 
       {upcomingByDate.length === 0 && (
@@ -341,6 +311,15 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
       )}
 
       {upcomingByDate.map(renderDay)}
+
+      {/* Below the upcoming dates rather than behind a button: folded, a
+          term's past dates are short enough to simply list. */}
+      {pastByDate.length > 0 && (
+        <>
+          <div className="eyebrow">{wholeTerm ? "Earlier this term" : "Last three weeks"}</div>
+          {pastByDate.map(renderDay)}
+        </>
+      )}
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>
