@@ -1,0 +1,4484 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Reschedule whole term</title><style>/* ============================================================
+   RollCall — visual system
+
+   Direction: highlighter on a printed timetable. The published grid is a
+   monochrome document; what a student adds to it is a bright mark against
+   the one slot that matters right now. So the chrome is a deep board that
+   frames the page like a departure display, content sits on paper stock,
+   and exactly one colour carries "now".
+
+   That colour is magenta rather than the usual productivity blue for a
+   practical reason as much as an aesthetic one: green and red already mean
+   attended and missed, so the live marker has to sit nowhere near either,
+   or it starts to read as a verdict.
+   ============================================================ */
+
+:root {
+  /* chrome + surfaces */
+  --board: #171B21;
+  --board-soft: #262C35;
+  --ink: #11151A;
+  --paper: #F4F5F2;
+  --card: #FFFFFF;
+  --rule: #E3E5E0;
+  --rule-strong: #CFD3CC;
+  --slate: #565E66;
+  --mute: #666E77;   /* 4.7:1 on paper — these carry real labels, not decoration */
+
+  /* the one loud colour */
+  --signal: #D6006F;
+  --signal-deep: #A80257;
+  --signal-wash: #FDE9F3;
+
+  /* attendance semantics */
+  --present: #0E6B4F;
+  --present-wash: #E1F0EA;
+  --absent: #B3261E;
+  --absent-wash: #FBE9E7;
+  --warn-ink: #8A5A12;
+  --warn-wash: #FDF3E0;
+
+  --sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --gutter: 62px;
+  --r: 10px;
+  --pad: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+/* min-height, not height. A sticky element sticks only within its containing
+   block, and #root is the masthead's — so pinning that box to exactly one
+   viewport meant the back button scrolled away the moment the page grew past
+   it. Letting #root grow with its content is what makes the masthead stay put
+   the whole way down. */
+#root { min-height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; cursor: pointer; }
+button:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.masthead :focus-visible, .tabs :focus-visible { outline-color: #fff; }
+
+.shell {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 0 var(--pad) calc(96px + env(safe-area-inset-bottom));
+}
+
+/* On a laptop-width screen, the week's timetable gets room to lay every day
+   out side by side instead of needing the horizontal scroll a phone has no
+   choice about. Scoped to the plain grid view only (see the class's home in
+   App.jsx) — Faculty, Reschedule and the rest are lists and prose, and read
+   worse stretched wide, so they keep the narrow column. The breakpoint is a
+   width, not a device: a phone rotated into a wide landscape window gets the
+   grid too, which is the correct outcome, not an edge case to guard against. */
+@media (min-width: 860px) {
+  .shell.shell-grid { max-width: 1040px; }
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--board);
+  color: #fff;
+  padding: calc(11px + env(safe-area-inset-top)) var(--pad) 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.masthead-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 40px of tap target on a 32px button: the arrow sits at the very top-left
+   corner of the screen, where a thumb is least accurate. */
+.masthead-back {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: -4px 0 -4px -6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+.masthead-back:active { background: rgba(255, 255, 255, 0.2); }
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.015em;
+  color: #fff;
+}
+.wordmark svg { display: block; }
+.wordmark b { font-weight: 600; }
+.wordmark i { font-style: normal; color: var(--signal); font-weight: 600; }
+
+.masthead-date {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: #9AA3AD;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ---------- section headings ---------- */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin: 28px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* Ordered after the rule, so the row reads label — hairline — button rather
+   than crowding the button against the words. */
+.eyebrow-act {
+  order: 1;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  margin: -6px 0;
+  border: 1px solid var(--rule-strong);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--slate);
+}
+.eyebrow-act:hover { border-color: var(--signal); color: var(--signal); }
+
+/* ---------- night order history ---------- */
+
+/* The first thing on the screen, and framed as a limit rather than a tip:
+   everything below is what was sent, and the app stops being able to see an
+   order the moment it leaves for WhatsApp. */
+.history-warn {
+  background: var(--warn-wash);
+  /* No warn border token exists; the ink at low opacity keeps the edge in the
+     same family as the fill instead of inventing a fifth amber. */
+  border: 1px solid rgba(138, 90, 18, 0.22);
+  border-radius: var(--r);
+  padding: 11px 13px;
+  margin: 0 0 18px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--warn-ink);
+}
+.history-warn b { color: var(--warn-ink); }
+
+.history-day { margin-bottom: 18px; }
+.history-day-head {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.history-card {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px 13px;
+  margin-bottom: 8px;
+}
+.history-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.history-where { font-size: 13.5px; font-weight: 600; min-width: 0; }
+.history-when {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+/* Which basket it came from, under the shop's name — two shops can share a
+   hostel's name, and the kind is what tells them apart. */
+.history-kind {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+/* The message exactly as sent. pre-wrap keeps its line breaks and blank
+   lines, which are how the counter reads dishes apart from the room number. */
+.history-msg {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.history-items { list-style: none; margin: 0; padding: 0; }
+.history-items li {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  padding: 3px 0;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+.history-qty {
+  flex: 0 0 auto;
+  min-width: 20px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--signal-wash);
+  color: var(--signal-deep);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.history-name { flex: 1 1 auto; min-width: 0; }
+/* What that line cost the night it was ordered — not today's price. */
+.history-cost {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--slate);
+}
+.history-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+}
+.history-total {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.history-export { margin-top: 6px; margin-bottom: 8px; }
+.history-copy { margin-top: 0; margin-bottom: 8px; }
+
+/* Quiet until reached for: removing an order is a thing you occasionally
+   want, not a thing the screen should keep offering. It still carries a full
+   44px touch target through the padding, because a small bin you have to aim
+   at is how people delete the wrong night's dinner. */
+.history-x {
+  flex: 0 0 auto;
+  /* The head is baseline-aligned for its two pieces of text; an icon has no
+     baseline worth lining up, so it centres against them instead. */
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: -8px -6px -8px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--mute);
+  cursor: pointer;
+}
+.history-x:hover, .history-x:focus-visible {
+  color: var(--absent);
+  background: var(--absent-wash);
+}
+.history-none {
+  text-align: center;
+  padding: 30px 16px;
+  color: var(--slate);
+  font-size: 14px;
+}
+.history-none p { margin: 0; }
+.history-none-sub { margin-top: 7px !important; font-size: 12.5px; color: var(--mute); }
+.history-clear { margin-top: 0; }
+.history-note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--mute);
+  margin: 14px 0 0;
+}
+
+/* ---------- the spine: time gutter + class rows ---------- */
+
+.day {
+  border-top: 1px solid var(--rule);
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: var(--gutter) 1fr;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+
+.slot-time {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--slate);
+  padding-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.slot-time small {
+  display: block;
+  font-size: 11px;
+  color: var(--mute);
+  font-weight: 400;
+}
+
+.slot.is-next .slot-time { color: var(--signal); }
+.slot.is-past { opacity: 0.5; }
+
+.course {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.meta {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--slate);
+  margin-top: 3px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--warn-wash);
+  color: var(--warn-ink);
+}
+.tag.signal { background: var(--signal-wash); color: var(--signal-deep); }
+
+/* the live marker — the one loud thing on the page */
+.now-line {
+  display: grid;
+  grid-template-columns: var(--gutter) 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 2px 0;
+}
+.now-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--signal);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.now-rule {
+  height: 2px;
+  background: var(--signal);
+  position: relative;
+  border-radius: 2px;
+}
+.now-rule::before {
+  content: "";
+  position: absolute;
+  left: -4px; top: -3px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .now-rule::before { animation: pulse 2.4s ease-in-out infinite; }
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(214, 0, 111, 0.45); }
+  50%      { box-shadow: 0 0 0 6px rgba(214, 0, 111, 0); }
+}
+
+/* ---------- attendance controls ---------- */
+
+.marks { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+/* The attendance choice. With three options the row filled itself; with two,
+   left-aligned pills left a hole on the right and read as unfinished. These
+   split the row instead, which also makes each a bigger tap target — this is
+   the control students use most, often in a hurry on the way into class. */
+.marks.choice { gap: 10px; }
+.marks.choice .mark {
+  flex: 1 1 0;
+  padding: 9px 12px;
+  text-align: center;
+}
+
+.mark {
+  border: 1px solid var(--rule);
+  background: var(--card);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--slate);
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+/* A disabled mark must look it. Reached from three places now — the admin
+   reading another year's app, the preview pane, and Schedule admin's busy
+   states — and a button that silently ignores a tap is worse than one that
+   is visibly off. */
+.mark[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mark[aria-pressed="true"].present {
+  background: var(--present); border-color: var(--present); color: #fff;
+}
+.mark[aria-pressed="true"].absent {
+  background: var(--absent); border-color: var(--absent); color: #fff;
+}
+
+/* ---------- week grid ---------- */
+
+.week {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.week-col {
+  flex: 0 0 168px;
+  scroll-snap-align: start;
+}
+.week-head {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 8px;
+}
+.week-head.today { color: var(--signal); border-bottom-color: var(--signal); }
+
+.week-block {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ink);
+  border-radius: var(--r);
+  padding: 9px 10px;
+  margin-bottom: 8px;
+}
+.week-block .t {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--slate);
+  margin-bottom: 3px;
+}
+.week-block .n { font-size: 13px; font-weight: 600; line-height: 1.25; }
+
+/* ---------- attendance bars ---------- */
+
+.stat { padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.stat-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.stat-name { font-size: 14px; font-weight: 500; }
+.stat-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--slate);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.track {
+  position: relative;
+  height: 6px;
+  background: var(--rule);
+  border-radius: 3px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.fill { height: 100%; border-radius: 3px; transition: width 0.35s ease; }
+.fill.ok { background: var(--present); }
+.fill.low { background: var(--absent); }
+/* the 75% line students actually care about */
+.threshold {
+  position: absolute;
+  left: 75%;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: var(--ink);
+  opacity: 0.55;
+}
+
+/* ---------- buttons, cards, banners ---------- */
+
+.btn {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
+.btn.block { display: block; width: 100%; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--signal-wash);
+  border: 1px solid #F6CFE2;
+  border-radius: var(--r);
+  padding: 12px 14px;
+  font-size: 13.5px;
+  margin-top: 16px;
+}
+.banner.warn { background: var(--warn-wash); border-color: #ecd9b4; }
+.banner p { margin: 0; }
+
+/* The install banner carries a dismiss, which the alerts banner does not:
+   alerts being off is a state to fix, but choosing not to install is a
+   perfectly good answer and has to be sayable. */
+.banner-acts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.banner-x {
+  border: 0;
+  background: none;
+  color: var(--slate);
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.banner-x:hover { color: var(--ink); }
+.banner-how {
+  flex: 1 1 100%;
+  margin: 2px 0 0 !important;
+  padding-top: 9px;
+  border-top: 1px solid #F6CFE2;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--slate);
+}
+.banner-how strong { color: var(--ink); }
+
+/* On the sign-in screen, where everything else is centred prose. */
+.banner.compact {
+  text-align: left;
+  margin: 18px 0 0;
+  font-size: 13px;
+}
+
+.notice {
+  background: var(--absent-wash);
+  border: 1px solid #edcdcb;
+  color: var(--absent);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  font-size: 13.5px;
+  margin-top: 14px;
+}
+
+.empty {
+  border: 1px dashed var(--rule);
+  border-radius: var(--r);
+  padding: 26px 18px;
+  text-align: center;
+  color: var(--slate);
+  font-size: 14px;
+}
+
+/* ---------- onboarding ---------- */
+
+.intro { padding: 40px 0 0; }
+.intro h1 {
+  font-size: 30px;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+.intro p { color: var(--slate); margin: 0 0 22px; }
+
+.dropzone {
+  border: 1px dashed var(--mute);
+  border-radius: var(--r);
+  background: var(--card);
+  padding: 30px 18px;
+  text-align: center;
+  transition: border-color 0.15s;
+}
+.dropzone:hover, .dropzone.over { border-color: var(--signal); }
+.dropzone .big { font-weight: 600; margin-bottom: 4px; }
+.dropzone .small { font-size: 13px; color: var(--slate); }
+
+.spinner {
+  width: 26px; height: 26px;
+  border: 2px solid var(--rule);
+  border-top-color: var(--signal);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2.4s; }
+}
+
+/* ---------- confirm / edit ---------- */
+
+.row-edit {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.row-edit.unverified { border-color: #ecd9b4; background: var(--warn-wash); }
+.row-edit input, .row-edit select {
+  font-family: var(--sans);
+  font-size: 14px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 8px 10px;
+  width: 100%;
+  background: var(--card);
+  color: var(--ink);
+}
+.row-edit .grid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+.linklike {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--absent);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+/* ---------- tab bar ---------- */
+
+.tabs {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 30;
+  display: flex;
+  background: var(--board);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Icon over label. Names of this length are unreadable as text alone on a
+   phone, so the icon carries recognition and the label confirms it. */
+.tab {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 0;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 9px 3px 10px;
+  color: #7E8792;
+  border-top: 2px solid transparent;
+  transition: color 0.14s;
+}
+
+.tab-icon {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+.tab-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.25;
+  text-align: center;
+  /* Two lines at most — "Week's Timetable" and "Today's classes" both wrap
+     on a narrow phone; a third line would start pushing the bar taller than
+     the content deserves. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.tab[aria-selected="true"] { color: #fff; border-top-color: var(--signal); }
+.tab:focus-visible { outline-offset: -3px; }
+.tab:focus-visible { outline-offset: -3px; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  z-index: 40;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- course picker ---------- */
+
+.search {
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 15px;
+  padding: 11px 13px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.picked-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--signal);
+  background: var(--signal-wash);
+  color: var(--signal);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.course-row {
+  border-bottom: 1px solid var(--rule);
+}
+.course-hit {
+  display: grid;
+  grid-template-columns: 56px 1fr 24px;
+  gap: 10px;
+  align-items: start;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 13px 2px;
+  color: inherit;
+}
+.course-hit .code {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+  padding-top: 2px;
+}
+.course-row.on .code { color: var(--signal); }
+.course-hit .body { display: block; min-width: 0; }
+.course-hit .check {
+  font-size: 15px;
+  color: var(--mute);
+  text-align: right;
+  padding-top: 1px;
+}
+.course-row.on .check { color: var(--signal); }
+.course-row.on .course { color: var(--signal); }
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 2px 13px 66px;
+}
+.sections .mark { text-align: left; border-radius: 8px; }
+.sections .mark[aria-pressed="true"] {
+  background: var(--signal-wash);
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+.save-dock {
+  position: sticky;
+  bottom: calc(58px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--paper) 72%, transparent);
+  padding: 16px 0 8px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- skip budget ---------- */
+
+.budget {
+  border-bottom: 1px solid var(--rule);
+  padding: 16px 0;
+}
+.budget-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.budget-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.budget-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mute);
+  margin-top: 3px;
+}
+
+/* A separate line rather than folded into budget-sub — that line already
+   carries either the instructor or the credit fallback, and cramming venue
+   in too made it wrap awkwardly on courses with two instructors. */
+.budget-venue { margin-top: 7px; }
+
+/* The venue reads as a label stuck on the course, not as more metadata — so
+   it's filled in the board colour, the same stock the masthead is printed on.
+   Deliberately not a colour: every colour here already means something
+   (signal = now, green/red = verdict), and a coloured venue would read as a
+   status rather than a place. */
+.venue-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  background: var(--board);
+  border: 1px solid var(--board);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #fff;
+  line-height: 1.35;
+}
+/* The pin recedes a step so the room number stays the thing being read. */
+.venue-chip svg { flex: 0 0 auto; color: #9AA3AD; }
+
+/* Rooms with written directions get a caret; the rest are inert labels, and
+   look it. */
+.venue-chip.has-note { padding-right: 6px; }
+.venue-caret { transition: transform 0.15s ease; }
+.venue-chip.open .venue-caret { transform: rotate(180deg); }
+
+/* Breaks onto its own line in both places the chip appears: a flex row of
+   metadata on Today, and a plain block under the course name on Profile. */
+.venue-note {
+  display: block;
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 7px;
+  padding-left: 9px;
+  border-left: 2px solid var(--rule-strong);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--slate);
+}
+
+/* The number is the answer to the question people actually have. */
+.budget-count {
+  text-align: right;
+  flex: 0 0 auto;
+  line-height: 1;
+}
+.budget-count strong {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--present);
+}
+.budget-count span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.budget-count.tight strong { color: var(--warn-ink); }
+.budget-count.over strong { color: var(--absent); }
+
+/* one pip per permitted absence — filled once spent */
+.pips {
+  display: flex;
+  gap: 5px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.pip {
+  width: 22px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--rule);
+}
+.pip.spent { background: var(--absent); }
+
+.budget-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--slate);
+}
+.tag.quiet { background: var(--rule); color: var(--slate); }
+
+/* A course's attendance so far, as a chip in the colours the rest of the app
+   uses for attended and missed — green at or above the course's line, red
+   below it — so it is the first thing read on the card's last line. */
+.pct-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--present-wash);
+  color: var(--present);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.pct-badge small {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.pct-badge.low { background: var(--absent-wash); color: var(--absent); }
+
+/* ---------- sessions grouped by day (Edit attendance, Reschedule) ---------- */
+
+.daylist { margin-bottom: 20px; }
+.daylist-date {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+.daylist-day > span { color: var(--mute); letter-spacing: 0.04em; }
+
+/* DayFold: Edit attendance and Reschedule fold each date, since weeks of open
+   days are a long scroll to reach the one that needs changing. */
+.daylist.fold { margin-bottom: 0; }
+.daylist.fold[open] { margin-bottom: 14px; }
+.daylist.fold > summary {
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 10px;
+  margin-bottom: 0;
+  cursor: pointer;
+  list-style: none;          /* Firefox's marker */
+}
+.daylist.fold > summary::-webkit-details-marker { display: none; }
+.daylist.fold > summary:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.daylist.fold[open] > summary { margin-bottom: 4px; }
+.daylist-day { display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; }
+.daylist-tally {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--slate);
+}
+.daylist-chevron { flex: 0 0 auto; color: var(--mute); transition: transform 0.16s; }
+.daylist.fold[open] > summary .daylist-chevron { transform: rotate(180deg); }
+
+.daylist-row {
+  display: grid;
+  grid-template-columns: var(--gutter) 1fr;
+  gap: 12px;
+  padding: 10px 0;
+}
+.daylist-time {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--slate);
+  padding-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- tab badge ---------- */
+
+.tab-badge {
+  position: absolute;
+  top: -5px;
+  left: 11px;
+  background: var(--signal);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 999px;
+  letter-spacing: 0;
+  /* Cut into the board so the pill reads as sitting above the icon. */
+  box-shadow: 0 0 0 2px var(--board);
+}
+
+/* ---------- timetable grid ---------- */
+
+.tt-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 calc(var(--pad) * -1);
+  padding: 0 var(--pad);
+}
+
+.tt-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  /* `clip`, not `hidden`, and the difference is the whole reason the time
+     gutter stays put. `hidden` makes this element a scroll container, and a
+     sticky descendant resolves against its NEAREST scrolling ancestor — so
+     the gutter was sticking to this grid, which never scrolls, and rode off
+     the left edge with everything else. `clip` clips to the same rounded
+     corners without creating a scrollport, leaving .tt-scroll as the
+     scroller the gutter actually sticks to. */
+  overflow: clip;
+  /* Forces every column to its widest unwrapped line — a long venue name,
+     mainly — rather than letting it wrap. That's the point on a phone: a
+     guaranteed-readable column and a horizontal scroll are a fair trade.
+     On the wide desktop grid below, the same rule would keep forcing a
+     scrollbar no matter how much width .shell-grid hands it, since it sizes
+     off content rather than the container — so it's switched off there and
+     long names wrap in the cell instead. */
+  min-width: max-content;
+}
+@media (min-width: 860px) {
+  .shell-grid .tt-grid { min-width: 0; }
+}
+
+/* the time gutter stays put while the days scroll under it */
+.tt-corner,
+.tt-time {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: var(--paper);
+  /* Two jobs. The 1px on the right is the grid line: the grid's own gaps
+     stop working for a column that has content passing under it, so the
+     gutter carries its own edge. The wide band on the left covers the
+     scroller's horizontal padding — the gutter pins to the padding edge, not
+     the screen edge, and without this the days were visible sliding through
+     that strip beside the times. */
+  box-shadow:
+    calc(var(--pad) * -1) 0 0 var(--paper),
+    1px 0 0 var(--rule);
+}
+
+.tt-corner { min-height: 34px; }
+
+.tt-day {
+  background: var(--paper);
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 9px 0;
+}
+.tt-day.today { color: var(--signal); font-weight: 600; }
+
+.tt-time {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--slate);
+  padding: 9px 6px 9px 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+.tt-time small {
+  display: block;
+  font-size: 10px;
+  color: var(--mute);
+}
+.tt-time.live { color: var(--signal); font-weight: 600; }
+
+.tt-cell {
+  background: var(--card);
+  padding: 5px;
+  min-height: 62px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tt-cell.now { background: var(--signal-wash); }
+
+.tt-block {
+  background: var(--paper);
+  border-left: 3px solid var(--ink);
+  border-radius: 6px;
+  padding: 6px 7px;
+  flex: 1;
+}
+.tt-cell.now .tt-block { border-left-color: var(--signal); background: #fff; }
+
+.tt-name {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.tt-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--slate);
+  margin-top: 3px;
+}
+.tt-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.tt-tags .tag { font-size: 9px; padding: 1px 4px; }
+
+/* ---------- term calendar ---------- */
+
+.cal-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.cal-bar {
+  flex: 0 0 4px;
+  border-radius: 2px;
+  background: var(--present);
+}
+.cal-row.is-break .cal-bar { background: var(--warn-ink); }
+.cal-row.current .cal-bar { background: var(--signal); }
+
+.cal-label {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.cal-dates {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--slate);
+  margin-top: 3px;
+}
+.cal-dates span { color: var(--mute); }
+
+/* ---------- reschedule ---------- */
+
+.moved-row {
+  display: flex;
+  /* The row grew a Move button under its text, so it can no longer be
+     centred against a single line. */
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.strike { text-decoration: line-through; color: var(--mute); }
+
+.reschedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 11px;
+}
+.reschedule-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.reschedule-form label span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+/* "When is it now?" — a new date, or not decided yet. The chosen answer is
+   filled like the attendance choice, but in ink rather than green or red:
+   neither answer is good news or bad. */
+.reschedule-when { margin-top: 0; gap: 8px; }
+/* The form sits indented inside a class row, so it has well under the full
+   screen width. Tighter than the attendance pills so each label stays on one
+   line on an ordinary phone. */
+.reschedule-when .mark {
+  padding: 8px 8px;
+  font-size: 13px;
+}
+.reschedule-when .mark[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.reschedule-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--slate);
+}
+
+.reschedule-form input,
+.reschedule-form select {
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--ink);
+  width: 100%;
+}
+
+/* ---------- opening screen ---------- */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 24px;
+  z-index: 60;
+}
+
+.splash-mark {
+  filter: drop-shadow(0 8px 24px rgba(17, 21, 26, 0.16));
+  border-radius: 16px;
+}
+
+.splash-word {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+.splash-word i { font-style: normal; color: var(--signal); }
+
+.splash-msg {
+  margin: 6px 0 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+/* The leave mail's steps: set clear of the wordmark and motto, and in ink
+   at a readable size, since here the line is the news. public/gmail-callback.html
+   copies this by hand. */
+.splash-msg.splash-task {
+  margin-top: 24px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+/* An indeterminate sweep, not a spinner: it says "working" without
+   implying a percentage the app doesn't know. */
+.splash-bar {
+  margin-top: 26px;
+  width: 132px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--rule);
+  overflow: hidden;
+}
+.splash-bar span {
+  display: block;
+  width: 44px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--signal);
+  transform: translateX(-44px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .splash-bar span { animation: sweep 1.15s ease-in-out infinite; }
+  .mark-draw .mark-tick {
+    stroke-dasharray: 42;
+    stroke-dashoffset: 42;
+    animation: draw 0.62s cubic-bezier(0.65, 0, 0.35, 1) 0.12s forwards;
+  }
+}
+/* Reduce Motion asks for no movement, not for no sign of life. A splash
+   frozen solid read as a stuck app, so nothing moves here but the bar
+   breathes where it sits and the tick fades in. */
+@media (prefers-reduced-motion: reduce) {
+  .splash-bar span {
+    transform: translateX(44px);
+    animation: breathe 1.6s ease-in-out infinite;
+  }
+  .mark-draw .mark-tick { animation: appear 0.5s ease-out 0.12s both; }
+}
+
+@keyframes sweep {
+  0%   { transform: translateX(-44px); }
+  100% { transform: translateX(132px); }
+}
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 1; }
+}
+@keyframes appear {
+  from { opacity: 0; }
+}
+
+/* placeholder while a lazily-loaded screen arrives — deliberately quiet,
+   since most of these resolve in a few frames from cache */
+.screen-loading {
+  height: 140px;
+  border-radius: var(--r);
+  background: linear-gradient(
+    100deg,
+    var(--rule) 20%, #EDEEEA 38%, var(--rule) 56%
+  );
+  background-size: 220% 100%;
+  opacity: 0.55;
+  margin-top: 24px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .screen-loading { animation: shimmer 1.3s linear infinite; }
+}
+@keyframes shimmer {
+  to { background-position: -220% 0; }
+}
+
+
+/* ---------- crash screen ---------- */
+
+.crash {
+  max-width: 520px;
+  margin: 12vh auto;
+  padding: 24px;
+}
+.crash h1 { font-size: 19px; margin: 0 0 10px; letter-spacing: -0.02em; }
+.crash p { color: var(--slate); margin: 0 0 14px; font-size: 14.5px; }
+.crash pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--slate);
+  max-height: 220px;
+  overflow: auto;
+  margin: 0 0 16px;
+}
+.crash-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- sign in ---------- */
+
+.signin {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px calc(40px + env(safe-area-inset-bottom));
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.signin-mark {
+  filter: drop-shadow(0 8px 24px rgba(17, 21, 26, 0.16));
+  border-radius: 15px;
+}
+
+.signin h1 {
+  margin: 20px 0 8px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.signin h1 i { font-style: normal; color: var(--signal); }
+
+.signin-sub {
+  color: var(--slate);
+  font-size: 14.5px;
+  line-height: 1.5;
+  margin: 0 0 26px;
+}
+
+/* Google requires its button to stay recognisably Google's — white surface,
+   its own mark, unmodified. So this one deliberately ignores the app palette. */
+.btn.google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: #fff;
+  color: #1F1F1F;
+  border: 1px solid var(--rule-strong);
+  border-radius: 9px;
+  padding: 13px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 1px 2px rgba(17, 21, 26, 0.06);
+}
+.btn.google:hover { background: #FAFAFA; }
+.btn.google:disabled { opacity: 0.6; }
+
+.signin-note {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+.signin-retry { margin-top: 18px; color: var(--slate); }
+
+/* ---------- masthead account ---------- */
+
+.masthead-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.masthead-user {
+  background: var(--board-soft);
+  border: 0;
+  color: #C7CDD4;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+  border-radius: 999px;
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.masthead-user:hover { color: #fff; }
+
+
+/* ---------- profile ---------- */
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.profile-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  object-fit: cover;
+  background: var(--rule);
+}
+.profile-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--board);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+img.profile-avatar { display: block; }
+
+/* The DP is the way into the picker, with a pencil so it reads as tappable —
+   a plain picture gives no hint that it does anything. */
+.profile-avatar-btn {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+}
+.profile-avatar-edit {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  color: var(--slate);
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 14px 8px;
+}
+.avatar-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--slate);
+  font-size: 12px;
+}
+.avatar-choice-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--rule);
+}
+/* Ink, not the signal colour: magenta is kept for "now", and a picked
+   picture isn't that. */
+.avatar-choice.sel .avatar-choice-img { box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--ink); }
+.avatar-choice.sel { color: var(--ink); font-weight: 600; }
+.avatar-choice:disabled { opacity: 0.6; cursor: progress; }
+.avatar-only {
+  margin-top: -4px;
+  max-width: 76px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  /* Even lines, so a two-word name at the end isn't split onto its own. */
+  text-wrap: balance;
+  color: var(--mute);
+}
+.avatar-error {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--absent-wash);
+  color: var(--absent);
+  font-size: 13px;
+}
+
+.profile-name {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.profile-email {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--slate);
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* One line, not a band of tiles: the per-course cards right below carry the
+   detail, so this only has to flag how many of them need a look. */
+.profile-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--card);
+  margin-top: 10px;
+}
+.profile-summary strong {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.profile-summary span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.profile-summary.warn { border-color: var(--absent); background: var(--absent-wash); }
+.profile-summary.warn strong { color: var(--absent); }
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+/* Signing out is destructive-ish and rarely wanted; it reads quieter than
+   the action above it rather than competing for the same attention. */
+.profile-actions .signout { color: var(--slate); }
+
+/* ---------- motto and credit ---------- */
+
+.splash-motto,
+.signin-motto {
+  margin: 5px 0 0;
+  font-size: 13.5px;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--slate);
+}
+
+.signin-motto {
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+
+/* Deliberately quiet: present for whoever looks, absent for everyone else. */
+.made-by {
+  margin: 26px 0 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  text-align: center;
+  /* No opacity fade: at 9.5px it was landing under 4:1, and the small size
+     plus uppercase mono already makes it recede far enough. */
+}
+
+/* On the opening screen the credit sits at the foot rather than in the
+   centred stack, so it never competes with the mark and the loading bar.
+   Lifted clear of the home indicator on phones that have one. */
+.splash-credit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+  margin: 0;
+  padding: 0 24px;
+  /* A step up from the Profile credit it shares a class with: bigger and
+     darker, but still the mono small caps, so it reads as a signature rather
+     than a second headline under the wordmark. */
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--slate);
+}
+.splash-credit b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ---------- timetable action buttons ---------- */
+
+.tt-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+/* A two-column grid rather than a flex row, so the buttons stay equal width
+   whatever their labels say. An odd one out spans the pair instead of
+   leaving a gap beside it. */
+.tt-actions .btn { width: 100%; }
+.tt-actions .btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* OLT disagrees with a mark: a red "!" pinned to the button's top-left
+   corner, half outside it, the way an app icon carries a notification. */
+.tt-actions .btn.has-bang { position: relative; }
+.tt-bang {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--absent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+/* Top of the breakdown: classes OLT and the student marked differently. */
+.ab-mismatch {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--absent);
+  border-radius: var(--r);
+  background: var(--absent-wash);
+}
+.ab-mismatch-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--absent);
+}
+.ab-mismatch-bang {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--absent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+.ab-mismatch ul { list-style: none; margin: 10px 0 0; padding: 0; }
+.ab-mismatch li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid #edcdcb;
+  font-size: 13px;
+  color: var(--ink);
+}
+.ab-mismatch-what { min-width: 0; }
+.ab-mismatch-what b { font-weight: 600; }
+.ab-mismatch-marks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--slate);
+}
+/* Each source stays beside its own mark; a narrow row wraps between them. */
+.ab-mismatch-marks > span { white-space: nowrap; margin-right: 8px; }
+.ab-mismatch-marks .ab-status { min-width: 0; margin-left: 3px; }
+.btn.ab-mismatch-fix {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  background: var(--absent);
+  border-color: var(--absent);
+}
+
+
+/* ---------- attendance breakdown ---------- */
+
+/* Three buckets as one bar. Green and red already mean attended and missed
+   everywhere else in the app, so the third has to be neither: grey reads as
+   "no record", which is what it is — a gap in the student's own marking, not
+   a verdict against them. */
+.ab-total {
+  background: var(--board);
+  color: #fff;
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.ab-total-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ab-total-count {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: #A8B0BA;
+  font-variant-numeric: tabular-nums;
+}
+.ab-total .ab-legend { color: #C6CCD3; }
+
+.ab-card {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.ab-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ab-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  min-width: 0;
+}
+.ab-pct {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--present-wash);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--present);
+}
+.ab-pct.low { background: var(--absent-wash); color: var(--absent); }
+.ab-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--mute);
+  margin-top: 3px;
+}
+
+.ab-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 11px;   /* the space the bar used to occupy */
+  font-size: 12px;
+  color: var(--slate);
+}
+.ab-key { display: inline-flex; align-items: center; gap: 5px; }
+.ab-key i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.ab-key.present i { background: var(--present); }
+.ab-key.absent i { background: var(--absent); }
+.ab-key.unmarked i { background: var(--rule-strong); }
+.ab-key b {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The card is a <details>; the padding moves onto the parts so the open
+   panel can sit flush against the summary above it. */
+.ab-card { padding: 0; }
+.ab-summary {
+  padding: 14px;
+  cursor: pointer;
+  list-style: none;          /* Firefox's marker */
+  border-radius: var(--r);
+}
+.ab-summary::-webkit-details-marker { display: none; }
+.ab-summary:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
+
+/* The affordance, drawn as a pill rather than a caption: it is the only
+   thing on the card you can act on, and as grey small-caps it read as a
+   label about the card instead of a way into it. Sentence case on purpose —
+   every other mono label here is uppercase, so this one is set apart by not
+   being. The chevron rotates rather than swapping glyphs, so the direction
+   of travel is obvious. */
+.ab-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--signal-wash);
+  border: 1px solid var(--signal);
+  color: var(--signal-deep);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.ab-summary:hover .ab-more { background: var(--signal); color: #fff; }
+.ab-more svg { transition: transform 0.16s; }
+details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
+
+.ab-sessions {
+  border-top: 1px solid var(--rule);
+  padding: 4px 14px 12px;
+}
+.ab-session {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.ab-session:last-child { border-bottom: 0; }
+.ab-when { flex: 1; min-width: 0; color: var(--slate); }
+.ab-when b { color: var(--ink); font-weight: 600; }
+.ab-when .tag { margin-left: 6px; }
+.ab-at {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+/* The verdict, as a chip in the same three colours as the bar above it, so
+   a row and a segment are recognisably the same fact. */
+.ab-status {
+  flex: 0 0 auto;
+  min-width: 88px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+.ab-status.present { background: var(--present-wash); color: var(--present); }
+.ab-status.absent { background: var(--absent-wash); color: var(--absent); }
+.ab-status.unmarked { background: var(--paper); color: var(--mute); border: 1px solid var(--rule-strong); }
+
+.ab-foot {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+  margin-top: 14px;
+}
+
+
+/* ---------- admin: the whole app as another year ---------- */
+
+/* The offer, shown only to an admin and only when a second schedule exists. */
+.viewas-offer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r);
+  font-size: 12.5px;
+  color: var(--slate);
+}
+
+/* Loud on purpose, and on every tab. Reading somebody else's timetable with
+   an empty attendance record is exactly the state you must never mistake for
+   your own. */
+.viewas-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  background: var(--board);
+  color: #fff;
+  border-radius: var(--r);
+}
+.viewas-what { font-size: 13.5px; min-width: 0; }
+.viewas-note {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #A8B0BA;
+}
+.viewas-controls { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.viewas-controls select {
+  font: inherit;
+  font-size: 12.5px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid #3A424D;
+  background: var(--board-soft);
+  color: #fff;
+}
+.viewas-bar .mark { background: transparent; color: #fff; border-color: #4A525D; }
+.viewas-bar .mark:hover { background: var(--board-soft); }
+
+
+/* ---------- admin: read a schedule as a student ---------- */
+
+.preview-pane {
+  margin-top: 18px;
+  border: 1px solid var(--signal);
+  border-radius: var(--r);
+  background: var(--signal-wash);
+  padding: 12px;
+}
+.preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.preview-title { font-size: 13.5px; color: var(--ink); min-width: 0; }
+.preview-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.preview-field { display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
+.preview-field span {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.preview-field select, .preview-field input {
+  font: inherit;
+  padding: 5px 8px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+}
+.preview-note { font-size: 12.5px; color: var(--slate); margin: 0 0 10px; }
+
+/* The real screens, on their own paper so it is obvious they are a preview
+   rather than the admin's own timetable. */
+.preview-screen {
+  background: var(--paper);
+  border-radius: var(--r);
+  padding: 2px 12px 14px;
+  margin-bottom: 10px;
+}
+.preview-screen:last-child { margin-bottom: 0; }
+.preview-screen .eyebrow { margin-top: 16px; }
+
+
+/* ---------- day / night switch, and the night canteen ---------- */
+
+.daynight { display: flex; gap: 8px; margin: 4px 0 16px; }
+.daynight-tab {
+  flex: 1 1 0;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  border-radius: var(--r);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--slate);
+}
+.daynight-tab[aria-selected="true"] {
+  background: var(--signal-wash);
+  border-color: var(--signal);
+  color: var(--signal-deep);
+}
+
+/* Ordering at 1am is a phone call, so the number is the first thing here. */
+.canteen-head {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--r);
+  padding: 11px 13px;
+  margin-bottom: 14px;
+}
+.canteen-name { font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; }
+.canteen-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+}
+.canteen-call { color: var(--signal-deep); text-decoration: none; font-weight: 600; }
+
+/* The photographed menu. Loud on purpose: the typed list beneath it is a
+   transcription, and the photograph is the thing that is actually true, so it
+   should not read as a footnote. */
+.scan-cta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 13px 15px;
+  font-size: 14.5px;
+  text-align: left;
+}
+.scan-cta-text { flex: 1; min-width: 0; }
+.scan-cta-pages {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+}
+.scan-pages { margin-bottom: 14px; }
+.scan-note { font-size: 12.5px; line-height: 1.5; color: var(--mute); margin: 0 0 10px; }
+.scan-page {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  margin-bottom: 10px;
+  /* Menus are photographed on coloured card; a white sheet behind a page that
+     is still loading reads as broken rather than as pending. */
+  background: var(--rule);
+  min-height: 120px;
+}
+
+
+.diet-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.diet-chip {
+  padding: 7px 13px;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--slate);
+}
+.diet-chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* The Indian convention: a filled green square is vegetarian, brown is meat.
+   Egg gets its own amber because the two words mean different things to
+   different people, and a hollow dot means nobody has checked. */
+.diet-dot {
+  flex: 0 0 auto;
+  width: 11px; height: 11px;
+  border-radius: 3px;
+  border: 1.5px solid currentColor;
+}
+.diet-dot.veg { color: var(--present); background: currentColor; }
+.diet-dot.egg { color: var(--warn-ink); background: currentColor; }
+.diet-dot.non-veg { color: var(--absent); background: currentColor; }
+.diet-dot.unknown { color: var(--rule-strong); background: transparent; }
+
+/* ---------- basket ---------- */
+
+.night-row.in-cart { background: var(--signal-wash); }
+
+.night-add {
+  width: 26px; height: 26px;
+  border: 1px solid var(--rule-strong);
+  background: var(--card);
+  border-radius: 8px;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--slate);
+}
+.night-add:hover { border-color: var(--signal); color: var(--signal); }
+
+.qty { display: inline-flex; align-items: center; gap: 2px; }
+.qty button {
+  width: 26px; height: 26px;
+  border: 1px solid var(--signal);
+  background: var(--card);
+  color: var(--signal-deep);
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 1;
+}
+.qty b {
+  min-width: 22px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pinned above the tab bar, which is itself fixed. */
+/* Floating clear of the tab bar, not stacked on it. The bar is #171B21 and
+   the pill is #11151A, so at five pixels apart the two darks read as one
+   slab with a seam — the gap and the ring below are what separate them. */
+.cart-dock {
+  position: fixed;
+  left: 0; right: 0;
+  /* --nav-h is the tab bar's measured height, published by App. It already
+     includes the safe-area inset the bar pads itself with, so nothing is
+     added for that here. The fallback only ever applies for the instant
+     before the first measurement lands. */
+  bottom: calc(var(--nav-h, 64px) + 16px);
+  z-index: 25;
+  display: flex;
+  justify-content: center;
+  padding: 0 22px;
+  pointer-events: none;
+}
+
+/* The list runs underneath, so rows arrive at the pill's edge mid-word. This
+   fades them out into the page instead. */
+.cart-dock::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -20px;
+  height: 78px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(244, 245, 242, 0) 0%,
+    rgba(244, 245, 242, 0.86) 45%,
+    var(--paper) 78%
+  );
+}
+.cart-open {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 460px;
+  padding: 13px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 600;
+  /* A ring of the page colour, then the drop shadow. The ring is what stops
+     it merging into the tab bar when the two get close on a short screen —
+     the same trick the alert badge uses to sit on top of its icon. */
+  box-shadow:
+    0 0 0 4px var(--paper),
+    0 10px 24px rgba(17, 21, 26, 0.28),
+    0 2px 6px rgba(17, 21, 26, 0.16);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.cart-open:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 0 0 4px var(--paper),
+    0 5px 14px rgba(17, 21, 26, 0.26);
+}
+.cart-count {
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--signal);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.cart-total { margin-left: auto; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+/* So the dock never covers the last row of the menu. The pill, its ring, and
+   the gap it floats in — all measured rather than assumed. */
+.cart-spacer { height: calc(var(--nav-h, 64px) + 24px); }
+
+/* A sheet from the bottom on a phone, a centred dialog once there is room.
+   Bottom-anchored on small screens because that is where the thumb already
+   is — the dock that opened it sits an inch below. */
+.modal-back {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(17, 21, 26, 0.45);
+  padding: 0;
+}
+.modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -8px 34px rgba(0, 0, 0, 0.25);
+}
+@media (min-width: 560px) {
+  .modal-back { align-items: center; padding: 24px; }
+  .modal { border-radius: var(--r); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28); }
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--rule);
+}
+.modal-x {
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-size: 24px;
+  line-height: 1;
+  padding: 0 4px;
+}
+/* The list scrolls, the heading does not — with ten lines and two fields the
+   dialog is taller than a phone. */
+.modal-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+}
+.cart-line {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+}
+.cart-name { font-size: 13.5px; min-width: 0; }
+.cart-sum {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--slate);
+}
+.cart-sum div { display: flex; justify-content: space-between; padding: 2px 0; }
+.cart-sum span:last-child { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.cart-grand {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule-strong);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+/* Side by side, because they are both short and both about the same thing:
+   who is at the other end. They stack only on the very narrowest phones,
+   where two fields on one line would each be too narrow to read back. */
+.cart-who {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0 12px;
+}
+@media (max-width: 339px) { .cart-who { grid-template-columns: 1fr; } }
+.cart-who label { display: block; min-width: 0; }
+.cart-who span,
+.cart-notes span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 5px;
+}
+/* Chips rather than a dropdown: ten short names, and each one carries its
+   own price. A <select> would hide the fee behind a tap, which is exactly the
+   thing worth seeing before choosing. */
+.place-pick { border: 0; padding: 0; margin: 16px 0 12px; }
+.place-pick legend {
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 7px;
+}
+.place-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+.place-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: var(--card);
+  font-size: 13px;
+  color: var(--ink);
+}
+.place-chip:hover { border-color: var(--signal); }
+.place-chip.on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  font-weight: 600;
+}
+.place-fee {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.place-chip.on .place-fee { color: #C9CDD3; }
+
+.cart-notes { display: block; margin: 0 0 12px; }
+.cart-notes textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  resize: vertical;
+  min-height: 58px;
+}
+.cart-notes textarea:focus { outline: none; border-color: var(--signal); }
+.cart-notes em {
+  display: block;
+  margin-top: 5px;
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--mute);
+}
+/* The whole order in one box, so it wants to be read line by line rather
+   than as a note: the same size as the basket above it. */
+.cart-final textarea { min-height: 96px; font-size: 13.5px; }
+.cart-final-behind {
+  margin: 7px 0 0;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: var(--warn-wash);
+  color: var(--warn-ink);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cart-who input {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.cart-order {
+  background: #128C7E;          /* WhatsApp's own green, so it reads as a
+                                   handover to that app rather than a promise
+                                   this one is placing the order */
+  border-color: #128C7E;
+  margin-bottom: 8px;
+  text-align: center;
+  text-decoration: none;
+}
+.cart-note { font-size: 12px; line-height: 1.5; color: var(--mute); margin: 10px 0 0; }
+.cart-warn {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--warn-ink);
+  margin: 0 0 10px;
+}
+.cart-empty { margin-top: 14px; }
+
+
+/* Closed, the categories are a contents page: nineteen lines you can read in
+   one look, instead of two hundred and fifty rows you scroll past to find out
+   what the canteen even does. */
+.night-cat { margin-bottom: 6px; }
+.night-cat.open { margin-bottom: 16px; }
+
+.night-cat-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding: 9px 2px;
+  margin-bottom: 0;
+}
+.night-cat.open > .night-cat-head {
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.night-cat-head:hover { color: var(--ink); }
+/* The suggestions block borrows the heading but is not a control. */
+.night-cat-head.static { cursor: default; }
+.night-cat-name { flex: 1 1 auto; min-width: 0; }
+.night-cat-n {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--mute);
+}
+.night-chev {
+  flex: 0 0 auto;
+  color: var(--rule-strong);
+  transition: transform 120ms ease;
+}
+.night-cat-head:hover .night-chev { color: var(--signal); }
+.night-chev.open { transform: rotate(90deg); color: var(--signal); }
+@media (prefers-reduced-motion: reduce) { .night-chev { transition: none; } }
+
+/* Guesses, and marked as such — the heading alone would read as more menu. */
+.night-similar { margin-top: 10px; }
+.night-similar > .night-cat-head { border-bottom-color: var(--signal); color: var(--signal-deep); }
+/* Which section the suggestion came from: without it a dish arrives with no
+   context at all, several categories away from where it lives. */
+.night-from {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-top: 2px;
+}
+
+.night-row {
+  display: grid;
+  /* The last column is fixed rather than auto so that the price column lands
+     in the same place on every row, whether the item is in the basket (a
+     three-part stepper) or not (a single square button). */
+  grid-template-columns: 11px 1fr auto 84px;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.night-act { display: flex; justify-content: flex-end; }
+.night-item { font-size: 13.5px; line-height: 1.35; min-width: 0; }
+.night-item mark {
+  background: var(--signal-wash);
+  color: var(--signal-deep);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+.night-price {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Search, diet and count as one block, with a hairline under it so the menu
+   below reads as its result rather than as more of the same list. */
+.night-find {
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.night-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.night-filters .diet-row { margin-bottom: 0; }
+.night-count {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.night-none {
+  text-align: center;
+  padding: 20px 16px;
+  color: var(--mute);
+  font-size: 13.5px;
+}
+.night-none p { margin: 0 0 12px; }
+/* The variant that sits directly above the suggestions: a caption, not a
+   panel. Nothing is lost — the section under it names itself. */
+.night-none.tight {
+  padding: 12px 0 2px;
+  margin: 0;
+  text-align: left;
+  font-size: 13px;
+}
+/* No basket on this screen, so no action column — the price sits at the end
+   of the row instead of a step away from it. */
+/* Four cells: dot, name, price, and the add column — which is fixed width so
+   the prices line up whether or not a row carries a basket count beside its
+   plus. Getting this wrong wraps the button onto a row of its own. */
+/* Wide enough for the whole stepper. It was sized for a lone plus, and once
+   a minus joined it the row ran into the price — worst on the two-price
+   items, whose "₹40 / 60" is the longest price on the card. */
+.tuck-row { grid-template-columns: 11px 1fr auto 88px; }
+/* Until the Diet column is filled in there is no dot to leave room for. */
+.tuck-row.nodiet { grid-template-columns: 1fr auto 88px; }
+/* How many of this item are in the basket, at whatever prices — the row's
+   own stepper cannot say it, because one row can be two basket lines. */
+.tuck-have {
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--signal);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-align: center;
+}
+.night-act { gap: 7px; align-items: center; }
+
+.choose-name { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.choose-hint { font-size: 12.5px; line-height: 1.5; color: var(--mute); margin: 0 0 14px; }
+.choose-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+/* How many of that price are in the basket — the thing you need to know
+   before deciding which one to take away. Set apart with its own rule,
+   because "₹40" and "1 in basket" run together into "₹401" otherwise. */
+.choose-have {
+  padding-left: 10px;
+  border-left: 1px solid var(--rule-strong);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--mute);
+}
+.cart-each {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--mute);
+  margin-top: 2px;
+}
+
+/* Money, so it is walled off from the order above it rather than being one
+   more button in a stack. */
+.pay-block {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule-strong);
+}
+.pay-btn {
+  background: var(--ink);
+  border-color: var(--ink);
+  text-align: center;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+.pay-vpa {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+}
+.pay-vpa > span {
+  flex: 1 1 100%;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.pay-vpa code {
+  flex: 1 1 auto;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  color: var(--ink);
+  word-break: break-all;
+}
+.pay-copy { flex: 0 0 auto; padding: 6px 12px; font-size: 12.5px; }
+.pay-warn {
+  background: var(--absent-wash);
+  border: 1px solid #edcdcb;
+  color: var(--absent);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+/* Small print by design. Before a choice it is the only way to pick; after
+   one it is a way back that should not compete with the button above it. */
+.pay-pick-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  margin: -4px 0 12px;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  color: var(--slate);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.pay-pick-toggle:hover { color: var(--signal); }
+.pay-caret { transition: transform 0.14s ease; }
+.pay-caret.open { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .pay-caret { transition: none; } }
+
+.pay-pick {
+  margin: 0 0 12px;
+  padding: 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 12px;
+  background: var(--card);
+}
+.pay-pick-lead {
+  margin: 6px 6px 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--slate);
+}
+.pay-pick-app {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-size: 14px;
+  text-align: left;
+  color: var(--ink);
+}
+.pay-pick-app:hover { background: var(--paper); }
+.pay-pick-app.on { background: var(--signal-wash); color: var(--signal-deep); font-weight: 600; }
+/* Square, so a logo with its own padding sits level with one without. */
+.pay-pick-logo {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 5px;
+}
+.pay-pick-name { flex: 1 1 auto; min-width: 0; }
+.pay-pick-tick {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--signal-deep);
+}
+.pay-pick-clear { color: var(--slate); font-size: 13px; }
+.pay-pick-note {
+  margin: 4px 6px 6px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+.pay-alt { margin-bottom: 10px; text-align: center; text-decoration: none; }
+.pay-qr {
+  text-align: center;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: #fff;
+}
+/* Capped rather than full-width: a QR only needs to be big enough for another
+   phone's camera, and a giant one pushes the address off the screen. */
+.pay-qr img {
+  width: 100%;
+  max-width: 230px;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px;
+}
+.pay-qr p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--slate);
+  text-align: left;
+}
+.pay-note { font-size: 12px; line-height: 1.5; color: var(--mute); margin: 10px 0 0; }
+
+.night-note {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+  margin-top: 14px;
+}
+
+
+/* ---------- day mess menu ---------- */
+
+/* Four hostels as a tab strip, not a dropdown: the choice is the same every
+   time you open this, so it should not cost a tap to reveal. */
+.mess-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.mess-tab {
+  flex: 1 1 0;
+  min-width: 64px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--slate);
+}
+.mess-tab[aria-selected="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+/* Served regardless of the day, so it sits above the week instead of being
+   repeated inside all seven cards. */
+.mess-everyday {
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r);
+  padding: 11px 13px;
+  margin-bottom: 16px;
+}
+.mess-everyday-head {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 6px;
+}
+.mess-everyday p { margin: 0 0 4px; font-size: 13px; line-height: 1.45; color: var(--slate); }
+.mess-everyday p:last-child { margin-bottom: 0; }
+
+.mess-day {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.mess-day.today { border-color: var(--signal); }
+.mess-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Label beside items on a phone-width column: the meal names are short and
+   fixed, so a gutter reads faster than a heading above each list. */
+.mess-row {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 10px;
+  padding: 5px 0;
+}
+.mess-meal {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-top: 2px;
+}
+/* Serving times: four short pairs, so two columns keep the box small enough
+   that the week still starts above the fold. */
+.mess-timings {
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 9px 13px 10px;
+  margin-bottom: 12px;
+}
+.mess-timings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+}
+.mess-timings .mess-meal { display: block; padding-top: 0; }
+/* As the mess prints it, "8 AM to 10:30 AM". */
+.mess-time { font-size: 13px; white-space: nowrap; }
+.mess-everyday .mess-meal { display: inline; margin-right: 6px; }
+.mess-items { font-size: 13.5px; line-height: 1.5; }
+
+
+/* ---------- section picker (first-year first run) ---------- */
+
+/* Six tiles, because six is a choice you make at a glance and a dropdown
+   would hide five of them. Each shows its room, which is how most students
+   actually recognise their section. */
+.sec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+.sec-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  color: var(--ink);
+}
+.sec-tile:hover { border-color: var(--signal); background: var(--signal-wash); }
+.sec-letter { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+.sec-room {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--mute);
+}
+
+/* Everything arrives ticked, so the DEFAULT state is the loud one and
+   unticking visibly removes a course rather than merely failing to add it. */
+.sec-course {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  margin-bottom: 8px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--rule-strong);
+  border-radius: var(--r);
+  color: var(--ink);
+  opacity: 0.55;
+}
+.sec-course.on { opacity: 1; border-left-color: var(--signal); }
+.sec-check {
+  flex: 0 0 auto;
+  width: 20px; height: 20px;
+  margin-top: 1px;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  line-height: 1;
+}
+.sec-course.on .sec-check {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+.sec-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.sec-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.sec-meta, .sec-when {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--mute);
+}
+.sec-venue { margin-top: 5px; }
+
+/* ---------- nothing published for this cohort ---------- */
+
+.no-schedule {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--warn-ink);
+  border-radius: var(--r);
+  padding: 18px;
+  margin-top: 24px;
+}
+.no-schedule h2 {
+  font-size: 17px;
+  margin: 0 0 8px;
+  letter-spacing: -0.015em;
+}
+.no-schedule p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--slate); }
+.no-schedule p:last-child { margin-bottom: 0; }
+/* Separated from the explanation above it: this is the only thing on the
+   screen anybody can act on, and it should not read as another paragraph. */
+.no-schedule-out {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+.no-schedule code {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--paper);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+
+/* ---------- utils hub ---------- */
+
+/* Each entry gets a line explaining what it is, which the ghost buttons these
+   replaced had no room for. Same card language as the POR menu, one level
+   taller to carry the description. */
+.util-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.util-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  /* One of these is an anchor out to the institute's directory. It should
+     look identical to the buttons beside it — the external-link icon is what
+     says it leaves the app, not a stray underline. */
+  text-decoration: none;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--r);
+  color: var(--ink);
+}
+.util-item:hover { border-color: var(--signal); }
+/* The mark sits in its own tinted square so the three read as a set at a
+   glance, before any of the labels are read. */
+.util-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.util-item:hover .util-icon { background: var(--signal-wash); color: var(--signal-deep); }
+.util-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.util-label { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.util-desc { font-size: 12.5px; line-height: 1.4; color: var(--slate); }
+.util-go { flex: 0 0 auto; color: var(--rule-strong); }
+
+
+/* ---------- shared screen furniture ---------- */
+
+/* The standing explanatory line under a screen's eyebrow. Was repeated as an
+   inline style on every sub-screen that has one. */
+.screen-note {
+  color: var(--slate);
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+
+/* A section that is usually not what you came for — past classes on
+   Reschedule — folded away behind its own count. */
+.disclosure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 4px 0 2px;
+  padding: 11px 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate);
+  text-align: left;
+}
+.disclosure-caret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.15s ease;
+}
+.disclosure-caret.open { transform: rotate(90deg); }
+.disclosure .tag { margin-left: auto; }
+
+/* ---------- faculty directory ---------- */
+
+/* Not sticky, though it now could be. The reason recorded here used to be
+   that #root was height:100%, which capped the masthead's containing block
+   and stopped it sticking after one viewport; that is fixed, and the masthead
+   holds all the way down. What remains is a choice rather than a limit: on a
+   list this long the search box is worth reaching for once, and a second
+   pinned bar under the masthead costs a strip of screen on every screenful. */
+.dir-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  background: var(--card);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+}
+.dir-search svg { flex: 0 0 auto; color: var(--mute); }
+.dir-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  padding: 10px 0;
+  font: inherit;
+  font-size: 15px;   /* below 16px, iOS zooms the page on focus */
+  color: var(--ink);
+}
+.dir-search input::-webkit-search-cancel-button { display: none; }
+.dir-search:focus-within { border-color: var(--signal); }
+
+.dir-clear {
+  flex: 0 0 auto;
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.dir-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0 2px;
+}
+.dir-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+/* A body that runs a public event has a front door of its own. Chips rather
+   than a list: there are one or two of them, and they sit in the gap between
+   the count and the first name without claiming a row. */
+.por-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 14px;
+}
+.por-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 12.5px;
+  text-decoration: none;
+}
+.por-link:hover { border-color: var(--signal); color: var(--signal); }
+.por-link svg { color: var(--mute); flex: 0 0 auto; }
+.por-link:hover svg { color: var(--signal); }
+
+.chip-toggle {
+  border: 1px solid var(--rule-strong);
+  background: var(--card);
+  color: var(--slate);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+}
+.chip-toggle.on {
+  background: var(--signal-wash);
+  border-color: var(--signal);
+  color: var(--signal-deep);
+}
+
+.dir-card {
+  border-bottom: 1px solid var(--rule);
+  padding: 13px 0;
+}
+.dir-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dir-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.dir-courses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+/* A second office block only exists for the deans, who hold two rooms and two
+   numbers; the rule separates them without implying a second person. */
+.dir-office + .dir-office {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--rule);
+}
+.dir-office-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-top: 8px;
+}
+
+/* Two columns of short fields, with the email spanning both — an address is
+   far too long to sit beside anything on a phone. */
+.dir-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+  margin: 7px 0 0;
+}
+.dir-field { min-width: 0; }
+.dir-field.wide { grid-column: 1 / -1; }
+.dir-field dt {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.dir-field dd {
+  margin: 1px 0 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.dir-field dd a {
+  color: var(--signal-deep);
+  text-decoration: none;
+}
+.dir-field dd a:hover { text-decoration: underline; }
+.dir-field dd .muted { color: var(--mute); }
+/* A room with directions reads like the links beside it, plus the caret the
+   venue chip uses, so "tap for more" looks the same across the app. */
+.dir-room {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--signal-deep);
+  cursor: pointer;
+}
+.dir-room.open .venue-caret { transform: rotate(180deg); }
+
+
+/* ---------- J-Maps ---------- */
+
+/* Building names are longer than hostel codes; sized to their words rather
+   than split evenly, so "CDPO Building" stays on one line on a phone. */
+.map-tabs { margin-top: 14px; }
+.map-tabs .mess-tab {
+  flex: 1 0 auto;
+  min-width: 0;
+  padding: 8px 10px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* The way to the building, ahead of the way to the room. A card rather than a
+   line of text because it is the one thing on the screen that leaves the app. */
+.map-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  margin: 0 0 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  background: var(--card);
+}
+.map-card-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.map-card-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.map-card-hint { font-size: 12.5px; line-height: 1.4; color: var(--slate); }
+.map-card-go {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.map-card-go:hover { background: var(--signal-deep); }
+
+/* Pinned just under the masthead while the rooms scroll beneath it, so the
+   way to the building is a tap away from any room on the list. Searching,
+   each building's card holds only while its own rooms go by, and hands over
+   to the next one's.
+
+   The pin is a strip of paper with the card inside, not the card itself:
+   rows scrolling past would otherwise show in the gap above the card and at
+   its rounded corners. Its top padding is that gap, taken back out of the
+   margin so the card sits where it did. */
+.map-pin {
+  position: sticky;
+  top: var(--mast-h, 52px);
+  z-index: 5;
+  margin-top: -8px;
+  padding-top: 8px;
+  background: var(--paper);
+}
+.map-pin .map-card { box-shadow: 0 6px 12px -8px rgba(17, 21, 26, 0.28); }
+
+.map-group + .map-group { margin-top: 18px; }
+.map-group .map-pin { margin-top: 4px; }
+
+.map-floor {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin: 18px 0 2px;
+}
+
+.map-room {
+  border-bottom: 1px solid var(--rule);
+  padding: 10px 0;
+}
+.map-room-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.map-room-no { font-family: var(--mono); font-size: 13.5px; font-weight: 600; }
+.map-room-name { font-size: 12px; color: var(--mute); }
+.map-room-desc { margin-top: 3px; font-size: 13px; line-height: 1.45; color: var(--slate); }
+
+.venue-note a { color: var(--signal-deep); }
+
+
+/* ---------- fine print ---------- */
+
+.fineprint {
+  margin-top: 18px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+
+
+/* ---------- POR dashboard ---------- */
+
+.por-cards { display: flex; flex-direction: column; gap: 10px; }
+
+/* The whole card is the target: a mess secretary on a phone should not have
+   to find a small "Edit" link inside it. */
+.por-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 13px 14px;
+}
+button.por-card { cursor: pointer; }
+button.por-card:hover { border-color: var(--signal); }
+/* Granted but not editable yet: present, so the owner knows it is coming,
+   and visibly not a button. */
+.por-card.off { background: transparent; border-style: dashed; }
+.por-card.off .por-card-title { color: var(--slate); }
+.por-card-text { flex: 1 1 auto; min-width: 0; }
+.por-card-title { display: block; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.por-card-meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--mute);
+  overflow-wrap: anywhere;
+}
+.por-card-go { flex: 0 0 auto; font-size: 22px; line-height: 1; color: var(--mute); }
+
+/* One part of a form: the timings, the every-day items, one day of the week. */
+.por-block {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 12px 14px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.por-h {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.por-hint { margin: -2px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--mute); }
+/* Four short timings, two to a row, until the phone is too narrow to read
+   "8 AM to 10:30 AM" in half its width. */
+.por-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 360px) { .por-grid { grid-template-columns: 1fr; } }
+.por-publish { margin-top: 16px; }
+
+/* The admin's "see the dashboard as" switch. */
+.por-viewas { margin-bottom: 14px; }
+.por-viewas select {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.por-viewas select:focus { outline: none; border-color: var(--signal); }
+
+/* The guide. Read on a phone by someone who has never seen the dashboard, so
+   the steps are numbered big enough to keep your place in. */
+.por-p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.por-steps,
+.por-list {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.por-steps li::marker { font-weight: 700; color: var(--signal-deep); }
+.por-list { gap: 6px; }
+/* A message quoted exactly as the screen shows it, so it can be matched by
+   eye against what is in front of you. */
+.por-quote {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 0 5px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.por-faq-group {
+  margin: 16px 0 6px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.por-faq {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+}
+.por-faq summary {
+  cursor: pointer;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  list-style: none;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+.por-faq summary::-webkit-details-marker { display: none; }
+.por-faq summary::after { content: "+"; flex: 0 0 auto; color: var(--mute); font-weight: 400; }
+.por-faq[open] summary::after { content: "−"; }
+.por-faq[open] summary { border-bottom: 1px solid var(--rule); }
+.por-faq-a { padding: 11px 14px 13px; font-size: 13.5px; line-height: 1.55; }
+.por-faq-a .por-list { margin-top: 8px; }
+
+/* ---------- schedule admin ---------- */
+
+.admin-live {
+  background: var(--board);
+  color: #fff;
+  border-radius: var(--r);
+  padding: 13px 15px;
+  margin-bottom: 4px;
+}
+.admin-live-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9AA3AD;
+}
+.admin-live-term {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2px;
+}
+.admin-live-meta {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: #9AA3AD;
+  margin-top: 3px;
+}
+
+/* The input itself is hidden inside the label, so the whole block is the
+   target rather than a stray browser-styled button beside it. */
+.admin-drop {
+  display: block;
+  text-align: center;
+  padding: 20px 16px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r);
+  background: var(--card);
+  cursor: pointer;
+}
+.admin-drop:hover { border-color: var(--signal); }
+.admin-drop input { display: none; }
+.admin-drop-title { display: block; font-size: 14.5px; font-weight: 600; }
+.admin-drop-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--mute);
+}
+.admin-drop-sub code { font-family: var(--mono); font-size: 11.5px; }
+
+.admin-errors {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-staged {
+  margin-top: 12px;
+  padding: 13px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--card);
+}
+.admin-staged-head { display: flex; align-items: center; gap: 8px; }
+.admin-staged-meta {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--slate);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.admin-row {
+  display: flex;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.admin-row.live { background: linear-gradient(90deg, var(--signal-wash), transparent 60%); }
+.admin-row-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.admin-diff {
+  margin-top: 10px;
+  padding: 11px;
+  border-radius: 8px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.admin-diff em { color: var(--mute); }
+
+/* The one difference publishing can't repair by itself, so it reads as a
+   warning rather than as another line of the list. */
+.admin-diff-warn {
+  background: var(--warn-wash);
+  color: var(--warn-ink);
+  border-radius: 6px;
+  padding: 9px 10px;
+  margin-bottom: 9px;
+}
+
+.admin-diff-line { display: flex; gap: 10px; margin-top: 5px; }
+.admin-diff-line dt {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-top: 2px;
+  min-width: 92px;
+}
+.admin-diff-line dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+
+.contact-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 5px 9px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+}
+.contact-phone svg { color: var(--slate); }
+.contact-phone:hover { border-color: var(--signal); }
+.contact-phone.muted {
+  color: var(--mute);
+  font-style: italic;
+  border-style: dashed;
+  font-family: var(--sans);
+  font-size: 12.5px;
+}
+
+/* WhatsApp's own green, because that is what the button is — using the app's
+   accent here would say "this is the important one", which it isn't. */
+.contact-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--present);
+  background: var(--present-wash);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+.contact-wa:hover { filter: brightness(0.96); }
+
+@media (max-width: 460px) {
+  .stu-card { align-items: flex-start; }
+  .stu-actions { width: 100%; }
+}
+
+
+/* ---------- POR details ---------- */
+
+/* The trail is the only thing telling you how deep you are, so it sits above
+   the content rather than under it, and every step back up is one tap. */
+.por-crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: -4px 0 14px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+.por-crumb-wrap { display: inline-flex; align-items: center; gap: 2px; }
+.por-crumb-sep { color: var(--rule-strong); padding: 0 2px; }
+.por-crumb {
+  border: 0;
+  background: none;
+  padding: 3px 4px;
+  color: var(--signal-deep);
+  font: inherit;
+  border-radius: 4px;
+}
+.por-crumb:hover:not(:disabled) { background: var(--signal-wash); }
+/* The last crumb is where you already are — shown, but not a way to go there. */
+.por-crumb:disabled { color: var(--slate); cursor: default; }
+
+.por-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* The search above the first menu. Space below it only when the menu follows;
+   results bring their own count bar, which already sits clear of the box. */
+.por-top-search + .por-menu { margin-top: 14px; }
+
+/* Results from every list, grouped under the list they came from. The heading
+   is also the way into that list, so it looks like the breadcrumbs above —
+   the same mono, the same colour that means "you can go here". */
+.por-group { margin-top: 14px; }
+.por-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 0 2px;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--signal-deep);
+}
+.por-group-head span { flex: 1; min-width: 0; }
+.por-group-head svg { flex: 0 0 auto; }
+.por-group-head:hover { color: var(--signal); }
+.por-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 15px 14px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--r);
+  color: var(--ink);
+}
+.por-item:hover { border-color: var(--signal); }
+.por-item-label { flex: 1; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.por-item-count {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.por-item-go { flex: 0 0 auto; color: var(--rule-strong); }
+
+.por-section { margin-bottom: 6px; }
+.por-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.por-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule);
+  padding: 11px 0;
+}
+.por-who { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.por-name { font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; }
+/* The post is what people search this screen by, so it reads as a label
+   rather than as an afterthought under the name. */
+.por-role {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--slate);
+}
+.por-email {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--signal-deep);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.por-email:hover { text-decoration: underline; }
+
+.por-contact { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+
+@media (max-width: 460px) {
+  .por-row { align-items: flex-start; }
+  .por-contact { width: 100%; }
+}
+
+
+/* ---------- leave mail ---------- */
+
+/* The same fields as the basket's, stacked in one card: this is a form you
+   fill top to bottom once, not a list you come back to. */
+.leave-form {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.leave-field { display: block; min-width: 0; }
+.leave-field span,
+.leave-line-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 5px;
+}
+.leave-field input,
+.leave-field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+/* iOS draws date and time inputs at their content width and centres the
+   text; left-aligned and full width, they line up with the fields above. */
+.leave-field input[type="date"],
+.leave-field input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 40px;
+  text-align: left;
+}
+.leave-field input::-webkit-date-and-time-value { text-align: left; }
+.leave-field textarea { resize: vertical; min-height: 58px; }
+.leave-field input:focus,
+.leave-field textarea:focus { outline: none; border-color: var(--signal); }
+/* Pairs that belong together — a date and its time — side by side, until
+   the phone is too narrow for either to be read back. */
+/* Aligned on the boxes, not the labels: "Contact while on leave" wraps to
+   two lines on a phone, and top-aligned it pushed its box below the one
+   beside it. */
+.leave-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: end;
+}
+@media (max-width: 339px) { .leave-pair { grid-template-columns: 1fr; } }
+.leave-hostel { margin: 0; }
+
+/* The mail as it will arrive: an envelope's header lines, then the body. */
+.leave-mail {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--r);
+  margin-bottom: 14px;
+}
+.leave-line,
+.leave-body { padding: 11px 14px; border-bottom: 1px solid var(--rule); }
+.leave-mail > :last-child { border-bottom: 0; }
+.leave-line-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.leave-line-head .leave-line-label { margin: 0; }
+.leave-line-value {
+  margin-top: 3px;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+.leave-body pre {
+  margin: 6px 0 0;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.leave-copy {
+  flex: 0 0 auto;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.leave-copy:hover { border-color: var(--signal); }
+.leave-pending {
+  margin-top: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--warn-ink);
+  background: var(--warn-wash);
+  border: 1px solid #ecd9b4;
+  border-radius: var(--r);
+}
+.leave-pending p { margin: 0; }
+.leave-pending p + p { margin-top: 4px; }
+.leave-send { margin-top: 12px; text-align: center; text-decoration: none; }
+.leave-acts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.leave-acts .leave-send { margin-top: 0; padding-left: 10px; padding-right: 10px; }
+/* The ghost style is drawn for paper; on a disabled button it would fade to
+   nothing, so it keeps its border. */
+.leave-acts .btn.ghost { border-color: var(--rule-strong); }
+/* The finished draft: one thing left to do, said once and loudly. */
+.leave-ready { margin-top: 14px; }
+.leave-ready-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.leave-ready-head svg { color: var(--present); flex: none; }
+.leave-ready .leave-saved { margin-top: 3px; }
+.btn.leave-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 14px 18px;
+  font-size: 15px;
+  text-decoration: none;
+  background: var(--signal);
+  border-color: var(--signal);
+}
+.btn.leave-open:hover { background: var(--signal-deep); border-color: var(--signal-deep); }
+/* Two slow rings as it arrives, then still: enough to catch the eye coming
+   off the loader, not a button that nags for as long as it is on screen. */
+@media (prefers-reduced-motion: no-preference) {
+  .leave-open { animation: beckon 1.4s ease-out 0.2s 2; }
+}
+@keyframes beckon {
+  0%   { box-shadow: 0 0 0 0 rgba(214, 0, 111, 0.45); }
+  100% { box-shadow: 0 0 0 12px rgba(214, 0, 111, 0); }
+}
+.leave-alt {
+  display: block;
+  margin: 12px auto 0;
+  font-size: 13px;
+  color: var(--slate);
+}
+.leave-saved {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--slate);
+}
+.leave-saved strong { color: var(--ink); overflow-wrap: anywhere; }
+.leave-retry {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  text-decoration: underline;
+}
+.leave-copy:disabled { opacity: 0.5; cursor: default; }
+/* Lower-case and unshouted beside an upper-case label, so it reads as a
+   remark about the field rather than as part of its name. */
+.leave-optional {
+  margin-left: 6px;
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--mute);
+}
+.leave-optional::before { content: "("; }
+.leave-optional::after { content: ")"; }
+/* Tinted in the signal colour so it reads as something to tap, not as a
+   caption under the button. The disclosure's rule gives way to a box. */
+.leave-draft-toggle {
+  margin-top: 10px;
+  padding: 11px 14px;
+  background: var(--signal-wash);
+  border: 1px solid #F6CFE2;
+  border-radius: var(--r);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--signal-deep);
+}
+.leave-draft-toggle:hover { border-color: var(--signal); }
+.leave-draft-wait { color: var(--mute); }
+
+/* ---------- official attendance (OLT) ---------- */
+
+.olt-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.olt-head span {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--slate);
+}
+/* OLT's courses reuse the breakdown's cards. One with no dates to open is a
+   plain div, so it keeps the padding a <details> card hands to its parts. */
+.ab-card.olt-card { padding: 14px; }
+.olt-dw-note {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--slate);
+}
+.olt-dw-note.warn { color: var(--warn-ink); }
+/* The breakdown's OLT Sync card, between the batch total and the courses.
+   In the accent colour, and the only thing on the page that is: every other
+   card is the student's own record, and this is the one place that reaches
+   out to another system — so it reads as the thing to act on, not one more
+   course. */
+.olt-sync {
+  background: var(--signal-wash);
+  border: 1.5px solid var(--signal);
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(214, 0, 111, 0.10);
+}
+.olt-sync-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--signal-deep);
+  margin-bottom: 10px;
+}
+.olt-sync-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--signal);
+  color: #fff;
+}
+.olt-sync-when {
+  font-size: 13px;
+  color: var(--slate);
+  margin-bottom: 12px;
+}
+.olt-sync-when b { color: var(--ink); font-weight: 600; }
+.olt-sync-note { font-size: 13px; color: var(--mute); }
+.olt-sync-form { display: flex; flex-direction: column; gap: 10px; }
+/* White boxes on the pink, so they still read as places to type. */
+.olt-sync .leave-field input { background: #fff; border-color: #F0B3D2; }
+.btn.olt-sync-go {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+.btn.olt-sync-go:hover:not(:disabled) { background: var(--signal-deep); border-color: var(--signal-deep); }
+.olt-sync-warn {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--warn-ink);
+}
+
+/* "Password saved": the whole of the form once there is one. */
+.olt-saved {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--slate);
+}
+.olt-saved svg { flex: 0 0 auto; color: var(--present); }
+
+/* The tick and what it promises, in one box. The promise folds away behind
+   the (i) so the form stays short, and opens by itself on ticking. */
+.olt-remember {
+  background: #fff;
+  border: 1px solid #F0B3D2;
+  border-radius: 10px;
+  padding: 6px 6px 6px 12px;
+}
+.olt-remember.on { border-color: var(--signal); }
+.olt-remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.olt-remember-tick {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+/* A real tap target, not just the 18px glyph. */
+.olt-info {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--signal-deep);
+  cursor: pointer;
+}
+.olt-info:hover,
+.olt-info.on { background: var(--signal-wash); }
+.olt-info:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
+.olt-remember-tick input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--signal);
+}
+.olt-remember-how {
+  margin: 6px 6px 6px 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--slate);
+}
+.olt-remember-how li { margin-bottom: 3px; }
+.olt-remember-how li:last-child { margin-bottom: 0; }
+/* The way back out, marked so it's read first. */
+.olt-remember-how li.olt-remember-key {
+  list-style: none;
+  margin: 0 0 7px -18px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: var(--signal-wash);
+  color: var(--signal-deep);
+  font-weight: 600;
+}
+
+/* After a sync: where the new numbers went. */
+.olt-synced {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #A9D4C3;
+  border-radius: 10px;
+  background: var(--present-wash);
+  color: var(--present);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.olt-synced svg { flex: 0 0 auto; margin-top: 1px; }
+
+/* Profile's "OLT password". */
+.olt-pw {
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--card);
+  padding: 12px 14px;
+}
+.olt-pw-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+.olt-pw-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 10px;
+  font-size: 13px;
+  color: var(--slate);
+}
+.olt-pw-state svg { flex: 0 0 auto; color: var(--present); }
+.olt-pw .olt-remember-how { margin: 0; }
+.olt-pw-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.olt-pw-acts .btn { flex: 1 1 0; }
+.btn.ghost.olt-pw-del-start { color: var(--absent); }
+.btn.olt-pw-delete { background: var(--absent); border-color: var(--absent); }
+.olt-pw-confirm p { margin: 0 0 10px; font-size: 13px; color: var(--ink); }
+.olt-pw-done { margin-top: 10px; font-size: 13px; color: var(--present); }
+
+/* OLT's totals on a course card, under the student's own counts. */
+.ab-olt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px dashed var(--rule);
+  font-size: 12px;
+  color: var(--slate);
+}
+.ab-olt-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+}
+.ab-olt b {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--present-wash);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--present);
+}
+.ab-olt b.low { background: var(--absent-wash); color: var(--absent); }
+
+/* Two verdicts a row, OLT's then the student's, under headings that line up
+   with them. Fixed widths, so a column reads straight down even when one
+   side says "Did not mark" and the other "—". */
+.ab-dual .ab-status {
+  flex: 0 0 92px;
+  min-width: 0;
+  padding: 3px 4px;
+  font-size: 10px;
+}
+.ab-status.none { color: var(--mute); }
+.ab-cols { padding: 8px 0 6px; }
+.ab-cols span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--mute);
+}
+.ab-cols .ab-col { flex: 0 0 92px; text-align: center; }
+/* OLT decides how many columns there are, so they flow rather than sit in a
+   fixed grid. */
+.olt-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 6px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.olt-cells div { display: flex; gap: 5px; }
+.olt-cells dt { color: var(--mute); }
+.olt-cells dd { margin: 0; color: var(--ink); }
+.olt-form { margin-top: 4px; }
+.olt-results { margin-top: 22px; }
+.olt-form select {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+/* The eye sits inside the box, so the text has to stop short of it. */
+.olt-pass { position: relative; }
+.leave-field .olt-pass input { padding-right: 44px; }
+.olt-eye {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--slate);
+  cursor: pointer;
+  border-radius: 0 10px 10px 0;
+}
+.olt-eye:hover,
+.olt-eye[aria-pressed="true"] { color: var(--ink); }
+.olt-eye:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
+/* The login ID is shown so the phone can file the password under it, but it
+   can't be changed, so it reads as information rather than a box to fill. */
+.leave-field.olt-login input[readonly] {
+  background: transparent;
+  color: var(--slate);
+  border-style: dashed;
+}
+
+
+.wrap{display:flex;flex-wrap:wrap;gap:24px;padding:24px;align-items:flex-start}
+.phone{width:390px;max-height:900px;overflow:auto;border:1px solid #ccc;border-radius:14px;background:var(--bg,#fff)}
+.cap{font:600 13px system-ui;margin:0 0 8px;color:#555;max-width:390px}
+</style></head><body><p style="font:13px system-ui;margin:16px 24px 0;color:#555">Tap any date to open or close it. Scroll inside each frame. (Earlier classes, Move and Undo need the app.)</p><div class="wrap"><section><h2 class="cap">Whole term (Term V: 24 Aug – 22 Nov), on opening</h2>
+  <div class="phone"><div class="shell"><div class="eyebrow">Reschedule</div><p class="screen-note">Changes that one class only — the rest of the term carries on as published.</p><div class="eyebrow" style="margin-top:0">Changes you&#x27;ve made</div><div class="moved-row"><div style="min-width:0;flex:1"><div class="course">Bank Management</div><div class="meta"><span class="strike">Mon, Nov 16</span><span>→ Sat, Nov 14 2:30 pm</span></div><div class="marks"><button class="mark">Move again</button><button class="mark">Undo</button></div></div></div><button class="disclosure" aria-expanded="false"><span class="disclosure-caret" aria-hidden="true"></span>Earlier classes<span class="tag quiet">35</span></button><div class="eyebrow">Rest of the term</div><details class="daylist fold" open=""><summary class="daylist-date"><div class="daylist-day">Today<span>Oct 22</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Analytics in Practice</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Monday<span>Nov 2</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Bank Management</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Tuesday<span>Nov 3</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">2:30pm</div><div style="min-width:0"><div class="course">Consumption Culture &amp; Markets</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Wednesday<span>Nov 4</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">8:30am</div><div style="min-width:0"><div class="course">Pricing</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Thursday<span>Nov 5</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Analytics in Practice</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Monday<span>Nov 9</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Bank Management</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Tuesday<span>Nov 10</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">2:30pm</div><div style="min-width:0"><div class="course">Consumption Culture &amp; Markets</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Wednesday<span>Nov 11</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">8:30am</div><div style="min-width:0"><div class="course">Pricing</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Thursday<span>Nov 12</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Analytics in Practice</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Saturday<span>Nov 14</span></div><div class="daylist-tally"><span>1 class</span><span class="tag signal">1 moved</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">2:30pm</div><div style="min-width:0"><div class="course">Bank Management</div><div class="meta"><span>N-22</span><span class="tag signal">moved from Mon, Nov 16</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Tuesday<span>Nov 17</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">2:30pm</div><div style="min-width:0"><div class="course">Consumption Culture &amp; Markets</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Wednesday<span>Nov 18</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">8:30am</div><div style="min-width:0"><div class="course">Pricing</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Thursday<span>Nov 19</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Analytics in Practice</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><button class="btn ghost block" style="margin-top:18px">Back to timetable</button></div></div></section><section><h2 class="cap">No term calendar published — still three weeks either side</h2>
+  <div class="phone"><div class="shell"><div class="eyebrow">Reschedule</div><p class="screen-note">Changes that one class only — the rest of the term carries on as published.</p><button class="disclosure" aria-expanded="false"><span class="disclosure-caret" aria-hidden="true"></span>Earlier classes<span class="tag quiet">12</span></button><div class="eyebrow">Next three weeks</div><details class="daylist fold" open=""><summary class="daylist-date"><div class="daylist-day">Today<span>Oct 22</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Analytics in Practice</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Monday<span>Oct 26</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Bank Management</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Tuesday<span>Oct 27</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">2:30pm</div><div style="min-width:0"><div class="course">Consumption Culture &amp; Markets</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Wednesday<span>Oct 28</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">8:30am</div><div style="min-width:0"><div class="course">Pricing</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Thursday<span>Oct 29</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Analytics in Practice</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Monday<span>Nov 2</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Bank Management</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Tuesday<span>Nov 3</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">2:30pm</div><div style="min-width:0"><div class="course">Consumption Culture &amp; Markets</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Wednesday<span>Nov 4</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">8:30am</div><div style="min-width:0"><div class="course">Pricing</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Thursday<span>Nov 5</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Analytics in Practice</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Monday<span>Nov 9</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Bank Management</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Tuesday<span>Nov 10</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">2:30pm</div><div style="min-width:0"><div class="course">Consumption Culture &amp; Markets</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Wednesday<span>Nov 11</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">8:30am</div><div style="min-width:0"><div class="course">Pricing</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><details class="daylist fold"><summary class="daylist-date"><div class="daylist-day">Thursday<span>Nov 12</span></div><div class="daylist-tally"><span>1 class</span></div><svg class="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></summary><div class="daylist-row"><div class="daylist-time">10:15am</div><div style="min-width:0"><div class="course">Analytics in Practice</div><div class="meta"><span>N-22</span></div><div class="marks"><button class="mark">Move</button></div></div></div></details><button class="btn ghost block" style="margin-top:18px">Back to timetable</button></div></div></section></div></body></html>

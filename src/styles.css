@@ -1073,11 +1073,10 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   padding-bottom: 6px;
   margin-bottom: 10px;
 }
-.daylist-date > span,
 .daylist-day > span { color: var(--mute); letter-spacing: 0.04em; }
 
-/* Edit attendance folds each date: a term's worth of open days is a long
-   scroll to reach the one that needs changing. Reschedule keeps the flat list. */
+/* DayFold: Edit attendance and Reschedule fold each date, since weeks of open
+   days are a long scroll to reach the one that needs changing. */
 .daylist.fold { margin-bottom: 0; }
 .daylist.fold[open] { margin-bottom: 14px; }
 .daylist.fold > summary {

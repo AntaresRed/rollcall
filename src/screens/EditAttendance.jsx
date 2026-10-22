@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { markableSessions, pretty, toMinutes, hhmm, DAY_LONG, weekdayOf, isoDate } from "../lib/api";
+import DayFold from "./DayFold";
 
 /**
  * Every class that has already begun, and the mark against each one.
@@ -43,9 +44,8 @@ export default function EditAttendance({
 
   const unmarked = sessions.filter((s) => s.status === null).length;
 
-  // Each date folds shut; the ones with something still to mark start open.
-  // Taken once, at first render, so marking a day's last class doesn't snap it
-  // shut under the student's thumb.
+  // The dates with something still to mark start open. Taken once, at first
+  // render, because DayFold only reads it then.
   const [openAtStart] = useState(() =>
     new Set(sessions.filter((s) => s.status === null).map((s) => s.date)));
 
@@ -107,15 +107,13 @@ export default function EditAttendance({
       </p>
 
       {shown.map(([date, items]) => (
-        <details key={date} className="daylist fold" open={openAtStart.has(date)}>
-          <summary className="daylist-date">
-            <div className="daylist-day">
-              {label(date)}
-              <span>{date}</span>
-            </div>
-            <Tally items={items} />
-            <ChevronIcon />
-          </summary>
+        <DayFold
+          key={date}
+          day={label(date)}
+          date={date}
+          tally={<Tally items={items} />}
+          defaultOpen={openAtStart.has(date)}
+        >
 
           {items.map(({ cls, movedFrom, status }) => (
             // movedFrom is part of the identity, not decoration. A class
@@ -156,7 +154,7 @@ export default function EditAttendance({
               </div>
             </div>
           ))}
-        </details>
+        </DayFold>
       ))}
 
       {hiddenDays > 0 && (
@@ -189,19 +187,5 @@ function Tally({ items }) {
       ))}
       <span className="sr-only">{parts.map(([, word, n]) => `${n} ${word}`).join(", ")}</span>
     </div>
-  );
-}
-
-function ChevronIcon() {
-  return (
-    <svg className="daylist-chevron" width="13" height="13" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <path
-        d="M4.5 7 9 11.5 13.5 7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

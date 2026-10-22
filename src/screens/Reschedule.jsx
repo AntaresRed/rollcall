@@ -3,14 +3,13 @@ import {
   SLOT_STARTS, SLOT_ENDS, DAY_LONG,
   pretty, isoDate, weekdayOf, expectedSessions, hhmm, undecidedReschedules,
 } from "../lib/api";
+import DayFold from "./DayFold";
 
 const DAY_MS = 86_400_000;
-const HORIZON_DAYS = 21;
-// Symmetrical with the horizon. A class is usually only known to have moved
-// once it hasn't happened — the notice comes late, or the professor says so
-// in the class before — so the window a student needs to reach backwards into
-// is the same size as the one they plan forwards in.
-const LOOKBACK_DAYS = 21;
+// Only used with no term calendar, when there's no term to span. Symmetrical:
+// a class is usually only known to have moved once it hasn't happened, so the
+// reach backwards matters as much as the reach forwards.
+const FALLBACK_DAYS = 21;
 
 const fmtDate = (iso) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, {
@@ -49,17 +48,21 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
   const [showPast, setShowPast] = useState(false);
 
   const today = isoDate(now);
-  const horizon = isoDate(new Date(now.getTime() + HORIZON_DAYS * DAY_MS));
-  // Never reach back past the start of term — there are no sessions there,
-  // and an override against a date outside the term would never resolve.
-  const earliest = useMemo(() => {
-    const back = isoDate(new Date(now.getTime() - LOOKBACK_DAYS * DAY_MS));
-    return term?.term_start && term.term_start > back ? term.term_start : back;
-  }, [now, term]);
+  // The whole term, start to end. This used to be three weeks either side of
+  // today, which left a class announced as moving later in the term with
+  // nowhere to be entered. Folding each date (DayFold) is what keeps a term's
+  // worth of dates short enough to scroll.
+  const wholeTerm = Boolean(term?.term_start && term?.term_end);
+  const [from, to] = useMemo(() => wholeTerm
+    ? [term.term_start, term.term_end]
+    : [
+        isoDate(new Date(now.getTime() - FALLBACK_DAYS * DAY_MS)),
+        isoDate(new Date(now.getTime() + FALLBACK_DAYS * DAY_MS)),
+      ], [wholeTerm, term, now]);
 
   const sessions = useMemo(
-    () => expectedSessions(classes, term, { from: earliest, to: horizon }, overrides),
-    [classes, term, overrides, earliest, horizon],
+    () => expectedSessions(classes, term, { from, to }, overrides),
+    [classes, term, overrides, from, to],
   );
 
   // Classes waiting for a date, and moves that have one. Kept apart because
@@ -97,6 +100,11 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
   }, [sessions, today]);
 
   const pastCount = pastByDate.reduce((n, [, items]) => n + items.length, 0);
+
+  // Every date folds shut except the next one with classes — usually the one
+  // being changed. Taken once, at first render, because DayFold only reads it
+  // then.
+  const [openAtStart] = useState(() => upcomingByDate[0]?.[0] ?? null);
 
   // `originalDate` identifies the override; `date`/`start` only seed the form,
   // and are where the meeting currently sits — a session already moved once
@@ -137,11 +145,14 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
   );
 
   const renderDay = ([date, items]) => (
-    <div key={date} className="daylist">
-      <div className="daylist-date">
-        {date === today ? "Today" : DAY_LONG[weekdayOf(new Date(`${date}T00:00:00`))]}
-        <span>{fmtDate(date)}</span>
-      </div>
+    <DayFold
+      key={date}
+      day={date === today ? "Today" : DAY_LONG[weekdayOf(new Date(`${date}T00:00:00`))]}
+      // The heading already names the day, so its date leaves the weekday out.
+      date={new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+      tally={<DayTally items={items} />}
+      defaultOpen={date === openAtStart}
+    >
 
       {items.map(({ cls, movedFrom }) => {
         const originalDate = movedFrom ?? date;
@@ -177,7 +188,7 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
           </div>
         );
       })}
-    </div>
+    </DayFold>
   );
 
   if (!classes.length) {
@@ -268,8 +279,9 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
                   </div>
 
                   {/* Editable from here as well as from the day list, because
-                      a session moved outside the three-week window shows up
-                      nowhere else — and a second change to the same meeting
+                      a session moved outside the listed dates (past the term's
+                      end, or beyond the window when there's no calendar) shows
+                      up nowhere else — and a second change to the same meeting
                       is exactly the case that used to be unreachable. */}
                   {editing === key ? (
                     <div style={{ marginTop: 8 }}>
@@ -312,7 +324,7 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
           {showPast && (
             <>
               <p className="screen-note" style={{ marginTop: 10 }}>
-                The last three weeks.
+                {wholeTerm ? "Since the start of term." : "The last three weeks."}
               </p>
               {pastByDate.map(renderDay)}
             </>
@@ -320,11 +332,11 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
         </>
       )}
 
-      <div className="eyebrow">Next three weeks</div>
+      <div className="eyebrow">{wholeTerm ? "Rest of the term" : "Next three weeks"}</div>
 
       {upcomingByDate.length === 0 && (
         <div className="empty">
-          No classes scheduled in the next three weeks.
+          {wholeTerm ? "No classes left this term." : "No classes scheduled in the next three weeks."}
         </div>
       )}
 
@@ -336,6 +348,20 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
         </button>
       )}
     </>
+  );
+}
+
+/**
+ * A closed day's contents: how many classes, and whether any of them is one
+ * already moved here — the thing a student checking their changes looks for.
+ */
+function DayTally({ items }) {
+  const moved = items.filter((s) => s.movedFrom).length;
+  return (
+    <div className="daylist-tally">
+      <span>{items.length} {items.length === 1 ? "class" : "classes"}</span>
+      {moved > 0 && <span className="tag signal">{moved} moved</span>}
+    </div>
   );
 }
 
