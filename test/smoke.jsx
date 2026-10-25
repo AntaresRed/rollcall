@@ -37,6 +37,7 @@ import CoursePicker from "../src/screens/CoursePicker";
 import SectionPicker from "../src/screens/SectionPicker";
 import CataloguePreview from "../src/screens/CataloguePreview";
 import LeaveMail from "../src/screens/LeaveMail";
+import GuestEntry from "../src/screens/GuestEntry";
 import pgp1 from "../src/data/catalogue-pgp1.json";
 import pgp2 from "../src/data/catalogue.json";
 import SignIn from "../src/screens/SignIn";
@@ -291,6 +292,7 @@ const cases = [
   ["PorDetails / no back button", <PorDetails key="porn" />],
   ["Utils", <Utils key="u" onOpen={noop} />],
   ["Utils / contacts group", <Utils key="uc" onOpen={noop} group="contacts" />],
+  ["Utils / mail services group", <Utils key="um" onOpen={noop} group="mail" />],
   ["LeaveMail / blank", <LeaveMail key="lm" email="abc2027@email.iimcal.ac.in"
       accountName="A Student" onBack={noop} />],
   // Gmail draft off: the Send Mail route, which is also its fallback.
@@ -311,6 +313,33 @@ const cases = [
       }} />],
   // An older stored shape: fields missing entirely rather than blank.
   ["LeaveMail / partial form, draft open", <LeaveMail key="lmp" openDraft initial={{ name: "A Student" }} />],
+  ["GuestEntry / blank", <GuestEntry key="ge" email="abc2027@email.iimcal.ac.in"
+      accountName="A Student" onBack={noop} />],
+  // Gmail draft off: the Send Mail route, where the ID copy isn't required.
+  ["GuestEntry / ready to send, draft open", <GuestEntry key="ger" email="abc2027@email.iimcal.ac.in"
+      onBack={noop} openDraft gmailDraft={false} initial={{
+        date: "2026-10-25", guestNames: "R Sarkar, M Sarkar", guestAddress: "12 Park Street\nKolkata 700016",
+        guestMobiles: "9830012345, 9830067890", relationship: "Parents",
+        visitHostel: "Other", visitHostelOther: "Guest house",
+        arriveDate: "2026-10-26", arriveTime: "11:00", departDate: "2026-10-26", departTime: "17:30",
+        reason: "Visiting for the day", name: "A Student", reg: "0001/01", phone: "9876543210",
+        hostel: "LVH", room: "12",
+      }} />],
+  // With a Google client ID: the draft, and the ID copy it needs.
+  ["GuestEntry / Gmail draft, ID picked", <GuestEntry key="get" email="abc2027@email.iimcal.ac.in"
+      onBack={noop}
+      initialId={{ name: "Guest ID (masked).jpg", type: "image/jpeg", bytes: new Uint8Array(2048) }}
+      initial={{
+        date: "2026-10-25", guestNames: "R Sarkar", guestAddress: "12 Park Street",
+        guestMobiles: "9830012345", relationship: "Father", visitHostel: "NH",
+        arriveDate: "2026-10-26", arriveTime: "11:00", departDate: "2026-10-27", departTime: "10:00",
+        reason: "Visiting", name: "A Student", reg: "0001/01", phone: "9876543210",
+        hostel: "NH", room: "12",
+      }} />],
+  ["GuestEntry / Gmail draft, no ID yet", <GuestEntry key="gen" gmailDraft
+      initial={{ name: "A Student", guestNames: "R Sarkar" }} />],
+  // An older stored shape: fields missing entirely rather than blank.
+  ["GuestEntry / partial form, draft open", <GuestEntry key="gep" openDraft initial={{ reason: "x" }} />],
   ["DayMessMenu", <DayMessMenu key="dm" onBack={noop} now={now} />],
   // Sunday is the rotation's edge case — the week must wrap, not truncate.
   ["DayMessMenu / on a Sunday", <DayMessMenu key="dms" onBack={noop}

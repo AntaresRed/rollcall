@@ -6,8 +6,10 @@ import { track } from "../lib/track";
  * Five entries in one flat list had become a list you read rather than a menu
  * you scan: three of them were contact directories that belong together, and
  * the two that were not sat between them. So the contacts are one door now,
- * and the top level is a few doors — food, maps, people, leave — each
- * with a mark you can recognise before reading the label.
+ * and the top level is a few doors — food, maps, people, mail — each
+ * with a mark you can recognise before reading the label. The mails got the
+ * same treatment once there were two: one door, Mail Services, with the
+ * leave mail and the guest entry mail behind it.
  *
  * Both levels are the same component and the same card, because they are the
  * same act: pick one of a few things. A second level that looked different
@@ -20,8 +22,8 @@ import { track } from "../lib/track";
 /** The institute's own directory. Declared above the lists, which read it. */
 const STUDENT_DIRECTORY = "https://student.iimcal.ac.in/jd/#/";
 
-/** The top level, most-used first: food and finding a room are daily, leave
-    mail is an occasional job. */
+/** The top level, most-used first: food and finding a room are daily, the
+    mails are an occasional job. */
 const GROUPS = [
   ["mess", "Day-Night Mess & Tuck",
     "The week's mess food, plus night canteen and tuck shop menus you can "
@@ -34,10 +36,11 @@ const GROUPS = [
   ["contacts", "Faculty and POR Contact Details",
     "Professors, the council, clubs and captains, and the batch directory.",
     ContactsIcon],
-  ["leave", "Leave Mail",
-    // Not "sent": the app only drafts it, and the student presses Send in Gmail.
-    "Leave Mail auto-drafted, official form attached, ready to send from "
-    + "Gmail.",
+  ["mail", "Mail Services",
+    // Not "sent": the app only drafts them, and the student presses Send in
+    // Gmail.
+    "Leave and guest entry mails, auto-drafted with the official forms "
+    + "attached, ready to send from Gmail.",
     MailIcon],
 ];
 
@@ -57,8 +60,19 @@ const CONTACTS = [
     StudentsIcon, STUDENT_DIRECTORY],
 ];
 
-const LISTS = { contacts: CONTACTS };
-const EYEBROW = { contacts: "Faculty & POR contacts" };
+/** Behind the mail door. */
+const MAIL = [
+  ["leave", "Leave Mail",
+    "Leave of more than a day: the mail auto-drafted, leave form attached.",
+    MailIcon],
+  ["guest", "Guest Entry",
+    "A visitor to your hostel: the entry form signed and the guest's ID "
+    + "attached, drafted in Gmail.",
+    GuestIcon],
+];
+
+const LISTS = { contacts: CONTACTS, mail: MAIL };
+const EYEBROW = { contacts: "Faculty & POR contacts", mail: "Mail services" };
 
 export default function Utils({ onOpen, group = null }) {
   const items = LISTS[group] ?? GROUPS;
@@ -130,6 +144,21 @@ function MessIcon() {
       <path d="M2.5 20.5h15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
       <path d="M20.5 3.5v8.5m0 0v8.5m0-8.5c1.2-1 1.2-2.4 1.2-4V3.5"
             stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** A visitor arriving: a figure beside an open door. */
+function GuestIcon() {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M13.5 20.5V4.2a.7.7 0 0 1 .9-.7l5.6 1.6v15.4"
+            stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M11.5 20.5h10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <circle cx="6.5" cy="7.5" r="2.2" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M2.8 20.5v-3.6a3.7 3.7 0 0 1 7.4 0v3.6" stroke="currentColor"
+            strokeWidth="1.7" strokeLinecap="round" />
+      <circle cx="16.4" cy="12.5" r="0.9" fill="currentColor" />
     </svg>
   );
 }

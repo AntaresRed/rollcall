@@ -28,7 +28,15 @@ const TOKEN = "iimpresent.gmail.token";      // { token, expiresAt, email }
 const STATE = "iimpresent.gmail.state";      // the round trip's nonce
 const PENDING = "iimpresent.gmail.pending";  // a draft was asked for before the redirect
 const CALLBACK = "iimpresent.gmail.callback"; // raw fragment, left by the callback page
-const DRAFT = "iimpresent.gmail.draft";      // { draftId, messageId, key } this session
+const DRAFT = "iimpresent.gmail.draft";      // { draftId, messageId, key } this session, per kind
+
+/**
+ * Which mail a draft is for: "leave" or "guest". Each keeps its own draft,
+ * so updating one never replaces the other. The leave mail's keys are the
+ * ones it had before there was a second kind, so a draft made just before
+ * the change is still found.
+ */
+const draftKey = (kind) => (kind === "leave" ? DRAFT : `${DRAFT}.${kind}`);
 
 /**
  * The loader's two steps, in the order they happen. Drafting covers the trip
@@ -36,6 +44,7 @@ const DRAFT = "iimpresent.gmail.draft";      // { draftId, messageId, key } this
  * does public/gmail-callback.html, which can't import this and spells it out.
  */
 export const DRAFT_STEPS = { drafting: "Drafting your mail", attaching: "Attaching leave form" };
+export const GUEST_DRAFT_STEPS = { drafting: "Drafting your mail", attaching: "Attaching guest form" };
 
 /* ---------- storage, inside try: the accessor itself can throw ---------- */
 
@@ -84,13 +93,16 @@ export function authUrl({ clientId, redirectUri, email, state }) {
   return `${AUTH}?${p}`;
 }
 
-/** Leave for Google. Everything the form holds is already in storage. */
-export function askGoogle(email) {
+/**
+ * Leave for Google. Everything the form holds is already in storage.
+ * `kind` says which screen the return should open on.
+ */
+export function askGoogle(email, kind = "leave") {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
   const state = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
   put(STATE, state);
-  put(PENDING, { email, at: Date.now() });
+  put(PENDING, { email, at: Date.now(), kind });
   window.location.assign(authUrl({
     clientId: GOOGLE_CLIENT_ID, redirectUri: callbackUrl(window.location.origin), email, state,
   }));
@@ -126,19 +138,32 @@ export function readCallback(fragment, expectedState, now = Date.now()) {
  * development checks build a screen twice — the second build must see the
  * same answer, not storage the first one already emptied.
  */
-let held = null;
-export function takeRoundTrip(now = Date.now()) {
-  if (!held) held = readRoundTrip(now);
-  return held;
+const held = {};
+export function takeRoundTrip(now = Date.now(), kind = "leave") {
+  if (!held[kind]) held[kind] = readRoundTrip(now, kind);
+  return held[kind];
 }
 
 /** The owed draft was made, or its error shown — don't act on it again. */
-export function finishRoundTrip() {
-  held = { pending: false };
+export function finishRoundTrip(kind = "leave") {
+  held[kind] = { pending: false };
 }
 
-function readRoundTrip(now) {
+/**
+ * Which screen a trip to Google was started from, without using it up — for
+ * the app to open on that screen when the student comes back. Null when no
+ * trip is waiting. A trip from before there were two kinds was the leave
+ * mail's.
+ */
+export function pendingKind() {
   const pending = get(PENDING);
+  return pending ? pending.kind ?? "leave" : null;
+}
+
+function readRoundTrip(now, kind) {
+  const pending = get(PENDING);
+  // Another screen's trip is left for that screen to take.
+  if (pending && (pending.kind ?? "leave") !== kind) return { pending: false };
   const fragment = get(CALLBACK);
   const state = get(STATE);
   put(CALLBACK, null);
@@ -194,16 +219,16 @@ function filenames(name) {
 }
 
 /**
- * The whole message as MIME: text and the form. Line endings are CRLF
+ * The whole message as MIME: text and the attachments — `file` for one,
+ * `files` for several. Line endings are CRLF
  * throughout, and the boundary is checked against the content rather than
  * trusted to be unlikely.
  */
-export function mimeMessage({ to, cc, subject, body, file }) {
+export function mimeMessage({ to, cc, subject, body, file, files = file ? [file] : [] }) {
   let boundary = "leave-mail-boundary";
   const text = wrapped(utf8(String(body ?? "").replace(/\r?\n/g, "\r\n")));
-  const pdf = wrapped(file.bytes);
-  while (text.includes(boundary) || pdf.includes(boundary)) boundary += "-x";
-  const { plain, exact } = filenames(file.name);
+  const parts = files.map((f) => ({ ...f, data: wrapped(f.bytes), ...filenames(f.name) }));
+  while (text.includes(boundary) || parts.some((f) => f.data.includes(boundary))) boundary += "-x";
   return [
     `To: ${to.join(", ")}`,
     ...(cc?.length ? [`Cc: ${cc.join(", ")}`] : []),
@@ -216,12 +241,15 @@ export function mimeMessage({ to, cc, subject, body, file }) {
     "Content-Transfer-Encoding: base64",
     "",
     text,
-    `--${boundary}`,
-    `Content-Type: ${file.type || "application/pdf"}; name="${plain}"`,
-    `Content-Disposition: attachment; filename="${plain}"; filename*=UTF-8''${exact}`,
-    "Content-Transfer-Encoding: base64",
-    "",
-    pdf,
+    // One part per attachment: the form, and for a guest the ID copy too.
+    ...parts.flatMap((f) => [
+      `--${boundary}`,
+      `Content-Type: ${f.type || "application/pdf"}; name="${f.plain}"`,
+      `Content-Disposition: attachment; filename="${f.plain}"; filename*=UTF-8''${f.exact}`,
+      "Content-Transfer-Encoding: base64",
+      "",
+      f.data,
+    ]),
     `--${boundary}--`,
     "",
   ].join("\r\n");
@@ -256,14 +284,14 @@ async function call(token, method, path, body) {
  * should find one leave mail in Drafts, not two that disagree. If that draft
  * has gone (sent, or deleted in Gmail), a new one is made.
  */
-export async function saveDraft(token, raw, key) {
-  const before = get(DRAFT);
+export async function saveDraft(token, raw, key, kind = "leave") {
+  const before = get(draftKey(kind));
   if (before?.draftId) {
     try {
       const d = await call(token, "PUT", `/drafts/${encodeURIComponent(before.draftId)}`,
         { id: before.draftId, message: { raw } });
       const out = { draftId: d.id, messageId: d.message?.id ?? before.messageId, key };
-      put(DRAFT, out);
+      put(draftKey(kind), out);
       return out;
     } catch (err) {
       // Gone is expected — anything else (an expired token) is the caller's.
@@ -272,12 +300,12 @@ export async function saveDraft(token, raw, key) {
   }
   const d = await call(token, "POST", "/drafts", { message: { raw } });
   const out = { draftId: d.id, messageId: d.message?.id ?? "", key };
-  put(DRAFT, out);
+  put(draftKey(kind), out);
   return out;
 }
 
 /** The draft made this session — for this form, or one since edited. */
-export const lastDraft = () => get(DRAFT);
+export const lastDraft = (kind = "leave") => get(draftKey(kind));
 
 /**
  * Where "Open Gmail" goes. On a laptop, straight into the draft, in the

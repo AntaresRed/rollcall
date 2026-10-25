@@ -23,7 +23,7 @@ create table if not exists public.feature_events (
   -- names nobody will ever query. Adding an event means adding it here.
   event       text not null check (event in (
                 'open', 'menu', 'order', 'pay', 'original_menu',
-                'leave_mail', 'calendar_export')),
+                'leave_mail', 'guest_entry', 'calendar_export')),
   -- Which one: the screen opened, the shop ordered from. An open format
   -- rather than a list, because a new shop or screen should not need a
   -- migration; the shape still keeps free text, and so anything personal,
@@ -37,6 +37,15 @@ create table if not exists public.feature_events (
 
 create index if not exists feature_events_when_idx
   on public.feature_events (created_at);
+
+-- The list above only takes effect on a fresh table: on the live one, the
+-- check made the first time is the one in force. So each later name is
+-- added here too, by restating the check in full. Safe to run again.
+--   2026-10-26  guest_entry
+alter table public.feature_events drop constraint if exists feature_events_event_check;
+alter table public.feature_events add constraint feature_events_event_check check (event in (
+  'open', 'menu', 'order', 'pay', 'original_menu',
+  'leave_mail', 'guest_entry', 'calendar_export'));
 
 -- ---------- what the client may not decide ----------
 
@@ -90,7 +99,8 @@ comment on table public.feature_events is
 --                    still running in the background), a tab (today, timetable, utils,
 --                    profile), or a sub-screen tapped open (calendar,
 --                    reschedule, attendance, breakdown, contacts, faculty,
---                    por, students, mess, export, leave, maps (J-Maps),
+--                    por, students, mess, export, mail (the Mail Services
+--                    door), leave, guest, maps (J-Maps),
 --                    admin, order-history). Returning by a back arrow isn't counted.
 --   menu             day | night | tuck — which mess view was shown
 --   order            night:<canteen> | tuck:<shop> — handed to WhatsApp;
@@ -102,6 +112,8 @@ comment on table public.feature_events is
 --                    only before 2026-10-05 — the Mail app is no longer offered) |
 --                    draft-ask | draft | draft-open | draft-error (the Gmail
 --                    draft: sent to Google, made, opened, failed)
+--   guest_entry      the same details as leave_mail, for the guest entry
+--                    mail (from 2026-10-26)
 --   calendar_export  (no detail) — the calendar export was removed on
 --                    2026-10-19; kept in the list so old rows stay valid
 --

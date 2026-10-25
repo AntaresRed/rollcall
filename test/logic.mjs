@@ -34,7 +34,15 @@ import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, LEAVE_HOSTELS, BLANK_LEAVE, longDate,
 import { formDate, formWhen, formAnswers, formFilename, winAnsi, timesWidth, wrapText,
   fitBlock, formLayout, jpegInfo, buildPdf } from "../src/lib/leavepdf.js";
 import { GMAIL_SCOPE, authUrl, callbackUrl, readCallback, heldToken, takeRoundTrip,
-  mimeMessage, rawOf, gmailOpenHref } from "../src/lib/gmaildraft.js";
+  mimeMessage, rawOf, gmailOpenHref, pendingKind, lastDraft } from "../src/lib/gmaildraft.js";
+import { STUDENT_KEYS, studentPart, mergeStudent } from "../src/lib/student.js";
+import { GUEST_TO, GUEST_CC, GUEST_FIELDS, STUDENT_FIELDS, BLANK_GUEST, guestProblems,
+  numbersLookComplete, guestSubject, guestBody, guestMailto, guestGmailHref, guestGmailAppHref,
+  startingGuest } from "../src/lib/guestmail.js";
+import { mailtoHref, gmailComposeHref } from "../src/lib/mailhref.js";
+import { guestLayout, guestFilename } from "../src/lib/guestpdf.js";
+import { writePdf } from "../src/lib/formpdf.js";
+import { idCopyKind, idCopyName, prepareIdCopy, MAX_PDF_BYTES } from "../src/lib/idcopy.js";
 // The Edge Function's page reader. It imports nothing, so it runs here too.
 import { formFields, formAction, postBackFields, selectOptions, readGrid, hasPasswordBox, hasOtpField,
   termKey, decodeEntities, TERM_SELECT, readDatewise, datewiseAgrees, courseKey, matchSubject,
@@ -2656,7 +2664,10 @@ console.log("\nleave form PDF");
   check("the answers are Times-Roman", raw.includes("/BaseFont /Times-Roman /Encoding /WinAnsiEncoding"));
   check("a grey form is drawn grey", raw.includes("/ColorSpace /DeviceGray"));
   const noSig = Array.from(buildPdf({ form: jpeg, runs: [] }), (b) => String.fromCharCode(b)).join("");
-  check("no signature, nothing drawn for one", !noSig.includes("/Sig Do") && noSig.includes("/Form Do"));
+  // The form is the first image drawn; a signature would be the second.
+  check("no signature, nothing drawn for one", !noSig.includes("/Im1 Do") && noSig.includes("/Im0 Do"));
+  check("with a signature, both are drawn", raw.includes("/Im0 Do") && raw.includes("/Im1 Do"));
+  check("no bold, no bold font", !raw.includes("Times-Bold"));
   survives("refuses a form image that isn't a JPEG", () => {
     try { buildPdf({ form: new Uint8Array([0]), runs: [] }); throw new Error("accepted"); }
     catch (e) { if (e.message === "accepted") throw e; }
@@ -2983,6 +2994,236 @@ console.log("\nanimal DPs");
   check("the kitten is set on the account it was made for",
     Boolean(kitten) && kittenSql.includes(`lower(u.email) = '${kitten[2]}'`) &&
     kittenSql.includes(`set avatar = '${kitten[1]}'`));
+}
+
+console.log("\nmail services: shared student details");
+{
+  const leaveOld = { name: "Old Name", reg: "0001/01", phone: "9876543210", hostel: "NH", room: "1",
+    address: "Home", reason: "Family" };
+  check("only the student's own fields are shared",
+    JSON.stringify(Object.keys(studentPart(leaveOld))) === JSON.stringify(["name", "reg", "phone", "hostel", "room"]));
+  check("blank and non-string values are left out",
+    JSON.stringify(studentPart({ name: "", reg: 5, room: null, hostel: "OH" })) === JSON.stringify({ hostel: "OH" }));
+  check("before the shared record exists, the leave mail's older one is read",
+    mergeStudent(null, leaveOld).name === "Old Name" && mergeStudent(null, leaveOld).address === undefined);
+  check("once it exists, the shared record wins outright",
+    mergeStudent({ name: "New Name", room: "" }, leaveOld).name === "New Name");
+  check("a field cleared in one form doesn't come back from the other's old copy",
+    mergeStudent({ name: "New Name", room: "" }, leaveOld).room === undefined);
+  check("STUDENT_KEYS are the five the forms share, plus the hostel's Other box",
+    STUDENT_KEYS.join() === "name,reg,phone,hostel,hostelOther,room");
+}
+
+console.log("\nguest entry mail");
+{
+  const g = {
+    date: "2026-10-25", guestNames: "Rakesh Sarkar, Mitali Sarkar",
+    guestAddress: "Sugam Sudhir\nGaria", guestMobiles: "98300 12345, +91 98300 67890",
+    relationship: "Parents", visitHostel: "LVH", visitHostelOther: "",
+    arriveDate: "2026-10-26", arriveTime: "11:00", departDate: "2026-10-26", departTime: "17:30",
+    reason: "Visiting for the day", name: "Debjit Sarkar", reg: "MBA 0178/62",
+    phone: "8585820504", hostel: "LVH", hostelOther: "", room: "220",
+  };
+  check("addressed to the five offices, all in To",
+    GUEST_TO.join() === "saopgp@iimcal.ac.in,aso@iimcal.ac.in,securityofficer@iimcal.ac.in,"
+      + "hasecy@email.iimcal.ac.in,manager_hostel@iimcal.ac.in" && GUEST_CC.length === 0);
+  check("a complete form has no problems", guestProblems(g).length === 0);
+  const blank = guestProblems(BLANK_GUEST);
+  check("a blank form lists every field",
+    blank.length === 1 && [...GUEST_FIELDS, ...STUDENT_FIELDS].every((f) => blank[0].includes(f.label)));
+  check("the ID copy is asked for when the draft needs it",
+    guestProblems(g, { hasId: false }).some((p) => p.includes("Guest ID")));
+  check("several guest numbers each need ten digits",
+    numbersLookComplete("98300 12345, +91 98300 67890") && !numbersLookComplete("98300 12345, 98300")
+    && numbersLookComplete("9830012345 and 9830067890") && !numbersLookComplete(""));
+  check("a short guest number is refused",
+    guestProblems({ ...g, guestMobiles: "98300" }).some((p) => /guest's mobile/.test(p)));
+  check("a short student number is refused",
+    guestProblems({ ...g, phone: "858582" }).some((p) => /Your mobile/.test(p)));
+  check("leaving before arriving is refused",
+    guestProblems({ ...g, departTime: "10:00" }).some((p) => /after the arrival/.test(p)));
+  check("\"Other\" hostels need naming",
+    guestProblems({ ...g, visitHostel: "Other" }).some((p) => p.includes("Hostel to be visited")));
+  survives("problems for no form at all", () => guestProblems(undefined));
+
+  check("a one-day visit names the day once",
+    guestSubject(g) === "Guest campus entry – Debjit Sarkar (MBA 0178/62) – 26 Oct 2026");
+  check("a longer visit gives the range",
+    guestSubject({ ...g, departDate: "2026-10-28" }).endsWith("26 Oct to 28 Oct 2026"));
+  check("across a year end, both years",
+    guestSubject({ ...g, arriveDate: "2026-12-30", departDate: "2027-01-02" }).endsWith("30 Dec 2026 to 2 Jan 2027"));
+
+  const body = guestBody(g);
+  check("the body opens as the leave mail's does",
+    body.startsWith("Respected Sir/Madam,\n\nI am writing to inform you regarding the campus entry of my guest(s)."));
+  check("the body says both attachments are there", body.includes("entry form and a masked copy of the guest's ID are attached"));
+  check("every guest field is listed", GUEST_FIELDS.every((f) => body.includes(`${f.label}:`)));
+  check("a multi-line address starts under its label", body.includes("Address:\nSugam Sudhir\nGaria"));
+  check("arrival written out in full", body.includes("Date and expected time of arrival: Monday, 26 October 2026, 11:00 AM"));
+  check("signed with name, reg. no., hostel and room, and mobile",
+    body.endsWith("Thanking you,\nDebjit Sarkar\nMBA 0178/62\nLVH, Room 220\n8585820504"));
+
+  check("mailto: all five in To, no CC line",
+    guestMailto(g).startsWith("mailto:saopgp@iimcal.ac.in,aso@iimcal.ac.in,securityofficer@") && !guestMailto(g).includes("cc="));
+  const web = new URL(guestGmailHref(g, "abc2027@email.iimcal.ac.in"));
+  check("Gmail on the web: the institute account, To, no CC",
+    web.searchParams.get("authuser") === "abc2027@email.iimcal.ac.in"
+    && web.searchParams.get("to") === GUEST_TO.join(",") && !web.searchParams.has("cc"));
+  check("Gmail app link carries subject and body",
+    guestGmailAppHref(g).startsWith("googlegmail://co?to=")
+    && new URLSearchParams(guestGmailAppHref(g).split("?")[1]).get("body") === body);
+  check("mail links write spaces as %20",
+    !mailtoHref({ to: ["a@x.in"], subject: "a b", body: "c d" }).includes("+")
+    && !gmailComposeHref({ to: ["a@x.in"], subject: "a b", body: "c d" }).includes("+"));
+
+  // What comes back next time.
+  const at = new Date(2026, 9, 25, 9, 0);
+  const fresh = startingGuest(at, { accountName: "Google Name" });
+  check("a first visit: today's date, guest arriving today, account name",
+    fresh.date === "2026-10-25" && fresh.arriveDate === "2026-10-25" && fresh.name === "Google Name"
+    && fresh.guestNames === "" && fresh.reason === "");
+  const back = startingGuest(at, {
+    student: { name: "Debjit Sarkar", reg: "MBA 0178/62", hostel: "LVH", room: "220", phone: "8585820504" },
+    remembered: { reason: "Visiting for the day", guestNames: "should not come back" },
+  });
+  check("the student's details come back from the shared record",
+    back.name === "Debjit Sarkar" && back.room === "220" && back.phone === "8585820504");
+  check("the reason comes back", back.reason === "Visiting for the day");
+  check("the guest's own details don't", back.guestNames === "" && back.guestMobiles === "");
+  check("the visit is to the student's own hostel unless changed", back.visitHostel === "LVH");
+  check("an Other hostel carries its name into the visit",
+    startingGuest(at, { student: { hostel: "Other", hostelOther: "MDC" } }).visitHostelOther === "MDC");
+  check("today's half-written visit is picked back up",
+    startingGuest(at, { trip: { savedOn: "2026-10-25", guestNames: "R Sarkar", visitHostel: "OH" } }).guestNames === "R Sarkar");
+  check("yesterday's is dropped",
+    startingGuest(at, { trip: { savedOn: "2026-10-24", guestNames: "R Sarkar" } }).guestNames === "");
+  check("the trip can't overwrite the student or the reason",
+    startingGuest(at, { student: { name: "Me" }, remembered: { reason: "R" },
+      trip: { savedOn: "2026-10-25", name: "Other", reason: "Old" } }).name === "Me");
+  check("junk in storage is ignored, the shape kept",
+    Object.keys(BLANK_GUEST).every((k) =>
+      typeof startingGuest(at, { student: { name: 5 }, remembered: "junk", trip: [] })[k] === "string"));
+}
+
+console.log("\nguest entry form PDF");
+{
+  const g = {
+    date: "2026-10-25", guestNames: "Rakesh Sarkar, Mitali Sarkar", guestAddress: "Sugam Sudhir, Garia",
+    guestMobiles: "9830012345", relationship: "Parents", visitHostel: "LVH",
+    arriveDate: "2026-10-26", arriveTime: "11:00", departDate: "2026-10-26", departTime: "17:30",
+    reason: "Visiting for the day", name: "Debjit Sarkar", reg: "MBA 0178/62",
+    phone: "8585820504", hostel: "LVH", room: "220",
+  };
+  const page = guestLayout(g);
+  const find = (str) => page.runs.find((r) => r.str === str);
+  check("the heading is the template's, bold and centred",
+    find("INDIAN INSTITUTE OF MANAGEMENT CALCUTTA")?.bold === true
+    && Math.abs(find("INDIAN INSTITUTE OF MANAGEMENT CALCUTTA").x - 125.9) < 1.5);
+  check("the first question sits where the template's does",
+    find("Name of Guest(s): ")?.x === 54 && find("Name of Guest(s): ")?.y === 189.6);
+  check("an answer follows its label on the same line",
+    find("Rakesh Sarkar, Mitali Sarkar")?.y === 189.6
+    && Math.abs(find("Rakesh Sarkar, Mitali Sarkar").x - (54 + timesWidth("Name of Guest(s): ", 12))) < 0.01);
+  check("the ID line says the masked copy is attached, underlined",
+    Boolean(find("Masked copy attached")) && page.rules.length >= 3);
+  check("dates are day first, 24-hour", Boolean(find("26/10/2026 11:00")) && Boolean(find("26/10/2026 17:30")));
+  check("short answers leave the declaration where the template has it",
+    Math.abs(find("Self-Declaration").y - 385.5) < 0.1);
+  check("the declaration is the template's, word for word",
+    page.runs.filter((r) => r.size === 11 && r.y > 385).map((r) => r.str).join(" ").startsWith(
+      "I hereby declare that all the information provided above is true, accurate, and complete to the best of my knowledge"));
+  check("Word's break after \"policy—\" is kept",
+    page.runs.some((r) => r.size === 11 && r.str.endsWith("misuse of this policy—")));
+  check("justified lines are stretched, last lines aren't",
+    page.runs.some((r) => r.size === 11 && r.wordSpace > 0)
+    && page.runs.find((r) => r.str.startsWith("rules, regulations")).wordSpace === 0);
+  check("signed and dated", Boolean(find("Date: 25/10/2026")) && page.signature.cx > 54);
+  check("the student's details close the page",
+    Boolean(find("Debjit Sarkar")) && Boolean(find("Room No.: 220")) && Boolean(find("8585820504")));
+  check("a short form ends where the template does", Math.abs(page.bottom - 721.5) < 0.5 && !page.cut);
+
+  const long = guestLayout({ ...g, reason: "A long reason for the visit. ".repeat(60) });
+  check("a very long reason still fits one page", long.bottom <= 800);
+  check("…and is cut, and says so", long.cut === true
+    && long.runs.some((r) => r.str.endsWith("…")));
+  check("the reason steps down to 10 pt before anything is cut",
+    long.runs.some((r) => r.size === 10));
+  // Justified lines are stretched to the margin by their word spacing, so
+  // it's their unstretched width that has to fit.
+  check("nothing runs off the right margin",
+    long.runs.every((r) => r.x + timesWidth(r.str, r.size, r.bold) <= 541.5));
+  check("filename names the student and the arrival",
+    guestFilename(g) === "Guest Entry - Debjit Sarkar - 26-10-2026.pdf");
+
+  const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x10, 0x00, 0x20, 0x03,
+    0x01, 0x11, 0x00, 0xff, 0xd9]);
+  const raw = Array.from(writePdf({ images: [{ jpeg, x: 269, y: 54, w: 57, h: 54 }], rules: page.rules,
+    runs: page.runs, title: "Guest Entry" }), (b) => String.fromCharCode(b)).join("");
+  const xrefAt = Number(/startxref\n(\d+)/.exec(raw)[1]);
+  const offsets = [...raw.slice(xrefAt).matchAll(/^(\d{10}) 00000 n $/gm)].map((m) => Number(m[1]));
+  check("the guest PDF's table points at every object",
+    offsets.length > 0 && offsets.every((o, i) => raw.startsWith(`${i + 1} 0 obj`, o)));
+  check("bold is Times-Bold, set only because it is used", raw.includes("/BaseFont /Times-Bold"));
+  check("a colour crest is drawn in colour", raw.includes("/ColorSpace /DeviceRGB"));
+  check("justified lines carry their word spacing", / Tw\n/.test(raw));
+  check("underlines are drawn", / l\nS/.test(raw));
+}
+
+console.log("\nguest ID copy");
+{
+  check("photos and PDFs are accepted", idCopyKind({ type: "image/jpeg" }) === "image"
+    && idCopyKind({ type: "image/heic" }) === "image" && idCopyKind({ type: "application/pdf" }) === "pdf"
+    && idCopyKind({ type: "", name: "scan.PDF" }) === "pdf");
+  check("anything else isn't", idCopyKind({ type: "text/plain" }) === null && idCopyKind(null) === null);
+  check("the attachment's name says what it is, not what the phone called it",
+    idCopyName("image/jpeg") === "Guest ID (masked).jpg" && idCopyName("application/pdf") === "Guest ID (masked).pdf");
+  later.push(prepareIdCopy({ type: "application/pdf", name: "big.pdf", size: MAX_PDF_BYTES + 1 })
+    .then(() => check("an oversized PDF is refused", false))
+    .catch((e) => check("an oversized PDF is refused", e?.code === "too-big")));
+  later.push(prepareIdCopy({ type: "text/plain", name: "a.txt", size: 3 })
+    .then(() => check("a text file is refused", false))
+    .catch((e) => check("a text file is refused", e?.code === "type")));
+}
+
+console.log("\nGmail drafts for two mails");
+{
+  const two = mimeMessage({
+    to: ["a@x.in"], subject: "S", body: "B",
+    files: [{ name: "form.pdf", type: "application/pdf", bytes: new Uint8Array([1, 2, 3]) },
+      { name: "Guest ID (masked).jpg", type: "image/jpeg", bytes: new Uint8Array([4, 5, 6]) }],
+  });
+  check("two attachments, two parts", (two.match(/Content-Disposition: attachment/g) || []).length === 2);
+  check("each keeps its own type and name",
+    two.includes('Content-Type: image/jpeg; name="Guest ID (masked).jpg"')
+    && two.includes('Content-Type: application/pdf; name="form.pdf"'));
+  check("one attachment still reads as before",
+    (mimeMessage({ to: ["a@x.in"], subject: "S", body: "", file: { name: "f.pdf", bytes: new Uint8Array([1]) } })
+      .match(/Content-Disposition: attachment/g) || []).length === 1);
+
+  // A tab's sessionStorage, for the round trip: which screen asked is kept,
+  // and only that screen may take it.
+  const store = new Map();
+  globalThis.sessionStorage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+    removeItem: (k) => store.delete(k),
+  };
+  const now = Date.now();
+  store.set("iimpresent.gmail.pending", JSON.stringify({ email: "a@x.in", at: now, kind: "guest" }));
+  check("the app is told a guest entry trip is waiting", pendingKind() === "guest");
+  check("the guest's trip isn't the leave mail's to take",
+    takeRoundTrip(now, "leave").pending === false && store.has("iimpresent.gmail.pending"));
+  check("the guest entry screen takes it", takeRoundTrip(now, "guest").pending === true
+    && !store.has("iimpresent.gmail.pending"));
+  store.set("iimpresent.gmail.pending", JSON.stringify({ email: "a@x.in", at: now }));
+  check("a trip from before there were two mails is the leave mail's", pendingKind() === "leave");
+  store.clear();
+  check("nothing waiting, no kind", pendingKind() === null);
+  store.set("iimpresent.gmail.draft", JSON.stringify({ draftId: "L", key: "k" }));
+  store.set("iimpresent.gmail.draft.guest", JSON.stringify({ draftId: "G", key: "k" }));
+  check("each mail keeps its own draft",
+    lastDraft("leave").draftId === "L" && lastDraft("guest").draftId === "G" && lastDraft().draftId === "L");
+  delete globalThis.sessionStorage;
 }
 
 Promise.all(later).catch((err) => {

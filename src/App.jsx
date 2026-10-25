@@ -20,7 +20,7 @@ import {
   enableAlerts, alertsActive, registerServiceWorker, pushSupported, isIOS, isStandalone,
 } from "./lib/push";
 import { track } from "./lib/track";
-import { DRAFT_STEPS } from "./lib/gmaildraft";
+import { DRAFT_STEPS, pendingKind } from "./lib/gmaildraft";
 
 import Splash, { Mark } from "./screens/Splash";
 import SignIn from "./screens/SignIn";
@@ -42,6 +42,7 @@ const MessMenu = lazy(() => import("./screens/MessMenu"));
 const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
 const SectionPicker = lazy(() => import("./screens/SectionPicker"));
 const LeaveMail = lazy(() => import("./screens/LeaveMail"));
+const GuestEntry = lazy(() => import("./screens/GuestEntry"));
 const JMaps = lazy(() => import("./screens/JMaps"));
 const OltAttendance = lazy(() => import("./screens/OltAttendance"));
 const PorDashboard = lazy(() => import("./screens/PorDashboard"));
@@ -60,11 +61,34 @@ const SUB_SCREEN_BACK = {
   faculty: "Back to contacts",
   por: "Back to contacts",
   mess: "Back to utils",
-  leave: "Back to utils",
+  mail: "Back to utils",
+  // Behind the mail door, like the contacts above.
+  leave: "Back to mail services",
+  guest: "Back to mail services",
   maps: "Back to utils",
   admin: "Back to profile",
   pordash: "Back to profile",
 };
+
+/**
+ * Where the masthead's arrow goes from a screen behind a second-level door:
+ * the door, so that back undoes the one tap that got the student here, as
+ * its label already says. Anything not listed goes to the tab's top.
+ */
+const SUB_SCREEN_PARENT = {
+  faculty: "contacts",
+  por: "contacts",
+  leave: "mail",
+  guest: "mail",
+};
+
+/**
+ * Which mail screen a return from Google's Gmail permission page belongs
+ * to. The callback page sends every return to /?leave=draft — a name from
+ * when the leave mail was the only one — and the trip itself remembers
+ * which screen asked.
+ */
+const draftScreen = () => (pendingKind() === "guest" ? "guest" : "leave");
 
 const TABS = [
   ["today", "Today's classes", TodayIcon],
@@ -112,11 +136,14 @@ export default function App() {
   // draft starts on the leave mail itself rather than switching to it after
   // boot, so Today never flashes up between the loader and the draft.
   const [returnForDraft] = useState(backForDraft);
+  // Which mail screen, read now: the screen itself uses the trip up as it
+  // opens, so asking again later would find nothing.
+  const [returnScreen] = useState(() => (returnForDraft ? draftScreen() : null));
   const [tab, setTab] = useState(returnForDraft ? "utils" : "today");
   const [now, setNow] = useState(new Date());
   const [alerts, setAlerts] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [subScreen, setSubScreen] = useState(returnForDraft ? "leave" : null);
+  const [subScreen, setSubScreen] = useState(returnScreen);
   const [returnTab, setReturnTab] = useState(null);
   const [toast, setToast] = useState("");
   const [fatal, setFatal] = useState("");
@@ -454,8 +481,9 @@ export default function App() {
     window.history.replaceState({}, "", rest ? `${window.location.pathname}?${rest}` : window.location.pathname);
   }, [ready]);
 
-  // Back from Google's Gmail permission page: the leave mail is already the
-  // screen (see returnForDraft), and it picks up the draft it was asked for.
+  // Back from Google's Gmail permission page: the mail screen that asked is
+  // already the screen (see returnScreen), and it picks up the draft it was
+  // asked for.
   // This clears the address bar, and puts the screen back should anything in
   // boot have moved it. Not tracked as an "open" — the student didn't open
   // it, they came back to it.
@@ -463,8 +491,10 @@ export default function App() {
   // The screen's code is fetched alongside boot rather than after it, so the
   // loader runs straight on instead of pausing on a blank page between the two.
   useEffect(() => {
-    if (returnForDraft) import("./screens/LeaveMail").catch(() => {});
-  }, [returnForDraft]);
+    if (!returnScreen) return;
+    (returnScreen === "guest" ? import("./screens/GuestEntry") : import("./screens/LeaveMail"))
+      .catch(() => {});
+  }, [returnScreen]);
   useEffect(() => {
     if (!ready) return;
     const params = new URLSearchParams(window.location.search);
@@ -473,8 +503,8 @@ export default function App() {
     const rest = params.toString();
     window.history.replaceState({}, "", rest ? `${window.location.pathname}?${rest}` : window.location.pathname);
     setTab("utils");
-    setSubScreen("leave");
-  }, [ready]);
+    setSubScreen(returnScreen ?? "leave");
+  }, [ready, returnScreen]);
 
   const turnOnAlerts = async () => {
     try {
@@ -837,7 +867,7 @@ export default function App() {
     <>
       <Masthead
         now={now}
-        onBack={subScreen ? () => setSubScreen(null) : null}
+        onBack={subScreen ? () => setSubScreen(SUB_SCREEN_PARENT[subScreen] ?? null) : null}
         backLabel={SUB_SCREEN_BACK[subScreen]}
       />
       {/* Widened only for the plain grid view — the day columns are what
@@ -880,7 +910,7 @@ export default function App() {
         {/* The leave mail's loader stands in for it while its code arrives,
             so a return for a draft never shows a blank page mid-loader. */}
         <Suspense
-          fallback={returnForDraft && subScreen === "leave"
+          fallback={returnForDraft && (subScreen === "leave" || subScreen === "guest")
             ? <Splash message={DRAFT_STEPS.drafting} draw={false} task />
             : <div className="screen-loading" aria-hidden="true" />}
         >
@@ -964,11 +994,21 @@ export default function App() {
         {/* The student's own address and name, not the viewed cohort's:
             viewing-as changes whose timetable is on screen, never whose
             mail this is. */}
+        {tab === "utils" && subScreen === "mail" && (
+          <Utils onOpen={openSub} group="mail" />
+        )}
         {tab === "utils" && subScreen === "leave" && (
           <LeaveMail
             email={session.user?.email ?? ""}
             accountName={session.user?.user_metadata?.full_name ?? session.user?.user_metadata?.name ?? ""}
-            onBack={() => setSubScreen(null)}
+            onBack={() => setSubScreen("mail")}
+          />
+        )}
+        {tab === "utils" && subScreen === "guest" && (
+          <GuestEntry
+            email={session.user?.email ?? ""}
+            accountName={session.user?.user_metadata?.full_name ?? session.user?.user_metadata?.name ?? ""}
+            onBack={() => setSubScreen("mail")}
           />
         )}
         {tab === "utils" && subScreen === "maps" && (

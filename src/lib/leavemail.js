@@ -14,6 +14,8 @@
  * asked for only then, and still leaves the Send to them. See gmaildraft.js.
  */
 
+import { readStudent, writeStudent } from "./student.js";
+
 export const LEAVE_TO = ["pgpoffice@iimcal.ac.in", "aso@iimcal.ac.in"];
 export const LEAVE_CC = [
   "securityofficer@iimcal.ac.in",
@@ -358,13 +360,19 @@ const write = (which, key, value) => {
   }
 };
 
+/* The student's own details — name, registration number, phone, hostel,
+   room — live in the record the guest entry form shares (student.js), and
+   win over this form's older copy of them. The address and the reason stay
+   here: they are about a leave, not about the student. */
 export function loadLeave(now, accountName = "") {
-  return startingLeave(now, read("local", WHO), read("session", TRIP), accountName);
+  const remembered = { ...read("local", WHO), ...readStudent() };
+  return startingLeave(now, remembered, read("session", TRIP), accountName);
 }
 
 export function saveLeave(form, now = new Date()) {
   const trip = { savedOn: isoDay(now) };
   for (const [k, v] of Object.entries(form ?? {})) if (!REMEMBERED.includes(k)) trip[k] = v;
   write("local", WHO, rememberedPart(form));
+  writeStudent(form);
   write("session", TRIP, trip);
 }
