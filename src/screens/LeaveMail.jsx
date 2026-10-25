@@ -192,7 +192,6 @@ export default function LeaveMail({
             <input
               type="tel"
               value={form.phone}
-              placeholder="98765 43210"
               autoComplete="tel"
               onChange={set("phone")}
             />

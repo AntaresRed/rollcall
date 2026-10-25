@@ -201,8 +201,9 @@ const isoDay = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDa
  * The starting form. The student's details come from the shared record (or
  * the Google account's name, for a first visit); the reason from last time.
  * The visit is to the student's own hostel unless they say otherwise, and
- * the guest arrives today unless they say otherwise — both the likeliest
- * answers, and both one tap to change.
+ * the guest arrives now unless they say otherwise — the mail is usually
+ * written as the guest reaches the gate, as the leave mail's departure is
+ * as the student leaves it. Both are one tap to change.
  *
  * `trip` is this session's half-written form, kept as the leave mail keeps
  * its own and only on the day it was written. The mail's date is never
@@ -222,6 +223,7 @@ export function startingGuest(now, { student = {}, remembered = null, trip = nul
     ...BLANK_GUEST,
     date: today,
     arriveDate: today,
+    arriveTime: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
     ...(accountName ? { name: accountName } : {}),
     ...own,
     ...pick(remembered, GUEST_REMEMBERED),

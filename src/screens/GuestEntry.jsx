@@ -10,7 +10,7 @@ import {
 import { isIOS, isAndroid, isStandalone } from "../lib/platform";
 import { deliverFile } from "../lib/deliver";
 import { track } from "../lib/track";
-import { GUEST_DRAFT_STEPS, GOOGLE_CLIENT_ID } from "../lib/gmaildraft";
+import { GUEST_DRAFT_STEPS, GOOGLE_CLIENT_ID, takeRoundTrip } from "../lib/gmaildraft";
 import { useGmailDraft, DraftPanel, Field, Line, CopyButton, copyText } from "./MailDraft";
 
 /**
@@ -118,7 +118,17 @@ export default function GuestEntry({
   // The draft's key covers the ID copy too: a different ID is a different
   // mail, and Update Gmail draft should say so.
   const draftKey = `${formKey}|${idCopy ? `${idCopy.type}:${idCopy.bytes.length}` : "no-id"}`;
-  const [restoring, setRestoring] = useState(false);
+  // Restoring from the very first render, not from the effect that does it.
+  // The draft owed after a trip looks first — its effect runs before the
+  // restore's — and a form with no ID yet looked like one that could never
+  // be drafted: it gave up, and the student had to tap Create Gmail draft a
+  // second time. The trip is the same one the draft hook reads; it is held
+  // once per page, so asking here doesn't use it up.
+  const [restoring, setRestoring] = useState(() => {
+    if (!gmailDraft || initialId) return false;
+    const trip = takeRoundTrip(Date.now(), "guest");
+    return trip.pending && !trip.error;
+  });
   const draft = useGmailDraft({
     kind: "guest",
     event: "guest_entry",
@@ -236,7 +246,6 @@ export default function GuestEntry({
             <input
               type="tel"
               value={form.guestMobiles}
-              placeholder="98765 43210"
               autoComplete="off"
               onChange={set("guestMobiles")}
             />
@@ -285,7 +294,6 @@ export default function GuestEntry({
           <textarea
             rows={3}
             value={form.reason}
-            placeholder="The complete reason, as the form asks"
             onChange={set("reason")}
           />
         </Field>
@@ -351,7 +359,6 @@ export default function GuestEntry({
             <input
               type="tel"
               value={form.phone}
-              placeholder="98765 43210"
               autoComplete="tel"
               onChange={set("phone")}
             />

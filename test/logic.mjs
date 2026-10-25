@@ -3083,6 +3083,11 @@ console.log("\nguest entry mail");
   check("a first visit: today's date, guest arriving today, account name",
     fresh.date === "2026-10-25" && fresh.arriveDate === "2026-10-25" && fresh.name === "Google Name"
     && fresh.guestNames === "" && fresh.reason === "");
+  check("the arrival starts at now, zero-padded", fresh.arriveTime === "09:00"
+    && startingGuest(new Date(2026, 9, 25, 7, 5)).arriveTime === "07:05");
+  check("the departure is left for the student", fresh.departDate === "" && fresh.departTime === "");
+  check("an arrival already typed this session wins over now",
+    startingGuest(at, { trip: { savedOn: "2026-10-25", arriveTime: "18:30" } }).arriveTime === "18:30");
   const back = startingGuest(at, {
     student: { name: "Debjit Sarkar", reg: "MBA 0178/62", hostel: "LVH", room: "220", phone: "8585820504" },
     remembered: { reason: "Visiting for the day", guestNames: "should not come back" },
