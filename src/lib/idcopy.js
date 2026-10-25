@@ -1,9 +1,10 @@
 /**
- * The masked copy of a guest's government ID, which the guest entry form
- * says is attached.
+ * Copies of the guests' government IDs, which the guest entry form says are
+ * attached — one per guest, or front and back of one card, so there may be
+ * several.
  *
- * Picked on the form and put into the Gmail draft as a second attachment,
- * and nowhere else: never uploaded to the app's own server, never part of
+ * Picked on the form and put into the Gmail draft beside the form, and
+ * nowhere else: never uploaded to the app's own server, never part of
  * what the form remembers. The one place it is written down is the phone's
  * own storage, for as long as the trip to Google's permission page takes —
  * the page is left and reloaded on the way back, and a picked file does not
@@ -26,6 +27,11 @@ const MAX_SIDE = 1800;
  */
 export const MAX_PDF_BYTES = 2 * 1024 * 1024;
 
+/** How many ID copies one mail may carry, and how much they may weigh
+ *  together — the same five-megabyte ceiling, shared. */
+export const MAX_ID_COPIES = 6;
+export const MAX_TOTAL_BYTES = 3 * 1024 * 1024;
+
 export class IdCopyError extends Error {
   constructor(code) {
     super(code);
@@ -33,9 +39,18 @@ export class IdCopyError extends Error {
   }
 }
 
-/** The name the attachment goes by, whatever the file was called on the
- *  phone — "IMG_4031.HEIC" tells the office nothing. */
-export const idCopyName = (type) => `Guest ID (masked).${type === "application/pdf" ? "pdf" : "jpg"}`;
+/** The name an attachment goes by, whatever the file was called on the
+ *  phone — "IMG_4031.HEIC" tells the office nothing. "Guest ID" alone, or
+ *  numbered in the order picked when there are several. */
+export const idCopyName = (type, index = 0, count = 1) =>
+  `Guest ID${count > 1 ? ` ${index + 1}` : ""}.${type === "application/pdf" ? "pdf" : "jpg"}`;
+
+/** The copies with their names set by position, as they go into the mail. */
+export const namedIdCopies = (copies) =>
+  (copies ?? []).map((c, i, all) => ({ ...c, name: idCopyName(c.type, i, all.length) }));
+
+/** Their weight together, in bytes. */
+export const idCopiesBytes = (copies) => (copies ?? []).reduce((n, c) => n + (c?.bytes?.length ?? 0), 0);
 
 /** Is this file something the ID copy can be made from? */
 export function idCopyKind(file) {
@@ -137,30 +152,38 @@ async function run(mode, act) {
   }
 }
 
-/** Keep the copy on the phone, in case the page is left for Google. */
-export async function holdIdCopy(copy) {
+/** Keep the copies on the phone, in case the page is left for Google. */
+export async function holdIdCopies(copies) {
   try {
-    await run("readwrite", (s) => s.put({ ...copy, at: Date.now() }, KEY));
+    const list = (copies ?? []).map((c) => ({ type: c.type, bytes: c.bytes }));
+    await run("readwrite", (s) => s.put({ copies: list, at: Date.now() }, KEY));
   } catch {
-    /* private mode: a trip to Google will need the ID picked again */
+    /* private mode: a trip to Google will need the IDs picked again */
   }
 }
 
-/** The copy held for a trip, if it is recent; anything older is deleted. */
-export async function heldIdCopy(now = Date.now()) {
+/**
+ * The copies held for a trip, if recent; anything older is deleted. A copy
+ * held by the version before there could be several — one file, no list — is
+ * read as a list of one.
+ */
+export async function heldIdCopies(now = Date.now()) {
   try {
     const got = await run("readonly", (s) => s.get(KEY));
-    if (!got?.bytes || now - (got.at ?? 0) > MAX_AGE_MS) {
+    const list = Array.isArray(got?.copies) ? got.copies : got?.bytes ? [got] : [];
+    if (!list.length || now - (got.at ?? 0) > MAX_AGE_MS) {
       await dropIdCopy();
-      return null;
+      return [];
     }
-    return { name: got.name, type: got.type, bytes: new Uint8Array(got.bytes) };
+    return list
+      .filter((c) => c?.bytes)
+      .map((c) => ({ type: c.type, bytes: new Uint8Array(c.bytes) }));
   } catch {
-    return null;
+    return [];
   }
 }
 
-/** Delete the held copy. */
+/** Delete the held copies. */
 export async function dropIdCopy() {
   try {
     await run("readwrite", (s) => s.delete(KEY));

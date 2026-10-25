@@ -4514,6 +4514,9 @@ button.por-card:hover { border-color: var(--signal); }
   color: var(--warn-ink);
 }
 .guest-id .guest-id-pick { width: 100%; }
+/* Several IDs stack, the add button under the last. */
+.guest-id-chosen + .guest-id-chosen,
+.guest-id-chosen + .guest-id-pick { margin-top: 6px; }
 .guest-id-chosen {
   display: flex;
   align-items: center;

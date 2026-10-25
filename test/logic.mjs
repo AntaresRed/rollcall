@@ -42,7 +42,8 @@ import { GUEST_TO, GUEST_CC, GUEST_FIELDS, STUDENT_FIELDS, BLANK_GUEST, guestPro
 import { mailtoHref, gmailComposeHref } from "../src/lib/mailhref.js";
 import { guestLayout, guestFilename } from "../src/lib/guestpdf.js";
 import { writePdf } from "../src/lib/formpdf.js";
-import { idCopyKind, idCopyName, prepareIdCopy, MAX_PDF_BYTES } from "../src/lib/idcopy.js";
+import { idCopyKind, idCopyName, namedIdCopies, idCopiesBytes, prepareIdCopy, MAX_PDF_BYTES,
+  MAX_ID_COPIES, MAX_TOTAL_BYTES } from "../src/lib/idcopy.js";
 // The Edge Function's page reader. It imports nothing, so it runs here too.
 import { formFields, formAction, postBackFields, selectOptions, readGrid, hasPasswordBox, hasOtpField,
   termKey, decodeEntities, TERM_SELECT, readDatewise, datewiseAgrees, courseKey, matchSubject,
@@ -3182,7 +3183,20 @@ console.log("\nguest ID copy");
     && idCopyKind({ type: "", name: "scan.PDF" }) === "pdf");
   check("anything else isn't", idCopyKind({ type: "text/plain" }) === null && idCopyKind(null) === null);
   check("the attachment's name says what it is, not what the phone called it",
-    idCopyName("image/jpeg") === "Guest ID (masked).jpg" && idCopyName("application/pdf") === "Guest ID (masked).pdf");
+    idCopyName("image/jpeg") === "Guest ID.jpg" && idCopyName("application/pdf") === "Guest ID.pdf");
+  const named = namedIdCopies([
+    { type: "image/jpeg", bytes: new Uint8Array(10), name: "IMG_1.jpg" },
+    { type: "application/pdf", bytes: new Uint8Array(20) },
+    { type: "image/jpeg", bytes: new Uint8Array(30) },
+  ]);
+  check("several are numbered in the order picked",
+    named.map((c) => c.name).join() === "Guest ID 1.jpg,Guest ID 2.pdf,Guest ID 3.jpg");
+  check("one alone isn't numbered",
+    namedIdCopies([{ type: "image/jpeg", bytes: new Uint8Array(1) }])[0].name === "Guest ID.jpg");
+  check("no copies, no names", namedIdCopies(null).length === 0 && namedIdCopies([]).length === 0);
+  check("their weight is added up", idCopiesBytes(named) === 60 && idCopiesBytes(null) === 0);
+  check("the limits leave room under Gmail's ceiling",
+    MAX_ID_COPIES >= 2 && MAX_TOTAL_BYTES >= MAX_PDF_BYTES && MAX_TOTAL_BYTES <= 3.5 * 1024 * 1024);
   later.push(prepareIdCopy({ type: "application/pdf", name: "big.pdf", size: MAX_PDF_BYTES + 1 })
     .then(() => check("an oversized PDF is refused", false))
     .catch((e) => check("an oversized PDF is refused", e?.code === "too-big")));
@@ -3196,11 +3210,11 @@ console.log("\nGmail drafts for two mails");
   const two = mimeMessage({
     to: ["a@x.in"], subject: "S", body: "B",
     files: [{ name: "form.pdf", type: "application/pdf", bytes: new Uint8Array([1, 2, 3]) },
-      { name: "Guest ID (masked).jpg", type: "image/jpeg", bytes: new Uint8Array([4, 5, 6]) }],
+      { name: "Guest ID.jpg", type: "image/jpeg", bytes: new Uint8Array([4, 5, 6]) }],
   });
   check("two attachments, two parts", (two.match(/Content-Disposition: attachment/g) || []).length === 2);
   check("each keeps its own type and name",
-    two.includes('Content-Type: image/jpeg; name="Guest ID (masked).jpg"')
+    two.includes('Content-Type: image/jpeg; name="Guest ID.jpg"')
     && two.includes('Content-Type: application/pdf; name="form.pdf"'));
   check("one attachment still reads as before",
     (mimeMessage({ to: ["a@x.in"], subject: "S", body: "", file: { name: "f.pdf", bytes: new Uint8Array([1]) } })

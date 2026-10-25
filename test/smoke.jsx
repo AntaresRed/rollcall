@@ -326,9 +326,10 @@ const cases = [
         hostel: "LVH", room: "12",
       }} />],
   // With a Google client ID: the draft, and the ID copy it needs.
-  ["GuestEntry / Gmail draft, ID picked", <GuestEntry key="get" email="abc2027@email.iimcal.ac.in"
+  ["GuestEntry / Gmail draft, two IDs picked", <GuestEntry key="get" email="abc2027@email.iimcal.ac.in"
       onBack={noop}
-      initialId={{ name: "Guest ID (masked).jpg", type: "image/jpeg", bytes: new Uint8Array(2048) }}
+      initialIds={[{ type: "image/jpeg", bytes: new Uint8Array(2048) },
+        { type: "application/pdf", bytes: new Uint8Array(4096) }]}
       initial={{
         date: "2026-10-25", guestNames: "R Sarkar", guestAddress: "12 Park Street",
         guestMobiles: "9830012345", relationship: "Father", visitHostel: "NH",
