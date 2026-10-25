@@ -333,11 +333,6 @@ export default function GuestEntry({
               {idBusy || restoring ? "Preparing…" : "Choose photo or PDF"}
             </button>
           )}
-          <em className="guest-id-note">
-            Aadhaar with all but the last four digits hidden, or any other
-            government ID. It goes into the draft and is never uploaded
-            anywhere else.
-          </em>
           {idError && <p className="leave-warn">{idError}</p>}
         </div>
 

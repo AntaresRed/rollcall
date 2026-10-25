@@ -4535,11 +4535,3 @@ button.por-card:hover { border-color: var(--signal); }
   font-size: 11.5px;
   color: var(--mute);
 }
-.guest-id-note {
-  display: block;
-  margin-top: 6px;
-  font-style: normal;
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--mute);
-}
