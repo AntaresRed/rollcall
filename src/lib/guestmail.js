@@ -169,10 +169,11 @@ export function guestBody(form) {
   });
   const where = [v.hostel, v.room ? `Room ${v.room}` : ""].filter(Boolean).join(", ");
   return [
-    "Respected Sir/Madam,",
+    // Addressed to the offices, not a person: it goes to five of them at once.
+    "Respected Offices,",
     "",
     "I am writing to inform you regarding the campus entry of my guest(s). The "
-      + "guest entry form and a masked copy of the guest's ID are attached.",
+      + "guest entry form and a copy of the guest's ID are attached.",
     "",
     ...lines,
     "",

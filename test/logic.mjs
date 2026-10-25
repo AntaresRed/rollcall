@@ -3054,9 +3054,10 @@ console.log("\nguest entry mail");
     guestSubject({ ...g, arriveDate: "2026-12-30", departDate: "2027-01-02" }).endsWith("30 Dec 2026 to 2 Jan 2027"));
 
   const body = guestBody(g);
-  check("the body opens as the leave mail's does",
-    body.startsWith("Respected Sir/Madam,\n\nI am writing to inform you regarding the campus entry of my guest(s)."));
-  check("the body says both attachments are there", body.includes("entry form and a masked copy of the guest's ID are attached"));
+  check("the body opens to the offices",
+    body.startsWith("Respected Offices,\n\nI am writing to inform you regarding the campus entry of my guest(s)."));
+  check("the body says both attachments are there",
+    body.includes("The guest entry form and a copy of the guest's ID are attached.\n\n"));
   check("every guest field is listed", GUEST_FIELDS.every((f) => body.includes(`${f.label}:`)));
   check("a multi-line address starts under its label", body.includes("Address:\nSugam Sudhir\nGaria"));
   check("arrival written out in full", body.includes("Date and expected time of arrival: Monday, 26 October 2026, 11:00 AM"));
