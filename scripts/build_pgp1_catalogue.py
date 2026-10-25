@@ -82,6 +82,22 @@ SEC_BARE = re.compile(r"\(\s*([A-F](?:\s*(?:,|&|and)\s*[A-F])*)\s*\)", re.I)
 # "Session 1-5:", "(1-5, All six secs)" — mapped by session range, not section.
 SESSION_RANGED = re.compile(r"Session|\b\d+\s*-\s*\d+\b")
 
+# Breaks the institute changed after printing the Calendar sheet. Keyed by
+# label; `printed` is what the sheet still says, checked on every run, so a
+# reissued workbook that already carries the change stops the build instead of
+# being "corrected" a second time.
+CALENDAR_FIXES = {
+    # Summer placement ran 10-16 Oct, not 08-16. The Thursday and Friday grid
+    # classes on 08 and 09 Oct were held, and without them most courses come up
+    # one meeting short of total_classes.
+    "Summer placement": {
+        "printed": ("2026-10-08", "2026-10-16"),
+        "to": ("2026-10-10", "2026-10-16"),
+        "note": "October 10 - October 16, 2026 (No Class) — shortened from "
+                "the printed October 08 - October 16",
+    },
+}
+
 MONTHS = {m.lower(): i for i, m in enumerate(
     ["January", "February", "March", "April", "May", "June", "July",
      "August", "September", "October", "November", "December"], start=1)}
@@ -305,8 +321,22 @@ def read_calendar(ws):
                            (("end term exam",), "End-term exams")]:
         raw = find(*needles)
         a, b = parse_range(raw)
-        breaks.append({"label": label, "from": a.isoformat(),
-                       "to": b.isoformat(), "note": raw})
+        brk = {"label": label, "from": a.isoformat(),
+               "to": b.isoformat(), "note": raw}
+        fix = CALENDAR_FIXES.get(label)
+        if fix:
+            if (brk["from"], brk["to"]) != fix["printed"]:
+                die(f"CALENDAR_FIXES[{label!r}] expects the sheet to print "
+                    f"{fix['printed'][0]}..{fix['printed'][1]}, but it says "
+                    f"{brk['from']}..{brk['to']} ({raw!r}). Recheck the fix "
+                    "against the new sheet.")
+            brk.update({"from": fix["to"][0], "to": fix["to"][1],
+                        "note": fix["note"]})
+        breaks.append(brk)
+    unknown = set(CALENDAR_FIXES) - {b["label"] for b in breaks}
+    if unknown:
+        die(f"CALENDAR_FIXES names breaks the calendar has no row for: "
+            f"{', '.join(sorted(unknown))}")
     breaks.sort(key=lambda b: b["from"])
 
     return {
