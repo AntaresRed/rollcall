@@ -130,8 +130,8 @@ export function useGmailDraft({
       if (err?.status === 401 || err?.status === 403) dropToken();
       setError(err?.status === 401 || err?.status === 403
         ? "Gmail didn't accept the permission. Try again, and choose Allow on Google's page."
-        : err?.status === 413
-          ? "Gmail refused a mail that large. Try a smaller photo of the ID."
+        : err?.tooLarge
+          ? "Gmail refused a mail that large. Remove a PDF, or use a photo of the ID instead."
           : "Couldn't reach Gmail. Check your connection and try again.");
     } finally {
       setBusy(false);

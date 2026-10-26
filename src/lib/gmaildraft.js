@@ -285,6 +285,9 @@ class GmailError extends Error {
   constructor(status, message) {
     super(message || `Gmail answered ${status}`);
     this.status = status;
+    // Too large, however Gmail chose to say it: 413, or a 400 whose message
+    // names the size ("Request payload size exceeds the limit").
+    this.tooLarge = status === 413 || (status === 400 && /size|too large|exceed/i.test(message ?? ""));
   }
 }
 
@@ -294,7 +297,15 @@ async function call(token, method, path, body) {
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new GmailError(res.status);
+  if (!res.ok) {
+    let message = "";
+    try {
+      message = (await res.json())?.error?.message ?? "";
+    } catch {
+      /* no readable answer: the status says enough */
+    }
+    throw new GmailError(res.status, message);
+  }
   return res.json();
 }
 

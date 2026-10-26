@@ -21,16 +21,22 @@ export const ID_ACCEPT = "image/*,application/pdf";
 const MAX_SIDE = 1800;
 
 /**
- * The most a PDF copy may weigh. The draft goes to Gmail base64-encoded
- * twice over (once as an attachment, once as the message), and a request
- * much past five megabytes is refused.
+ * The most one PDF copy may weigh, and all the copies together. The ceiling
+ * is Gmail's own: it won't send a mail past 25 MB, attachments counted as
+ * they travel — base64, a third larger than the files. 15 MB of IDs is about
+ * 20 MB in the mail, with room for the form and the text.
+ *
+ * Measured, not guessed, as far as it could be: the draft address accepted
+ * requests of 40 MB before it so much as looked at the permission (a probe
+ * with a fake one, October 2026). Whether it then takes a real draft that
+ * large wasn't measurable that way; if it refuses, the screen says the mail
+ * was too large rather than failing quietly — see MailDraft.jsx.
  */
-export const MAX_PDF_BYTES = 2 * 1024 * 1024;
+export const MAX_PDF_BYTES = 10 * 1024 * 1024;
+export const MAX_TOTAL_BYTES = 15 * 1024 * 1024;
 
-/** How many ID copies one mail may carry, and how much they may weigh
- *  together — the same five-megabyte ceiling, shared. */
+/** How many ID copies one mail may carry. */
 export const MAX_ID_COPIES = 6;
-export const MAX_TOTAL_BYTES = 3 * 1024 * 1024;
 
 export class IdCopyError extends Error {
   constructor(code) {

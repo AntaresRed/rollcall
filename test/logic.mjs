@@ -34,7 +34,7 @@ import { LEAVE_TO, LEAVE_CC, LEAVE_FIELDS, LEAVE_HOSTELS, BLANK_LEAVE, longDate,
 import { formDate, formWhen, formAnswers, formFilename, winAnsi, timesWidth, wrapText,
   fitBlock, formLayout, jpegInfo, buildPdf } from "../src/lib/leavepdf.js";
 import { GMAIL_SCOPE, authUrl, callbackUrl, readCallback, heldToken, takeRoundTrip,
-  mimeMessage, rawOf, gmailOpenHref, pendingKind, lastDraft } from "../src/lib/gmaildraft.js";
+  mimeMessage, rawOf, gmailOpenHref, pendingKind, lastDraft, saveDraft } from "../src/lib/gmaildraft.js";
 import { STUDENT_KEYS, studentPart, mergeStudent } from "../src/lib/student.js";
 import { GUEST_TO, GUEST_CC, GUEST_FIELDS, STUDENT_FIELDS, BLANK_GUEST, guestProblems,
   numbersLookComplete, guestSubject, guestBody, guestMailto, guestGmailHref, guestGmailAppHref,
@@ -3197,8 +3197,13 @@ console.log("\nguest ID copy");
     namedIdCopies([{ type: "image/jpeg", bytes: new Uint8Array(1) }])[0].name === "Guest ID.jpg");
   check("no copies, no names", namedIdCopies(null).length === 0 && namedIdCopies([]).length === 0);
   check("their weight is added up", idCopiesBytes(named) === 60 && idCopiesBytes(null) === 0);
-  check("the limits leave room under Gmail's ceiling",
-    MAX_ID_COPIES >= 2 && MAX_TOTAL_BYTES >= MAX_PDF_BYTES && MAX_TOTAL_BYTES <= 3.5 * 1024 * 1024);
+  // As they travel, attachments are base64: four bytes for every three.
+  // With a megabyte for the form and the text, the mail must stay under
+  // Gmail's 25 MB, or the student can draft it but not send it.
+  check("the limits keep a full mail under Gmail's 25 MB",
+    MAX_ID_COPIES >= 2 && MAX_TOTAL_BYTES >= MAX_PDF_BYTES
+    && (MAX_TOTAL_BYTES * 4) / 3 + 1024 * 1024 <= 25 * 1024 * 1024);
+  check("a PDF up to 10 MB is taken", MAX_PDF_BYTES >= 10 * 1024 * 1024);
   later.push(prepareIdCopy({ type: "application/pdf", name: "big.pdf", size: MAX_PDF_BYTES + 1 })
     .then(() => check("an oversized PDF is refused", false))
     .catch((e) => check("an oversized PDF is refused", e?.code === "too-big")));
@@ -3342,6 +3347,30 @@ console.log("\nMDC & Tata Hall booking mail");
   check("…with the ID still attached", mime.includes('filename="Guest ID.jpg"'));
   check("a mail without HTML is as it was", !mimeMessage({ to: ["a@x.in"], subject: "S", body: "x" })
     .includes("multipart/alternative"));
+}
+
+console.log("\nGmail refusing a draft for its size");
+{
+  // Gmail answered by a stub, with no draft made yet, so saveDraft goes
+  // straight to creating one.
+  const refuse = async (status, message) => {
+    const was = globalThis.fetch;
+    globalThis.fetch = async () => ({
+      ok: false, status, json: async () => ({ error: { code: status, message } }),
+    });
+    try {
+      return await saveDraft("tok", "RAW", "k", "guest").catch((e) => e);
+    } finally {
+      globalThis.fetch = was;
+    }
+  };
+  later.push((async () => {
+    check("a 413 is read as too large", (await refuse(413, "Request Entity Too Large")).tooLarge === true);
+    check("so is a 400 that names the size",
+      (await refuse(400, "Request payload size exceeds the limit: 10485760 bytes.")).tooLarge === true);
+    check("an ordinary 400 isn't", (await refuse(400, "Invalid to header")).tooLarge === false);
+    check("nor is an expired permission", (await refuse(401, "Invalid Credentials")).tooLarge === false);
+  })());
 }
 
 Promise.all(later).catch((err) => {
