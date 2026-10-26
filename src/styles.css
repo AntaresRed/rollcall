@@ -4093,6 +4093,53 @@ button.por-card:hover { border-color: var(--signal); }
 }
 .leave-ready-head svg { color: var(--present); flex: none; }
 .leave-ready .leave-saved { margin-top: 3px; }
+/* The phone's way to Send, one numbered step a line. "Edit draft" is the
+   step people miss, so it alone gets the signal colour. */
+.leave-steps {
+  list-style: none;
+  counter-reset: step;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.leave-steps li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 30px;
+  min-height: 20px;
+}
+.leave-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--rule);
+  color: var(--slate);
+}
+.leave-steps li span {
+  display: block;
+  font-size: 12px;
+  color: var(--signal-deep);
+}
+.leave-steps li.key {
+  margin: 0 -8px;
+  padding: 6px 8px 6px 38px;
+  border-radius: 10px;
+  background: var(--signal-wash);
+}
+.leave-steps li.key::before { left: 8px; top: 6px; background: var(--signal); color: #fff; }
 .btn.leave-open {
   display: flex;
   align-items: center;

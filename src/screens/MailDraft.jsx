@@ -222,11 +222,23 @@ export function DraftPanel({
             <TickIcon /> Draft ready in Gmail
           </p>
           <p className="leave-saved">
-            Addressed, with {attached}.{" "}
-            {platform === "web"
-              ? "Open it, check it and press Send."
-              : `In Gmail, open Drafts, tap ${mailName} and press Send.`}
+            Addressed, with {attached}.
+            {platform === "web" && " Open it, check it and press Send."}
           </p>
+          {/* On a phone the app opens a draft read-only: the body and Send
+              appear only after "Edit draft", a step students missed when it
+              was half a sentence. Numbered, with that step marked. */}
+          {platform !== "web" && (
+            <ol className="leave-steps">
+              <li>In Gmail, open <b>Drafts</b></li>
+              <li>Tap {mailName}</li>
+              <li className="key">
+                Tap <b>Edit draft</b>
+                <span>The mail and its Send button only show after this.</span>
+              </li>
+              <li>Check it and tap <b>Send</b></li>
+            </ol>
+          )}
           {/* A link, so the app opens from the tap itself — a phone opens
               another app only straight from a tap. On a laptop it goes
               into the draft, in a tab of its own. */}
