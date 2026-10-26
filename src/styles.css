@@ -4101,6 +4101,7 @@ button.por-card:hover { border-color: var(--signal); }
   margin-top: 12px;
   padding: 14px 18px;
   font-size: 15px;
+  text-align: center;        /* Android's longer label runs to two lines */
   text-decoration: none;
   background: var(--signal);
   border-color: var(--signal);

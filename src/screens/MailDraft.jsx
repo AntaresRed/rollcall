@@ -244,7 +244,13 @@ export function DraftPanel({
               // One span, so the button's flex gap doesn't part the dots
               // from the word.
               ? <span>Opening Gmail<LoadingDots /></span>
-              : <>Open Gmail drafts and send mail<ArrowIcon /></>}
+              // Android opens Gmail at the inbox, not the draft (iOS too, but
+              // only Android was asked for), so the label spells out the
+              // path from there instead of promising the draft itself. Broken
+              // by hand: left to wrap, it split the steps mid-path.
+              : platform === "android"
+                ? <span>Click to open Gmail →<br />Drafts → Edit Draft → Send</span>
+                : <>Open Gmail drafts and send mail<ArrowIcon /></>}
           </a>
           {onDownload && (
             <button type="button" className="leave-retry leave-alt" onClick={onDownload}>
