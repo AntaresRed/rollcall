@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
 import { supabase, getSession, signOut, readAuthError } from "./lib/supabase";
 import {
   loadClasses, loadAttendance, loadTerm, markAttendance, unmarkAttendance,
@@ -27,46 +27,31 @@ import SignIn from "./screens/SignIn";
 import InstallBanner from "./InstallBanner";
 import NoSchedule from "./screens/NoSchedule";
 import { TodayIcon, TimetableIcon, UtilsIcon, ProfileIcon } from "./screens/TabIcons";
-const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 import Today from "./screens/Today";
+import { screen, ScreenLoading, ScreenBoundary } from "./screens/ScreenLoad";
 
-/**
- * A tab screen: split out of the first download like the rest, but fetched
- * in the background once Today is up, so the first tap on the tab doesn't
- * wait on the network. That wait was a blank tab for as long as campus wifi
- * took — seconds, on Profile.
- *
- * Once fetched, lazy() is handed a thenable that answers at once. A plain
- * promise answers a tick later, and React would show the blank fallback for
- * a frame on a screen that is already here.
- */
-function tabScreen(load) {
-  let mod = null;
-  let pending = null;
-  const fetchIt = () => (pending ??= load().then((m) => (mod = m)));
-  const Screen = lazy(() => (mod ? { then: (done) => done(mod) } : fetchIt()));
-  // A failed fetch is forgotten, so the tap itself tries again.
-  Screen.preload = () => fetchIt().catch(() => { pending = null; });
-  return Screen;
-}
-const Timetable = tabScreen(() => import("./screens/Timetable"));
-const Profile = tabScreen(() => import("./screens/Profile"));
-const EditAttendance = lazy(() => import("./screens/EditAttendance"));
-const TermCalendar = lazy(() => import("./screens/TermCalendar"));
-const Reschedule = lazy(() => import("./screens/Reschedule"));
-const Faculty = lazy(() => import("./screens/Faculty"));
-const ScheduleAdmin = lazy(() => import("./screens/ScheduleAdmin"));
-const PorDetails = lazy(() => import("./screens/PorDetails"));
-const Utils = tabScreen(() => import("./screens/Utils"));
-const MessMenu = lazy(() => import("./screens/MessMenu"));
-const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
-const SectionPicker = lazy(() => import("./screens/SectionPicker"));
-const LeaveMail = lazy(() => import("./screens/LeaveMail"));
-const GuestEntry = lazy(() => import("./screens/GuestEntry"));
-const HallBooking = lazy(() => import("./screens/HallBooking"));
-const JMaps = lazy(() => import("./screens/JMaps"));
-const OltAttendance = lazy(() => import("./screens/OltAttendance"));
-const PorDashboard = lazy(() => import("./screens/PorDashboard"));
+// Each screen's code arrives on first use. Timetable, Utils and Profile are
+// also fetched in the background once Today is up (warmTabs, below), so the
+// first tap on a tab doesn't wait on the network.
+const CoursePicker = screen(() => import("./screens/CoursePicker"));
+const Timetable = screen(() => import("./screens/Timetable"));
+const Profile = screen(() => import("./screens/Profile"));
+const EditAttendance = screen(() => import("./screens/EditAttendance"));
+const TermCalendar = screen(() => import("./screens/TermCalendar"));
+const Reschedule = screen(() => import("./screens/Reschedule"));
+const Faculty = screen(() => import("./screens/Faculty"));
+const ScheduleAdmin = screen(() => import("./screens/ScheduleAdmin"));
+const PorDetails = screen(() => import("./screens/PorDetails"));
+const Utils = screen(() => import("./screens/Utils"));
+const MessMenu = screen(() => import("./screens/MessMenu"));
+const AttendanceBreakdown = screen(() => import("./screens/AttendanceBreakdown"));
+const SectionPicker = screen(() => import("./screens/SectionPicker"));
+const LeaveMail = screen(() => import("./screens/LeaveMail"));
+const GuestEntry = screen(() => import("./screens/GuestEntry"));
+const HallBooking = screen(() => import("./screens/HallBooking"));
+const JMaps = screen(() => import("./screens/JMaps"));
+const OltAttendance = screen(() => import("./screens/OltAttendance"));
+const PorDashboard = screen(() => import("./screens/PorDashboard"));
 
 // What the masthead's back arrow says it returns to, per sub-screen. Tabs
 // themselves don't stack — they're a flat choice, and back through a tab you
@@ -118,9 +103,9 @@ const draftScreen = () => {
 
 /** Each mail screen's code, fetched alongside boot on a return from Google. */
 const MAIL_SCREENS = {
-  leave: () => import("./screens/LeaveMail"),
-  guest: () => import("./screens/GuestEntry"),
-  hall: () => import("./screens/HallBooking"),
+  leave: LeaveMail,
+  guest: GuestEntry,
+  hall: HallBooking,
 };
 
 const TABS = [
@@ -525,7 +510,7 @@ export default function App() {
   // loader runs straight on instead of pausing on a blank page between the two.
   useEffect(() => {
     if (!returnScreen) return;
-    (MAIL_SCREENS[returnScreen] ?? MAIL_SCREENS.leave)().catch(() => {});
+    (MAIL_SCREENS[returnScreen] ?? MAIL_SCREENS.leave).preload();
   }, [returnScreen]);
   useEffect(() => {
     if (!ready) return;
@@ -834,7 +819,8 @@ export default function App() {
     return (
       <div className="shell">
         <Masthead now={now} />
-        <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
+        <ScreenBoundary>
+        <Suspense fallback={<ScreenLoading />}>
           <PorDashboard
             email={session.user?.email ?? ""}
             access={porAccess}
@@ -844,6 +830,7 @@ export default function App() {
             }}
           />
         </Suspense>
+        </ScreenBoundary>
       </div>
     );
   }
@@ -885,7 +872,8 @@ export default function App() {
           onBack={editing && classes.length ? leaveEditing : null}
           backLabel="Back without saving"
         />
-        <Suspense fallback={<div className="screen-loading" aria-hidden="true" />}>
+        <ScreenBoundary>
+        <Suspense fallback={<ScreenLoading />}>
           {/* Which picker to show is a property of the schedule, not of the
               student: a core curriculum is chosen by section, electives by
               course. Asking the catalogue means neither year needs to be
@@ -904,6 +892,7 @@ export default function App() {
             />
           )}
         </Suspense>
+        </ScreenBoundary>
       </div>
     );
   }
@@ -954,11 +943,14 @@ export default function App() {
         )}
 
         {/* The leave mail's loader stands in for it while its code arrives,
-            so a return for a draft never shows a blank page mid-loader. */}
+            so a return for a draft never shows a blank page mid-loader.
+            Keyed by screen, so a page that failed to load is forgotten once
+            the student goes elsewhere. */}
+        <ScreenBoundary key={`${tab}/${subScreen ?? ""}`}>
         <Suspense
           fallback={returnForDraft && Boolean(MAIL_SCREENS[subScreen])
             ? <Splash message={DRAFT_STEPS.drafting} draw={false} task />
-            : <div className="screen-loading" aria-hidden="true" />}
+            : <ScreenLoading />}
         >
         {tab === "today" && (
           <Today
@@ -1109,6 +1101,7 @@ export default function App() {
           />
         )}
         </Suspense>
+        </ScreenBoundary>
       </div>
 
       <nav className="tabs" role="tablist" ref={setNav}>

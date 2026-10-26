@@ -1478,6 +1478,9 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 @keyframes shimmer {
   to { background-position: -220% 0; }
 }
+/* what the placeholder becomes once the code is clearly not coming */
+.screen-stalled { margin-top: 24px; }
+.screen-stalled p { margin: 0 0 14px; }
 
 
 /* ---------- crash screen ---------- */
