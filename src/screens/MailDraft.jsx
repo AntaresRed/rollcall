@@ -454,7 +454,7 @@ export function TickIcon() {
 function LoadingDots() {
   return (
     <span className="loading-dots" aria-hidden="true">
-      <i>.</i><i>.</i><i>.</i>
+      <i /><i /><i />
     </span>
   );
 }

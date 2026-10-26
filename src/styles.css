@@ -4113,8 +4113,15 @@ button.por-card:hover { border-color: var(--signal); }
 }
 /* "Opening Gmail..." — the dots light up left to right, on a loop. With
    reduced motion they simply stand, all three lit. */
-.loading-dots { display: inline-flex; margin-left: 1px; }
-.loading-dots i { font-style: normal; }
+/* Drawn as circles rather than full stops: a full stop is too small to see
+   blinking. Sat on the text's baseline, where full stops would be. */
+.loading-dots { display: inline-flex; align-items: flex-end; gap: 4px; margin-left: 4px; }
+.loading-dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
 @media (prefers-reduced-motion: no-preference) {
   .loading-dots i { animation: dot 1.2s ease-in-out infinite; }
   .loading-dots i:nth-child(2) { animation-delay: 0.2s; }
