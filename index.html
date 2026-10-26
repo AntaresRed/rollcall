@@ -3,27 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <!--
-      viewport-fit=cover is for the iPhone, where it lets the tab bar run
-      under the home indicator. In the installed Android app it asks Chrome to
-      draw the page under the navigation bar, and on a fresh launch Chrome
-      makes that bar see-through a moment before the page has painted under
-      it: the home screen wallpaper flashes in the strip below the tab bar.
-      Without it Chrome paints the bar itself from the first frame, as it
-      does for other installed apps. Dropped before anything is drawn, and
-      the same checks as src/lib/platform.js (a module can't run this early).
-      public/gmail-callback.html does the same, so the trip back from Google
-      doesn't switch modes mid-way.
-    -->
-    <script>
-      try {
-        if (/android/i.test(navigator.userAgent) &&
-            window.matchMedia("(display-mode: standalone)").matches) {
-          document.querySelector('meta[name="viewport"]')
-            .setAttribute("content", "width=device-width, initial-scale=1");
-        }
-      } catch (e) { /* the meta as written is a safe default */ }
-    </script>
     <meta name="theme-color" content="#171B21" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
