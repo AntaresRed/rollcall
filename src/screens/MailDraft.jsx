@@ -244,11 +244,11 @@ export function DraftPanel({
               // One span, so the button's flex gap doesn't part the dots
               // from the word.
               ? <span>Opening Gmail<LoadingDots /></span>
-              // Android opens Gmail at the inbox, not the draft (iOS too, but
-              // only Android was asked for), so the label spells out the
-              // path from there instead of promising the draft itself. Broken
-              // by hand: left to wrap, it split the steps mid-path.
-              : platform === "android"
+              // A phone opens the Gmail app at the inbox, not the draft, so
+              // the label spells out the path from there instead of promising
+              // the draft itself. Broken by hand: left to wrap, it split the
+              // steps mid-path. A laptop's tab does open the draft.
+              : platform !== "web"
                 ? <span>Click to open Gmail →<br />Drafts → Edit Draft → Send</span>
                 : <>Open Gmail drafts and send mail<ArrowIcon /></>}
           </a>
