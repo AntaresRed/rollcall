@@ -4111,6 +4111,19 @@ button.por-card:hover { border-color: var(--signal); }
 @media (prefers-reduced-motion: no-preference) {
   .leave-open { animation: beckon 1.4s ease-out 0.2s 2; }
 }
+/* "Opening Gmail..." — the dots light up left to right, on a loop. With
+   reduced motion they simply stand, all three lit. */
+.loading-dots { display: inline-flex; margin-left: 1px; }
+.loading-dots i { font-style: normal; }
+@media (prefers-reduced-motion: no-preference) {
+  .loading-dots i { animation: dot 1.2s ease-in-out infinite; }
+  .loading-dots i:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots i:nth-child(3) { animation-delay: 0.4s; }
+}
+@keyframes dot {
+  0%, 80%, 100% { opacity: 0.2; }
+  40%           { opacity: 1; }
+}
 @keyframes beckon {
   0%   { box-shadow: 0 0 0 0 rgba(214, 0, 111, 0.45); }
   100% { box-shadow: 0 0 0 12px rgba(214, 0, 111, 0); }

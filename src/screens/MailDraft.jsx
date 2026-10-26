@@ -240,7 +240,11 @@ export function DraftPanel({
               track(draft.event, "draft-open");
             }}
           >
-            {opening ? "Opening Gmail…" : <>Open Gmail drafts and send mail<ArrowIcon /></>}
+            {opening
+              // One span, so the button's flex gap doesn't part the dots
+              // from the word.
+              ? <span>Opening Gmail<LoadingDots /></span>
+              : <>Open Gmail drafts and send mail<ArrowIcon /></>}
           </a>
           {onDownload && (
             <button type="button" className="leave-retry leave-alt" onClick={onDownload}>
@@ -441,6 +445,17 @@ export function TickIcon() {
       <path d="m5.4 9.2 2.4 2.4 4.8-5.2" stroke="#fff" strokeWidth="1.8"
             strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+/** Three dots that light up in turn, so "Opening Gmail" reads as under way
+ *  rather than stuck. Each keeps its space while dim, so the label never
+ *  shifts. Hidden from screen readers, which have aria-busy instead. */
+function LoadingDots() {
+  return (
+    <span className="loading-dots" aria-hidden="true">
+      <i>.</i><i>.</i><i>.</i>
+    </span>
   );
 }
 
