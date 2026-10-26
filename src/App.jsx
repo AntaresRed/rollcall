@@ -29,15 +29,35 @@ import NoSchedule from "./screens/NoSchedule";
 import { TodayIcon, TimetableIcon, UtilsIcon, ProfileIcon } from "./screens/TabIcons";
 const CoursePicker = lazy(() => import("./screens/CoursePicker"));
 import Today from "./screens/Today";
-const Timetable = lazy(() => import("./screens/Timetable"));
-const Profile = lazy(() => import("./screens/Profile"));
+
+/**
+ * A tab screen: split out of the first download like the rest, but fetched
+ * in the background once Today is up, so the first tap on the tab doesn't
+ * wait on the network. That wait was a blank tab for as long as campus wifi
+ * took — seconds, on Profile.
+ *
+ * Once fetched, lazy() is handed a thenable that answers at once. A plain
+ * promise answers a tick later, and React would show the blank fallback for
+ * a frame on a screen that is already here.
+ */
+function tabScreen(load) {
+  let mod = null;
+  let pending = null;
+  const fetchIt = () => (pending ??= load().then((m) => (mod = m)));
+  const Screen = lazy(() => (mod ? { then: (done) => done(mod) } : fetchIt()));
+  // A failed fetch is forgotten, so the tap itself tries again.
+  Screen.preload = () => fetchIt().catch(() => { pending = null; });
+  return Screen;
+}
+const Timetable = tabScreen(() => import("./screens/Timetable"));
+const Profile = tabScreen(() => import("./screens/Profile"));
 const EditAttendance = lazy(() => import("./screens/EditAttendance"));
 const TermCalendar = lazy(() => import("./screens/TermCalendar"));
 const Reschedule = lazy(() => import("./screens/Reschedule"));
 const Faculty = lazy(() => import("./screens/Faculty"));
 const ScheduleAdmin = lazy(() => import("./screens/ScheduleAdmin"));
 const PorDetails = lazy(() => import("./screens/PorDetails"));
-const Utils = lazy(() => import("./screens/Utils"));
+const Utils = tabScreen(() => import("./screens/Utils"));
 const MessMenu = lazy(() => import("./screens/MessMenu"));
 const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
 const SectionPicker = lazy(() => import("./screens/SectionPicker"));
@@ -786,6 +806,20 @@ export default function App() {
     () => occurrencesOn(viewClasses, viewTerm, isoDate(now), viewOverrides),
     [viewClasses, viewTerm, now, viewOverrides],
   );
+
+  // Waits for an idle moment after the tabs are on screen, so these fetches
+  // never compete with Today's own first paint.
+  const warmTabs = ready && !splashHeld && Boolean(session) && !porAccess;
+  useEffect(() => {
+    if (!warmTabs) return undefined;
+    const go = () => { Timetable.preload(); Utils.preload(); Profile.preload(); };
+    if (typeof requestIdleCallback !== "function") {
+      const id = setTimeout(go, 1000);
+      return () => clearTimeout(id);
+    }
+    const id = requestIdleCallback(go, { timeout: 3000 });
+    return () => cancelIdleCallback(id);
+  }, [warmTabs]);
 
   // ---- everything below this line may return early ----
   if (!ready || splashHeld) {
