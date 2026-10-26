@@ -257,11 +257,10 @@ export function DraftPanel({
               // from the word.
               ? <span>Opening Gmail<LoadingDots /></span>
               // A phone opens the Gmail app at the inbox, not the draft, so
-              // the label spells out the path from there instead of promising
-              // the draft itself. Broken by hand: left to wrap, it split the
-              // steps mid-path. A laptop's tab does open the draft.
+              // it promises only Gmail; the numbered steps above carry the
+              // way from there. A laptop's tab does open the draft.
               : platform !== "web"
-                ? <span>Click to open Gmail →<br />Drafts → Edit Draft → Send</span>
+                ? <>Open Gmail<ArrowIcon /></>
                 : <>Open Gmail drafts and send mail<ArrowIcon /></>}
           </a>
           {onDownload && (
