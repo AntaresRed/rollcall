@@ -13,6 +13,9 @@ Edge Functions, pg_cron). Deployed on Vercel.
 - `src/data/*.json` — **generated**. Never hand-edit; rebuild from the source
   workbook (see below).
 - `scripts/build_*.py` — one builder per dataset. `scripts/smoke.mjs` — test runner.
+  `build_startup_images.py` draws the iPhone launch images (`public/startup/`)
+  and writes their `<link>` block in `index.html`; add a row when Apple ships
+  a new screen size.
 - `supabase/schema.sql` + migration files; `supabase/functions/` holds
   `send-class-alerts` and `mark-attendance`.
 - `templates/` — blank, correctly shaped example of every input file, each with a

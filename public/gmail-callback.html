@@ -3,6 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Not drawn under Android's navigation bar in the installed app, to
+         match the app itself: see the note in index.html. -->
+    <script>
+      try {
+        if (/android/i.test(navigator.userAgent) &&
+            window.matchMedia("(display-mode: standalone)").matches) {
+          document.querySelector('meta[name="viewport"]')
+            .setAttribute("content", "width=device-width, initial-scale=1");
+        }
+      } catch (e) { /* the meta as written is a safe default */ }
+    </script>
     <meta name="referrer" content="no-referrer" />
     <meta name="theme-color" content="#171B21" />
     <title>IIMPresent</title>
