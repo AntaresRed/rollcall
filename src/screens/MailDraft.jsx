@@ -26,6 +26,8 @@ import {
 
 /** The least time each of the loader's steps is on show, in milliseconds. */
 const STEP_MS = 700;
+/** How long "Opening Gmail…" may stay up if the page never loses sight. */
+const OPENING_MS = 10_000;
 const pause = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 
 /** What to say when the trip to Google's permission page came back wrong. */
@@ -183,6 +185,29 @@ export function DraftPanel({
   saved = null,
 }) {
   const { platform, madeThis, made, busy, error, step, trip, outcome, makeDraft, label } = draft;
+
+  // "Opening Gmail…" from the tap until Gmail is in front. Gmail taking a
+  // second or two to come up left the button looking as if the tap hadn't
+  // registered, and it got tapped again. The page going out of sight — the
+  // app switch on a phone, the new tab on a laptop — is the one sign there is
+  // that Gmail opened; the timeout covers a tap that opened nothing.
+  const [opening, setOpening] = useState(false);
+  useEffect(() => {
+    if (!opening) return undefined;
+    const done = () => setOpening(false);
+    const hidden = () => { if (document.visibilityState === "hidden") done(); };
+    document.addEventListener("visibilitychange", hidden);
+    window.addEventListener("pagehide", done);
+    window.addEventListener("blur", done);
+    const timer = setTimeout(done, OPENING_MS);
+    return () => {
+      document.removeEventListener("visibilitychange", hidden);
+      window.removeEventListener("pagehide", done);
+      window.removeEventListener("blur", done);
+      clearTimeout(timer);
+    };
+  }, [opening]);
+
   return (
     <>
       {step && <Splash message={steps[step]} draw={!trip.pending} task />}
@@ -209,10 +234,13 @@ export function DraftPanel({
             className="btn block leave-open"
             href={gmailOpenHref({ platform, email: draft.email, messageId: madeThis.messageId })}
             {...(platform === "web" ? { target: "_blank", rel: "noopener" } : {})}
-            onClick={() => track(draft.event, "draft-open")}
+            aria-busy={opening}
+            onClick={() => {
+              setOpening(true);
+              track(draft.event, "draft-open");
+            }}
           >
-            Open Gmail drafts and send mail
-            <ArrowIcon />
+            {opening ? "Opening Gmail…" : <>Open Gmail drafts and send mail<ArrowIcon /></>}
           </a>
           {onDownload && (
             <button type="button" className="leave-retry leave-alt" onClick={onDownload}>
