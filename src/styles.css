@@ -4072,6 +4072,8 @@ button.por-card:hover { border-color: var(--signal); }
   margin-top: 12px;
 }
 .leave-acts .leave-send { margin-top: 0; padding-left: 10px; padding-right: 10px; }
+/* One button alone — a mail with no form to download — takes the full width. */
+.leave-acts.single { grid-template-columns: 1fr; }
 /* The ghost style is drawn for paper; on a disabled button it would fade to
    nothing, so it keeps its border. */
 .leave-acts .btn.ghost { border-color: var(--rule-strong); }
@@ -4537,4 +4539,21 @@ button.por-card:hover { border-color: var(--signal); }
   font-style: normal;
   font-size: 11.5px;
   color: var(--mute);
+}
+
+/* ---------- hall booking ---------- */
+
+.hall-nights {
+  margin: -4px 0 0;
+  font-size: 13px;
+  color: var(--slate);
+}
+.hall-nights strong { color: var(--ink); }
+/* The mail as Gmail will show it: the draft's own markup, set like the
+   plain preview beside it in the other two mails. */
+.hall-preview {
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }

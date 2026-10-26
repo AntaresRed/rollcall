@@ -38,6 +38,7 @@ import SectionPicker from "../src/screens/SectionPicker";
 import CataloguePreview from "../src/screens/CataloguePreview";
 import LeaveMail from "../src/screens/LeaveMail";
 import GuestEntry from "../src/screens/GuestEntry";
+import HallBooking from "../src/screens/HallBooking";
 import pgp1 from "../src/data/catalogue-pgp1.json";
 import pgp2 from "../src/data/catalogue.json";
 import SignIn from "../src/screens/SignIn";
@@ -340,6 +341,25 @@ const cases = [
   ["GuestEntry / Gmail draft, no ID yet", <GuestEntry key="gen" gmailDraft
       initial={{ name: "A Student", guestNames: "R Sarkar" }} />],
   // An older stored shape: fields missing entirely rather than blank.
+  ["HallBooking / blank", <HallBooking key="hb" email="abc2027@email.iimcal.ac.in"
+      accountName="A Student" onBack={noop} />],
+  // Gmail draft off: one tap to the mail, no form to save.
+  ["HallBooking / ready to send, draft open", <HallBooking key="hbr" onBack={noop} openDraft
+      gmailDraft={false} initial={{
+        hall: "MDC", guestName: "R Sarkar", relation: "Father",
+        checkIn: "2026-10-27", checkOut: "2026-10-29",
+        name: "A Student", reg: "0001/01", phone: "9876543210",
+      }} />],
+  ["HallBooking / Gmail draft, ID picked, draft open", <HallBooking key="hbt" onBack={noop} openDraft
+      initialIds={[{ type: "image/jpeg", bytes: new Uint8Array(1024) }]}
+      initial={{
+        hall: "Tata Hall", guestName: "R <b>Sarkar</b> & co", relation: "Father",
+        checkIn: "2026-10-27", checkOut: "2026-10-28",
+        name: "A Student", reg: "0001/01", phone: "9876543210",
+      }} />],
+  ["HallBooking / Gmail draft, no ID yet", <HallBooking key="hbn" gmailDraft
+      initial={{ hall: "MDC", name: "A Student" }} />],
+  ["HallBooking / partial form, draft open", <HallBooking key="hbp" openDraft initial={{ relation: "x" }} />],
   ["GuestEntry / partial form, draft open", <GuestEntry key="gep" openDraft initial={{ reason: "x" }} />],
   ["DayMessMenu", <DayMessMenu key="dm" onBack={noop} now={now} />],
   // Sunday is the rotation's edge case — the week must wrap, not truncate.

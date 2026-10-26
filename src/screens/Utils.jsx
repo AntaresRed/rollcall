@@ -69,6 +69,10 @@ const MAIL = [
     "A visitor to your hostel: the entry form signed and the guest's ID "
     + "attached, drafted in Gmail.",
     GuestIcon],
+  ["hall", "MDC & Tata Hall Booking",
+    "A guest house stay for a relative: the booking request drafted in "
+    + "Gmail, photo ID attached.",
+    HallIcon],
 ];
 
 const LISTS = { contacts: CONTACTS, mail: MAIL };
@@ -144,6 +148,20 @@ function MessIcon() {
       <path d="M2.5 20.5h15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
       <path d="M20.5 3.5v8.5m0 0v8.5m0-8.5c1.2-1 1.2-2.4 1.2-4V3.5"
             stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** A guest house: a roof over a bed. */
+function HallIcon() {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 10.5 12 4l9 6.5" stroke="currentColor" strokeWidth="1.7"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 9.2V20h14V9.2" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M8 17v-3.2h8V17M8 15.6h8" stroke="currentColor" strokeWidth="1.7"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="9.6" cy="12.1" r="0.9" fill="currentColor" />
     </svg>
   );
 }

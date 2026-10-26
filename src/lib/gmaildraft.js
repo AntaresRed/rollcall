@@ -31,7 +31,7 @@ const CALLBACK = "iimpresent.gmail.callback"; // raw fragment, left by the callb
 const DRAFT = "iimpresent.gmail.draft";      // { draftId, messageId, key } this session, per kind
 
 /**
- * Which mail a draft is for: "leave" or "guest". Each keeps its own draft,
+ * Which mail a draft is for: "leave", "guest" or "hall". Each keeps its own draft,
  * so updating one never replaces the other. The leave mail's keys are the
  * ones it had before there was a second kind, so a draft made just before
  * the change is still found.
@@ -45,6 +45,7 @@ const draftKey = (kind) => (kind === "leave" ? DRAFT : `${DRAFT}.${kind}`);
  */
 export const DRAFT_STEPS = { drafting: "Drafting your mail", attaching: "Attaching leave form" };
 export const GUEST_DRAFT_STEPS = { drafting: "Drafting your mail", attaching: "Attaching guest form" };
+export const HALL_DRAFT_STEPS = { drafting: "Drafting your mail", attaching: "Attaching photo ID" };
 
 /* ---------- storage, inside try: the accessor itself can throw ---------- */
 
@@ -220,15 +221,37 @@ function filenames(name) {
 
 /**
  * The whole message as MIME: text and the attachments — `file` for one,
- * `files` for several. Line endings are CRLF
+ * `files` for several. `html`, when given, goes beside the plain text as
+ * its formatted twin (multipart/alternative): Gmail shows the formatting,
+ * and any client that can't still has the words. Line endings are CRLF
  * throughout, and the boundary is checked against the content rather than
  * trusted to be unlikely.
  */
-export function mimeMessage({ to, cc, subject, body, file, files = file ? [file] : [] }) {
+export function mimeMessage({ to, cc, subject, body, html = null, file, files = file ? [file] : [] }) {
   let boundary = "leave-mail-boundary";
   const text = wrapped(utf8(String(body ?? "").replace(/\r?\n/g, "\r\n")));
+  const rich = html == null ? null : wrapped(utf8(String(html).replace(/\r?\n/g, "\r\n")));
   const parts = files.map((f) => ({ ...f, data: wrapped(f.bytes), ...filenames(f.name) }));
-  while (text.includes(boundary) || parts.some((f) => f.data.includes(boundary))) boundary += "-x";
+  const clash = (b) => text.includes(b) || (rich ?? "").includes(b) || parts.some((f) => f.data.includes(b));
+  while (clash(boundary) || clash(`${boundary}-alt`)) boundary += "-x";
+  const alt = `${boundary}-alt`;
+  const words = rich == null
+    ? ["Content-Type: text/plain; charset=UTF-8", "Content-Transfer-Encoding: base64", "", text]
+    : [
+      `Content-Type: multipart/alternative; boundary="${alt}"`,
+      "",
+      `--${alt}`,
+      "Content-Type: text/plain; charset=UTF-8",
+      "Content-Transfer-Encoding: base64",
+      "",
+      text,
+      `--${alt}`,
+      "Content-Type: text/html; charset=UTF-8",
+      "Content-Transfer-Encoding: base64",
+      "",
+      rich,
+      `--${alt}--`,
+    ];
   return [
     `To: ${to.join(", ")}`,
     ...(cc?.length ? [`Cc: ${cc.join(", ")}`] : []),
@@ -237,10 +260,7 @@ export function mimeMessage({ to, cc, subject, body, file, files = file ? [file]
     `Content-Type: multipart/mixed; boundary="${boundary}"`,
     "",
     `--${boundary}`,
-    "Content-Type: text/plain; charset=UTF-8",
-    "Content-Transfer-Encoding: base64",
-    "",
-    text,
+    ...words,
     // One part per attachment: the form, and for a guest the ID copy too.
     ...parts.flatMap((f) => [
       `--${boundary}`,

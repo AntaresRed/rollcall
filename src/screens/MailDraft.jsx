@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { isIOS, isAndroid } from "../lib/platform";
 import { track } from "../lib/track";
 import Splash from "./Splash";
@@ -6,9 +6,13 @@ import {
   askGoogle, takeRoundTrip, finishRoundTrip, heldToken, dropToken,
   mimeMessage, rawOf, saveDraft, lastDraft, gmailOpenHref,
 } from "../lib/gmaildraft";
+import {
+  ID_ACCEPT, MAX_PDF_BYTES, MAX_ID_COPIES, MAX_TOTAL_BYTES, prepareIdCopy, namedIdCopies,
+  idCopiesBytes, holdIdCopies, heldIdCopies, dropIdCopy,
+} from "../lib/idcopy";
 
 /**
- * What the leave mail and the guest entry mail share: the Gmail draft — the
+ * What the mail screens share: the Gmail draft — the
  * whole mail, addressed, written and with its attachments, put in the
  * student's own Drafts for them to send — and the small pieces of form both
  * screens are built from.
@@ -171,6 +175,8 @@ export function useGmailDraft({
  * student finds it in Drafts ("the leave mail"); `attached` says what went in.
  * `pdfFile` is set when the draft can be made; `canDownload` when the form
  * alone can be saved, which for the guest entry is before its ID is picked.
+ * A mail with no form of its own (the hall booking) passes no `onDownload`,
+ * and there is nothing to download.
  */
 export function DraftPanel({
   draft, steps, pdfFile, canDownload = Boolean(pdfFile), onDownload, mailName, attached, idle,
@@ -208,13 +214,15 @@ export function DraftPanel({
             Open Gmail drafts and send mail
             <ArrowIcon />
           </a>
-          <button type="button" className="leave-retry leave-alt" onClick={onDownload}>
-            Download the form as well
-          </button>
+          {onDownload && (
+            <button type="button" className="leave-retry leave-alt" onClick={onDownload}>
+              Download the form as well
+            </button>
+          )}
         </div>
       ) : (
         <>
-          <div className="leave-acts" ref={outcome}>
+          <div className={`leave-acts${onDownload ? "" : " single"}`} ref={outcome}>
             <button
               className="btn leave-send"
               disabled={!pdfFile || busy}
@@ -222,9 +230,11 @@ export function DraftPanel({
             >
               {label}
             </button>
-            <button className="btn ghost leave-send" disabled={!canDownload} onClick={onDownload}>
-              Download form
-            </button>
+            {onDownload && (
+              <button className="btn ghost leave-send" disabled={!canDownload} onClick={onDownload}>
+                Download form
+              </button>
+            )}
           </div>
           {busy ? null : made ? (
             <p className="leave-saved">
@@ -248,6 +258,151 @@ export function DraftPanel({
       )}
       {saved}
     </>
+  );
+}
+
+/* ---------- the guest's ID copies ----------
+   The one attachment the app can't make and must be given. Shared by every
+   mail that carries one (guest entry, hall booking); see src/lib/idcopy.js
+   for where the copies are and aren't kept. */
+
+/**
+ * The IDs picked on one screen.
+ *
+ *   kind     the draft kind, whose trip to Google they are held across
+ *   slot     where on the phone they are held, one per mail
+ *   enabled  whether drafts are on — only a draft's trip needs them held
+ *   initial  copies to start with, for the smoke test only
+ *
+ * As many as the student picks, up to MAX_ID_COPIES and a total Gmail will
+ * take in one draft. Named by their order ("Guest ID 1", "Guest ID 2") only
+ * when they go out.
+ */
+export function useIdCopies({ kind, slot, enabled, initial = null }) {
+  const [copies, setCopies] = useState(initial ?? []);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const picker = useRef(null);
+  const named = useMemo(() => namedIdCopies(copies), [copies]);
+
+  const keep = (next) => {
+    setCopies(next);
+    if (next.length) holdIdCopies(next, slot);
+    else dropIdCopy(slot);
+  };
+
+  const pick = async (e) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";               // so picking the same file again still fires
+    if (!files.length) return;
+    setBusy(true);
+    setError("");
+    const next = [...copies];
+    const errors = new Set();
+    for (const file of files) {
+      if (next.length >= MAX_ID_COPIES) { errors.add("count"); break; }
+      try {
+        const copy = await prepareIdCopy(file);
+        if (idCopiesBytes(next) + copy.bytes.length > MAX_TOTAL_BYTES) { errors.add("total"); continue; }
+        next.push(copy);
+      } catch (err) {
+        errors.add(err?.code ?? "unreadable");
+      }
+    }
+    keep(next);
+    setError([...errors].map((code) => ({
+      "too-big": `A PDF over ${Math.round(MAX_PDF_BYTES / 1048576)} MB was left out. A photo of the ID works too.`,
+      type: "Only photos and PDFs can be added.",
+      count: `Up to ${MAX_ID_COPIES} IDs can go in one mail.`,
+      total: `Together the IDs would be over ${Math.round(MAX_TOTAL_BYTES / 1048576)} MB, too large for one mail. Photos are smaller than PDFs.`,
+      unreadable: "An image couldn't be read. Try a JPEG or PNG photo, or a PDF.",
+    }[code])).join(" "));
+    setBusy(false);
+  };
+  const remove = (index) => {
+    setError("");
+    keep(copies.filter((_, i) => i !== index));
+  };
+
+  // Restoring from the very first render, not from the effect that does it.
+  // The draft owed after a trip looks at the form before any effect has
+  // put the IDs back, and a form with no ID yet looked like one that could
+  // never be drafted: it gave up, and the student had to tap Create Gmail
+  // draft a second time. The trip is the one the draft hook reads; it is
+  // held once per page, so asking here doesn't use it up.
+  const returning = () => {
+    const trip = takeRoundTrip(Date.now(), kind);
+    return trip.pending && !trip.error;
+  };
+  const [restoring, setRestoring] = useState(() => Boolean(enabled && !initial && returning()));
+
+  // Back from Google, the copies held for the trip are put back before the
+  // owed draft is made. Any other visit clears what an earlier one may have
+  // left, and leaving the screen clears it too — but only once the arrival
+  // has settled: React's development checks mount a screen twice, and a
+  // clear between the two would delete what the second mount puts back.
+  const settled = useRef(false);
+  useEffect(() => {
+    if (initial) return undefined;
+    let live = true;
+    if (enabled && returning()) {
+      setRestoring(true);
+      heldIdCopies(Date.now(), slot).then((got) => {
+        if (!live) return;
+        if (got.length) setCopies(got);
+        setRestoring(false);
+        settled.current = true;
+      });
+    } else {
+      dropIdCopy(slot);
+      settled.current = true;
+    }
+    return () => {
+      live = false;
+      if (settled.current) dropIdCopy(slot);
+    };
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** What the draft key needs: a different set is a different mail. */
+  const key = copies.map((c) => `${c.type}:${c.bytes.length}`).join(",") || "no-id";
+
+  return { copies, named, error, busy, restoring, picker, pick, remove, key };
+}
+
+/** The picker: what has been chosen, each removable, and a button to add
+ *  more. A button over a hidden input, so it looks like the rest of the
+ *  form; images and PDFs both, since an ID is as often a photo as a scan. */
+export function IdPicker({ ids, label = "Guest ID" }) {
+  const { named, copies, busy, restoring, error, picker, pick, remove } = ids;
+  return (
+    <div className="leave-field guest-id">
+      <span>{label}</span>
+      <input ref={picker} type="file" accept={ID_ACCEPT} multiple onChange={pick} hidden />
+      {named.map((c, i) => (
+        <div className="guest-id-chosen" key={`${i}-${c.bytes.length}`}>
+          <div className="guest-id-name">
+            {c.name}
+            <em>{Math.max(1, Math.round(c.bytes.length / 1024))} KB</em>
+          </div>
+          <button type="button" className="leave-copy" onClick={() => remove(i)}>
+            Remove
+          </button>
+        </div>
+      ))}
+      {copies.length < MAX_ID_COPIES && (
+        <button
+          type="button"
+          className="btn ghost guest-id-pick"
+          disabled={busy || restoring}
+          onClick={() => picker.current?.click()}
+        >
+          {busy || restoring ? "Preparing…" : copies.length ? "Add another ID" : "Choose photos or PDFs"}
+        </button>
+      )}
+      {error && <p className="leave-warn">{error}</p>}
+    </div>
   );
 }
 

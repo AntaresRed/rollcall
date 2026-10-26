@@ -40,6 +40,8 @@ import { GUEST_TO, GUEST_CC, GUEST_FIELDS, STUDENT_FIELDS, BLANK_GUEST, guestPro
   numbersLookComplete, guestSubject, guestBody, guestMailto, guestGmailHref, guestGmailAppHref,
   startingGuest } from "../src/lib/guestmail.js";
 import { mailtoHref, gmailComposeHref } from "../src/lib/mailhref.js";
+import { HALL_TO, HALL_FIELDS, BLANK_HALL, hallSubject, hallNights, hallDate, hallBody, hallHtml,
+  hallProblems, hallMailto, startingHall } from "../src/lib/hallmail.js";
 import { guestLayout, guestFilename } from "../src/lib/guestpdf.js";
 import { writePdf } from "../src/lib/formpdf.js";
 import { idCopyKind, idCopyName, namedIdCopies, idCopiesBytes, prepareIdCopy, MAX_PDF_BYTES,
@@ -3244,6 +3246,102 @@ console.log("\nGmail drafts for two mails");
   check("each mail keeps its own draft",
     lastDraft("leave").draftId === "L" && lastDraft("guest").draftId === "G" && lastDraft().draftId === "L");
   delete globalThis.sessionStorage;
+}
+
+console.log("\nMDC & Tata Hall booking mail");
+{
+  const h = {
+    hall: "MDC", guestName: "Rakesh Sarkar", relation: "Father",
+    checkIn: "2026-10-27", checkOut: "2026-10-29",
+    name: "Debjit Sarkar", reg: "MBA 0178/62", phone: "8585820504",
+    hostel: "LVH", hostelOther: "", room: "220",
+  };
+  check("addressed to admin_mdp@ and saopgp@, both in To",
+    HALL_TO.join() === "admin_mdp@iimcal.ac.in,saopgp@iimcal.ac.in");
+  check("the subject names the guest house",
+    hallSubject(h) === "Request for MDC Guest House Booking Approval"
+    && hallSubject({ ...h, hall: "Tata Hall" }) === "Request for Tata Hall Guest House Booking Approval");
+  check("nights are counted from the dates", hallNights("2026-10-27", "2026-10-29") === "2 nights"
+    && hallNights("2026-10-27", "2026-10-28") === "1 night" && hallNights("2026-12-30", "2027-01-02") === "3 nights");
+  check("no nights for a same-day or backwards stay",
+    hallNights("2026-10-27", "2026-10-27") === "" && hallNights("2026-10-29", "2026-10-27") === "");
+  check("dates written out", hallDate("2026-10-27") === "27 October 2026" && hallDate("2026-02-30") === "");
+
+  // The wording the student body gave, word for word, with the bold and
+  // italic marks taken off for the plain text.
+  check("the plain mail is the given wording", hallBody(h) === [
+    "Dear Offices,",
+    "",
+    "I am Debjit Sarkar (MBA 0178/62), writing to request permission for booking the MDC Guest House "
+      + "for my relative from 27 October 2026 to 29 October 2026. I have attached the photo ID for "
+      + "your verification and validation.",
+    "",
+    "Booking summary",
+    "The guest details-->",
+    "Name of guest: Rakesh Sarkar",
+    "Relation to the guest: Father",
+    "",
+    "Booking details-->",
+    "Stay being booked: 2 nights",
+    "Check in date: 27 October 2026",
+    "Check out date: 29 October 2026",
+    "",
+    "I would be grateful if you could kindly approve the booking request.",
+    "",
+    "Best Regards,",
+    "Debjit Sarkar",
+    "MBA 0178/62",
+    "8585820504",
+  ].join("\n"));
+  const html = hallHtml(h);
+  check("the formatted mail sets the summary heading in italics", html.includes("<i>Booking summary</i>"));
+  check("…and each label in bold, its answer plain",
+    html.includes("<b>Name of guest</b>: Rakesh Sarkar") && html.includes("<b>Stay being booked</b>: 2 nights")
+    && html.includes("<b>Check out date</b>: 29 October 2026"));
+  check("…one line per line", (html.match(/<br>/g) || []).length === hallBody(h).split("\n").length - 1);
+  check("whatever is typed is escaped, never markup",
+    hallHtml({ ...h, guestName: "<script>x</script> & <b>y</b>" }).includes(
+      "&lt;script&gt;x&lt;/script&gt; &amp; &lt;b&gt;y&lt;/b&gt;")
+    && !hallHtml({ ...h, guestName: "<script>" }).includes("<script>"));
+  check("the arrows stay arrows", html.includes("The guest details--&gt;"));
+
+  check("a complete form has no problems", hallProblems(h).length === 0);
+  const blank = hallProblems(BLANK_HALL);
+  check("a blank form lists every field",
+    blank.length === 1 && HALL_FIELDS.every((f) => blank[0].includes(f.label)));
+  check("the photo ID is asked for when the draft needs it",
+    hallProblems(h, { hasId: false }).some((p) => p.includes("Guest ID")));
+  check("checking out before checking in is refused",
+    hallProblems({ ...h, checkOut: "2026-10-26" }).some((p) => /after the check-in/.test(p)));
+  check("only the two guest houses count", hallProblems({ ...h, hall: "Taj" }).some((p) => p.includes("Guest house")));
+  check("a short contact number is refused",
+    hallProblems({ ...h, phone: "85858" }).some((p) => /contact number/.test(p)));
+
+  check("mail links carry the plain words, no marks",
+    decodeURIComponent(hallMailto(h)).includes("Name of guest: Rakesh Sarkar") && !hallMailto(h).includes("cc="));
+
+  const at = new Date(2026, 9, 27, 9, 0);
+  const start = startingHall(at, {
+    student: { name: "Debjit Sarkar", reg: "MBA 0178/62", phone: "8585820504", hostel: "LVH", room: "220" },
+  });
+  check("the student's details come back, the booking doesn't",
+    start.name === "Debjit Sarkar" && start.phone === "8585820504" && start.hall === ""
+    && start.guestName === "" && start.checkIn === "");
+  check("the hostel and room ride along unseen, so saving here can't blank them",
+    start.hostel === "LVH" && start.room === "220");
+  check("today's half-written booking comes back, yesterday's doesn't",
+    startingHall(at, { trip: { savedOn: "2026-10-27", guestName: "R" } }).guestName === "R"
+    && startingHall(at, { trip: { savedOn: "2026-10-26", guestName: "R" } }).guestName === "");
+
+  // The formatted mail, as it goes to Gmail: plain and formatted twins.
+  const mime = mimeMessage({ to: ["a@x.in"], subject: "S", body: "plain", html: "<b>rich</b>",
+    files: [{ name: "Guest ID.jpg", type: "image/jpeg", bytes: new Uint8Array([1]) }] });
+  check("a formatted mail goes as plain and HTML side by side",
+    mime.includes("Content-Type: multipart/alternative;") && mime.includes("Content-Type: text/plain; charset=UTF-8")
+    && mime.includes("Content-Type: text/html; charset=UTF-8"));
+  check("…with the ID still attached", mime.includes('filename="Guest ID.jpg"'));
+  check("a mail without HTML is as it was", !mimeMessage({ to: ["a@x.in"], subject: "S", body: "x" })
+    .includes("multipart/alternative"));
 }
 
 Promise.all(later).catch((err) => {

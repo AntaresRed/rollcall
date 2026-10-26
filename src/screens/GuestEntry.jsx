@@ -1,18 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   GUEST_TO, GUEST_CC, GUEST_HOSTELS, BLANK_GUEST, loadGuest, saveGuest,
   guestProblems, guestSubject, guestBody, guestMailto, guestGmailHref, guestGmailAppHref,
 } from "../lib/guestmail";
 import { makeGuestPdf, guestLayout } from "../lib/guestpdf";
-import {
-  ID_ACCEPT, MAX_PDF_BYTES, MAX_ID_COPIES, MAX_TOTAL_BYTES, prepareIdCopy, namedIdCopies,
-  idCopiesBytes, holdIdCopies, heldIdCopies, dropIdCopy,
-} from "../lib/idcopy";
 import { isIOS, isAndroid, isStandalone } from "../lib/platform";
 import { deliverFile } from "../lib/deliver";
 import { track } from "../lib/track";
-import { GUEST_DRAFT_STEPS, GOOGLE_CLIENT_ID, takeRoundTrip } from "../lib/gmaildraft";
-import { useGmailDraft, DraftPanel, Field, Line, CopyButton, copyText } from "./MailDraft";
+import { GUEST_DRAFT_STEPS, GOOGLE_CLIENT_ID } from "../lib/gmaildraft";
+import {
+  useGmailDraft, useIdCopies, DraftPanel, IdPicker, Field, Line, CopyButton, copyText,
+} from "./MailDraft";
 
 /**
  * The guest entry mail — a visitor to a student hostel, reported to the
@@ -43,60 +41,15 @@ export default function GuestEntry({
     setForm((f) => ({ ...f, [key]: value, ...(value !== "Other" ? { [otherKey]: "" } : {}) }));
 
   /* ---------- the ID copies ---------- */
-  // One per guest, or both sides of one card: as many as the student picks,
-  // up to MAX_ID_COPIES and a total Gmail will take in one draft. Named by
-  // their order ("Guest ID 1", "Guest ID 2") only when they go out.
-  const [idCopies, setIdCopies] = useState(initialIds ?? []);
-  const [idError, setIdError] = useState("");
-  const [idBusy, setIdBusy] = useState(false);
-  const picker = useRef(null);
-  const namedIds = useMemo(() => namedIdCopies(idCopies), [idCopies]);
-
-  const keepIds = (next) => {
-    setIdCopies(next);
-    if (next.length) holdIdCopies(next);
-    else dropIdCopy();
-  };
-
-  const pickIds = async (e) => {
-    const files = Array.from(e.target.files ?? []);
-    e.target.value = "";               // so picking the same file again still fires
-    if (!files.length) return;
-    setIdBusy(true);
-    setIdError("");
-    const next = [...idCopies];
-    const errors = new Set();
-    for (const file of files) {
-      if (next.length >= MAX_ID_COPIES) { errors.add("count"); break; }
-      try {
-        const copy = await prepareIdCopy(file);
-        if (idCopiesBytes(next) + copy.bytes.length > MAX_TOTAL_BYTES) { errors.add("total"); continue; }
-        next.push(copy);
-      } catch (err) {
-        errors.add(err?.code ?? "unreadable");
-      }
-    }
-    keepIds(next);
-    setIdError([...errors].map((code) => ({
-      "too-big": `A PDF over ${Math.round(MAX_PDF_BYTES / 1048576)} MB was left out. A photo of the ID works too.`,
-      type: "Only photos and PDFs can be added.",
-      count: `Up to ${MAX_ID_COPIES} IDs can go in one mail.`,
-      total: `Together the IDs would be over ${Math.round(MAX_TOTAL_BYTES / 1048576)} MB, too large for one mail. Photos are smaller than PDFs.`,
-      unreadable: "An image couldn't be read. Try a JPEG or PNG photo, or a PDF.",
-    }[code])).join(" "));
-    setIdBusy(false);
-  };
-  const removeId = (index) => {
-    setIdError("");
-    keepIds(idCopies.filter((_, i) => i !== index));
-  };
+  // Shared with the hall booking: see useIdCopies in MailDraft.jsx.
+  const ids = useIdCopies({ kind: "guest", slot: "guest-id", enabled: gmailDraft, initial: initialIds });
 
   /* ---------- checks ---------- */
   // The form's own answers decide whether the PDF can be made; the ID copy
   // only whether the draft can. Picking the ID last doesn't wait on the PDF.
   const formProblems = useMemo(() => guestProblems(form), [form]);
   const formReady = formProblems.length === 0;
-  const needsId = gmailDraft && idCopies.length === 0;
+  const needsId = gmailDraft && ids.copies.length === 0;
   const problems = useMemo(
     () => (needsId ? guestProblems(form, { hasId: false }) : formProblems),
     [form, formProblems, needsId],
@@ -136,18 +89,7 @@ export default function GuestEntry({
   /* ---------- the Gmail draft ---------- */
   // The draft's key covers the ID copies too: a different set is a
   // different mail, and Update Gmail draft should say so.
-  const draftKey = `${formKey}|${idCopies.map((c) => `${c.type}:${c.bytes.length}`).join(",") || "no-id"}`;
-  // Restoring from the very first render, not from the effect that does it.
-  // The draft owed after a trip looks first — its effect runs before the
-  // restore's — and a form with no ID yet looked like one that could never
-  // be drafted: it gave up, and the student had to tap Create Gmail draft a
-  // second time. The trip is the same one the draft hook reads; it is held
-  // once per page, so asking here doesn't use it up.
-  const [restoring, setRestoring] = useState(() => {
-    if (!gmailDraft || initialIds) return false;
-    const trip = takeRoundTrip(Date.now(), "guest");
-    return trip.pending && !trip.error;
-  });
+  const draftKey = `${formKey}|${ids.key}`;
   const draft = useGmailDraft({
     kind: "guest",
     event: "guest_entry",
@@ -159,7 +101,7 @@ export default function GuestEntry({
     pdfFile: ready ? pdfFile : null,
     pdfFailed,
     formKey: draftKey,
-    hold: restoring,
+    hold: ids.restoring,
     compose: async () => ({
       to: GUEST_TO,
       cc: GUEST_CC,
@@ -167,41 +109,10 @@ export default function GuestEntry({
       body,
       files: [
         { name: pdfFile.name, type: pdfFile.type, bytes: new Uint8Array(await pdfFile.arrayBuffer()) },
-        ...namedIds,
+        ...ids.named,
       ],
     }),
   });
-
-  // Back from Google, the ID copies held for the trip are put back on the form
-  // before the owed draft is made. Any other visit clears what an earlier
-  // one may have left, and leaving the screen clears it too.
-  //
-  // Leaving clears it only once the arrival has settled: React's development
-  // checks mount a screen twice, and a clear between the two would delete
-  // the copy the second mount is about to put back.
-  const settled = useRef(false);
-  useEffect(() => {
-    if (initialIds) return undefined;
-    let live = true;
-    if (draft.trip.pending && !draft.trip.error) {
-      setRestoring(true);
-      heldIdCopies().then((got) => {
-        if (!live) return;
-        if (got.length) setIdCopies(got);
-        setRestoring(false);
-        settled.current = true;
-      });
-    } else {
-      dropIdCopy();
-      settled.current = true;
-    }
-    return () => {
-      live = false;
-      if (settled.current) dropIdCopy();
-    };
-    // Once, on arrival.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   /* ---------- the usual way, when there is no draft ---------- */
   // As the leave mail does it: save the form, then open the mail; the
@@ -317,43 +228,7 @@ export default function GuestEntry({
           />
         </Field>
 
-        {/* A button over a hidden input, so the picker looks like the rest
-            of the form. Images and PDFs both: an ID is as often a photo as
-            a scan. */}
-        <div className="leave-field guest-id">
-          <span>Guest ID</span>
-          <input
-            ref={picker}
-            type="file"
-            accept={ID_ACCEPT}
-            multiple
-            onChange={pickIds}
-            hidden
-          />
-          {namedIds.map((c, i) => (
-            <div className="guest-id-chosen" key={`${i}-${c.bytes.length}`}>
-              <div className="guest-id-name">
-                {c.name}
-                <em>{Math.max(1, Math.round(c.bytes.length / 1024))} KB</em>
-              </div>
-              <button type="button" className="leave-copy" onClick={() => removeId(i)}>
-                Remove
-              </button>
-            </div>
-          ))}
-          {idCopies.length < MAX_ID_COPIES && (
-            <button
-              type="button"
-              className="btn ghost guest-id-pick"
-              disabled={idBusy || restoring}
-              onClick={() => picker.current?.click()}
-            >
-              {idBusy || restoring ? "Preparing…"
-                : idCopies.length ? "Add another ID" : "Choose photos or PDFs"}
-            </button>
-          )}
-          {idError && <p className="leave-warn">{idError}</p>}
-        </div>
+        <IdPicker ids={ids} />
 
         <p className="leave-sub">Your details</p>
         <Field label="Name of student">
@@ -428,8 +303,8 @@ export default function GuestEntry({
           canDownload={Boolean(pdfFile)}
           onDownload={saveOnly}
           mailName="the guest entry mail"
-          attached={`the form and the ${idCopies.length > 1 ? "ID copies" : "ID copy"} attached`}
-          idle={`The mail goes into your Gmail Drafts with the form and the ${idCopies.length > 1 ? "ID copies" : "ID copy"} attached. You press Send there. The first time, Google asks you to allow this.`}
+          attached={`the form and the ${ids.copies.length > 1 ? "ID copies" : "ID copy"} attached`}
+          idle={`The mail goes into your Gmail Drafts with the form and the ${ids.copies.length > 1 ? "ID copies" : "ID copy"} attached. You press Send there. The first time, Google asks you to allow this.`}
           saved={savedThis && (
             <p className="leave-saved">
               Guest form saved as <strong>{pdfFile.name}</strong>

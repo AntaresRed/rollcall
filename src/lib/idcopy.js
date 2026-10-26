@@ -119,7 +119,10 @@ export async function prepareIdCopy(file) {
 
 const DB = "iimpresent-mail";
 const STORE = "files";
-const KEY = "guest-id";
+/** Each mail holds its own copies, so a trip from one can't hand another
+ *  mail's IDs back. The guest entry's slot is its name from before there was
+ *  a second mail with IDs. */
+const GUEST_SLOT = "guest-id";
 /** A copy older than this was not left for a trip still under way. */
 const MAX_AGE_MS = 30 * 60_000;
 
@@ -153,10 +156,10 @@ async function run(mode, act) {
 }
 
 /** Keep the copies on the phone, in case the page is left for Google. */
-export async function holdIdCopies(copies) {
+export async function holdIdCopies(copies, slot = GUEST_SLOT) {
   try {
     const list = (copies ?? []).map((c) => ({ type: c.type, bytes: c.bytes }));
-    await run("readwrite", (s) => s.put({ copies: list, at: Date.now() }, KEY));
+    await run("readwrite", (s) => s.put({ copies: list, at: Date.now() }, slot));
   } catch {
     /* private mode: a trip to Google will need the IDs picked again */
   }
@@ -167,12 +170,12 @@ export async function holdIdCopies(copies) {
  * held by the version before there could be several — one file, no list — is
  * read as a list of one.
  */
-export async function heldIdCopies(now = Date.now()) {
+export async function heldIdCopies(now = Date.now(), slot = GUEST_SLOT) {
   try {
-    const got = await run("readonly", (s) => s.get(KEY));
+    const got = await run("readonly", (s) => s.get(slot));
     const list = Array.isArray(got?.copies) ? got.copies : got?.bytes ? [got] : [];
     if (!list.length || now - (got.at ?? 0) > MAX_AGE_MS) {
-      await dropIdCopy();
+      await dropIdCopy(slot);
       return [];
     }
     return list
@@ -184,9 +187,9 @@ export async function heldIdCopies(now = Date.now()) {
 }
 
 /** Delete the held copies. */
-export async function dropIdCopy() {
+export async function dropIdCopy(slot = GUEST_SLOT) {
   try {
-    await run("readwrite", (s) => s.delete(KEY));
+    await run("readwrite", (s) => s.delete(slot));
   } catch {
     /* nothing held, or no storage to hold it in */
   }

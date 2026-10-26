@@ -43,6 +43,7 @@ const AttendanceBreakdown = lazy(() => import("./screens/AttendanceBreakdown"));
 const SectionPicker = lazy(() => import("./screens/SectionPicker"));
 const LeaveMail = lazy(() => import("./screens/LeaveMail"));
 const GuestEntry = lazy(() => import("./screens/GuestEntry"));
+const HallBooking = lazy(() => import("./screens/HallBooking"));
 const JMaps = lazy(() => import("./screens/JMaps"));
 const OltAttendance = lazy(() => import("./screens/OltAttendance"));
 const PorDashboard = lazy(() => import("./screens/PorDashboard"));
@@ -65,6 +66,7 @@ const SUB_SCREEN_BACK = {
   // Behind the mail door, like the contacts above.
   leave: "Back to mail services",
   guest: "Back to mail services",
+  hall: "Back to mail services",
   maps: "Back to utils",
   admin: "Back to profile",
   pordash: "Back to profile",
@@ -80,6 +82,7 @@ const SUB_SCREEN_PARENT = {
   por: "contacts",
   leave: "mail",
   guest: "mail",
+  hall: "mail",
 };
 
 /**
@@ -88,7 +91,17 @@ const SUB_SCREEN_PARENT = {
  * when the leave mail was the only one — and the trip itself remembers
  * which screen asked.
  */
-const draftScreen = () => (pendingKind() === "guest" ? "guest" : "leave");
+const draftScreen = () => {
+  const kind = pendingKind();
+  return kind === "guest" || kind === "hall" ? kind : "leave";
+};
+
+/** Each mail screen's code, fetched alongside boot on a return from Google. */
+const MAIL_SCREENS = {
+  leave: () => import("./screens/LeaveMail"),
+  guest: () => import("./screens/GuestEntry"),
+  hall: () => import("./screens/HallBooking"),
+};
 
 const TABS = [
   ["today", "Today's classes", TodayIcon],
@@ -492,8 +505,7 @@ export default function App() {
   // loader runs straight on instead of pausing on a blank page between the two.
   useEffect(() => {
     if (!returnScreen) return;
-    (returnScreen === "guest" ? import("./screens/GuestEntry") : import("./screens/LeaveMail"))
-      .catch(() => {});
+    (MAIL_SCREENS[returnScreen] ?? MAIL_SCREENS.leave)().catch(() => {});
   }, [returnScreen]);
   useEffect(() => {
     if (!ready) return;
@@ -910,7 +922,7 @@ export default function App() {
         {/* The leave mail's loader stands in for it while its code arrives,
             so a return for a draft never shows a blank page mid-loader. */}
         <Suspense
-          fallback={returnForDraft && (subScreen === "leave" || subScreen === "guest")
+          fallback={returnForDraft && Boolean(MAIL_SCREENS[subScreen])
             ? <Splash message={DRAFT_STEPS.drafting} draw={false} task />
             : <div className="screen-loading" aria-hidden="true" />}
         >
@@ -999,6 +1011,13 @@ export default function App() {
         )}
         {tab === "utils" && subScreen === "leave" && (
           <LeaveMail
+            email={session.user?.email ?? ""}
+            accountName={session.user?.user_metadata?.full_name ?? session.user?.user_metadata?.name ?? ""}
+            onBack={() => setSubScreen("mail")}
+          />
+        )}
+        {tab === "utils" && subScreen === "hall" && (
+          <HallBooking
             email={session.user?.email ?? ""}
             accountName={session.user?.user_metadata?.full_name ?? session.user?.user_metadata?.name ?? ""}
             onBack={() => setSubScreen("mail")}
