@@ -62,7 +62,10 @@ export default function Stats({ classes, attendance, term = null, now, overrides
               <div>
                 <div className="budget-name">{r.subject}</div>
                 <div className="budget-sub">
-                  {instructorLine ?? `${r.credits} cr · ${r.total_classes} classes · ${r.min_pct}% needed`}
+                  {/* `total`, as courseStats names it (from skipBudget) —
+                      the row has no `total_classes`, which printed
+                      "undefined classes". */}
+                  {instructorLine ?? `${r.credits} cr · ${r.total} classes · ${r.min_pct}% needed`}
                 </div>
                 {r.venue && (
                   <div className="budget-venue"><VenueChip venue={r.venue} /></div>
