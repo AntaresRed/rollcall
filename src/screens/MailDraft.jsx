@@ -227,17 +227,22 @@ export function DraftPanel({
           </p>
           {/* On a phone the app opens a draft read-only: the body and Send
               appear only after "Edit draft", a step students missed when it
-              was half a sentence. Numbered, with that step marked. */}
+              was half a sentence. Numbered, in a card of their own, with that
+              step marked. They arrive one by one and the marked step pulses,
+              so the eye lands on them before the button. */}
           {platform !== "web" && (
-            <ol className="leave-steps">
-              <li>In Gmail, open <b>Drafts</b></li>
-              <li>Tap {mailName}</li>
-              <li className="key">
-                Tap <b>Edit draft</b>
-                <span>The mail and its Send button only show after this.</span>
-              </li>
-              <li>Check it and tap <b>Send</b></li>
-            </ol>
+            <div className="leave-howto">
+              <p className="leave-howto-head">Send it from the Gmail app</p>
+              <ol className="leave-steps">
+                <li>In Gmail, open <b>Drafts</b></li>
+                <li>Tap {mailName}</li>
+                <li className="key">
+                  Tap <b>Edit draft</b>
+                  <span>The mail and its Send button only show after this.</span>
+                </li>
+                <li>Check it and tap <b>Send</b></li>
+              </ol>
+            </div>
           )}
           {/* A link, so the app opens from the tap itself — a phone opens
               another app only straight from a tap. On a laptop it goes
