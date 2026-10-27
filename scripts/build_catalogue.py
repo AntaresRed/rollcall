@@ -543,6 +543,34 @@ def apply_overrides(catalogue, overrides_path):
             applied.append(f"{sp['code']}: {ov.get('note', 'added')}")
             continue
 
+        if op == "break":
+            # A calendar break, not a course, so it is matched by label. The
+            # printed dates are checked like a venue's: a reissued Calendar
+            # sheet that says something else is a question, not a thing to
+            # overwrite.
+            want, had = ov["to"], ov["from"]
+            brk = next((b for b in catalogue["calendar"]["breaks"]
+                        if b["label"] == ov["label"]), None)
+            if brk is None:
+                raise SystemExit(f"break override names {ov['label']!r}, "
+                                 "which the calendar has no row for")
+            now = {"from": brk["from"], "to": brk["to"]}
+            if now == want:
+                applied.append(f"break {ov['label']}: already applied")
+                continue
+            if now != had:
+                raise SystemExit(
+                    f"break override for {ov['label']!r} expects the sheet to say "
+                    f"{had['from']}..{had['to']}, but it says {now['from']}..{now['to']}. "
+                    "The calendar may have been reissued — recheck it.")
+            brk.update(want)
+            if ov.get("calendar_note"):
+                brk["note"] = ov["calendar_note"]
+            catalogue["calendar"]["breaks"].sort(key=lambda b: b["from"])
+            applied.append(f"break {ov['label']}: {ov.get('note', 'dates')} "
+                           f"({had['from']}..{had['to']} -> {want['from']}..{want['to']})")
+            continue
+
         course = resolve(ov)
         if not course:
             raise SystemExit(

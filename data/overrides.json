@@ -4,8 +4,9 @@
     "after publishing and never reissues the file, so corrections live here and",
     "are reapplied on every rebuild.",
     "",
-    "Ops: move / add / remove / credits / venue / set_dates / add_course.",
-    "Target a course by \"name\" (durable) rather than \"code\" (derived).",
+    "Ops: move / add / remove / credits / venue / set_dates / add_course / break.",
+    "Target a course by \"name\" (durable) rather than \"code\" (derived); a break",
+    "by its \"label\".",
     "Everything is declarative and idempotent: running the build twice is a no-op,",
     "and an override that no longer matches the sheet fails loudly."
   ],
@@ -131,6 +132,21 @@
       },
       "to": {
         "venue": "Amphi (West-100)"
+      }
+    },
+    {
+      "op": "break",
+      "label": "Summer placement",
+      "note": "SIP ran 10-16 Oct; the Thursday and Friday classes on 08 and 09 Oct were held",
+      "since": "2026-10-27",
+      "calendar_note": "October 10 to October 16, 2026 (No MBA classes) — shortened from the printed October 8 to October 16",
+      "from": {
+        "from": "2026-10-08",
+        "to": "2026-10-16"
+      },
+      "to": {
+        "from": "2026-10-10",
+        "to": "2026-10-16"
       }
     }
   ]
