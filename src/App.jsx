@@ -920,9 +920,6 @@ export default function App() {
             onExit={exitViewAs}
           />
         )}
-        {!viewAs && isAdmin && cohorts.length > 1 && (
-          <ViewAsPicker mine={cohort} cohorts={cohorts} onPick={enterViewAs} />
-        )}
         {/* Only one banner may say "add this to your home screen". The alerts
             banner already does when that is why alerts are off, and two of
             them stacked reads as a bug rather than as emphasis. */}
@@ -1101,6 +1098,12 @@ export default function App() {
             onSignOut={handleSignOut}
             onScheduleAdmin={isAdmin && !readOnly ? () => openSub("admin") : null}
             onPorDashboard={isAdmin && !readOnly ? () => openSub("pordash") : null}
+            // The other years' schedules, for an admin to look at the app as
+            // one. On Profile with the other admin tools rather than across
+            // the top of every tab; empty while already viewing as one, when
+            // the bar's "Back to mine" is the way out.
+            viewAsCohorts={isAdmin && !viewAs ? cohorts.filter((c) => c.cohort_year !== cohort) : []}
+            onViewAs={enterViewAs}
             onOfficialAttendance={isTester && !readOnly ? () => openSub("olt") : null}
             oltPassword={isTester && !readOnly}
           />
@@ -1136,26 +1139,6 @@ export default function App() {
 
       {toast && <div className="toast" role="status">{toast}</div>}
     </>
-  );
-}
-
-/**
- * Offered to admins only, and only when there is more than one live schedule.
- * Switching is for looking at another year's app, which is worth nothing if
- * there is only one year to look at.
- */
-function ViewAsPicker({ mine, cohorts, onPick }) {
-  const others = cohorts.filter((c) => c.cohort_year !== mine);
-  if (!others.length) return null;
-  return (
-    <div className="viewas-offer">
-      <span>Admin — see the app as another year:</span>
-      {others.map((c) => (
-        <button key={c.id} className="mark" onClick={() => onPick(c)}>
-          Class of {c.cohort_year}
-        </button>
-      ))}
-    </div>
   );
 }
 

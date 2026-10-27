@@ -25,6 +25,8 @@ export default function Profile({
   // same count the breakdown shows.
   term = null, now, overrides = [],
   onScheduleAdmin, onOfficialAttendance, onPorDashboard,
+  // Admins only: other years' published schedules, to see the app as one.
+  viewAsCohorts = [], onViewAs = null,
   // Testers only: the remembered OLT password, to change or delete.
   // `oltInitial` stands in for its load in the smoke test.
   oltPassword = false, oltInitial,
@@ -180,6 +182,18 @@ export default function Profile({
           <button className="btn ghost block" onClick={onPorDashboard}>
             POR dashboard
           </button>
+        )}
+        {/* Here, with the other admin tools. It used to sit across the top
+            of every tab, where only one person ever needed it. */}
+        {onViewAs && viewAsCohorts.length > 0 && (
+          <div className="viewas-offer">
+            <span>See the app as another year</span>
+            {viewAsCohorts.map((c) => (
+              <button key={c.id} className="mark" onClick={() => onViewAs(c)}>
+                Class of {c.cohort_year}
+              </button>
+            ))}
+          </div>
         )}
         {onChangeCourses && (
           <button className="btn ghost block" onClick={onChangeCourses}>

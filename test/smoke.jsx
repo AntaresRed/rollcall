@@ -182,7 +182,8 @@ const cases = [
       }))} />],
   ["Profile / admin", <Profile key="pa" session={{ user: { email: "a@email.iimcal.ac.in", user_metadata: {} } }}
       classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop}
-      onScheduleAdmin={noop} onPorDashboard={noop} />],
+      onScheduleAdmin={noop} onPorDashboard={noop}
+      viewAsCohorts={[{ id: "cat-2028", cohort_year: 2028, label: "PGP1" }]} onViewAs={noop} />],
   ["Profile", <Profile key="p" session={{ user: {
       email: "anuja2027@email.iimcal.ac.in",
       user_metadata: { full_name: "Anuja Sharma", avatar_url: "https://example.test/a.jpg" },

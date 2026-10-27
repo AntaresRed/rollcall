@@ -2138,12 +2138,14 @@ details[open] > .ab-summary .ab-more svg { transform: rotate(180deg); }
 /* ---------- admin: the whole app as another year ---------- */
 
 /* The offer, shown only to an admin and only when a second schedule exists. */
+/* Profile's admin-only "see the app as another year", among the admin
+   buttons; dashed so it reads as a tool, not something of the student's. */
 .viewas-offer {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 14px 0 0;
+  margin: 0;
   padding: 10px 12px;
   border: 1px dashed var(--rule-strong);
   border-radius: var(--r);
