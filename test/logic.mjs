@@ -1899,9 +1899,14 @@ console.log("POR dashboard: day mess menus");
   check("and a cleaned menu passes", validateDayMess(messy, "zz").ok);
 
   // What students are shown once something is live.
-  const nh = { ...good, id: "nh", name: "NH", days: week("Live dosa") };
+  const nh = { ...good, id: "nh", name: "NH", days: week("Live dosa"),
+    timings: { Breakfast: "7 AM to 9 AM" } };
   setLiveDatasets([
     { kind: "day-mess", scope: "nh", payload: nh },
+    // Published with no timings at all: the dashboard still wins, and the
+    // bundled times are not merged back in underneath (the user's rule,
+    // 2026-10-27 — whatever the mess rep publishes is what is shown).
+    { kind: "day-mess", scope: "lvh", payload: { ...nh, id: "lvh", name: "LVH", timings: {} } },
     // Says it is OH's but fails the checks: the bundle must win.
     { kind: "day-mess", scope: "oh", payload: { ...nh, id: "oh", days: [] } },
     // A kind this app does not read yet is ignored, not half-shown.
@@ -1912,6 +1917,11 @@ console.log("POR dashboard: day mess menus");
   const shown = hostels();
   check("a published menu replaces the bundled one",
     shown.find(h => h.id === "nh").days[0].meals.Breakfast === "Live dosa");
+  check("published timings replace the bundled ones",
+    JSON.stringify(shown.find(h => h.id === "nh").timings) === '{"Breakfast":"7 AM to 9 AM"}');
+  check("even when the published menu has none",
+    Object.keys(shown.find(h => h.id === "lvh").timings).length === 0
+    && Object.keys(bundledHostel("lvh").timings).length > 0);
   check("a hostel nobody published stays as built",
     shown.find(h => h.id === "wh") === bundledHostel("wh"));
   check("a published menu that fails the checks falls back to the bundle",

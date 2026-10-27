@@ -150,6 +150,9 @@ export default function NightMessMenu() {
   }
 
   const firstNumber = canteen?.phone?.split("/")[0].replace(/\D/g, "") ?? "";
+  const numbers = String(canteen?.phone ?? "").split("/")
+    .map((p) => p.replace(/\D/g, ""))
+    .filter((d) => /^[6-9]\d{9}$/.test(d));
   // What the basket writes out, and what will actually be sent — the same
   // until the student edits the final message.
   const written = orderText(canteen, bill.items, {
@@ -184,9 +187,14 @@ export default function NightMessMenu() {
         <div className="canteen-head">
           <div className="canteen-name">{canteen.canteen}</div>
           <div className="canteen-meta">
-            {canteen.phone && (
-              <a className="canteen-call" href={telHref(firstNumber)}>{canteen.phone}</a>
-            )}
+            {/* One link per number, first then second as the card lists them:
+                a single link over "a / b" rang the first whichever half was
+                tapped. The order still goes to the first. */}
+            {numbers.length > 0
+              ? numbers.map((n) => (
+                <a className="canteen-call" key={n} href={telHref(n)}>{prettyPhone(n)}</a>
+              ))
+              : canteen.phone && <span>{canteen.phone}</span>}
             {canteen.hours && <span>{canteen.hours}</span>}
             {canteen.room_service && <span>Room service ₹{canteen.room_service}</span>}
           </div>
