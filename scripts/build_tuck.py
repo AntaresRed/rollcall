@@ -494,7 +494,10 @@ def build(path, qr_dir="public/tuck", pages_dir="public/menu/tuck"):
         meta = info.get(tag)
         if meta is None:
             die(f"'{name}' has no matching row in the Info sheet (looked for {tag})")
-        if not re.fullmatch(r"[6-9]\d{9}", re.sub(r"\D", "", meta["phone"] or "")):
+        # The first of "a / b" is the one called and sent orders — the same
+        # rule as shopPhone() in src/lib/tuck.js.
+        first = (meta["phone"] or "").split("/")[0]
+        if not re.fullmatch(r"[6-9]\d{9}", re.sub(r"\D", "", first)):
             # Not fatal — a counter you walk to is still worth listing — but
             # said out loud, because the screen quietly drops the call button.
             warnings.append(f"{tag}: no usable phone number, so no call button")

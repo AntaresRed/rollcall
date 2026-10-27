@@ -22,7 +22,7 @@ import { insertLine, messageOf, edited, withAdded, isBehind, UNTOUCHED } from ".
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
 import { UPI_APPS, appById, forApp, logoFor } from "../src/lib/upiapps.js";
-import { SHOPS, shopById, filterItems, hasDiet, shopPhone, priceOptions,
+import { SHOPS, shopById, filterItems, hasDiet, shopPhone, shopPhones, priceOptions,
   billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
   shopQr, payNote, LOCATIONS, deliveryFor, chargesByPlace,
   filterGrouped, hasCategories } from "../src/lib/tuck.js";
@@ -56,6 +56,9 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
+import nightJson from "../src/data/night-menu.json";
+import tuckJson from "../src/data/tuck.json";
+import { MEDICAL, PLACES, HOSTELS as CAMPUS_HOSTELS, hostelTab, dayName } from "../src/lib/campus.js";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
 
 let fail = 0;
@@ -1150,6 +1153,13 @@ console.log("tuck shops");
   const tagore = SHOPS.find((s) => s.id === "tagore");
   check("Mohan Da is there", Boolean(mohan) && mohan.name === "Mohan Da");
   check("and can be called", shopPhone(mohan) === "8100294443");
+  // Literal, not Mohan Da's row: the header lists every number, the order
+  // still goes to the first.
+  const two = { phone: "8100294443 / 8240698156" };
+  check("a second number is listed", shopPhones(two).join() === "8100294443,8240698156");
+  check("but orders go to the first", shopPhone(two) === "8100294443");
+  check("a half that isn't a mobile is dropped",
+    shopPhones({ phone: "8100294443 / 2240" }).join() === "8100294443");
 
   check("Tagore can be called too", shopPhone(tagore) === "7602416780");
   // Each shop's own line. Sharing one would look right on screen and send
@@ -1814,16 +1824,18 @@ console.log("day mess menu");
   check("and the others do not invent one",
     HOSTELS.filter(h => h.id !== "oh").every(h => Object.keys(h.everyday).length === 0));
 
-  // Serving times are WH's own. LVH's menu was copied from WH's, which makes
-  // its times the likeliest thing to be copied next — and a wrong closing
-  // time sends someone to a shut mess.
+  // Serving times come from each hostel's own info sheet (2026-10-27). LVH's
+  // menu was copied from WH's, which makes its times the likeliest thing to
+  // be copied next — and a wrong closing time sends someone to a shut mess.
+  // WH's snacks start at 5, the other three at 5:15, which is what shows they
+  // are each hostel's own.
   const wh = HOSTELS.find(h => h.id === "wh");
-  check("WH publishes a time for every meal",
-    Boolean(wh) && MEALS.every(m => wh.timings[m]?.length > 0));
+  check("every hostel publishes a time for every meal",
+    HOSTELS.every(h => MEALS.every(m => h.timings[m]?.length > 0)));
   check("timings only ever name a meal",
     HOSTELS.every(h => Object.keys(h.timings).every(m => MEALS.includes(m))));
   check("no other hostel has borrowed WH's times",
-    HOSTELS.filter(h => h.id !== "wh").every(h => Object.keys(h.timings).length === 0));
+    HOSTELS.filter(h => h.id !== "wh").every(h => h.timings.Snacks !== wh.timings.Snacks));
 }
 
 console.log("");
@@ -3371,6 +3383,48 @@ console.log("\nGmail refusing a draft for its size");
     check("an ordinary 400 isn't", (await refuse(400, "Invalid to header")).tooLarge === false);
     check("nor is an expired permission", (await refuse(401, "Invalid Credentials")).tooLarge === false);
   })());
+}
+
+console.log("\ncampus & hostel services");
+{
+  // campus.json copies the reps, night messes and tuck shops at build time.
+  // A rebuild of por.json, night-menu.json or tuck.json without one of
+  // campus.json would leave two numbers for one counter — fail instead.
+  const nums = (text) => String(text ?? "").split("/").map((p) => p.replace(/\D/g, "")).filter(Boolean).join();
+  const people = Object.values(porJson).flatMap((d) => (d.sections ?? []).flatMap((s) => s.people));
+  const roleOf = { Rep: "Hostel Representative", "Mess Rep": "Mess Representative" };
+  check("every hostel's reps match POR details", CAMPUS_HOSTELS.every((h) => h.reps.length === 2
+    && h.reps.every((r) => {
+      const p = people.find((x) => x.role === `${h.id} ${roleOf[r.role.slice(h.id.length + 1)]}`);
+      return p && p.name === r.name && (p.phone ?? "") === r.phone && (p.email ?? "") === r.email;
+    })));
+
+  const items = [...PLACES.flatMap((p) => p.items), ...CAMPUS_HOSTELS.flatMap((h) => h.items)];
+  const night = items.filter((i) => i.menu === "night");
+  check("every night mess matches the night menu", night.length > 0 && night.every((i) => {
+    const c = nightJson.hostels.find((h) => `${h.id.toUpperCase()} Night Mess` === i.name);
+    return c && nums(c.phone) === i.phones.map((p) => p.number).join() && c.hours === i.hours;
+  }));
+  const tuck = items.filter((i) => i.menu === "tuck");
+  check("every tuck shop matches its menu", tuck.length > 0 && tuck.every((i) => {
+    const s = tuckJson.shops.find((x) => x.name === i.name);
+    return s && nums(s.phone) === i.phones.map((p) => p.number).join() && s.hours === i.hours;
+  }));
+  check("each hostel lists its own night mess",
+    CAMPUS_HOSTELS.every((h) => h.items.some((i) => i.name === `${h.id} Night Mess`)));
+  check("a 'contact the rep' row carries that hostel's rep",
+    CAMPUS_HOSTELS.every((h) => h.items.filter((i) => i.rep)
+      .every((i) => i.rep.phone === h.reps[0].phone)));
+
+  const doctor = MEDICAL.find((m) => m.week);
+  check("the doctor's week runs Monday to Sunday",
+    doctor?.week.map((d) => d.day).join() === "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday");
+  check("27 Oct 2026 is a Tuesday", dayName(new Date(2026, 9, 27, 12)) === "Tuesday");
+  check("the forms' Tagore opens the WH tab", hostelTab("Tagore") === "WH");
+  check("case doesn't matter", hostelTab("lvh") === "LVH");
+  // Annexe has no tab of its own; nor does a hostel nobody typed.
+  check("Annexe opens the first tab", hostelTab("Annexe") === CAMPUS_HOSTELS[0].id);
+  survives("no saved hostel", () => hostelTab(undefined));
 }
 
 Promise.all(later).catch((err) => {

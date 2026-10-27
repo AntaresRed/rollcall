@@ -10,7 +10,12 @@
       "id": "nh",
       "name": "NH",
       "everyday": {},
-      "timings": {},
+      "timings": {
+        "Breakfast": "8 AM to 10:30 AM",
+        "Lunch": "1 PM to 2:30 PM",
+        "Snacks": "5:15 PM to 6:30 PM",
+        "Dinner": "8 PM to 9:30 PM"
+      },
       "days": [
         {
           "day": "Monday",
@@ -86,7 +91,12 @@
         "Snacks": "Tea/Coffee/Rasna, Bread Butter Jam",
         "Dinner": "Salad, Roti, Steamed Rice"
       },
-      "timings": {},
+      "timings": {
+        "Breakfast": "8 AM to 10:30 AM",
+        "Lunch": "1 PM to 2:30 PM",
+        "Snacks": "5:15 PM to 6:30 PM",
+        "Dinner": "8 PM to 9:30 PM"
+      },
       "days": [
         {
           "day": "Monday",
@@ -157,7 +167,12 @@
       "id": "lvh",
       "name": "LVH",
       "everyday": {},
-      "timings": {},
+      "timings": {
+        "Breakfast": "8 AM to 10:30 AM",
+        "Lunch": "1 PM to 2:30 PM",
+        "Snacks": "5:15 PM to 6:30 PM",
+        "Dinner": "8 PM to 9:30 PM"
+      },
       "days": [
         {
           "day": "Monday",

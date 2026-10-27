@@ -5,7 +5,7 @@
       "name": "NH",
       "canteen": "New Hostel Night Canteen",
       "phone": "9038103742",
-      "hours": "",
+      "hours": "11:00 PM - 4:00 AM",
       "room_service": "5",
       "pages": [
         "/menu/night/nh-1.jpg",
@@ -985,7 +985,7 @@
       "name": "OH",
       "canteen": "O.H. Night Cafeteria (Ramanujan)",
       "phone": "9874886704 / 7687917536",
-      "hours": "",
+      "hours": "11:00 PM - 4:00 AM",
       "room_service": "5",
       "pages": [
         "/menu/night/oh-1.jpg",

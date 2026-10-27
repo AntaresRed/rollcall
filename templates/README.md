@@ -18,6 +18,7 @@ the builder at that.
 | `Tuck Shops.template.xlsx` | Tuck shop / mess secretary | `build_tuck.py` | Tuck shops tab |
 | `Night Mess Menu.template.xlsx` | Canteen / mess secretary | `build_night_menu.py` | Night canteen tab |
 | `Campus Rooms.template.xlsx` | You, room by room | `build_rooms.py` | J-Maps, venue directions |
+| `Campus Contacts.template.xlsx` | Campus info sheet | `build_campus.py` | Campus & Hostel Services screen |
 
 Every template has a `.README.md` beside it saying what each sheet and column
 means and what will stop the build.

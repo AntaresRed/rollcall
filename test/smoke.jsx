@@ -30,6 +30,7 @@ import NightMessMenu from "../src/screens/NightMessMenu";
 import MessMenu from "../src/screens/MessMenu";
 import OrderHistory from "../src/screens/OrderHistory";
 import NoSchedule from "../src/screens/NoSchedule";
+import CampusServices from "../src/screens/CampusServices";
 import TuckShops from "../src/screens/TuckShops";
 import AttendanceBreakdown from "../src/screens/AttendanceBreakdown";
 import OltSync from "../src/screens/OltSync";
@@ -294,6 +295,13 @@ const cases = [
   ["Utils", <Utils key="u" onOpen={noop} />],
   ["Utils / contacts group", <Utils key="uc" onOpen={noop} group="contacts" />],
   ["Utils / mail services group", <Utils key="um" onOpen={noop} group="mail" />],
+  ["CampusServices", <CampusServices key="cs" onOpen={noop} />],
+  // Opened without a way out to the menus: no order links, nothing throws.
+  ["CampusServices / no onOpen", <CampusServices key="csn" />],
+  ["CampusServices / shops", <CampusServices key="css" onOpen={noop} start="shops" />],
+  ["CampusServices / food", <CampusServices key="csf" onOpen={noop} start="food" />],
+  ["CampusServices / sports", <CampusServices key="csx" start="sports" />],
+  ["CampusServices / hostel", <CampusServices key="csh" onOpen={noop} start="hostel" />],
   ["LeaveMail / blank", <LeaveMail key="lm" email="abc2027@email.iimcal.ac.in"
       accountName="A Student" onBack={noop} />],
   // Gmail draft off: the Send Mail route, which is also its fallback.

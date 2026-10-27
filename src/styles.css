@@ -4005,6 +4005,54 @@ button.por-card:hover { border-color: var(--signal); }
 }
 
 
+/* ---------- campus & hostel services ---------- */
+
+/* Hours and delivery in the canteen header's mono, so a shop reads the same
+   here as on its menu. */
+.campus-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+}
+.campus-note { font-size: 12.5px; line-height: 1.4; color: var(--slate); margin-top: 2px; }
+.campus-menu {
+  align-self: flex-start;
+  margin-top: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--signal-deep);
+  cursor: pointer;
+}
+.campus-phones { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+/* A number's label ("Day, till 7:30 PM", "Rep · …") sits on its own line
+   above it; beside it, it squeezed the number onto two. */
+.campus-phones .por-contact { flex-wrap: wrap; justify-content: flex-end; }
+.campus-label { flex-basis: 100%; text-align: right; font-family: var(--mono); font-size: 10.5px; color: var(--slate); }
+.campus-phones .contact-phone { white-space: nowrap; }
+/* Five tabs on a phone: tighter than the mess's three or four, so all of them
+   show without a scroll that hides the Hostel tab off the edge. */
+.campus-tabs .mess-tab { min-width: 0; padding: 8px 4px; }
+.campus-hostels { margin-top: -6px; }
+.campus-week { width: 100%; margin: 4px 0 0; }
+.campus-week-grid { display: grid; gap: 3px; }
+.campus-day { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--slate); }
+.campus-day.today { color: var(--ink); font-weight: 600; }
+
+@media (max-width: 460px) {
+  .campus-phones { width: 100%; align-items: flex-start; }
+  .campus-phones .por-contact { justify-content: flex-start; }
+  .campus-label { text-align: left; }
+}
+
+
 /* ---------- leave mail ---------- */
 
 /* The same fields as the basket's, stacked in one card: this is a form you

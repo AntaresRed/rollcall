@@ -50,6 +50,7 @@ const LeaveMail = screen(() => import("./screens/LeaveMail"));
 const GuestEntry = screen(() => import("./screens/GuestEntry"));
 const HallBooking = screen(() => import("./screens/HallBooking"));
 const JMaps = screen(() => import("./screens/JMaps"));
+const CampusServices = screen(() => import("./screens/CampusServices"));
 const OltAttendance = screen(() => import("./screens/OltAttendance"));
 const PorDashboard = screen(() => import("./screens/PorDashboard"));
 
@@ -73,6 +74,7 @@ const SUB_SCREEN_BACK = {
   guest: "Back to mail services",
   hall: "Back to mail services",
   maps: "Back to utils",
+  campus: "Back to utils",
   admin: "Back to profile",
   pordash: "Back to profile",
 };
@@ -1058,6 +1060,9 @@ export default function App() {
         )}
         {tab === "utils" && subScreen === "maps" && (
           <JMaps onBack={() => setSubScreen(null)} />
+        )}
+        {tab === "utils" && subScreen === "campus" && (
+          <CampusServices now={now} onOpen={openSub} />
         )}
         {tab === "utils" && !subScreen && <Utils onOpen={openSub} />}
         {tab === "timetable" && !subScreen && (

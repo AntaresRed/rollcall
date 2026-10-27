@@ -36,6 +36,10 @@ const GROUPS = [
   ["contacts", "Faculty and POR Contact Details",
     "Professors, the council, clubs and captains, and the batch directory.",
     ContactsIcon],
+  ["campus", "Campus & Hostel Services",
+    "Doctor, ambulance and pharmacies, shops and food outlets, gym and court "
+    + "hours, and each hostel's electrician, laundry and reps.",
+    CampusIcon],
   ["mail", "Mail Services",
     // Not "sent": the app only drafts them, and the student presses Send in
     // Gmail.
@@ -199,6 +203,19 @@ function MapIcon() {
       <path d="M3.5 6.5 9 4.5l6 2 5.5-2v13l-5.5 2-6-2-5.5 2v-13Z" stroke="currentColor"
             strokeWidth="1.7" strokeLinejoin="round" />
       <path d="M9 4.5v13M15 6.5v13" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+  );
+}
+
+/** A building with a cross on it: help, and the place you find it. */
+function CampusIcon() {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 20.5V8.5L12 4l8 4.5v12" stroke="currentColor" strokeWidth="1.7"
+            strokeLinejoin="round" />
+      <path d="M2.5 20.5h19" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M12 9.5v6M9 12.5h6" stroke="currentColor" strokeWidth="1.7"
+            strokeLinecap="round" />
     </svg>
   );
 }

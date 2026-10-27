@@ -106,6 +106,12 @@ export const shopPhone = (shop) => {
   return /^[6-9]\d{9}$/.test(digits) ? digits : null;
 };
 
+/** Every callable number, for the header. Orders still go to the first. */
+export const shopPhones = (shop) =>
+  String(shop?.phone ?? "").split("/")
+    .map((p) => p.replace(/\D/g, ""))
+    .filter((d) => /^[6-9]\d{9}$/.test(d));
+
 // ---------- the basket ----------
 
 /**

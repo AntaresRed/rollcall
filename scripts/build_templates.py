@@ -382,6 +382,78 @@ def por():
     save(wb, "POR Contacts Sheet.template.xlsx")
 
 
+# ------------------------------------------------- campus & hostel services
+
+def campus():
+    wb = openpyxl.Workbook()
+    guide(wb, "Campus Contacts — medical, shops, food, sports, hostel staff", [
+        "Read by: scripts/build_campus.py    Feeds: the Campus & Hostel Services screen",
+        "",
+        "Sheet names must match exactly:",
+        "Medical · Doctor Hours · Services · NH · OH · LVH · WH",
+        "",
+        "Not in this workbook, on purpose:",
+        "The hostel and mess reps, the four night messes, Mohan Da and the WH "
+        "tuck shop. The build copies them from the POR sheet, the night menu "
+        "and the tuck shop workbook, which are the one place each number is "
+        "written. Rebuild campus.json after rebuilding any of those.",
+        "",
+        "Columns are found by heading:",
+        "Order does not matter, but the headings must read as below.",
+        "",
+        "Phone numbers:",
+        "Ten digits starting 6-9. Anything else stops the build — a typo'd "
+        "number is a dead call button. 'Phone label' names a number when a "
+        "contact has two that differ ('Day, till 7:30 PM' / 'Night').",
+        "",
+        "Doctor Hours:",
+        "Monday to Sunday, in that order, one row each. They belong to the "
+        "Medical row named 'Doctor'.",
+        "",
+        "Services:",
+        "Group is Store, Food or Services (shown as Shops, Food, Sports). "
+        "Delivery reads Yes, No, or a short phrase kept as written.",
+        "",
+        "Hostel sheets:",
+        "A Note reading 'Contact the OH Rep' (or NH, LVH, WH) gets that "
+        "hostel's rep and their number shown beside it. A row with no number "
+        "and no note is left out and reported.",
+        "",
+        "Corrections:",
+        "Cells known to be wrong in the source sheet are fixed in a list "
+        "inside build_campus.py and re-checked on every run, as in "
+        "build_por.py.",
+        "",
+        "This template will not build as-is, and that is correct:",
+        "Running build_campus.py against it fails, naming something of the "
+        "real sheet's it expected — Kotler Da for the NH tab, or the WH "
+        "electrician's misspelling it corrects. That is the guard doing its "
+        "job. A real filled-in workbook builds cleanly.",
+    ], name="Campus Contacts.template.xlsx")
+
+    sheet(wb, "Medical", ["Name", "Phone", "Phone 2", "Note"],
+          [["Medical Unit", "9876543210", "", ""],
+           ["Doctor", "9876543211", "9876543212", ""]],
+          widths=[24, 16, 16, 30])
+    sheet(wb, "Doctor Hours", ["Day", "Hours"],
+          [[d, "9:00 AM - 5:00 PM"] for d in
+           ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]],
+          widths=[14, 24])
+    sheet(wb, "Services", ["Group", "Name", "Person", "Phone", "Phone label",
+                           "Phone 2", "Phone 2 label", "Hours", "Delivery", "Note"],
+          [["Store", "A Shop", "A Da", "9876543213", "Day", "9876543214", "Night",
+            "10 AM - 10 PM", "Yes", ""],
+           ["Food", "A Cafe", "", "9876543215", "", "", "", "4 PM - 3:30 AM", "No", ""],
+           ["Services", "Gym", "", "", "", "", "", "6:30 AM - 10:30 AM", "", ""]],
+          widths=[10, 20, 14, 14, 16, 14, 16, 26, 10, 24])
+    for h in ["NH", "OH", "LVH", "WH"]:
+        sheet(wb, h, ["Role", "Name", "Phone", "Phone label", "Phone 2", "Phone 2 label", "Note"],
+              [["Electrician", "A Person", "9876543216", "", "", "", ""],
+               ["Plumber", "", "", "", "", "", f"Contact the {h} Rep"]],
+              widths=[22, 20, 14, 16, 14, 16, 36])
+    save(wb, "Campus Contacts.template.xlsx")
+
+
 # ------------------------------------------------------- the class schedule
 
 def pgp2_schedule():
@@ -796,6 +868,7 @@ the builder at that.
 | `Tuck Shops.template.xlsx` | Tuck shop / mess secretary | `build_tuck.py` | Tuck shops tab |
 | `Night Mess Menu.template.xlsx` | Canteen / mess secretary | `build_night_menu.py` | Night canteen tab |
 | `Campus Rooms.template.xlsx` | You, room by room | `build_rooms.py` | J-Maps, venue directions |
+| `Campus Contacts.template.xlsx` | Campus info sheet | `build_campus.py` | Campus & Hostel Services screen |
 
 Every template has a `.README.md` beside it saying what each sheet and column
 means and what will stop the build.
@@ -866,6 +939,7 @@ if __name__ == "__main__":
     tuck()
     night_mess()
     por()
+    campus()
     pgp2_schedule()
     pgp1_schedule()
     faculty_directory()

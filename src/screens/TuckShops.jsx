@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  SHOPS, shopById, filterItems, filterGrouped, hasDiet, shopPhone,
+  SHOPS, shopById, filterItems, filterGrouped, hasDiet, shopPhone, shopPhones,
   priceOptions, lineKey, billFor, orderText, itemLine, shopUpi, upiHref, shopQr, payNote,
   LOCATIONS, deliveryFor, chargesByPlace,
 } from "../lib/tuck";
@@ -198,9 +198,11 @@ export default function TuckShops() {
             {/* Only when there is a number worth tapping. A shop with none is
                 still worth listing — you walk to it — but a dead link that
                 looks like a phone number is worse than no link. */}
-            {phone ? (
-              <a className="canteen-call" href={telHref(phone)}>{prettyPhone(phone)}</a>
-            ) : (
+            {/* One link per number: a single link over "a / b" would ring
+                the first whichever half was tapped. */}
+            {phone ? shopPhones(shop).map((p) => (
+              <a className="canteen-call" key={p} href={telHref(p)}>{prettyPhone(p)}</a>
+            )) : (
               <span>Walk over — no number on file</span>
             )}
             {shop.hours && <span>{shop.hours}</span>}
