@@ -81,22 +81,18 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
       .sort((a, b) => a.original_date.localeCompare(b.original_date));
   }, [overrides, classes]);
 
-  // One pass over the window, split at today, each half nearest-first: the
-  // next class to move is the one coming up, and the one most likely to be
-  // entered after the fact is the one that just happened.
-  const [pastByDate, upcomingByDate] = useMemo(() => {
+  // One list, latest date first — the same direction as Edit attendance, so
+  // the two screens read alike. It used to be split at today into upcoming and
+  // earlier, each nearest-first; today now sits partway down, marked as such.
+  const byDate = useMemo(() => {
     const groups = new Map();
     for (const item of sessions) {
       const list = groups.get(item.date) ?? [];
       list.push(item);
       groups.set(item.date, list);
     }
-    const all = [...groups.entries()];
-    return [
-      all.filter(([d]) => d < today).sort((a, b) => b[0].localeCompare(a[0])),
-      all.filter(([d]) => d >= today).sort((a, b) => a[0].localeCompare(b[0])),
-    ];
-  }, [sessions, today]);
+    return [...groups.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+  }, [sessions]);
 
 
   // `originalDate` identifies the override; `date`/`start` only seed the form,
@@ -144,6 +140,7 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
       // so it's what the student scans this list for.
       heading={new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
       aside={date === today ? "Today" : DAY_LONG[weekdayOf(new Date(`${date}T00:00:00`))]}
+      today={date === today}
       tally={<DayTally items={items} />}
     >
 
@@ -303,24 +300,15 @@ export default function Reschedule({ classes, term, overrides, now, onMove, onCl
         </>
       )}
 
-      <div className="eyebrow">{wholeTerm ? "Rest of the term" : "Next three weeks"}</div>
+      <div className="eyebrow">{wholeTerm ? "This term" : "Three weeks either side of today"}</div>
 
-      {upcomingByDate.length === 0 && (
+      {byDate.length === 0 && (
         <div className="empty">
-          {wholeTerm ? "No classes left this term." : "No classes scheduled in the next three weeks."}
+          {wholeTerm ? "No classes this term." : "No classes in the three weeks either side of today."}
         </div>
       )}
 
-      {upcomingByDate.map(renderDay)}
-
-      {/* Below the upcoming dates rather than behind a button: folded, a
-          term's past dates are short enough to simply list. */}
-      {pastByDate.length > 0 && (
-        <>
-          <div className="eyebrow">{wholeTerm ? "Earlier this term" : "Last three weeks"}</div>
-          {pastByDate.map(renderDay)}
-        </>
-      )}
+      {byDate.map(renderDay)}
 
       {onBack && (
         <button className="btn ghost block" style={{ marginTop: 18 }} onClick={onBack}>

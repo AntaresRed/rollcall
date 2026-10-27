@@ -11,9 +11,11 @@
  */
 // `heading` and `aside` rather than day and date: Edit attendance leads with
 // the day and Reschedule with the date, so which comes first is the caller's.
-export default function DayFold({ heading, aside, tally = null, children }) {
+// `today` marks the date in place: in a latest-first list it sits partway
+// down, not at the top where it used to be easy to find.
+export default function DayFold({ heading, aside, today = false, tally = null, children }) {
   return (
-    <details className="daylist fold">
+    <details className={`daylist fold${today ? " today" : ""}`}>
       <summary className="daylist-date">
         <div className="daylist-day">
           {heading}
