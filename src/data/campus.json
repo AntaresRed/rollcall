@@ -1,48 +1,9 @@
 {
   "medical": [
     {
-      "name": "Medical Unit",
-      "person": "",
-      "phones": [
-        {
-          "number": "6292199622",
-          "label": ""
-        }
-      ],
-      "hours": "",
-      "delivery": "",
-      "note": "",
-      "rep": null,
-      "menu": null
-    },
-    {
-      "name": "Ambulance",
-      "person": "",
-      "phones": [
-        {
-          "number": "6292208958",
-          "label": ""
-        }
-      ],
-      "hours": "",
-      "delivery": "",
-      "note": "",
-      "rep": null,
-      "menu": null
-    },
-    {
       "name": "Doctor",
       "person": "",
-      "phones": [
-        {
-          "number": "9831403424",
-          "label": ""
-        },
-        {
-          "number": "7001006783",
-          "label": ""
-        }
-      ],
+      "phones": [],
       "hours": "",
       "delivery": "",
       "note": "",
@@ -80,6 +41,51 @@
       ]
     },
     {
+      "name": "Medical Unit",
+      "person": "",
+      "phones": [
+        {
+          "number": "6292199622",
+          "label": ""
+        }
+      ],
+      "hours": "",
+      "delivery": "",
+      "note": "",
+      "rep": null,
+      "menu": null
+    },
+    {
+      "name": "Ambulance",
+      "person": "",
+      "phones": [
+        {
+          "number": "6292208958",
+          "label": ""
+        }
+      ],
+      "hours": "",
+      "delivery": "",
+      "note": "",
+      "rep": null,
+      "menu": null
+    },
+    {
+      "name": "Gynecologist",
+      "person": "",
+      "phones": [
+        {
+          "number": "9051783310",
+          "label": ""
+        }
+      ],
+      "hours": "",
+      "delivery": "",
+      "note": "",
+      "rep": null,
+      "menu": null
+    },
+    {
       "name": "Apurba Pharmacy",
       "person": "",
       "phones": [
@@ -114,11 +120,11 @@
       "menu": null
     },
     {
-      "name": "Gynecologist",
+      "name": "Psychologist",
       "person": "",
       "phones": [
         {
-          "number": "9051783310",
+          "number": "9674353005",
           "label": ""
         }
       ],
@@ -142,27 +148,13 @@
       "note": "",
       "rep": null,
       "menu": null
-    },
-    {
-      "name": "Psychologist",
-      "person": "",
-      "phones": [
-        {
-          "number": "9674353005",
-          "label": ""
-        }
-      ],
-      "hours": "",
-      "delivery": "",
-      "note": "",
-      "rep": null,
-      "menu": null
     }
   ],
   "places": [
     {
       "id": "shops",
-      "label": "Shops",
+      "label": "Tuck Shops and Food",
+      "tab": "Tuck & Food",
       "items": [
         {
           "name": "Mohan Da",
@@ -178,7 +170,7 @@
             }
           ],
           "hours": "10:00 AM - 10:00 PM",
-          "delivery": "Delivers, ₹15–20",
+          "delivery": "Delivers",
           "note": "",
           "rep": null,
           "menu": "tuck"
@@ -193,7 +185,7 @@
             }
           ],
           "hours": "10:00 AM - 10:00 PM",
-          "delivery": "Room delivery ₹6 (WH only)",
+          "delivery": "Delivers (WH only)",
           "note": "",
           "rep": null,
           "menu": "tuck"
@@ -212,7 +204,7 @@
             }
           ],
           "hours": "11 AM - 4 AM",
-          "delivery": "Delivers to hostels",
+          "delivery": "No delivery",
           "note": "",
           "rep": null,
           "menu": null
@@ -228,6 +220,25 @@
           ],
           "hours": "10 AM - 4 AM",
           "delivery": "",
+          "note": "",
+          "rep": null,
+          "menu": null
+        },
+        {
+          "name": "Machaan",
+          "person": "",
+          "phones": [
+            {
+              "number": "8583083838",
+              "label": ""
+            },
+            {
+              "number": "9831314060",
+              "label": ""
+            }
+          ],
+          "hours": "8:30 AM - 3 PM, 6 PM - 9:30 PM",
+          "delivery": "Delivers to hostels",
           "note": "",
           "rep": null,
           "menu": null
@@ -265,33 +276,9 @@
       ]
     },
     {
-      "id": "food",
-      "label": "Food",
-      "items": [
-        {
-          "name": "Machaan",
-          "person": "",
-          "phones": [
-            {
-              "number": "8583083838",
-              "label": ""
-            },
-            {
-              "number": "9831314060",
-              "label": ""
-            }
-          ],
-          "hours": "8:30 AM - 3 PM, 6 PM - 9:30 PM",
-          "delivery": "Delivers to hostels",
-          "note": "",
-          "rep": null,
-          "menu": null
-        }
-      ]
-    },
-    {
       "id": "sports",
       "label": "Sports",
+      "tab": "Sports",
       "items": [
         {
           "name": "Gym",
@@ -340,36 +327,7 @@
     {
       "id": "NH",
       "name": "New Hostel",
-      "reps": [
-        {
-          "role": "NH Rep",
-          "name": "Aita Manish",
-          "phone": "7318020844",
-          "email": "nhrep@email.iimcal.ac.in"
-        },
-        {
-          "role": "NH Mess Rep",
-          "name": "Aasif Alam",
-          "phone": "9123169600",
-          "email": "nhmessrep@email.iimcal.ac.in"
-        }
-      ],
       "items": [
-        {
-          "name": "NH Night Mess",
-          "person": "",
-          "phones": [
-            {
-              "number": "9038103742",
-              "label": ""
-            }
-          ],
-          "hours": "11:00 PM - 4:00 AM",
-          "delivery": "Room service ₹5",
-          "note": "",
-          "rep": null,
-          "menu": "night"
-        },
         {
           "name": "Kotler Da",
           "person": "",
@@ -384,7 +342,7 @@
             }
           ],
           "hours": "11 AM - 4 AM",
-          "delivery": "Delivers to hostels",
+          "delivery": "No delivery",
           "note": "",
           "rep": null,
           "menu": null
@@ -406,10 +364,7 @@
           "hours": "",
           "delivery": "",
           "note": "Contact NH Rep",
-          "rep": {
-            "name": "Aita Manish",
-            "phone": "7318020844"
-          },
+          "rep": "NH",
           "menu": null
         },
         {
@@ -419,10 +374,7 @@
           "hours": "",
           "delivery": "",
           "note": "Contact NH Rep",
-          "rep": {
-            "name": "Aita Manish",
-            "phone": "7318020844"
-          },
+          "rep": "NH",
           "menu": null
         },
         {
@@ -432,10 +384,7 @@
           "hours": "",
           "delivery": "",
           "note": "Contact NH Rep",
-          "rep": {
-            "name": "Aita Manish",
-            "phone": "7318020844"
-          },
+          "rep": "NH",
           "menu": null
         },
         {
@@ -458,40 +407,7 @@
     {
       "id": "OH",
       "name": "Ramanujan Hostel",
-      "reps": [
-        {
-          "role": "OH Rep",
-          "name": "Srishti Verma",
-          "phone": "9650012290",
-          "email": "ohrep@email.iimcal.ac.in"
-        },
-        {
-          "role": "OH Mess Rep",
-          "name": "Hitesh Mohnot",
-          "phone": "7073654383",
-          "email": "ohmessrep@email.iimcal.ac.in"
-        }
-      ],
       "items": [
-        {
-          "name": "OH Night Mess",
-          "person": "",
-          "phones": [
-            {
-              "number": "9874886704",
-              "label": ""
-            },
-            {
-              "number": "7687917536",
-              "label": ""
-            }
-          ],
-          "hours": "11:00 PM - 4:00 AM",
-          "delivery": "Room service ₹5",
-          "note": "",
-          "rep": null,
-          "menu": "night"
-        },
         {
           "name": "Mohan Da",
           "person": "",
@@ -506,7 +422,7 @@
             }
           ],
           "hours": "10:00 AM - 10:00 PM",
-          "delivery": "Delivers, ₹15–20",
+          "delivery": "Delivers",
           "note": "",
           "rep": null,
           "menu": "tuck"
@@ -523,10 +439,7 @@
           "hours": "",
           "delivery": "",
           "note": "For all issues Contact the OH Rep",
-          "rep": {
-            "name": "Srishti Verma",
-            "phone": "9650012290"
-          },
+          "rep": "OH",
           "menu": null
         },
         {
@@ -536,10 +449,7 @@
           "hours": "",
           "delivery": "",
           "note": "Contact the OH Rep",
-          "rep": {
-            "name": "Srishti Verma",
-            "phone": "9650012290"
-          },
+          "rep": "OH",
           "menu": null
         },
         {
@@ -564,10 +474,7 @@
           "hours": "",
           "delivery": "",
           "note": "Contact the OH Rep",
-          "rep": {
-            "name": "Srishti Verma",
-            "phone": "9650012290"
-          },
+          "rep": "OH",
           "menu": null
         },
         {
@@ -620,36 +527,7 @@
     {
       "id": "LVH",
       "name": "Lake View Hostel",
-      "reps": [
-        {
-          "role": "LVH Rep",
-          "name": "Subhadip Patra",
-          "phone": "8777645015",
-          "email": "lvhrep@email.iimcal.ac.in"
-        },
-        {
-          "role": "LVH Mess Rep",
-          "name": "Penta Charvitha Sri",
-          "phone": "7032309976",
-          "email": "lvhmessrep@email.iimcal.ac.in"
-        }
-      ],
       "items": [
-        {
-          "name": "LVH Night Mess",
-          "person": "",
-          "phones": [
-            {
-              "number": "9330797259",
-              "label": ""
-            }
-          ],
-          "hours": "11:00 PM - 4:00 AM",
-          "delivery": "Room service ₹5",
-          "note": "",
-          "rep": null,
-          "menu": "night"
-        },
         {
           "name": "LVH Tuck Shop",
           "person": "Deepu Da",
@@ -690,11 +568,8 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact LVH rep or LVH admin",
-          "rep": {
-            "name": "Subhadip Patra",
-            "phone": "8777645015"
-          },
+          "note": "Contact LVH Rep",
+          "rep": "LVH",
           "menu": null
         },
         {
@@ -723,11 +598,8 @@
           ],
           "hours": "",
           "delivery": "",
-          "note": "Contact LVH rep or LVH admin",
-          "rep": {
-            "name": "Subhadip Patra",
-            "phone": "8777645015"
-          },
+          "note": "Contact LVH Rep",
+          "rep": "LVH",
           "menu": null
         },
         {
@@ -754,36 +626,7 @@
     {
       "id": "WH",
       "name": "White Hostel",
-      "reps": [
-        {
-          "role": "WH Rep",
-          "name": "Vivek Patel",
-          "phone": "8081325747",
-          "email": "whrep@email.iimcal.ac.in"
-        },
-        {
-          "role": "WH Mess Rep",
-          "name": "Mayank Raj Kankas",
-          "phone": "8952800777",
-          "email": "whmessrep@email.iimcal.ac.in"
-        }
-      ],
       "items": [
-        {
-          "name": "WH Night Mess",
-          "person": "",
-          "phones": [
-            {
-              "number": "9875555920",
-              "label": ""
-            }
-          ],
-          "hours": "11:00 PM - 4:00 AM",
-          "delivery": "Room service ₹5",
-          "note": "",
-          "rep": null,
-          "menu": "night"
-        },
         {
           "name": "Tagore Tuck Shop",
           "person": "",
@@ -794,7 +637,7 @@
             }
           ],
           "hours": "10:00 AM - 10:00 PM",
-          "delivery": "Room delivery ₹6 (WH only)",
+          "delivery": "Delivers (WH only)",
           "note": "",
           "rep": null,
           "menu": "tuck"
@@ -821,10 +664,7 @@
           "hours": "",
           "delivery": "",
           "note": "Contact WH Rep",
-          "rep": {
-            "name": "Vivek Patel",
-            "phone": "8081325747"
-          },
+          "rep": "WH",
           "menu": null
         },
         {
@@ -834,10 +674,7 @@
           "hours": "",
           "delivery": "",
           "note": "Contact WH Rep",
-          "rep": {
-            "name": "Vivek Patel",
-            "phone": "8081325747"
-          },
+          "rep": "WH",
           "menu": null
         },
         {
@@ -847,10 +684,7 @@
           "hours": "",
           "delivery": "",
           "note": "Contact WH Rep",
-          "rep": {
-            "name": "Vivek Patel",
-            "phone": "8081325747"
-          },
+          "rep": "WH",
           "menu": null
         },
         {

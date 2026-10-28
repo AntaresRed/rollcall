@@ -293,6 +293,9 @@ const cases = [
       payload={{ ...pgp1, calendar: null }} label="broken" onClose={noop} />],
   ["PorDetails", <PorDetails key="por" onBack={noop} />],
   ["PorDetails / no back button", <PorDetails key="porn" />],
+  // Sent from a "Contact the OH Rep" row in Campus Services.
+  ["PorDetails / opened on a rep", <PorDetails key="porr" onBack={noop}
+      start={{ from: "campus", path: ["student-council"], query: "OH Hostel Representative" }} />],
   ["Utils", <Utils key="u" onOpen={noop} />],
   ["Utils / contacts group", <Utils key="uc" onOpen={noop} group="contacts" />],
   ["Utils / mail services group", <Utils key="um" onOpen={noop} group="mail" />],
@@ -300,7 +303,8 @@ const cases = [
   // Opened without a way out to the menus: no order links, nothing throws.
   ["CampusServices / no onOpen", <CampusServices key="csn" />],
   ["CampusServices / shops", <CampusServices key="css" onOpen={noop} start="shops" />],
-  ["CampusServices / food", <CampusServices key="csf" onOpen={noop} start="food" />],
+  // Back from POR details: the hostel tab it left, on the hostel it left.
+  ["CampusServices / back on OH", <CampusServices key="csb" onOpen={noop} start="hostel" startHostel="OH" />],
   ["CampusServices / sports", <CampusServices key="csx" start="sports" />],
   ["CampusServices / hostel", <CampusServices key="csh" onOpen={noop} start="hostel" />],
   ["LeaveMail / blank", <LeaveMail key="lm" email="abc2027@email.iimcal.ac.in"

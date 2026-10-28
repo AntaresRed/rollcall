@@ -4041,7 +4041,8 @@ button.por-card:hover { border-color: var(--signal); }
 .campus-phones .contact-phone { white-space: nowrap; }
 /* Five tabs on a phone: tighter than the mess's three or four, so all of them
    show without a scroll that hides the Hostel tab off the edge. */
-.campus-tabs .mess-tab { min-width: 0; padding: 8px 4px; }
+/* Each tab as wide as its name: "Tuck & Food" in an equal share is clipped. */
+.campus-tabs .mess-tab { flex: 1 0 auto; min-width: 0; padding: 8px 6px; white-space: nowrap; }
 .campus-hostels { margin-top: -6px; }
 .campus-week { width: 100%; margin: 4px 0 0; }
 .campus-week-grid { display: grid; gap: 3px; }

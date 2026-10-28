@@ -37,8 +37,8 @@ const GROUPS = [
     "Professors, the council, clubs and captains, and the batch directory.",
     ContactsIcon],
   ["campus", "Campus & Hostel Services",
-    "Doctor, ambulance and pharmacies, shops and food outlets, gym and court "
-    + "hours, and each hostel's electrician, laundry and reps.",
+    "Doctor timings, ambulance and pharmacies, tuck shops and food, gym and "
+    + "court hours, and each hostel's electrician and laundry.",
     CampusIcon],
   ["mail", "Mail Services",
     // Not "sent": the app only drafts them, and the student presses Send in

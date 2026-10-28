@@ -164,6 +164,10 @@ export default function App() {
   const [alerts, setAlerts] = useState(false);
   const [editing, setEditing] = useState(false);
   const [subScreen, setSubScreen] = useState(returnScreen);
+  // How POR details was opened when another screen sent the student there:
+  // { from, path, query, back } — back being what that screen needs to
+  // reopen where they left it. Null when it was opened from its own door.
+  const [porStart, setPorStart] = useState(null);
   const [returnTab, setReturnTab] = useState(null);
   const [toast, setToast] = useState("");
   const [fatal, setFatal] = useState("");
@@ -616,10 +620,17 @@ export default function App() {
    * tap on the way in, never a return. An admin looking at another year's app
    * is inspecting it, not using it, so that is left out.
    */
-  const openSub = (id) => {
+  const openSub = (id, start = null) => {
     if (!readOnlyRef.current) track("open", id);
+    // Any door but the one into POR details forgets the last trip there, so
+    // Campus Services opened fresh starts on Medical again.
+    setPorStart(id === "por" ? start : null);
     setSubScreen(id);
   };
+  // Back from POR details goes to whichever screen sent the student there.
+  const parentOf = (id) => (id === "por" && porStart?.from) || SUB_SCREEN_PARENT[id] || null;
+  const backLabelOf = (id) => (id === "por" && porStart?.from === "campus"
+    ? "Back to campus services" : SUB_SCREEN_BACK[id]);
 
   const startOver = () => {
     // Remember where the edit was launched from, so saving returns there
@@ -904,8 +915,8 @@ export default function App() {
     <>
       <Masthead
         now={now}
-        onBack={subScreen ? () => setSubScreen(SUB_SCREEN_PARENT[subScreen] ?? null) : null}
-        backLabel={SUB_SCREEN_BACK[subScreen]}
+        onBack={subScreen ? () => setSubScreen(parentOf(subScreen)) : null}
+        backLabel={backLabelOf(subScreen)}
       />
       {/* Widened only for the plain grid view — the day columns are what
           actually benefit from a laptop's extra width. Every other screen,
@@ -1026,7 +1037,7 @@ export default function App() {
           <MessMenu now={now} onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "por" && (
-          <PorDetails onBack={() => setSubScreen("contacts")} />
+          <PorDetails start={porStart} onBack={() => setSubScreen(parentOf("por"))} />
         )}
         {/* The student's own address and name, not the viewed cohort's:
             viewing-as changes whose timetable is on screen, never whose
@@ -1059,7 +1070,8 @@ export default function App() {
           <JMaps onBack={() => setSubScreen(null)} />
         )}
         {tab === "utils" && subScreen === "campus" && (
-          <CampusServices now={now} onOpen={openSub} />
+          <CampusServices now={now} onOpen={openSub}
+                          start={porStart?.back?.tab} startHostel={porStart?.back?.hostel} />
         )}
         {tab === "utils" && !subScreen && <Utils onOpen={openSub} />}
         {tab === "timetable" && !subScreen && (

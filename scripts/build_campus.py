@@ -13,9 +13,10 @@ That sheet repeats numbers the app already holds — the hostel and mess reps,
 the four night messes, Mohan Da and the WH tuck shop — and its copies had
 drifted: on 2026-10-27 its NH night mess number, Mohan Da's "no delivery" and
 the WH tuck shop's "only call" were all out of date. So the workbook does not
-carry those rows at all. They are copied in here from por.json, night-menu.json
-and tuck.json, the one place each is written, and test/logic.mjs fails if
-campus.json falls behind any of them. Rebuild this after rebuilding those.
+carry those rows at all. The tuck shops are copied in here from tuck.json, the
+one place each is written, and test/logic.mjs fails if campus.json falls
+behind it. Rebuild this after rebuilding tuck.json. The night messes and reps
+are not shown here at all.
 
   Medical        Name | Phone | Phone 2 | Note
   Doctor Hours   Day | Hours                (Monday to Sunday, the "Doctor" row's)
@@ -23,8 +24,9 @@ campus.json falls behind any of them. Rebuild this after rebuilding those.
                  Phone 2 label | Hours | Delivery | Note
   NH, OH, ...    Role | Name | Phone | Phone label | Phone 2 | Phone 2 label | Note
 
-A hostel row that says "Contact the OH Rep" gets that rep's name and number
-attached, since the instruction is only useful with the number beside it.
+A hostel row that says "Contact the OH Rep" gets a link to that rep in POR
+details, since the instruction is only useful with a way to reach them. The
+link, not a copied number, so that POR details stays the one place it lives.
 """
 
 import json
@@ -44,13 +46,19 @@ DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday",
 # for it is blank; the schedule came separately.
 DOCTOR_ROW = "Doctor"
 
-# Services sheet group -> how the screen heads it.
-GROUPS = [("Store", "shops", "Shops"), ("Food", "food", "Food"),
-          ("Services", "sports", "Sports")]
+# Screen tab -> its heading, its tab label and the Services sheet groups it
+# shows, in sheet order. Shops and food are one tab: a tuck shop is where you
+# get food at night, and the user merged them (2026-10-28). The tuck shops
+# from tuck.json lead it. The heading is the user's name for it; the tab is
+# shorter because four tabs share a 360px phone.
+GROUPS = [("shops", "Tuck Shops and Food", "Tuck & Food", ["Store", "Food"]),
+          ("sports", "Sports", "Sports", ["Services"])]
 
 # Hostel tabs, as the sheet titles them, and the shop each hostel's tab lists
 # under its own staff. "tuck:" rows come from tuck.json, "services:" from the
-# Services sheet. Night messes need no entry: every hostel has one, by id.
+# Services sheet. Night messes and reps are left out: they have their own
+# screens (the night menu, POR details), and the user dropped them here
+# (2026-10-28).
 HOSTELS = [
     ("NH", "New Hostel", ["services:Kotler Da"]),
     ("OH", "Ramanujan Hostel", ["tuck:MOHANDA"]),
@@ -71,6 +79,11 @@ CORRECTIONS = [
     # (sheet, role, field, as printed, corrected, why)
     ("WH", "Electrician", "name", "Soumin", "Soumen Roy",
      "the same number as OH's Soumen Roy, and the same person (2026-10-27)"),
+    # There is no LVH admin contact to give; the rep is the way in (2026-10-28).
+    ("LVH", "Plumber", "note", "Contact LVH rep or LVH admin", "Contact LVH Rep",
+     "the rep stands in for the admin"),
+    ("LVH", "Housekeeping Incharge", "note", "Contact LVH rep or LVH admin", "Contact LVH Rep",
+     "the rep stands in for the admin"),
 ]
 
 MOBILE = re.compile(r"[6-9]\d{9}")
@@ -115,7 +128,7 @@ def phones(where, *pairs):
 
 
 def split_phones(where, text):
-    """night-menu.json and tuck.json write two numbers as "a / b"."""
+    """tuck.json writes two numbers as "a / b"."""
     return phones(where, *[(p.strip(), "") for p in (text or "").split("/")])
 
 
@@ -140,49 +153,25 @@ def load(name):
         return json.load(f)
 
 
-def reps_from_por(por):
-    """'NH Hostel Representative' / 'NH Mess Representative' from the council."""
-    found = {}
-    for ds in por.values():
-        for sec in ds.get("sections", []):
-            for p in sec.get("people", []):
-                m = re.fullmatch(r"(NH|OH|LVH|WH) (Hostel|Mess) Representative", p.get("role") or "")
-                if m:
-                    found[(m.group(1), m.group(2))] = p
-    out = {}
+def check_reps(por):
+    """Every hostel has an 'NH Hostel Representative' in the council list —
+    a "Contact the NH Rep" row links there, and must not land on nobody."""
+    roles = {p.get("role") for d in por.values() for s in d.get("sections", [])
+             for p in s.get("people", [])}
     for hid, _, _ in HOSTELS:
-        out[hid] = []
-        for kind in ("Hostel", "Mess"):
-            p = found.get((hid, kind))
-            if p is None:
-                die(f"por.json has no '{hid} {kind} Representative'")
-            out[hid].append({"role": f"{hid} {'Rep' if kind == 'Hostel' else 'Mess Rep'}",
-                             "name": p["name"], "phone": p.get("phone") or "",
-                             "email": p.get("email") or ""})
-    return out
+        if f"{hid} Hostel Representative" not in roles:
+            die(f"por.json has no '{hid} Hostel Representative'")
 
 
 def tuck_item(shop):
-    fees = sorted({z["fee"] for z in shop.get("zones", [])})
-    if fees:
-        d = f"Delivers, ₹{fees[0]}" + (f"–{fees[-1]}" if len(fees) > 1 else "")
-    elif shop.get("delivery"):
-        d = f"Room delivery ₹{shop['delivery']}"
-    else:
-        d = ""
+    # Whether it delivers, not what it charges: the menu screen works out the
+    # fee for the student's own hostel, and a range here only competes with it.
+    d = "Delivers" if shop.get("zones") or shop.get("delivery") else ""
     reach = TUCK_REACH.get(shop["tag"])
     if reach:
         d = f"{d} ({reach})" if d else reach
     return item(shop["name"], nums=split_phones(shop["name"], shop["phone"]),
                 hours=shop.get("hours", ""), delivery=d, menu="tuck")
-
-
-def night_item(h):
-    return item(f"{h['id'].upper()} Night Mess",
-                nums=split_phones(h["canteen"], h["phone"]),
-                hours=h.get("hours", ""),
-                delivery=f"Room service ₹{h['room_service']}" if h.get("room_service") else "",
-                menu="night")
 
 
 def correct(sheet, rows):
@@ -192,7 +181,7 @@ def correct(sheet, rows):
         hits = [r for r in rows if r["Role"] == role]
         if len(hits) != 1:
             die(f"correction for {s} {role}: {len(hits)} rows match, expected 1")
-        key = {"name": "Name"}[field]
+        key = {"name": "Name", "note": "Note"}[field]
         if hits[0][key] != wrong:
             die(f"correction for {s} {role} is stale: the sheet reads "
                 f"'{hits[0][key]}', not '{wrong}' ({why}). Update CORRECTIONS.")
@@ -202,10 +191,9 @@ def correct(sheet, rows):
 def build(path):
     wb = openpyxl.load_workbook(path, data_only=True)
     warnings = []
-    por, tuck, night = load("por.json"), load("tuck.json"), load("night-menu.json")
-    reps = reps_from_por(por)
+    por, tuck = load("por.json"), load("tuck.json")
+    check_reps(por)
     shops = {s["tag"]: s for s in tuck["shops"]}
-    canteens = {h["id"].upper(): h for h in night["hostels"]}
 
     # Doctor's week, strictly Monday to Sunday.
     week = read(wb["Doctor Hours"], ["Day", "Hours"])
@@ -226,13 +214,14 @@ def build(path):
     if not any("week" in m for m in medical):
         die(f"Medical: no '{DOCTOR_ROW}' row for the Doctor Hours sheet")
 
-    services = {}
+    services = []
     by_name = {}
+    known = [g for _, _, _, gs in GROUPS for g in gs]
     for r in read(wb["Services"], ["Group", "Name", "Person", "Phone", "Phone label",
                                     "Phone 2", "Phone 2 label", "Hours", "Delivery", "Note"]):
         if not r["Name"]:
             continue
-        if r["Group"] not in [g for g, _, _ in GROUPS]:
+        if r["Group"] not in known:
             die(f"Services: '{r['Name']}' is in unknown group '{r['Group']}'")
         it = item(r["Name"], r["Person"],
                   phones(r["Name"], (r["Phone"], r["Phone label"]), (r["Phone 2"], r["Phone 2 label"])),
@@ -240,31 +229,26 @@ def build(path):
         if not (it["phones"] or it["hours"] or it["note"]):
             warnings.append(f"Services: {r['Name']} has nothing to show, left out")
             continue
-        services.setdefault(r["Group"], []).append(it)
+        services.append((r["Group"], it))
         by_name[r["Name"]] = it
 
     places = []
-    for g, gid, label in GROUPS:
+    for gid, label, tab, groups in GROUPS:
         items = []
-        if g == "Store":
+        if "Store" in groups:
             items += [tuck_item(s) for s in tuck["shops"]]
-        # The night messes live under each hostel's tab only: Food is for the
-        # outlets anyone can walk to (the user's call, 2026-10-27).
-        items += services.get(g, [])
-        places.append({"id": gid, "label": label, "items": items})
+        items += [it for g, it in services if g in groups]
+        places.append({"id": gid, "label": label, "tab": tab, "items": items})
 
     hostels = []
     for hid, title, extra in HOSTELS:
         if hid not in wb.sheetnames:
             die(f"no '{hid}' sheet")
-        if hid not in canteens:
-            die(f"night-menu.json has no {hid} canteen")
         rows = read(wb[hid], ["Role", "Name", "Phone", "Phone label",
                               "Phone 2", "Phone 2 label", "Note"])
         rows = [r for r in rows if r["Role"]]
         correct(hid, rows)
-        hostel_rep = reps[hid][0]
-        items = [night_item(canteens[hid])]
+        items = []
         for ref in extra:
             kind, key = ref.split(":", 1)
             src = shops.get(key) if kind == "tuck" else by_name.get(key)
@@ -277,7 +261,9 @@ def build(path):
             if m:
                 if m.group(1).upper() != hid:
                     die(f"{hid} {r['Role']}: note sends you to the {m.group(1)} rep")
-                rep = {"name": hostel_rep["name"], "phone": hostel_rep["phone"]}
+                # Which hostel's rep, not their number: the screen links to
+                # them in POR details, so a new rep needs no rebuild here.
+                rep = hid
             it = item(r["Role"], r["Name"],
                       phones(f"{hid} {r['Role']}", (r["Phone"], r["Phone label"]),
                              (r["Phone 2"], r["Phone 2 label"])),
@@ -286,7 +272,7 @@ def build(path):
                 warnings.append(f"{hid}: {r['Role']} is blank on the sheet, left out")
                 continue
             items.append(it)
-        hostels.append({"id": hid, "name": title, "reps": reps[hid], "items": items})
+        hostels.append({"id": hid, "name": title, "items": items})
 
     # One number, one contact. Two names on a number means one of them is a
     # copy-paste slip — or the same person spelled twice, as the electrician was.

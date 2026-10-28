@@ -394,9 +394,10 @@ def campus():
         "",
         "Not in this workbook, on purpose:",
         "The hostel and mess reps, the four night messes, Mohan Da and the WH "
-        "tuck shop. The build copies them from the POR sheet, the night menu "
-        "and the tuck shop workbook, which are the one place each number is "
-        "written. Rebuild campus.json after rebuilding any of those.",
+        "tuck shop. The build copies the tuck shops from the tuck shop "
+        "workbook, the one place each number is written; the reps and night "
+        "messes are not shown on this screen. Rebuild campus.json after "
+        "rebuilding tuck.json.",
         "",
         "Columns are found by heading:",
         "Order does not matter, but the headings must read as below.",
@@ -408,16 +409,18 @@ def campus():
         "",
         "Doctor Hours:",
         "Monday to Sunday, in that order, one row each. They belong to the "
-        "Medical row named 'Doctor'.",
+        "Medical row named 'Doctor', whose numbers are left blank: the "
+        "screen shows the doctor's timings only.",
         "",
         "Services:",
-        "Group is Store, Food or Services (shown as Shops, Food, Sports). "
+        "Group is Store, Food or Services. Store and Food show together as "
+        "Tuck Shops and Food, Services as Sports. "
         "Delivery reads Yes, No, or a short phrase kept as written.",
         "",
         "Hostel sheets:",
-        "A Note reading 'Contact the OH Rep' (or NH, LVH, WH) gets that "
-        "hostel's rep and their number shown beside it. A row with no number "
-        "and no note is left out and reported.",
+        "A Note reading 'Contact the OH Rep' (or NH, LVH, WH) gets a link to "
+        "that hostel's rep in POR details. A row with no number and no note is "
+        "left out and reported.",
         "",
         "Corrections:",
         "Cells known to be wrong in the source sheet are fixed in a list "
@@ -433,7 +436,7 @@ def campus():
 
     sheet(wb, "Medical", ["Name", "Phone", "Phone 2", "Note"],
           [["Medical Unit", "9876543210", "", ""],
-           ["Doctor", "9876543211", "9876543212", ""]],
+           ["Doctor", "", "", ""]],
           widths=[24, 16, 16, 30])
     sheet(wb, "Doctor Hours", ["Day", "Hours"],
           [[d, "9:00 AM - 5:00 PM"] for d in

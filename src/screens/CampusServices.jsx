@@ -13,15 +13,25 @@ import { prettyPhone, telHref, whatsAppHref } from "../lib/phone";
  * mail forms know it, but keeps the other three a tap away — the electrician
  * you need is sometimes in a friend's hostel.
  */
+// The POR list the hostel reps are in.
+const REP_LIST = "student-council";
+
 const TABS = [
   { id: "medical", label: "Medical" },
-  ...PLACES.map((p) => ({ id: p.id, label: p.label })),
+  ...PLACES.map((p) => ({ id: p.id, label: p.tab ?? p.label })),
   { id: "hostel", label: "Hostel" },
 ];
 
-export default function CampusServices({ now = new Date(), onOpen, start = "medical" }) {
+export default function CampusServices({ now = new Date(), onOpen, start = "medical", startHostel }) {
   const [tab, setTab] = useState(start);
-  const [hostel, setHostel] = useState(() => hostelTab(readStudent().hostel));
+  const [hostel, setHostel] = useState(() => hostelTab(startHostel ?? readStudent().hostel));
+  // Back from the rep in POR details lands on this same hostel tab.
+  const openRep = onOpen && ((hid) => onOpen("por", {
+    from: "campus",
+    path: [REP_LIST],
+    query: `${hid} Hostel Representative`,
+    back: { tab: "hostel", hostel },
+  }));
   const place = PLACES.find((p) => p.id === tab);
   const h = HOSTELS.find((x) => x.id === hostel);
 
@@ -47,16 +57,28 @@ export default function CampusServices({ now = new Date(), onOpen, start = "medi
         // Call only, no WhatsApp: for an ambulance or a doctor a message
         // that may be read in an hour is the wrong button to offer.
         <section className="por-section">
-          {MEDICAL.map((it) => (
-            <Row key={it.name} it={it} callOnly>
-              {it.week && <DoctorWeek week={it.week} today={dayName(now)} />}
-            </Row>
-          ))}
+          {/* The doctor's own numbers are not shown (the user's call,
+              2026-10-28), so that row is the week alone, first. */}
+          {MEDICAL.map((it) => (it.week && it.phones.length === 0
+            ? (
+              <div key={it.name} className="por-row campus-row">
+                <DoctorWeek week={it.week} today={dayName(now)} />
+              </div>
+            )
+            : (
+              <Row key={it.name} it={it} callOnly>
+                {it.week && <DoctorWeek week={it.week} today={dayName(now)} />}
+              </Row>
+            )))}
         </section>
       )}
 
       {place && (
         <section className="por-section">
+          {/* The tab's name is cut short to fit; the heading gives it whole. */}
+          {place.tab && place.tab !== place.label && (
+            <h3 className="por-section-head">{place.label}</h3>
+          )}
           {place.items.map((it) => (
             <Row key={it.name} it={it} onOpen={onOpen} />
           ))}
@@ -81,15 +103,8 @@ export default function CampusServices({ now = new Date(), onOpen, start = "medi
           {h && (
             <section className="por-section">
               <h3 className="por-section-head">{h.name}</h3>
-              {h.reps.map((r) => (
-                <Row
-                  key={r.role}
-                  it={{ name: r.role, person: r.name, email: r.email,
-                        phones: r.phone ? [{ number: r.phone, label: "" }] : [] }}
-                />
-              ))}
               {h.items.map((it, i) => (
-                <Row key={`${it.name}|${it.person}|${i}`} it={it} onOpen={onOpen} />
+                <Row key={`${it.name}|${it.person}|${i}`} it={it} onOpen={onOpen} onRep={openRep} />
               ))}
             </section>
           )}
@@ -100,7 +115,7 @@ export default function CampusServices({ now = new Date(), onOpen, start = "medi
 }
 
 /** One contact: what it is, who, when, and the numbers to tap. */
-function Row({ it, callOnly = false, onOpen, children }) {
+function Row({ it, callOnly = false, onOpen, onRep, children }) {
   const facts = [it.hours, it.delivery].filter(Boolean);
   return (
     <div className="por-row campus-row">
@@ -122,19 +137,22 @@ function Row({ it, callOnly = false, onOpen, children }) {
             {it.menu === "tuck" ? "Order from the menu" : "Order from the night menu"} →
           </button>
         )}
+        {/* "Contact the OH Rep" is only useful with a way to reach them. A
+            link to the rep in POR details rather than a copy of their number,
+            which would go stale the day the rep changes. */}
+        {it.rep && onRep && (
+          <button className="campus-menu" onClick={() => onRep(it.rep)}>
+            {it.rep} Rep in POR details →
+          </button>
+        )}
       </div>
 
-      {(it.phones.length > 0 || it.rep) && (
+      {it.phones.length > 0 && (
         <div className="campus-phones">
           {it.phones.map((p) => (
             <Numbers key={p.number} phone={p.number} label={p.label}
                      name={it.person || it.name} callOnly={callOnly} />
           ))}
-          {/* "Contact the OH Rep" is only useful with the rep's number beside
-              it, so the sheet's instruction carries it. */}
-          {it.rep && (
-            <Numbers phone={it.rep.phone} label={`Rep · ${it.rep.name}`} name={it.rep.name} />
-          )}
         </div>
       )}
       {children}
@@ -170,7 +188,7 @@ function Numbers({ phone, label, name, callOnly = false }) {
 function DoctorWeek({ week, today }) {
   return (
     <div className="mess-timings campus-week">
-      <div className="mess-everyday-head">Doctor available</div>
+      <div className="mess-everyday-head">Doctor timings</div>
       <div className="campus-week-grid">
         {week.map((d) => (
           <div key={d.day} className={`campus-day${d.day === today ? " today" : ""}`}>

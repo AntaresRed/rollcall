@@ -12,7 +12,7 @@ Medical · Doctor Hours · Services · NH · OH · LVH · WH
 
 **Not in this workbook, on purpose:**
 
-The hostel and mess reps, the four night messes, Mohan Da and the WH tuck shop. The build copies them from the POR sheet, the night menu and the tuck shop workbook, which are the one place each number is written. Rebuild campus.json after rebuilding any of those.
+The hostel and mess reps, the four night messes, Mohan Da and the WH tuck shop. The build copies the tuck shops from the tuck shop workbook, the one place each number is written; the reps and night messes are not shown on this screen. Rebuild campus.json after rebuilding tuck.json.
 
 
 
@@ -30,19 +30,19 @@ Ten digits starting 6-9. Anything else stops the build — a typo'd number is a 
 
 **Doctor Hours:**
 
-Monday to Sunday, in that order, one row each. They belong to the Medical row named 'Doctor'.
+Monday to Sunday, in that order, one row each. They belong to the Medical row named 'Doctor', whose numbers are left blank: the screen shows the doctor's timings only.
 
 
 
 **Services:**
 
-Group is Store, Food or Services (shown as Shops, Food, Sports). Delivery reads Yes, No, or a short phrase kept as written.
+Group is Store, Food or Services. Store and Food show together as Tuck Shops and Food, Services as Sports. Delivery reads Yes, No, or a short phrase kept as written.
 
 
 
 **Hostel sheets:**
 
-A Note reading 'Contact the OH Rep' (or NH, LVH, WH) gets that hostel's rep and their number shown beside it. A row with no number and no note is left out and reported.
+A Note reading 'Contact the OH Rep' (or NH, LVH, WH) gets a link to that hostel's rep in POR details. A row with no number and no note is left out and reported.
 
 
 

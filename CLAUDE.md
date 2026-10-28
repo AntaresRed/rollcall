@@ -32,7 +32,7 @@ npm run build    # eslint + all tests + vite build — run before saying anythin
 npm run smoke    # tests only
 ```
 
-`npm run build` must end with `125/125 screens rendered` and `all logic checks passed`.
+`npm run build` must end with `126/126 screens rendered` and `all logic checks passed`.
 
 The app needs `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and
 `VITE_VAPID_PUBLIC_KEY` (see `.env.example`). Screens that need sign-in can't be
@@ -72,11 +72,12 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   It is the only place a room's directions are written. Rule tabs (`NAB
   hallways`, `CDPO groups`) cover every number in a series and floor, listed
   or not. Only `Confirmed` rows ship; a draft stops the build.
-- Campus & Hostel Services (medical, shops, food, sports, hostel staff):
+- Campus & Hostel Services (medical, tuck shops and food, sports, hostel staff):
   `Campus/Campus Contacts.xlsx` → `build_campus.py` → `campus.json`. The
-  workbook leaves out the reps, night messes and tuck shops; the build copies
-  them from `por.json`, `night-menu.json` and `tuck.json`, and `test/logic.mjs`
-  fails until `campus.json` is rebuilt after any of those three changes.
+  workbook leaves out the reps, night messes and tuck shops. The build copies
+  the tuck shops from `tuck.json`, and `test/logic.mjs` fails until
+  `campus.json` is rebuilt after it changes. Reps and night messes aren't
+  shown; a "Contact the OH Rep" row links to that rep in POR details.
 - **POR dashboard** (`supabase/por-dashboard.sql`): role accounts listed in
   `por_access` (nhmessrep@, pgprep@ …) sign in to the dashboard and nothing
   else, and publish over the bundled JSON. Every publish is a new row in

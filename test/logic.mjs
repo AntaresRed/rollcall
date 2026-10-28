@@ -56,7 +56,6 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import catalogue from "../src/data/catalogue.json";
 import porJson from "../src/data/por.json";
-import nightJson from "../src/data/night-menu.json";
 import tuckJson from "../src/data/tuck.json";
 import { MEDICAL, PLACES, HOSTELS as CAMPUS_HOSTELS, hostelTab, dayName } from "../src/lib/campus.js";
 import cataloguePgp1 from "../src/data/catalogue-pgp1.json";
@@ -3397,38 +3396,37 @@ console.log("\nGmail refusing a draft for its size");
 
 console.log("\ncampus & hostel services");
 {
-  // campus.json copies the reps, night messes and tuck shops at build time.
-  // A rebuild of por.json, night-menu.json or tuck.json without one of
-  // campus.json would leave two numbers for one counter — fail instead.
+  // campus.json copies the tuck shops at build time. A rebuild of tuck.json
+  // without one of campus.json would leave two numbers for one counter —
+  // fail instead.
   const nums = (text) => String(text ?? "").split("/").map((p) => p.replace(/\D/g, "")).filter(Boolean).join();
-  const people = Object.values(porJson).flatMap((d) => (d.sections ?? []).flatMap((s) => s.people));
-  const roleOf = { Rep: "Hostel Representative", "Mess Rep": "Mess Representative" };
-  check("every hostel's reps match POR details", CAMPUS_HOSTELS.every((h) => h.reps.length === 2
-    && h.reps.every((r) => {
-      const p = people.find((x) => x.role === `${h.id} ${roleOf[r.role.slice(h.id.length + 1)]}`);
-      return p && p.name === r.name && (p.phone ?? "") === r.phone && (p.email ?? "") === r.email;
-    })));
-
   const items = [...PLACES.flatMap((p) => p.items), ...CAMPUS_HOSTELS.flatMap((h) => h.items)];
-  const night = items.filter((i) => i.menu === "night");
-  check("every night mess matches the night menu", night.length > 0 && night.every((i) => {
-    const c = nightJson.hostels.find((h) => `${h.id.toUpperCase()} Night Mess` === i.name);
-    return c && nums(c.phone) === i.phones.map((p) => p.number).join() && c.hours === i.hours;
-  }));
   const tuck = items.filter((i) => i.menu === "tuck");
   check("every tuck shop matches its menu", tuck.length > 0 && tuck.every((i) => {
     const s = tuckJson.shops.find((x) => x.name === i.name);
     return s && nums(s.phone) === i.phones.map((p) => p.number).join() && s.hours === i.hours;
   }));
-  check("each hostel lists its own night mess",
-    CAMPUS_HOSTELS.every((h) => h.items.some((i) => i.name === `${h.id} Night Mess`)));
-  check("and only there, not under Food",
-    !PLACES.some((p) => p.items.some((i) => i.menu === "night")));
-  check("a 'contact the rep' row carries that hostel's rep",
-    CAMPUS_HOSTELS.every((h) => h.items.filter((i) => i.rep)
-      .every((i) => i.rep.phone === h.reps[0].phone)));
+  // The night messes and reps have screens of their own, and were dropped
+  // from this one (2026-10-28).
+  check("no night mess is listed", !items.some((i) => i.menu === "night"));
+  check("no hostel lists its reps", CAMPUS_HOSTELS.every((h) => !("reps" in h)));
+  check("nor are delivery charges shown — the menu works them out",
+    items.every((i) => !/₹/.test(i.delivery)));
+  // A "contact the rep" row links to POR details with a search for that rep.
+  // It must find the one person, or the link lands on a list to scroll.
+  const repRows = CAMPUS_HOSTELS.flatMap((h) => h.items.filter((i) => i.rep).map((i) => [h.id, i.rep]));
+  check("'contact the rep' rows name their own hostel",
+    repRows.length > 0 && repRows.every(([hid, rep]) => hid === rep));
+  check("and the search they open finds exactly that rep",
+    CAMPUS_HOSTELS.every((h) => {
+      const found = searchPor("student-council", `${h.id} Hostel Representative`)
+        .flatMap((s) => s.people);
+      return found.length === 1 && found[0].role === `${h.id} Hostel Representative`;
+    }));
 
   const doctor = MEDICAL.find((m) => m.week);
+  check("the doctor shows timings, no numbers", doctor?.phones.length === 0);
+  check("and comes first in Medical", MEDICAL[0] === doctor);
   check("the doctor's week runs Monday to Sunday",
     doctor?.week.map((d) => d.day).join() === "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday");
   check("27 Oct 2026 is a Tuesday", dayName(new Date(2026, 9, 27, 12)) === "Tuesday");

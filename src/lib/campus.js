@@ -4,9 +4,9 @@ import CAMPUS from "../data/campus.json";
  * Medical help, shops, food, facilities and each hostel's staff — the campus
  * info sheet, built by scripts/build_campus.py.
  *
- * The reps, night messes and tuck shops in it are copies of por.json,
- * night-menu.json and tuck.json taken at build time; test/logic.mjs holds
- * the two sides together.
+ * The tuck shops in it are copies of tuck.json taken at build time;
+ * test/logic.mjs holds the two sides together. A "Contact the OH Rep" row
+ * names only the hostel, and the screen links to that rep in POR details.
  */
 
 export const MEDICAL = CAMPUS.medical;

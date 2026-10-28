@@ -14,9 +14,11 @@ import { prettyPhone, telHref, whatsAppHref } from "../lib/phone";
  * sub-screens wired into App — the nesting belongs to this feature, not to the
  * app's navigation.
  */
-export default function PorDetails({ onBack }) {
-  const [path, setPath] = useState([]);
-  const [query, setQuery] = useState("");
+// `start` opens on one list with a search already typed — Campus Services
+// sends "Contact the OH Rep" here, straight to that rep.
+export default function PorDetails({ onBack, start = null }) {
+  const [path, setPath] = useState(() => start?.path ?? []);
+  const [query, setQuery] = useState(() => start?.query ?? "");
 
   const node = nodeAt(path);
   // A path that no longer resolves falls back to the top menu rather than
