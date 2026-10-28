@@ -72,7 +72,7 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   It is the only place a room's directions are written. Rule tabs (`NAB
   hallways`, `CDPO groups`) cover every number in a series and floor, listed
   or not. Only `Confirmed` rows ship; a draft stops the build.
-- Campus & Hostel Services (medical, tuck shops and food, sports, hostel staff):
+- Campus & Hostel Services (medical, all shops & food, sports, hostel staff):
   `Campus/Campus Contacts.xlsx` → `build_campus.py` → `campus.json`. The
   workbook leaves out the reps, night messes and tuck shops. The build copies
   the tuck shops from `tuck.json`, and `test/logic.mjs` fails until

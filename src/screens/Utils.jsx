@@ -37,7 +37,7 @@ const GROUPS = [
     "Professors, the council, clubs and captains, and the batch directory.",
     ContactsIcon],
   ["campus", "Campus & Hostel Services",
-    "Doctor timings, ambulance and pharmacies, tuck shops and food, gym and "
+    "Doctor timings, ambulance, pharmacies and cabs, shops and food, gym and "
     + "court hours, and each hostel's electrician and laundry.",
     CampusIcon],
   ["mail", "Mail Services",

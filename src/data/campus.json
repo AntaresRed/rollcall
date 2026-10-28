@@ -148,13 +148,32 @@
       "note": "",
       "rep": null,
       "menu": null
+    },
+    {
+      "name": "DA Student Cabs",
+      "person": "",
+      "phones": [
+        {
+          "number": "6291109163",
+          "label": ""
+        },
+        {
+          "number": "8240255808",
+          "label": ""
+        }
+      ],
+      "hours": "7 AM - 11 PM, daily",
+      "delivery": "",
+      "note": "",
+      "rep": null,
+      "menu": null
     }
   ],
   "places": [
     {
       "id": "shops",
-      "label": "Tuck Shops and Food",
-      "tab": "Tuck & Food",
+      "label": "All Shops & Food",
+      "tab": "All Shops & Food",
       "items": [
         {
           "name": "Mohan Da",
@@ -329,25 +348,6 @@
       "name": "New Hostel",
       "items": [
         {
-          "name": "Kotler Da",
-          "person": "",
-          "phones": [
-            {
-              "number": "9831387694",
-              "label": "Day, till 7:30 PM"
-            },
-            {
-              "number": "6289290960",
-              "label": "Night"
-            }
-          ],
-          "hours": "11 AM - 4 AM",
-          "delivery": "No delivery",
-          "note": "",
-          "rep": null,
-          "menu": null
-        },
-        {
           "name": "Electrician",
           "person": "",
           "phones": [],
@@ -408,25 +408,6 @@
       "id": "OH",
       "name": "Ramanujan Hostel",
       "items": [
-        {
-          "name": "Mohan Da",
-          "person": "",
-          "phones": [
-            {
-              "number": "8100294443",
-              "label": ""
-            },
-            {
-              "number": "8240698156",
-              "label": ""
-            }
-          ],
-          "hours": "10:00 AM - 10:00 PM",
-          "delivery": "Delivers",
-          "note": "",
-          "rep": null,
-          "menu": "tuck"
-        },
         {
           "name": "Electrician",
           "person": "Soumen Roy",
@@ -529,21 +510,6 @@
       "name": "Lake View Hostel",
       "items": [
         {
-          "name": "LVH Tuck Shop",
-          "person": "Deepu Da",
-          "phones": [
-            {
-              "number": "8981243401",
-              "label": ""
-            }
-          ],
-          "hours": "10 AM - 4 AM",
-          "delivery": "",
-          "note": "",
-          "rep": null,
-          "menu": null
-        },
-        {
           "name": "Electrician",
           "person": "Prasad Da / Mallik Da",
           "phones": [
@@ -627,21 +593,6 @@
       "id": "WH",
       "name": "White Hostel",
       "items": [
-        {
-          "name": "Tagore Tuck Shop",
-          "person": "",
-          "phones": [
-            {
-              "number": "7602416780",
-              "label": ""
-            }
-          ],
-          "hours": "10:00 AM - 10:00 PM",
-          "delivery": "Delivers (WH only)",
-          "note": "",
-          "rep": null,
-          "menu": "tuck"
-        },
         {
           "name": "Electrician",
           "person": "Soumen Roy",

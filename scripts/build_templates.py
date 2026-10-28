@@ -412,9 +412,13 @@ def campus():
         "Medical row named 'Doctor', whose numbers are left blank: the "
         "screen shows the doctor's timings only.",
         "",
+        "Medical:",
+        "Rows show in sheet order. Hours is for a contact that keeps hours "
+        "(the student cabs); leave it blank otherwise.",
+        "",
         "Services:",
         "Group is Store, Food or Services. Store and Food show together as "
-        "Tuck Shops and Food, Services as Sports. "
+        "All Shops & Food, Services as Sports. "
         "Delivery reads Yes, No, or a short phrase kept as written.",
         "",
         "Hostel sheets:",
@@ -434,10 +438,11 @@ def campus():
         "job. A real filled-in workbook builds cleanly.",
     ], name="Campus Contacts.template.xlsx")
 
-    sheet(wb, "Medical", ["Name", "Phone", "Phone 2", "Note"],
-          [["Medical Unit", "9876543210", "", ""],
-           ["Doctor", "", "", ""]],
-          widths=[24, 16, 16, 30])
+    sheet(wb, "Medical", ["Name", "Phone", "Phone 2", "Note", "Hours"],
+          [["Medical Unit", "9876543210", "", "", ""],
+           ["Doctor", "", "", "", ""],
+           ["A Cab", "9876543211", "", "", "7 AM - 11 PM, daily"]],
+          widths=[24, 16, 16, 30, 24])
     sheet(wb, "Doctor Hours", ["Day", "Hours"],
           [[d, "9:00 AM - 5:00 PM"] for d in
            ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]],

@@ -34,9 +34,15 @@ Monday to Sunday, in that order, one row each. They belong to the Medical row na
 
 
 
+**Medical:**
+
+Rows show in sheet order. Hours is for a contact that keeps hours (the student cabs); leave it blank otherwise.
+
+
+
 **Services:**
 
-Group is Store, Food or Services. Store and Food show together as Tuck Shops and Food, Services as Sports. Delivery reads Yes, No, or a short phrase kept as written.
+Group is Store, Food or Services. Store and Food show together as All Shops & Food, Services as Sports. Delivery reads Yes, No, or a short phrase kept as written.
 
 
 

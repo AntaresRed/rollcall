@@ -3410,6 +3410,10 @@ console.log("\ncampus & hostel services");
   // from this one (2026-10-28).
   check("no night mess is listed", !items.some((i) => i.menu === "night"));
   check("no hostel lists its reps", CAMPUS_HOSTELS.every((h) => !("reps" in h)));
+  // Every shop is under All Shops & Food; a hostel tab is its own staff only.
+  const shopNames = new Set(PLACES.flatMap((p) => p.items.map((i) => i.name)));
+  check("no hostel repeats a shop", CAMPUS_HOSTELS.every((h) =>
+    h.items.every((i) => !i.menu && !shopNames.has(i.name))));
   check("nor are delivery charges shown — the menu works them out",
     items.every((i) => !/₹/.test(i.delivery)));
   // A "contact the rep" row links to POR details with a search for that rep.

@@ -18,7 +18,7 @@ one place each is written, and test/logic.mjs fails if campus.json falls
 behind it. Rebuild this after rebuilding tuck.json. The night messes and reps
 are not shown here at all.
 
-  Medical        Name | Phone | Phone 2 | Note
+  Medical        Name | Phone | Phone 2 | Note | Hours
   Doctor Hours   Day | Hours                (Monday to Sunday, the "Doctor" row's)
   Services       Group | Name | Person | Phone | Phone label | Phone 2 |
                  Phone 2 label | Hours | Delivery | Note
@@ -47,23 +47,22 @@ DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday",
 DOCTOR_ROW = "Doctor"
 
 # Screen tab -> its heading, its tab label and the Services sheet groups it
-# shows, in sheet order. Shops and food are one tab: a tuck shop is where you
-# get food at night, and the user merged them (2026-10-28). The tuck shops
-# from tuck.json lead it. The heading is the user's name for it; the tab is
-# shorter because four tabs share a 360px phone.
-GROUPS = [("shops", "Tuck Shops and Food", "Tuck & Food", ["Store", "Food"]),
+# shows, in sheet order. Shops and food are one tab, every shop on campus in
+# it, and the user named it (2026-10-28). The tuck shops from tuck.json lead
+# it. A tab label shorter than the heading is shown with the heading above
+# the list; four tabs share a 360px phone.
+GROUPS = [("shops", "All Shops & Food", "All Shops & Food", ["Store", "Food"]),
           ("sports", "Sports", "Sports", ["Services"])]
 
-# Hostel tabs, as the sheet titles them, and the shop each hostel's tab lists
-# under its own staff. "tuck:" rows come from tuck.json, "services:" from the
-# Services sheet. Night messes and reps are left out: they have their own
-# screens (the night menu, POR details), and the user dropped them here
+# Hostel tabs, as the sheet titles them. Only the hostel's own staff: its tuck
+# shop is under All Shops & Food, and the night mess and reps have screens of
+# their own (the night menu, POR details) — the user dropped all three here
 # (2026-10-28).
 HOSTELS = [
-    ("NH", "New Hostel", ["services:Kotler Da"]),
-    ("OH", "Ramanujan Hostel", ["tuck:MOHANDA"]),
-    ("LVH", "Lake View Hostel", ["services:LVH Tuck Shop"]),
-    ("WH", "White Hostel", ["tuck:TAGORE"]),
+    ("NH", "New Hostel"),
+    ("OH", "Ramanujan Hostel"),
+    ("LVH", "Lake View Hostel"),
+    ("WH", "White Hostel"),
 ]
 
 # What the Services sheet says about a tuck shop's reach that tuck.json has no
@@ -158,7 +157,7 @@ def check_reps(por):
     a "Contact the NH Rep" row links there, and must not land on nobody."""
     roles = {p.get("role") for d in por.values() for s in d.get("sections", [])
              for p in s.get("people", [])}
-    for hid, _, _ in HOSTELS:
+    for hid, _ in HOSTELS:
         if f"{hid} Hostel Representative" not in roles:
             die(f"por.json has no '{hid} Hostel Representative'")
 
@@ -193,7 +192,6 @@ def build(path):
     warnings = []
     por, tuck = load("por.json"), load("tuck.json")
     check_reps(por)
-    shops = {s["tag"]: s for s in tuck["shops"]}
 
     # Doctor's week, strictly Monday to Sunday.
     week = read(wb["Doctor Hours"], ["Day", "Hours"])
@@ -203,11 +201,11 @@ def build(path):
         die("Doctor Hours: a day has no hours")
 
     medical = []
-    for r in read(wb["Medical"], ["Name", "Phone", "Phone 2", "Note"]):
+    for r in read(wb["Medical"], ["Name", "Phone", "Phone 2", "Note", "Hours"]):
         if not r["Name"]:
             continue
         it = item(r["Name"], nums=phones(r["Name"], (r["Phone"], ""), (r["Phone 2"], "")),
-                  note=r["Note"])
+                  hours=r["Hours"], note=r["Note"])
         if r["Name"] == DOCTOR_ROW:
             it["week"] = [{"day": w["Day"], "hours": w["Hours"]} for w in week]
         medical.append(it)
@@ -215,7 +213,6 @@ def build(path):
         die(f"Medical: no '{DOCTOR_ROW}' row for the Doctor Hours sheet")
 
     services = []
-    by_name = {}
     known = [g for _, _, _, gs in GROUPS for g in gs]
     for r in read(wb["Services"], ["Group", "Name", "Person", "Phone", "Phone label",
                                     "Phone 2", "Phone 2 label", "Hours", "Delivery", "Note"]):
@@ -230,7 +227,6 @@ def build(path):
             warnings.append(f"Services: {r['Name']} has nothing to show, left out")
             continue
         services.append((r["Group"], it))
-        by_name[r["Name"]] = it
 
     places = []
     for gid, label, tab, groups in GROUPS:
@@ -241,7 +237,7 @@ def build(path):
         places.append({"id": gid, "label": label, "tab": tab, "items": items})
 
     hostels = []
-    for hid, title, extra in HOSTELS:
+    for hid, title in HOSTELS:
         if hid not in wb.sheetnames:
             die(f"no '{hid}' sheet")
         rows = read(wb[hid], ["Role", "Name", "Phone", "Phone label",
@@ -249,12 +245,6 @@ def build(path):
         rows = [r for r in rows if r["Role"]]
         correct(hid, rows)
         items = []
-        for ref in extra:
-            kind, key = ref.split(":", 1)
-            src = shops.get(key) if kind == "tuck" else by_name.get(key)
-            if src is None:
-                die(f"{hid}: '{ref}' is not in {'tuck.json' if kind == 'tuck' else 'Services'}")
-            items.append(tuck_item(src) if kind == "tuck" else src)
         for r in rows:
             m = CONTACT_REP.search(r["Note"])
             rep = None
