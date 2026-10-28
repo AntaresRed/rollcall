@@ -419,8 +419,8 @@
           ],
           "hours": "",
           "delivery": "",
-          "note": "For all issues Contact the OH Rep",
-          "rep": "OH",
+          "note": "",
+          "rep": null,
           "menu": null
         },
         {
@@ -451,11 +451,16 @@
         {
           "name": "Housekeeping Incharge",
           "person": "",
-          "phones": [],
+          "phones": [
+            {
+              "number": "7044698331",
+              "label": ""
+            }
+          ],
           "hours": "",
           "delivery": "",
-          "note": "Contact the OH Rep",
-          "rep": "OH",
+          "note": "",
+          "rep": null,
           "menu": null
         },
         {

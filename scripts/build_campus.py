@@ -83,6 +83,15 @@ CORRECTIONS = [
      "the rep stands in for the admin"),
     ("LVH", "Housekeeping Incharge", "note", "Contact LVH rep or LVH admin", "Contact LVH Rep",
      "the rep stands in for the admin"),
+    # OH, from the user (2026-10-28): the electrician and housekeeping are
+    # reached directly; only plumbing still goes through the rep (there is no
+    # permanent plumber), and its row stays as printed.
+    ("OH", "Electrician", "note", "For all issues Contact the OH Rep", "",
+     "Soumen Roy is called directly"),
+    ("OH", "Housekeeping Incharge", "phone", "", "7044698331",
+     "the sheet gave no number, only the rep"),
+    ("OH", "Housekeeping Incharge", "note", "Contact the OH Rep", "",
+     "reached on their own number now"),
 ]
 
 MOBILE = re.compile(r"[6-9]\d{9}")
@@ -180,7 +189,7 @@ def correct(sheet, rows):
         hits = [r for r in rows if r["Role"] == role]
         if len(hits) != 1:
             die(f"correction for {s} {role}: {len(hits)} rows match, expected 1")
-        key = {"name": "Name", "note": "Note"}[field]
+        key = {"name": "Name", "note": "Note", "phone": "Phone"}[field]
         if hits[0][key] != wrong:
             die(f"correction for {s} {role} is stale: the sheet reads "
                 f"'{hits[0][key]}', not '{wrong}' ({why}). Update CORRECTIONS.")
