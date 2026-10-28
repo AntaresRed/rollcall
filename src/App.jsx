@@ -28,6 +28,7 @@ import InstallBanner from "./InstallBanner";
 import NoSchedule from "./screens/NoSchedule";
 import { TodayIcon, TimetableIcon, UtilsIcon, ProfileIcon } from "./screens/TabIcons";
 import Today from "./screens/Today";
+import ScrollCue from "./screens/ScrollCue";
 import { screen, ScreenLoading, ScreenBoundary } from "./screens/ScreenLoad";
 
 // Each screen's code arrives on first use. Timetable, Utils and Profile are
@@ -1123,6 +1124,9 @@ export default function App() {
         </Suspense>
         </ScreenBoundary>
       </div>
+
+      {/* The fade and arrow over the foot of a page with more below it. */}
+      <ScrollCue />
 
       <nav className="tabs" role="tablist" ref={setNav}>
         {TABS.map(([key, label, Icon]) => (

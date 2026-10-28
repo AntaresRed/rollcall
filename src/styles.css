@@ -790,6 +790,47 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 .tab:focus-visible { outline-offset: -3px; }
 .tab:focus-visible { outline-offset: -3px; }
 
+/* ScrollCue: the foot of a page with more below it fades into the paper,
+   with an arrow that bobs in the fade. Under the tab bar's z-index and the
+   cart pill's, so neither is ever covered. The fade lets taps through to
+   the rows beneath it. */
+.scroll-fade {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: var(--nav-h, 64px);
+  height: 72px;
+  z-index: 20;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--paper) 85%);
+  transition: opacity 0.25s;
+}
+.scroll-more {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-h, 64px) + 4px);
+  z-index: 21;
+  width: 44px;
+  height: 36px;
+  margin-left: -22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--signal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.25s;
+}
+.scroll-fade.gone,
+.scroll-more.gone { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-more svg { animation: scroll-bob 1.6s ease-in-out infinite; }
+}
+@keyframes scroll-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(5px); }
+}
+
 .toast {
   position: fixed;
   left: 50%;
