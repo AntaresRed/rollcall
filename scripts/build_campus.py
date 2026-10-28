@@ -248,8 +248,8 @@ def build(path):
         items = []
         if g == "Store":
             items += [tuck_item(s) for s in tuck["shops"]]
-        if g == "Food":
-            items += [night_item(canteens[h]) for h, _, _ in HOSTELS]
+        # The night messes live under each hostel's tab only: Food is for the
+        # outlets anyone can walk to (the user's call, 2026-10-27).
         items += services.get(g, [])
         places.append({"id": gid, "label": label, "items": items})
 

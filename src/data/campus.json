@@ -269,89 +269,6 @@
       "label": "Food",
       "items": [
         {
-          "name": "NH Night Mess",
-          "person": "",
-          "phones": [
-            {
-              "number": "9038103742",
-              "label": ""
-            }
-          ],
-          "hours": "11:00 PM - 4:00 AM",
-          "delivery": "Room service ₹5",
-          "note": "",
-          "rep": null,
-          "menu": "night"
-        },
-        {
-          "name": "OH Night Mess",
-          "person": "",
-          "phones": [
-            {
-              "number": "9874886704",
-              "label": ""
-            },
-            {
-              "number": "7687917536",
-              "label": ""
-            }
-          ],
-          "hours": "11:00 PM - 4:00 AM",
-          "delivery": "Room service ₹5",
-          "note": "",
-          "rep": null,
-          "menu": "night"
-        },
-        {
-          "name": "LVH Night Mess",
-          "person": "",
-          "phones": [
-            {
-              "number": "9330797259",
-              "label": ""
-            }
-          ],
-          "hours": "11:00 PM - 4:00 AM",
-          "delivery": "Room service ₹5",
-          "note": "",
-          "rep": null,
-          "menu": "night"
-        },
-        {
-          "name": "WH Night Mess",
-          "person": "",
-          "phones": [
-            {
-              "number": "9875555920",
-              "label": ""
-            }
-          ],
-          "hours": "11:00 PM - 4:00 AM",
-          "delivery": "Room service ₹5",
-          "note": "",
-          "rep": null,
-          "menu": "night"
-        },
-        {
-          "name": "Nescafe",
-          "person": "",
-          "phones": [
-            {
-              "number": "8100771914",
-              "label": ""
-            },
-            {
-              "number": "8584938378",
-              "label": ""
-            }
-          ],
-          "hours": "4 PM - 3:30 AM",
-          "delivery": "Delivers to hostels",
-          "note": "",
-          "rep": null,
-          "menu": null
-        },
-        {
           "name": "Machaan",
           "person": "",
           "phones": [
@@ -365,21 +282,6 @@
             }
           ],
           "hours": "8:30 AM - 3 PM, 6 PM - 9:30 PM",
-          "delivery": "Delivers to hostels",
-          "note": "",
-          "rep": null,
-          "menu": null
-        },
-        {
-          "name": "Subway",
-          "person": "",
-          "phones": [
-            {
-              "number": "9836317222",
-              "label": ""
-            }
-          ],
-          "hours": "11 AM - 10 PM",
           "delivery": "Delivers to hostels",
           "note": "",
           "rep": null,

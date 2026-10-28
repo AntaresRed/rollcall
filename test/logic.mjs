@@ -3422,6 +3422,8 @@ console.log("\ncampus & hostel services");
   }));
   check("each hostel lists its own night mess",
     CAMPUS_HOSTELS.every((h) => h.items.some((i) => i.name === `${h.id} Night Mess`)));
+  check("and only there, not under Food",
+    !PLACES.some((p) => p.items.some((i) => i.menu === "night")));
   check("a 'contact the rep' row carries that hostel's rep",
     CAMPUS_HOSTELS.every((h) => h.items.filter((i) => i.rep)
       .every((i) => i.rep.phone === h.reps[0].phone)));
