@@ -423,8 +423,9 @@ def campus():
         "",
         "Hostel sheets:",
         "A Note reading 'Contact the OH Rep' (or NH, LVH, WH) gets a link to "
-        "that hostel's rep in POR details. A row with no number and no note is "
-        "left out and reported.",
+        "that hostel's rep in POR details, and reads 'Contact OH Rep or write "
+        "in OH book' on screen. A note with anything more in it stops the "
+        "build. A row with no number and no note is left out and reported.",
         "",
         "Corrections:",
         "Cells known to be wrong in the source sheet are fixed in a list "

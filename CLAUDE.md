@@ -50,7 +50,7 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   `build_por.py`, `SECTIONS` / `SPLITS` / `NOT_SPLIT` in `build_tuck.py`,
   `SPLITS` in `build_night_menu.py`, `NAME_FIXES` / `DEAN_NAMES` /
   `STRAY_TITLES` / `ROOM_FIXES` / `EXTRA_PEOPLE` in `build_directory_tsv.py`,
-  `ALIASES` in `build_rooms.py`, `CORRECTIONS` in `build_campus.py`, and
+  `ALIASES` in `build_rooms.py`, `CORRECTIONS` / `SHARED` in `build_campus.py`, and
   `data/overrides.json` for schedule
   amendments. When one goes stale the build fails **on purpose**. Update the
   entry against the source; never weaken the check.

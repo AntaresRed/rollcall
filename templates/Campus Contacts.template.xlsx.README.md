@@ -48,7 +48,7 @@ Group is Store, Food or Services. Store and Food show together as All Shops & Fo
 
 **Hostel sheets:**
 
-A Note reading 'Contact the OH Rep' (or NH, LVH, WH) gets a link to that hostel's rep in POR details. A row with no number and no note is left out and reported.
+A Note reading 'Contact the OH Rep' (or NH, LVH, WH) gets a link to that hostel's rep in POR details, and reads 'Contact OH Rep or write in OH book' on screen. A note with anything more in it stops the build. A row with no number and no note is left out and reported.
 
 
 

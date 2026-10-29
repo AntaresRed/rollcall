@@ -3414,6 +3414,10 @@ console.log("\ncampus & hostel services");
   const shopNames = new Set(PLACES.flatMap((p) => p.items.map((i) => i.name)));
   check("no hostel repeats a shop", CAMPUS_HOSTELS.every((h) =>
     h.items.every((i) => !i.menu && !shopNames.has(i.name))));
+  // One electrician serves the whole campus: the same row in every hostel.
+  const electricians = CAMPUS_HOSTELS.map((h) => h.items.find((i) => i.name === "Campus Electrician"));
+  check("every hostel lists the campus electrician", electricians.every(Boolean)
+    && electricians.every((e) => JSON.stringify(e) === JSON.stringify(electricians[0])));
   check("nor are delivery charges shown — the menu works them out",
     items.every((i) => !/₹/.test(i.delivery)));
   // A "contact the rep" row links to POR details with a search for that rep.
@@ -3421,6 +3425,9 @@ console.log("\ncampus & hostel services");
   const repRows = CAMPUS_HOSTELS.flatMap((h) => h.items.filter((i) => i.rep).map((i) => [h.id, i.rep]));
   check("'contact the rep' rows name their own hostel",
     repRows.length > 0 && repRows.every(([hid, rep]) => hid === rep));
+  check("and say the hostel's book is the other way in",
+    CAMPUS_HOSTELS.every((h) => h.items.filter((i) => i.rep)
+      .every((i) => i.note === `Contact ${h.id} Rep or write in ${h.id} book`)));
   check("and the search they open finds exactly that rep",
     CAMPUS_HOSTELS.every((h) => {
       const found = searchPor("student-council", `${h.id} Hostel Representative`)

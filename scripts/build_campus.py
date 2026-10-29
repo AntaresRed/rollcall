@@ -94,8 +94,23 @@ CORRECTIONS = [
      "reached on their own number now"),
 ]
 
+# Staff who serve every hostel, by number. The rows carrying it are renamed,
+# and a hostel whose sheet lacks one gets a copy at the top: the OH and WH
+# sheets list Soumen Roy as their own electrician, but he is the campus's
+# (the user, 2026-10-29). A hostel's own electrician, where it has one, stays.
+SHARED = [
+    # (name shown, number, why)
+    ("Campus Electrician", "8777313186", "one electrician for every hostel"),
+]
+
 MOBILE = re.compile(r"[6-9]\d{9}")
 CONTACT_REP = re.compile(r"\bcontact (?:the )?(NH|OH|LVH|WH) rep\b", re.I)
+
+# How a "Contact the OH Rep" note reads on screen, whatever the sheet's
+# wording: the hostel's complaint book is the other way in (the user,
+# 2026-10-29). Only a note that is nothing but that instruction is reworded;
+# one with more in it stops the build rather than losing the rest.
+REP_NOTE = "Contact {h} Rep or write in {h} book"
 
 
 def norm(v):
@@ -260,9 +275,13 @@ def build(path):
             if m:
                 if m.group(1).upper() != hid:
                     die(f"{hid} {r['Role']}: note sends you to the {m.group(1)} rep")
+                if m.group(0) != r["Note"].strip().rstrip("."):
+                    die(f"{hid} {r['Role']}: note '{r['Note']}' says more than "
+                        f"'contact the rep' — decide its wording in CORRECTIONS")
                 # Which hostel's rep, not their number: the screen links to
                 # them in POR details, so a new rep needs no rebuild here.
                 rep = hid
+                r["Note"] = REP_NOTE.format(h=hid)
             it = item(r["Role"], r["Name"],
                       phones(f"{hid} {r['Role']}", (r["Phone"], r["Phone label"]),
                              (r["Phone 2"], r["Phone 2 label"])),
@@ -272,6 +291,21 @@ def build(path):
                 continue
             items.append(it)
         hostels.append({"id": hid, "name": title, "items": items})
+
+    for name, number, why in SHARED:
+        hits = [it for h in hostels for it in h["items"]
+                if any(p["number"] == number for p in it["phones"])]
+        if not hits:
+            die(f"SHARED '{name}': no hostel sheet has {number} any more ({why}). Update SHARED.")
+        for it in hits:
+            it["name"] = name
+        first = hits[0]
+        if any((it["person"], it["phones"], it["note"]) != (first["person"], first["phones"], first["note"])
+               for it in hits):
+            die(f"SHARED '{name}': the hostel sheets disagree about {number}")
+        for h in hostels:
+            if not any(it["name"] == name for it in h["items"]):
+                h["items"].insert(0, json.loads(json.dumps(first)))
 
     # One number, one contact. Two names on a number means one of them is a
     # copy-paste slip — or the same person spelled twice, as the electrician was.

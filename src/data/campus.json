@@ -210,6 +210,21 @@
           "menu": "tuck"
         },
         {
+          "name": "NH Xerox Shop",
+          "person": "",
+          "phones": [
+            {
+              "number": "9831516852",
+              "label": ""
+            }
+          ],
+          "hours": "Usually 10 AM - 9 PM",
+          "delivery": "",
+          "note": "",
+          "rep": null,
+          "menu": null
+        },
+        {
           "name": "Kotler Da",
           "person": "",
           "phones": [
@@ -276,21 +291,6 @@
           "note": "",
           "rep": null,
           "menu": null
-        },
-        {
-          "name": "Co-operative Store",
-          "person": "",
-          "phones": [
-            {
-              "number": "9163077640",
-              "label": ""
-            }
-          ],
-          "hours": "4 PM - 8 PM",
-          "delivery": "No delivery",
-          "note": "",
-          "rep": null,
-          "menu": null
         }
       ]
     },
@@ -348,6 +348,21 @@
       "name": "New Hostel",
       "items": [
         {
+          "name": "Campus Electrician",
+          "person": "Soumen Roy",
+          "phones": [
+            {
+              "number": "8777313186",
+              "label": ""
+            }
+          ],
+          "hours": "",
+          "delivery": "",
+          "note": "",
+          "rep": null,
+          "menu": null
+        },
+        {
           "name": "Electrician",
           "person": "",
           "phones": [],
@@ -363,7 +378,7 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact NH Rep",
+          "note": "Contact NH Rep or write in NH book",
           "rep": "NH",
           "menu": null
         },
@@ -373,7 +388,7 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact NH Rep",
+          "note": "Contact NH Rep or write in NH book",
           "rep": "NH",
           "menu": null
         },
@@ -383,7 +398,7 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact NH Rep",
+          "note": "Contact NH Rep or write in NH book",
           "rep": "NH",
           "menu": null
         },
@@ -409,7 +424,7 @@
       "name": "Ramanujan Hostel",
       "items": [
         {
-          "name": "Electrician",
+          "name": "Campus Electrician",
           "person": "Soumen Roy",
           "phones": [
             {
@@ -429,7 +444,7 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact the OH Rep",
+          "note": "Contact OH Rep or write in OH book",
           "rep": "OH",
           "menu": null
         },
@@ -515,6 +530,21 @@
       "name": "Lake View Hostel",
       "items": [
         {
+          "name": "Campus Electrician",
+          "person": "Soumen Roy",
+          "phones": [
+            {
+              "number": "8777313186",
+              "label": ""
+            }
+          ],
+          "hours": "",
+          "delivery": "",
+          "note": "",
+          "rep": null,
+          "menu": null
+        },
+        {
           "name": "Electrician",
           "person": "Prasad Da / Mallik Da",
           "phones": [
@@ -539,7 +569,7 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact LVH Rep",
+          "note": "Contact LVH Rep or write in LVH book",
           "rep": "LVH",
           "menu": null
         },
@@ -569,7 +599,7 @@
           ],
           "hours": "",
           "delivery": "",
-          "note": "Contact LVH Rep",
+          "note": "Contact LVH Rep or write in LVH book",
           "rep": "LVH",
           "menu": null
         },
@@ -599,7 +629,7 @@
       "name": "White Hostel",
       "items": [
         {
-          "name": "Electrician",
+          "name": "Campus Electrician",
           "person": "Soumen Roy",
           "phones": [
             {
@@ -619,7 +649,7 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact WH Rep",
+          "note": "Contact WH Rep or write in WH book",
           "rep": "WH",
           "menu": null
         },
@@ -629,7 +659,7 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact WH Rep",
+          "note": "Contact WH Rep or write in WH book",
           "rep": "WH",
           "menu": null
         },
@@ -639,7 +669,7 @@
           "phones": [],
           "hours": "",
           "delivery": "",
-          "note": "Contact WH Rep",
+          "note": "Contact WH Rep or write in WH book",
           "rep": "WH",
           "menu": null
         },
