@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, itemLine,
+  CANTEENS, canteenById, filterMenu, countItems, basketFor, orderText, itemLine,
   similarItems, DIET_FILTERS, DIET_LABEL,
 } from "../lib/nightmenu";
 import { telHref, whatsAppHref, prettyPhone } from "../lib/phone";
@@ -11,13 +11,16 @@ import { UNTOUCHED, messageOf, withAdded } from "../lib/finalmessage";
 import FinalMessage from "./FinalMessage";
 
 /**
- * The night canteens — a priced list per hostel, with a basket.
+ * The night canteens — a list per hostel, with a basket.
  *
  * Read at 1am to decide what to order, which shapes everything here. There is
  * a search box because two hundred and fifty items is too many to scroll, a
  * diet filter because "is there anything vegetarian" is the question a third
- * of the batch opens this asking, and a basket because the next thing anybody
- * does after finding four items is add up what they cost.
+ * of the batch opens this asking, and a basket because four items found are
+ * four items to send in one message.
+ *
+ * No prices: they changed faster than the card could be re-typed. The
+ * photographed pages carry them, and the counter has the final word.
  *
  * The basket does NOT place an order. It writes the order out and hands it to
  * WhatsApp, where the student reads it and presses send themselves. Anything
@@ -90,12 +93,12 @@ export default function NightMessMenu() {
 
   // The basket only ever belongs to the canteen on screen. Memoised because
   // the empty case would otherwise hand back a fresh array every render and
-  // re-run the bill below it each time.
+  // re-run the count below it each time.
   const lines = useMemo(
     () => (cart.canteen === canteen?.id ? cart.lines : EMPTY),
     [cart, canteen],
   );
-  const bill = useMemo(() => billFor(canteen, lines), [canteen, lines]);
+  const basket = useMemo(() => basketFor(lines), [lines]);
   const qtyOf = (name) => lines.find((l) => l.name === name)?.qty ?? 0;
 
   // Escape closes the basket, which is what a dialog is expected to do and the
@@ -114,7 +117,7 @@ export default function NightMessMenu() {
       const at = mine.findIndex((l) => l.name === item.name);
       const next = [...mine];
       if (at < 0) {
-        if (by > 0) next.push({ name: item.name, price: item.price, qty: by });
+        if (by > 0) next.push({ name: item.name, qty: by });
       } else {
         const qty = next[at].qty + by;
         if (qty <= 0) next.splice(at, 1);
@@ -125,7 +128,7 @@ export default function NightMessMenu() {
       if (!next.length) return { ...prev, canteen: canteen.id, lines: next, ...UNTOUCHED };
       const draft = same ? { final: prev.final ?? null, finalBase: prev.finalBase ?? "" } : UNTOUCHED;
       const kept = at < 0 && by > 0
-        ? withAdded(draft, itemLine({ name: item.name, qty: by }), orderText(canteen, next, {
+        ? withAdded(draft, itemLine({ name: item.name, qty: by }), orderText(next, {
           reg: prev.reg ?? "", room: prev.room ?? "", notes: prev.notes ?? "",
         }))
         : draft;
@@ -155,7 +158,7 @@ export default function NightMessMenu() {
     .filter((d) => /^[6-9]\d{9}$/.test(d));
   // What the basket writes out, and what will actually be sent — the same
   // until the student edits the final message.
-  const written = orderText(canteen, bill.items, {
+  const written = orderText(basket.items, {
     reg: cart.reg ?? "", room: cart.room ?? "", notes: cart.notes ?? "",
   });
   const message = messageOf(cart, written);
@@ -163,7 +166,7 @@ export default function NightMessMenu() {
   /** Recorded on the way out, because this is the last moment the app knows
    *  anything. */
   const sent = () => {
-    recordOrder(canteen, message, { kind: "night", total: bill.total });
+    recordOrder(canteen, message, { kind: "night" });
     track("order", `night:${canteen.id}`);
   };
 
@@ -196,15 +199,14 @@ export default function NightMessMenu() {
               ))
               : canteen.phone && <span>{canteen.phone}</span>}
             {canteen.hours && <span>{canteen.hours}</span>}
-            {canteen.room_service && <span>Room service ₹{canteen.room_service}</span>}
           </div>
         </div>
       )}
 
-      {/* The typed list is a transcription; the photograph is what the canteen
-          actually charges. That makes this the most important thing on screen
-          after the menu itself, so it is a filled button rather than a line of
-          text somebody scrolls past. */}
+      {/* The typed list is a transcription without prices; the photograph is
+          what the canteen actually charges. That makes this the most
+          important thing on screen after the menu itself, so it is a filled
+          button rather than a line of text somebody scrolls past. */}
       {canteen?.pages?.length > 0 && (
         <>
           <button
@@ -335,10 +337,9 @@ export default function NightMessMenu() {
                 <span className="night-item">
                   <Hit text={item.name} terms={terms} />
                 </span>
-                <span className="night-price">₹{item.price}</span>
                 {/* Fixed-width, whether it holds a plus or a stepper. The two
                     are different sizes, and letting the column breathe put
-                    every price at a different distance from the edge. */}
+                    every button at a different distance from the edge. */}
                 <span className="night-act">
                   {qty ? (
                     <span className="qty">
@@ -382,7 +383,6 @@ export default function NightMessMenu() {
                   {item.name}
                   <span className="night-from">{item.category}</span>
                 </span>
-                <span className="night-price">₹{item.price}</span>
                 <span className="night-act">
                   {qty ? (
                     <span className="qty">
@@ -417,7 +417,7 @@ export default function NightMessMenu() {
       {/* A dialog rather than a panel further down the page. The basket is a
           thing you finish and leave, and it asks for two things to type; both
           go badly with two hundred menu rows still scrolling underneath. */}
-      {showCart && bill.count > 0 && (
+      {showCart && basket.count > 0 && (
         <div
           className="modal-back"
           onClick={(e) => { if (e.target === e.currentTarget) setShowCart(false); }}
@@ -431,7 +431,7 @@ export default function NightMessMenu() {
             </div>
 
             <div className="modal-body">
-              {bill.items.map((i) => (
+              {basket.items.map((i) => (
                 <div className="cart-line" key={i.name}>
                   <span className="qty">
                     <button aria-label={`One fewer ${i.name}`} onClick={() => change(i, -1)}>−</button>
@@ -439,17 +439,8 @@ export default function NightMessMenu() {
                     <button aria-label={`One more ${i.name}`} onClick={() => change(i, 1)}>+</button>
                   </span>
                   <span className="cart-name">{i.name}</span>
-                  <span className="night-price">₹{i.total}</span>
                 </div>
               ))}
-
-              <div className="cart-sum">
-                <div><span>Subtotal</span><span>₹{bill.subtotal}</span></div>
-                {bill.delivery > 0 && (
-                  <div><span>Room service</span><span>₹{bill.delivery}</span></div>
-                )}
-                <div className="cart-grand"><span>Total</span><span>₹{bill.total}</span></div>
-              </div>
 
               {/* Two fields rather than one line of free text: the counter
                   reads the room to walk to and the registration number to
@@ -553,14 +544,13 @@ export default function NightMessMenu() {
 
       {/* Pinned, because the basket is what you are building towards and is
           otherwise a long scroll away from whatever you just added. */}
-      {bill.count > 0 && (
+      {basket.count > 0 && (
         <>
           <div className="cart-spacer" aria-hidden="true" />
           <div className="cart-dock">
             <button className="cart-open" onClick={() => setShowCart(true)}>
-              <span className="cart-count">{bill.count}</span>
+              <span className="cart-count">{basket.count}</span>
               View basket
-              <span className="cart-total">₹{bill.total}</span>
             </button>
           </div>
         </>

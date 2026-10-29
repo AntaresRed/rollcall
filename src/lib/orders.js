@@ -74,14 +74,13 @@ export function textOf(entry) {
  * renamed in the spreadsheet, and a history that silently retitles what you
  * ordered last month is worse than one that is a little out of date.
  */
-export function entryFor(shop, message, { kind = "night", total = 0, now = new Date() } = {}) {
+export function entryFor(shop, message, { kind = "night", now = new Date() } = {}) {
   return {
     at: now.toISOString(),
     kind: kind === "tuck" ? "tuck" : "night",
     canteen: shop?.id ?? null,
     where: shop?.name ?? "",
     message: String(message ?? "").trim(),
-    total: Number(total) || 0,
   };
 }
 
@@ -173,8 +172,8 @@ function write(list) {
 }
 
 /** Called at the moment the order is handed to WhatsApp. */
-export function recordOrder(shop, message, { kind = "night", total = 0, now = new Date() } = {}) {
-  return write(appendOrder(readOrders(now), entryFor(shop, message, { kind, total, now })));
+export function recordOrder(shop, message, { kind = "night", now = new Date() } = {}) {
+  return write(appendOrder(readOrders(now), entryFor(shop, message, { kind, now })));
 }
 
 export const clearOrders = () => write([]);
@@ -241,7 +240,7 @@ const cell = (v) => {
 
 const pad = (n) => String(n).padStart(2, "0");
 
-export const HISTORY_COLUMNS = ["Date", "Time", "Type", "From", "Message", "Basket total"];
+export const HISTORY_COLUMNS = ["Date", "Time", "Type", "From", "Message"];
 
 /** What the saved file is called. Dated, so exporting twice in a term leaves
  *  two files rather than a puzzle about which is which. */
@@ -270,7 +269,7 @@ export function toCsv(history) {
     const time = ok ? `${pad(d.getHours())}:${pad(d.getMinutes())}` : "";
     rows.push([
       date, time, KIND_LABEL[e?.kind ?? "night"] ?? "", e?.where ?? "",
-      textOf(e), e?.total || "",
+      textOf(e),
     ].map(cell).join(","));
   }
   return rows.join("\n");

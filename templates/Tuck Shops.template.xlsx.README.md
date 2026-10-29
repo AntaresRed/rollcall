@@ -8,25 +8,31 @@ Read by: scripts/build_tuck.py    Feeds: the Tuck shops tab
 
 One row per shop. 'Shop' must match the first word of that shop's menu sheet name. A shop with no phone number is fine — it is a counter you walk to — and the screen simply shows no call button rather than a dead one. Never borrow another shop's number.
 
-Delivery (Rs): what the shop charges to bring an order over. Leave blank for none. It is added to a basket that has something in it, shown as its own line at checkout, and spelled out in the WhatsApp message — never folded silently into the total.
+Delivers: Yes if the shop brings orders over, otherwise blank. A shop with rows in the Delivery sheet counts as Yes either way.
 
-UPI: the shop's own payment address, name@bank. A malformed one stops the build; a missing one simply means no pay button. Never derive one from a phone number — an address is registered, not calculated, and a guess sends real money to a stranger.
 
-Payment note: a warning shown in red above the pay buttons. Only for a stand-in payee during testing. Clear it before sharing.
+
+**The Delivery sheet (optional):**
+
+Shop | Location, one row per place a shop walks to. The places offered in the basket are every location named here, in the order they first appear.
+
+
+
+No prices, delivery fees or payment details anywhere in this workbook: they changed faster than anybody re-typed the card. Students read prices off the photographed card and pay the counter.
 
 
 
 **The menu sheets:**
 
-Named '<SHOP> Tuck'. Sl No., Item and Price must be spelled exactly. Diet is optional; see below.
+Named '<SHOP> Tuck'. Sl No. and Item must be spelled exactly. Diet is optional; see below.
 
 One flat list, no categories — that is how the card on the counter reads, and inventing sections here would be a shape the shop does not have.
 
 
 
-**Prices, exactly as printed:**
+**Items, exactly as printed:**
 
-Half this card is two prices for one item — '40 / 60' for without and with cheese, '45 (65)' the same idea in brackets. Type them as the card does. They are shown as written and never added up; there is no basket on this screen, so nothing has to decide which of the two you meant.
+Type each line as the card does, slashes and all — 'Paneer Masala Patty / with cheese' stays one row. SPLITS in build_tuck.py turns the lines that are really several dishes into one item each.
 
 
 

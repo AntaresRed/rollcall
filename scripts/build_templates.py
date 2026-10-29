@@ -176,12 +176,14 @@ def night_mess():
         "Every canteen needs its own number. Two canteens sharing one is "
         "caught by the test suite, because the screen looks perfectly right "
         "while orders walk to the wrong hostel.",
-        "Room service (Rs): the flat delivery charge. Leave blank for none.",
         "",
         "The menu sheets:",
-        "Named '<HOSTEL> Night Menu'. The four column headings — Category, "
-        "Item, Price, Diet — must be spelled exactly. Renaming one stops the "
-        "build and prints the header it actually read.",
+        "Named '<HOSTEL> Night Menu'. The three column headings — Category, "
+        "Item, Diet — must be spelled exactly. Renaming one stops the build "
+        "and prints the header it actually read.",
+        "No prices, and no room-service charge: they changed faster than "
+        "anybody re-typed the card. Students read prices off the photographed "
+        "menu below, or ask the counter.",
         "",
         "Diet — only these three words:",
         "veg        no meat, no egg",
@@ -192,49 +194,39 @@ def night_mess():
         "with a hollow dot, and the build lists them at the end so they can "
         "be chased. Nothing is ever assumed vegetarian.",
         "",
-        "Price:",
-        "A whole number. A dish sold in two sizes may be written '22/25'; "
-        "the basket adds up using the first figure.",
-        "",
         "Categories:",
         "Keep each category's rows together. The app builds its sections in "
         "the order categories first appear, so a category split across two "
         "blocks becomes two sections with the same name.",
-        "",
-        "The shop's payment QR (optional):",
-        "Drop the shop's own printed QR at public/tuck/<shop>.png, lowercase. "
-        "It is discovered from the folder, so no spreadsheet change is needed. "
-        "Send the shop's own image rather than asking for one to be generated "
-        "from the UPI address: encoding a payment instruction wrongly pays the "
-        "wrong person, and the code on the counter already works.",
         "",
         "The photographed menu (optional, but do send it):",
         "Photograph the menu on the wall and send the images alongside. They "
         "go in public/menu/night/ named <hostel>-1.jpg, <hostel>-2.jpg and "
         "so on — lowercase. The app discovers them from the folder, so no "
         "spreadsheet change is needed. A canteen with no photos simply shows "
-        "no 'See Original Menu' button.",
+        "no 'See Original Menu' button — and then the counter is the only "
+        "place a student can find a price.",
     ], name="Night Mess Menu.template.xlsx")
 
     sheet(wb, "Info",
-          ["Hostel", "Canteen", "Phone", "Hours", "Room service (Rs)"],
+          ["Hostel", "Canteen", "Phone", "Hours"],
           [["NH", "New Hostel Night Canteen", "9876543210",
-            "11:00 PM - 4:00 AM", 5],
+            "11:00 PM - 4:00 AM"],
            ["WH", "W.H Night Cafeteria (Tagore)", "9123456780 / 9988776655",
-            "11:00 PM - 4:00 AM", 5]],
-          widths=[10, 34, 26, 22, 18],
+            "11:00 PM - 4:00 AM"]],
+          widths=[10, 34, 26, 22],
           note="One row per canteen. Hostel must match the menu sheet name.")
 
     for tag in ["NH", "WH"]:
         sheet(wb, f"{tag} Night Menu",
-              ["Category", "Item", "Price", "Diet"],
-              [["Roll", "Veg Roll", 43, "veg"],
-               ["Roll", "Egg Roll", 55, "egg"],
-               ["Roll", "Chicken Roll", 56, "non-veg"],
-               ["Momos", "Veg Steam Momo", 60, "veg"],
-               ["Momos", "Chicken Steam Momo", 100, "non-veg"],
-               ["Beverages", "Cold Drink", "22/25", "veg"]],
-              widths=[24, 34, 12, 14],
+              ["Category", "Item", "Diet"],
+              [["Roll", "Veg Roll", "veg"],
+               ["Roll", "Egg Roll", "egg"],
+               ["Roll", "Chicken Roll", "non-veg"],
+               ["Momos", "Veg Steam Momo", "veg"],
+               ["Momos", "Chicken Steam Momo", "non-veg"],
+               ["Beverages", "Cold Drink", "veg"]],
+              widths=[24, 34, 14],
               note="Six example rows — replace them. Keep each category's "
                    "rows together.")
     save(wb, "Night Mess Menu.template.xlsx")
@@ -252,30 +244,29 @@ def tuck():
         "menu sheet name. A shop with no phone number is fine — it is a "
         "counter you walk to — and the screen simply shows no call button "
         "rather than a dead one. Never borrow another shop's number.",
-        "Delivery (Rs): what the shop charges to bring an order over. Leave "
-        "blank for none. It is added to a basket that has something in it, "
-        "shown as its own line at checkout, and spelled out in the WhatsApp "
-        "message — never folded silently into the total.",
-        "UPI: the shop's own payment address, name@bank. A malformed one "
-        "stops the build; a missing one simply means no pay button. Never "
-        "derive one from a phone number — an address is registered, not "
-        "calculated, and a guess sends real money to a stranger.",
-        "Payment note: a warning shown in red above the pay buttons. Only "
-        "for a stand-in payee during testing. Clear it before sharing.",
+        "Delivers: Yes if the shop brings orders over, otherwise blank. A "
+        "shop with rows in the Delivery sheet counts as Yes either way.",
+        "",
+        "The Delivery sheet (optional):",
+        "Shop | Location, one row per place a shop walks to. The places offered "
+        "in the basket are every location named here, in the order they "
+        "first appear.",
+        "",
+        "No prices, delivery fees or payment details anywhere in this "
+        "workbook: they changed faster than anybody re-typed the card. "
+        "Students read prices off the photographed card and pay the counter.",
         "",
         "The menu sheets:",
-        "Named '<SHOP> Tuck'. Sl No., Item and Price must be spelled exactly. "
+        "Named '<SHOP> Tuck'. Sl No. and Item must be spelled exactly. "
         "Diet is optional; see below.",
         "One flat list, no categories — that is how the card on the counter "
         "reads, and inventing sections here would be a shape the shop does "
         "not have.",
         "",
-        "Prices, exactly as printed:",
-        "Half this card is two prices for one item — '40 / 60' for without "
-        "and with cheese, '45 (65)' the same idea in brackets. Type them as "
-        "the card does. They are shown as written and never added up; there "
-        "is no basket on this screen, so nothing has to decide which of the "
-        "two you meant.",
+        "Items, exactly as printed:",
+        "Type each line as the card does, slashes and all — 'Paneer Masala "
+        "Patty / with cheese' stays one row. SPLITS in build_tuck.py turns "
+        "the lines that are really several dishes into one item each.",
         "",
         "Sl No.:",
         "Kept as printed, gaps and all. The card handed over skips 27, 29-31, "
@@ -291,20 +282,23 @@ def tuck():
     ], name="Tuck Shops.template.xlsx")
 
     sheet(wb, "Info",
-          ["Shop", "Name", "Phone", "Hours", "Delivery (Rs)", "UPI", "Payment note"],
-          [["MOHANDA", "Mohan Da", "8100294443", "", "", "mohanda@okaxis", ""],
-           ["TAGORE", "Tagore Tuck Shop", "7602416780", "", 6, "shop@ybl", ""]],
-          widths=[14, 26, 18, 20, 15, 24, 34])
+          ["Shop", "Name", "Phone", "Hours", "Delivers"],
+          [["MOHANDA", "Mohan Da", "8100294443", "", ""],
+           ["TAGORE", "Tagore Tuck Shop", "7602416780", "", "Yes"]],
+          widths=[14, 26, 18, 20, 12])
 
     for tag in ["MOHANDA", "TAGORE"]:
-        sheet(wb, f"{tag} Tuck", ["Sl No.", "Item", "Price", "Diet"],
-              [[1, "Plain Cheese Sandwich Grilled", "40", ""],
-               [2, "Veg Cheese Sandwich Grilled", "60", ""],
-               [13, "Paneer Masala Patty / with cheese", "40 / 60", ""],
-               [22, "Double Egg Bread Omelet (Cheese)", "45 (65)", ""],
-               [44, "Masala Rice (Veg / Egg / Chicken / Paneer)",
-                "50 / 70 / 75 / 75", ""]],
-              widths=[10, 52, 20, 12])
+        sheet(wb, f"{tag} Tuck", ["Sl No.", "Item", "Diet"],
+              [[1, "Plain Cheese Sandwich Grilled", ""],
+               [2, "Veg Cheese Sandwich Grilled", ""],
+               [13, "Paneer Masala Patty / with cheese", ""],
+               [22, "Double Egg Bread Omelet (Cheese)", ""],
+               [44, "Masala Rice (Veg / Egg / Chicken / Paneer)", ""]],
+              widths=[10, 52, 12])
+
+    sheet(wb, "Delivery", ["Shop", "Location"],
+          [["MOHANDA", "NH"], ["MOHANDA", "OH"], ["MOHANDA", "LVH"]],
+          widths=[14, 22])
     save(wb, "Tuck Shops.template.xlsx")
 
 

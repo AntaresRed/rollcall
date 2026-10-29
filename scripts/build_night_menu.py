@@ -7,12 +7,16 @@ Build src/data/night-menu.json — the night canteen menus.
 
 A sibling of build_menu.py, not a branch inside it, because the two menus are
 different things wearing the same word. The day mess is a week: seven days,
-four meals, no prices. The night canteens are shops: a few hundred priced
-items grouped by category, the same list every night.
+four meals. The night canteens are shops: a few hundred items grouped by
+category, the same list every night.
 
 Sheets:
-  Info              Hostel | Canteen | Phone | Hours | Room service (Rs)
-  <TAG> Night Menu  Category | Item | Price | Diet
+  Info              Hostel | Canteen | Phone | Hours
+  <TAG> Night Menu  Category | Item | Diet
+
+No prices, on purpose. The canteens re-price faster than anybody re-types the
+card, and a stale number on screen was an argument at the counter waiting to
+happen. The photographed pages are where a price is read now.
 
 `Diet` is the column the app's veg filter reads. It is data rather than
 something derived at render time on purpose: guessing from a name is right
@@ -30,7 +34,7 @@ import sys
 import openpyxl
 
 DIETS = {"veg", "egg", "non-veg"}
-COLUMNS = ["Category", "Item", "Price", "Diet"]
+COLUMNS = ["Category", "Item", "Diet"]
 
 
 def norm(v):
@@ -56,7 +60,7 @@ def read_info(ws):
 
     ci = {k: col(*n) for k, n in {
         "id": ("hostel",), "canteen": ("canteen",), "phone": ("phone",),
-        "hours": ("hours",), "service": ("room service", "service"),
+        "hours": ("hours",),
     }.items()}
     if ci["id"] is None:
         die("Info sheet has no Hostel column")
@@ -71,7 +75,6 @@ def read_info(ws):
             "canteen": get("canteen"),
             "phone": get("phone"),
             "hours": get("hours"),
-            "room_service": get("service"),
         }
     return out
 
@@ -95,7 +98,7 @@ def read_menu(ws):
     cats, order, unknown = {}, [], []
     for r in rows[1:]:
         get = lambda k: r[idx[k]] if idx[k] < len(r) else ""
-        cat, item, price, diet = (get(c) for c in COLUMNS)
+        cat, item, diet = (get(c) for c in COLUMNS)
         if not item:
             continue
         if not cat:
@@ -107,15 +110,11 @@ def read_menu(ws):
             # vegetarian on the strength of a blank cell.
             unknown.append(f"{cat} / {item}" + (f" ({diet})" if diet else ""))
             diet = "unknown"
-        # A clean number stays a number; "22/25" and "7/8" are real prices
-        # the canteens print for two sizes, so those stay as written.
-        if re.fullmatch(r"\d+(\.\d+)?", price):
-            price = int(float(price))
 
         if cat not in cats:
             cats[cat] = []
             order.append(cat)
-        cats[cat].append({"name": item, "price": price, "diet": diet})
+        cats[cat].append({"name": item, "diet": diet})
 
     return [{"name": c, "items": split_items(cats[c])} for c in order], unknown
 
@@ -124,10 +123,9 @@ def read_menu(ws):
 #
 # Printed lines offering a straight choice, written as one item.
 #
-# Only where the two really are separate things to order. The price is the
-# same either way, so this buys nothing at the till — what it buys is a menu
-# somebody can search: typing "cold coffee" now finds the coffee instead of
-# being offered it as a near miss.
+# Only where the two really are separate things to order. What it buys is a
+# menu somebody can search: typing "cold coffee" now finds the coffee instead
+# of being offered it as a near miss.
 #
 # What is NOT here matters more. The canteens abbreviate with a slash too:
 # "Veg S/C Soup" is Sweet Corn and "Chicken H/S Soup" is Hot and Sour, so
@@ -145,7 +143,7 @@ SPLITS = {
 
 
 def split_items(items):
-    """Expand the one-line choices, keeping each half at the printed price."""
+    """Expand the one-line choices into one item each."""
     out = []
     for item in items:
         names = SPLITS.get(item["name"])

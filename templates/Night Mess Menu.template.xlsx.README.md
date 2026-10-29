@@ -12,13 +12,13 @@ Phone: ten digits. Two numbers may be written as '9876543210 / 9123456780' — t
 
 Every canteen needs its own number. Two canteens sharing one is caught by the test suite, because the screen looks perfectly right while orders walk to the wrong hostel.
 
-Room service (Rs): the flat delivery charge. Leave blank for none.
-
 
 
 **The menu sheets:**
 
-Named '<HOSTEL> Night Menu'. The four column headings — Category, Item, Price, Diet — must be spelled exactly. Renaming one stops the build and prints the header it actually read.
+Named '<HOSTEL> Night Menu'. The three column headings — Category, Item, Diet — must be spelled exactly. Renaming one stops the build and prints the header it actually read.
+
+No prices, and no room-service charge: they changed faster than anybody re-typed the card. Students read prices off the photographed menu below, or ask the counter.
 
 
 
@@ -34,24 +34,12 @@ Anything else, including a blank, is carried through as 'unconfirmed'. Those ite
 
 
 
-**Price:**
-
-A whole number. A dish sold in two sizes may be written '22/25'; the basket adds up using the first figure.
-
-
-
 **Categories:**
 
 Keep each category's rows together. The app builds its sections in the order categories first appear, so a category split across two blocks becomes two sections with the same name.
 
 
 
-**The shop's payment QR (optional):**
-
-Drop the shop's own printed QR at public/tuck/<shop>.png, lowercase. It is discovered from the folder, so no spreadsheet change is needed. Send the shop's own image rather than asking for one to be generated from the UPI address: encoding a payment instruction wrongly pays the wrong person, and the code on the counter already works.
-
-
-
 **The photographed menu (optional, but do send it):**
 
-Photograph the menu on the wall and send the images alongside. They go in public/menu/night/ named <hostel>-1.jpg, <hostel>-2.jpg and so on — lowercase. The app discovers them from the folder, so no spreadsheet change is needed. A canteen with no photos simply shows no 'See Original Menu' button.
+Photograph the menu on the wall and send the images alongside. They go in public/menu/night/ named <hostel>-1.jpg, <hostel>-2.jpg and so on — lowercase. The app discovers them from the folder, so no spreadsheet change is needed. A canteen with no photos simply shows no 'See Original Menu' button — and then the counter is the only place a student can find a price.

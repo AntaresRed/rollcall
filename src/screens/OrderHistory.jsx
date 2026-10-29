@@ -36,8 +36,8 @@ export default function OrderHistory({ onBack, now = new Date() }) {
   /**
    * The same rows, as a file.
    *
-   * A spreadsheet is what people actually want this for — totalling a month,
-   * splitting a bill — and a `.csv` opens straight into Excel, Sheets and
+   * A spreadsheet is what people actually want this for — looking back over
+   * a month, working out who ordered what — and a `.csv` opens straight into Excel, Sheets and
    * Numbers with its columns intact. A real `.xlsx` would need a library
    * several times the size of this whole app to say the same thing.
    */
@@ -124,15 +124,6 @@ export default function OrderHistory({ onBack, now = new Date() }) {
                   record, so it is shown the way it was sent rather than
                   re-laid out as a list the app would be guessing at. */}
               <p className="history-msg">{textOf(order)}</p>
-
-              {/* The basket's figure, not the message's: once the message can
-                  be edited the two can differ, so it says which it is. */}
-              {order.total > 0 && (
-                <div className="history-foot">
-                  <span>Basket total</span>
-                  <span className="history-total">₹{order.total}</span>
-                </div>
-              )}
             </div>
             );
           })}

@@ -2,7 +2,7 @@
 
 A React + Vite PWA for IIM Calcutta students: weekly timetable from the published
 schedule, push alerts before class, attendance against the 75% line, plus mess
-menus, night-canteen and tuck-shop ordering over WhatsApp with UPI payment, and
+menus, night-canteen and tuck-shop ordering over WhatsApp, and
 faculty / POR / student contact directories. Backend is Supabase (Postgres, RLS,
 Edge Functions, pg_cron). Deployed on Vercel.
 
@@ -58,9 +58,9 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
   Splits and grouping happen in the build script, and split items keep their
   original serial number.
 - Photos are found by filename, not listed anywhere:
-  `public/menu/night/<tag>-<n>.jpg`, `public/menu/tuck/<tag>-<n>.jpg`,
-  `public/tuck/<tag>.png` (payment QR). A shop or canteen with no photos simply
-  hides its "See original menu" button.
+  `public/menu/night/<tag>-<n>.jpg`, `public/menu/tuck/<tag>-<n>.jpg`. A shop
+  or canteen with no photos simply hides its "See original menu" button — and
+  the photos are the only place a student sees a price (see House rules).
 - Faculty directory: the MBA office's workbook (`Faculty Directory 2026
   -2027_Updated - Copy.xlsx`) is the source of truth. `build_directory_tsv.py`
   flattens it into `FacultyDirectory.tsv`, which feeds `build_directory.py`
@@ -100,10 +100,13 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
 - **Slashes are not always choices.** `S/C` (Sweet Corn), `H/S` (Hot & Sour) and
   `S/W` (Sandwich) are abbreviations and must never be split. Splits are named
   lists, never a pattern.
-- **Prices** stay as printed strings (`"40 / 60"`, `"45 (65)"`).
+- **No prices, charges or payment in the app** (removed 2026-10-29): they
+  changed faster than the cards could be re-typed. Menu items, room service,
+  delivery fees, basket totals and UPI pay are all gone, from the workbooks
+  and templates too; `test/logic.mjs` fails if a price comes back in the JSON.
+  The pre-removal workbooks are `*.before-2026-10-29.xlsx` beside the live ones.
 - **Cohorts** are the graduating year parsed from the email. `null` means
   unknown. It must never be treated as "unfiltered".
-- **UPI:** only a shop's own address or QR. Never derive or guess one.
 - **Reschedules:** a `session_overrides` row with no `new_date` means
   "rescheduled, date not decided" — the app no longer cancels classes, and
   older rows once labelled "cancelled" are read the same way. It raises no

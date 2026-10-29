@@ -14,17 +14,15 @@ import { validateDayMess, cleanDayMess, datasetsFrom, datasetTitle, KINDS, WEEK,
 import { setLiveDatasets, setLiveDataset, liveDataset, planSync, applySync, restoreSavedLive,
   saveLive, resetLive } from "../src/lib/live.js";
 import { syncLive } from "../src/lib/livesync.js";
-import { CANTEENS, canteenById, filterMenu, countItems, billFor, orderText, DIET_FILTERS,
+import { CANTEENS, canteenById, filterMenu, countItems, basketFor, orderText, DIET_FILTERS,
   similarity, similarItems, SIMILAR_ENOUGH } from "../src/lib/nightmenu.js";
 import { entryFor, appendOrder, textOf, isRepeat, dayLabel, clockOf, byDay, prune,
   toCsv, withoutOrder, historyFilename, CAP, KEEP_DAYS } from "../src/lib/orders.js";
 import { insertLine, messageOf, edited, withAdded, isBehind, UNTOUCHED } from "../src/lib/finalmessage.js";
 import { installRoute, browserHint, stillQuiet, QUIET_DAYS } from "../src/lib/install.js";
 import { IDENTITY, splitBasket, mergeBasket } from "../src/lib/basket.js";
-import { UPI_APPS, appById, forApp, logoFor } from "../src/lib/upiapps.js";
-import { SHOPS, shopById, filterItems, hasDiet, shopPhone, shopPhones, priceOptions,
-  billFor as tuckBill, orderText as tuckOrder, shopUpi, upiHref,
-  shopQr, payNote, LOCATIONS, deliveryFor, chargesByPlace,
+import { SHOPS, shopById, filterItems, hasDiet, shopPhone, shopPhones,
+  basketFor as tuckBasket, orderText as tuckOrder, LOCATIONS,
   filterGrouped, hasCategories } from "../src/lib/tuck.js";
 import { POR_MENU, nodeAt, trailOf, countUnder, searchPor, porLinks, linkKind, porTotal, porSize,
   searchAllPor, postLine, porLabel } from "../src/lib/por.js";
@@ -865,8 +863,14 @@ console.log("night canteen");
   const all = (c) => c.categories.flatMap(x => x.items);
   check("every canteen has items",
     CANTEENS.length > 0 && CANTEENS.every(c => all(c).length > 0));
-  check("every item has a name and a price",
-    CANTEENS.every(c => all(c).every(i => i.name && i.price !== "")));
+  check("every item has a name",
+    CANTEENS.every(c => all(c).every(i => i.name)));
+  // Prices were taken out because they changed faster than the card could be
+  // re-typed. Pinned, so a rebuild from an old workbook cannot bring them back.
+  check("no item carries a price",
+    CANTEENS.every(c => all(c).every(i => !("price" in i))));
+  check("nor does any canteen carry a room-service charge",
+    CANTEENS.every(c => !("room_service" in c)));
   check("every item carries a known diet",
     CANTEENS.every(c => all(c).every(i =>
       ["veg", "egg", "non-veg", "unknown"].includes(i.diet))));
@@ -954,8 +958,6 @@ console.log("night canteen");
   const whm = CANTEENS.find(c => c.id === "wh");
   check("LVH exists", Boolean(lvh));
   check("LVH carries the wings", countItems(filterMenu(lvh, { query: "chicken wings" })) === 1);
-  check("at the price asked for",
-    lvh.categories.flatMap(c => c.items).find(i => i.name === "Chicken Wings").price === 120);
   check("and nowhere else has them",
     CANTEENS.filter(c => countItems(filterMenu(c, { query: "chicken wings" })) > 0).length === 1);
   check("LVH is WH plus exactly that one item",
@@ -967,58 +969,48 @@ console.log("night canteen");
     }));
 
   // ---- the basket ----
-  // Arithmetic somebody pays for, so it is checked rather than eyeballed.
   const wh = CANTEENS.find(c => c.id === "wh");
-  const b = billFor(wh, [
-    { name: "Veg Roll", price: 43, qty: 2 },
-    { name: "Chicken Momo", price: 105, qty: 1 },
+  const b = basketFor([
+    { name: "Veg Roll", qty: 2 },
+    { name: "Chicken Momo", qty: 1 },
   ]);
-  check("line totals multiply", b.items[0].total === 86 && b.items[1].total === 105);
-  check("subtotal adds up", b.subtotal === 191);
-  check("room service is added once, not per item", b.delivery === 5 && b.total === 196);
   check("the count is items, not lines", b.count === 3);
-
-  const empty = billFor(wh, []);
-  check("an empty basket costs nothing, not the delivery fee",
-    empty.subtotal === 0 && empty.total === 0);
-
-  // "22/25" is a real printed price for two sizes. It must not become NaN and
-  // silently poison the total.
-  const odd = billFor(wh, [{ name: "Apple", price: "22/25", qty: 2 }]);
-  check("a two-size price does not break the total",
-    Number.isFinite(odd.total) && odd.subtotal === 44);
+  check("an empty basket is empty", basketFor([]).count === 0);
+  survives("no lines at all", () => basketFor(null));
+  // A basket saved on a phone before prices were taken out still has them.
+  const saved = basketFor([{ name: "Apple", price: "22/25", qty: 2 }]);
+  check("an old saved price is dropped", saved.items[0].name === "Apple"
+    && saved.items[0].qty === 2 && !("price" in saved.items[0]));
 
   // The message a human at the counter reads: what to cook, and for whom.
-  const text = orderText(wh, b.items, { room: "214", reg: "0446/62" });
+  const text = orderText(b.items, { room: "214", reg: "0446/62" });
   check("quantities lead each line", text.includes("2 x Veg Roll"));
   check("every basket line is in the message", text.includes("1 x Chicken Momo"));
   check("the room number is carried", text.includes("Room: 214"));
   check("the registration number is carried", text.includes("Reg. No: 0446/62"));
 
-  // Prices were removed deliberately. A figure sent from here is a second
-  // source of truth that goes stale the moment the canteen reprints its
-  // menu, and it is the counter's number to state, not this app's.
+  // No prices anywhere: the counter's number is the only one.
   check("no line prices", !/Rs|₹/.test(text));
   check("no total", !/Total/i.test(text));
   check("no canteen header", !text.includes(wh.canteen));
   check("the item lines come first",
     text.indexOf("2 x Veg Roll") < text.indexOf("Room:"));
 
-  const noted = orderText(wh, b.items, { room: "214", notes: "less spicy, no onion" });
+  const noted = orderText(b.items, { room: "214", notes: "less spicy, no onion" });
   check("the instructions are carried", noted.includes("less spicy, no onion"));
   check("and are labelled, not left as a loose line", noted.includes("Instructions:"));
   check("instructions sit with the food, above the address",
     noted.indexOf("Instructions:") < noted.indexOf("Room:"));
   check("no instructions means no empty label",
-    !orderText(wh, b.items, { room: "214", notes: "   " }).includes("Instructions"));
+    !orderText(b.items, { room: "214", notes: "   " }).includes("Instructions"));
 
-  const bare = orderText(wh, b.items);
+  const bare = orderText(b.items);
   check("nothing typed means no empty identity lines",
     !bare.includes("Room:") && !bare.includes("Reg. No:") && bare.includes("2 x Veg Roll"));
   check("blank fields are treated as nothing, not as a blank line",
-    !orderText(wh, b.items, { room: "  ", reg: " " }).includes("Room:"));
+    !orderText(b.items, { room: "  ", reg: " " }).includes("Room:"));
   check("one field on its own still goes",
-    orderText(wh, b.items, { room: "214" }).includes("Room: 214"));
+    orderText(b.items, { room: "214" }).includes("Room: 214"));
 
   check("an unknown canteen falls back", canteenById("nope") === CANTEENS[0]);
   survives("no canteen at all", () => filterMenu(null, { diet: "veg" }));
@@ -1094,7 +1086,7 @@ console.log("");
 console.log("baskets");
 {
   const cart = {
-    canteen: "wh", lines: [{ name: "Veg Roll", price: 43, qty: 2 }],
+    canteen: "wh", lines: [{ name: "Veg Roll", qty: 2 }],
     room: "214", reg: "0446/62", notes: "less spicy",
   };
   const { who, order } = splitBasket(cart);
@@ -1143,8 +1135,10 @@ console.log("tuck shops");
 {
   check("both shops are there", SHOPS.length === 2);
   check("each has items", SHOPS.every((s) => s.items.length > 0));
-  check("every item has a name and a price",
-    SHOPS.every((s) => s.items.every((i) => i.name && i.price)));
+  check("every item has a name",
+    SHOPS.every((s) => s.items.every((i) => i.name)));
+  check("no item carries a price",
+    SHOPS.every((s) => s.items.every((i) => !("price" in i))));
   check("no shop lists the same item twice",
     SHOPS.every((s) => new Set(s.items.map((i) => i.name)).size === s.items.length));
 
@@ -1167,16 +1161,10 @@ console.log("tuck shops");
     shopPhone(mohan) !== shopPhone(tagore));
   check("an unknown shop falls back", shopById("nope") === SHOPS[0]);
 
-  // Prices are transcribed as printed: half the card is "40 / 60", one item
-  // at two prices. Picking one to store would be inventing a fact.
-  check("two-price items are kept whole",
-    mohan.items.some((i) => /\d+\s*\/\s*\d+/.test(i.price)));
-  // Most of Mohan Da's two-price lines are now separate items. What stays
-  // whole is the one nobody could read: "Boiled Egg (1 piece)" at 13/15,
-  // where the card never says what the second price buys.
-  check("the unreadable two-price line is still offered as a choice",
-    priceOptions(mohan.items.find((i) => i.name === "Boiled Egg (1 piece)"))
-      .join() === "13,15");
+  // Printed at two prices nobody could explain. With no prices shown it is
+  // simply one dish, and the counter knows what the second one buys.
+  check("the unreadable two-price line is one item",
+    mohan.items.filter((i) => i.name.startsWith("Boiled Egg (")).length === 1);
   check("the serial numbers are kept as printed, gaps and all",
     mohan.items.some((i) => String(i.sl) === "28") &&
     !mohan.items.some((i) => String(i.sl) === "27"));
@@ -1200,39 +1188,19 @@ console.log("tuck shops");
   check("a blank search shows everything",
     filterItems(mohan, { query: "" }).length === mohan.items.length);
 
-  // ---- the basket ----
-  const priced = (name) => priceOptions(mohan.items.find((i) => i.name === name));
-  check("one price stays one choice",
-    priced("French Fries").join() === "50");
-  // Read off literal prices rather than real menu rows: the rows a printed
-  // card happens to carry change — several of these were split into separate
-  // items — but what the parser must do with each shape does not.
-  const asPrinted = (price) => priceOptions({ price }).join();
-  check("a slashed price becomes two", asPrinted("40 / 60") === "40,60");
-  check("a bracketed one does too", asPrinted("45 (65)") === "45,65");
-  check("four fillings, three distinct prices",
-    asPrinted("50 / 70 / 75 / 75") === "50,70,75");
-  check("two prices that happen to be equal are one choice",
-    asPrinted("80 / 80") === "80");
-  check("no number at all offers nothing", asPrinted("ask inside") === "");
-  check("every item offers at least one price",
-    mohan.items.every((i) => priceOptions(i).length > 0));
-
   // ---- the splits ----
   // One printed line that is really several things to order. The reading is
   // declared in build_tuck.py and verified against the card there; what is
   // checked here is that the result reached the app intact.
   const named = (n) => mohan.items.find((i) => i.name === n);
   check("two unrelated dishes on one line became two items",
-    named("Pav Bhaji")?.price === "50" && named("Extra Pav")?.price === "15");
+    named("Pav Bhaji") && named("Extra Pav"));
   check("and both still point at the line they were printed on",
     named("Pav Bhaji")?.sl === named("Extra Pav")?.sl);
-  check("one dish at two prices became the dish and the dish with cheese",
-    named("Vada Pav")?.price === "50" &&
-    named("Vada Pav with Cheese")?.price === "70");
-  check("two dishes sharing one price became two items at that price",
-    named("Chicken Steamed Momos (5 pieces)")?.price === "70" &&
-    named("Veg Steamed Momos (5 pieces)")?.price === "70");
+  check("one dish twice became the dish and the dish with cheese",
+    named("Vada Pav") && named("Vada Pav with Cheese"));
+  check("two dishes on one line became two items",
+    named("Chicken Steamed Momos (5 pieces)") && named("Veg Steamed Momos (5 pieces)"));
   check("a three-way line became three",
     named("Cold Bournvita") && named("Hot Bournvita") && named("Cold Coffee"));
   check("the combined lines are gone",
@@ -1256,7 +1224,7 @@ console.log("tuck shops");
   // A shop nobody has read into sections keeps the flat list. Tested against
   // a made-up shop rather than a real one: both real cards are grouped now,
   // and a test that quietly stops exercising its case is worse than no test.
-  const ungrouped = { id: "x", items: [{ name: "Tea", price: "10", diet: "veg" }] };
+  const ungrouped = { id: "x", items: [{ name: "Tea", diet: "veg" }] };
   check("a shop with no sections has none", !hasCategories(ungrouped));
   check("and grouping it returns null, not an empty list",
     filterGrouped(ungrouped, {}) === null);
@@ -1286,217 +1254,62 @@ console.log("tuck shops");
   check("and it is not Mohan Da's",
     JSON.stringify(tagore.items.map((i) => i.name))
       !== JSON.stringify(mohan.items.map((i) => i.name)));
-  check("its own prices, off its own photographs",
-    tag("Plain Maggi")?.price === "36" && tag("Fruit Chaat")?.price === "50");
-  check("Mohan Da charges differently for the same dish",
-    mohan.items.find((i) => i.name === "Plain Masala Maggi")?.price === "45");
+  check("its own items, off its own photographs",
+    Boolean(tag("Plain Maggi")) && Boolean(tag("Fruit Chaat")));
   // The card prints "ROOM DELIVERY CHARGE 6" as its last row. That is a fee,
-  // not something to put in a basket — asserted through deliveryFor, which is
-  // what the bill actually calls, rather than the raw cell it reads.
-  check("the room delivery charge is a fee, not an item",
+  // not something to put in a basket.
+  check("the room delivery charge is not an item",
     !tagore.items.some((i) => /delivery/i.test(i.name)));
-  check("and it is the six rupees the card prints",
-    deliveryFor(tagore, "anywhere") === 6);
+  check("and Tagore is still marked as delivering", tagore.delivers === true);
+  check("as is Mohan Da, from its delivery rows", mohan.delivers === true);
   check("S/W is left alone — it abbreviates Sandwich, not a choice",
     tagore.items.some((i) => i.name === "Paneer Cheese Kulcha S/W"));
   check("its hot/cold drinks were split",
-    tag("Chocolate (Hot)")?.price === "48" && tag("Chocolate (Cold)")?.price === "48");
+    Boolean(tag("Chocolate (Hot)")) && Boolean(tag("Chocolate (Cold)")));
   check("and its three-filling pasta became three",
     ["Tomato", "Cheese", "Mushroom"].every((f) => tag(`Maggi Pasta (${f})`)));
-  check("both shops now offer their original menu",
-    shopQr(mohan) && mohan.pages.length === 1 && tagore.pages.length === 3);
-  survives("no item", () => priceOptions(null));
+  // The photographs are where a price is read now, so they matter more.
+  check("both shops offer their original menu",
+    mohan.pages.length === 1 && tagore.pages.length === 3);
 
+  // ---- the basket ----
   const basket = [
-    { name: "French Fries", price: 50, qty: 2 },
-    { name: "Paneer Masala Patty / with cheese", price: 60, qty: 1 },
+    { name: "French Fries", qty: 2 },
+    { name: "Paneer Masala Patty", qty: 1 },
   ];
-  // Mohan Da charges nothing to bring it over; Tagore charges six.
-  const bill = tuckBill(mohan, basket);
-  check("line totals multiply", bill.items[0].total === 100);
-  check("the subtotal adds up", bill.subtotal === 160);
-  check("no delivery charge, no delivery line", bill.delivery === 0);
-  check("so the total is the subtotal", bill.total === 160);
-  check("the count is items, not lines", bill.count === 3);
+  check("the count is items, not lines", tuckBasket(basket).count === 3);
+  check("an empty basket is empty", tuckBasket([]).count === 0);
+  survives("no lines at all", () => tuckBasket(null));
+  // A phone may still hold a basket from when the same dish could be in it
+  // at two prices. Nothing can tell those apart now, so they fold together.
+  const folded = tuckBasket([
+    { name: "Boiled Egg (1 piece)", price: 13, qty: 1 },
+    { name: "Boiled Egg (1 piece)", price: 15, qty: 2 },
+  ]);
+  check("an old two-price basket folds into one line",
+    folded.items.length === 1 && folded.items[0].qty === 3);
+  check("and drops the prices", !("price" in folded.items[0]));
 
-  const dbill = tuckBill(tagore, basket);
-  check("Tagore's delivery charge is six", dbill.delivery === 6);
-  check("and it lands on the total", dbill.total === 166);
-  check("without touching the subtotal", dbill.subtotal === 160);
-
-  // An empty basket costs nothing — not the delivery fee on its own.
-  check("an empty basket costs nothing", tuckBill(mohan, []).total === 0);
-  check("nor the delivery fee by itself", tuckBill(tagore, []).total === 0);
-  check("and no charge is shown for it", tuckBill(tagore, []).delivery === 0);
-  survives("no lines at all", () => tuckBill(mohan, null));
-  survives("no shop at all", () => tuckBill(null, basket));
-
-  const msg = tuckOrder(mohan, bill.items, {});
+  const msg = tuckOrder(basket, {});
   check("quantities lead each line", msg.includes("2 x French Fries"));
-  check("no delivery charge means no breakdown", !msg.includes("Subtotal"));
+  check("every basket line is in the message", msg.includes("1 x Paneer Masala Patty"));
+  check("no prices or totals in the message", !/Rs|₹|Total|Subtotal/i.test(msg));
+  check("nowhere chosen means no delivery line", !msg.includes("Deliver to:"));
 
-  // The breakdown only appears when there is something to break down: a
-  // subtotal equal to the total is a line that makes the reader check.
-  const dmsg = tuckOrder(tagore, bill.items, {});
-  check("a delivery charge is spelled out", dmsg.includes("Delivery: Rs 6"));
-  check("with the subtotal above it", dmsg.includes("Subtotal: Rs 160"));
-  check("and the total below", dmsg.includes("Total: Rs 166"));
-  check("in that order",
-    dmsg.indexOf("Subtotal") < dmsg.indexOf("Delivery")
-    && dmsg.indexOf("Delivery") < dmsg.indexOf("Total: Rs 166"));
-  // The price is what says WHICH one, on a card printed at two prices.
-  check("the chosen price is on the line",
-    msg.includes("Paneer Masala Patty / with cheese — Rs 60"));
-  check("the total is stated", msg.includes("Total: Rs 160"));
-  check("nowhere chosen means no delivery line",
-    !tuckOrder(mohan, bill.items).includes("Deliver to:"));
-
-  // ---- delivery by location ----
-  // Mohan Da charges by how far it walks; Tagore charges one rate wherever
-  // it goes. Both are data, so a change of tariff is a spreadsheet edit.
-  check("the campus is listed once, in tariff order",
+  // ---- delivery ----
+  // Where to bring it is still asked. What it costs to bring is not.
+  check("the campus is listed once, in the workbook's order",
     LOCATIONS.join() === "NH,OH,Tagore,Annexe,NAB,OAB,Tata Hall,LVH,MDC,Family Quarters");
-  check("Mohan Da charges by place", chargesByPlace(mohan) === true);
-  check("Tagore does not", chargesByPlace(tagore) === false);
-
-  for (const near of ["NH", "OH", "Tagore", "Annexe", "NAB", "OAB", "Tata Hall"]) {
-    check(`${near} is fifteen`, deliveryFor(mohan, near) === 15);
-  }
-  for (const far of ["LVH", "MDC", "Family Quarters"]) {
-    check(`${far} is twenty`, deliveryFor(mohan, far) === 20);
-  }
-  check("a flat-rate shop ignores the location",
-    deliveryFor(tagore, "LVH") === 6 && deliveryFor(tagore, "NH") === 6);
-
-  // Nowhere chosen means no fee yet — the screen says the total is unsettled
-  // rather than quietly charging the cheapest.
-  check("no location, no charge yet", deliveryFor(mohan, "") === 0);
-  check("nor for somewhere off the list", deliveryFor(mohan, "Kolkata") === 0);
-  survives("no shop to price", () => deliveryFor(null, "NH"));
-
-  const nearBill = tuckBill(mohan, basket, "NH");
-  const farBill = tuckBill(mohan, basket, "LVH");
-  check("the near rate lands on the total", nearBill.total === 175);
-  check("and the far rate costs five more", farBill.total === 180);
-  check("the subtotal is the same either way",
-    nearBill.subtotal === farBill.subtotal);
-
-  const placed = tuckOrder(mohan, bill.items, { place: "LVH" });
+  const placed = tuckOrder(basket, { place: "LVH" });
   check("where it is going is in the message", placed.includes("Deliver to: LVH"));
-  check("with that location's charge", placed.includes("Delivery: Rs 20"));
-  check("and the total to match", placed.includes("Total: Rs 180"));
+  check("with no charge beside it", !/Delivery:|Rs/.test(placed));
 
-  // ---- paying ----
-  // A UPI address is registered, never calculated. Nothing may be derived
-  // from a phone number: a plausible guess sends real money to a stranger.
-  // Both shops now have a payee on file, so the empty case needs a made-up
-  // one rather than borrowing a real shop that has since been filled in.
-  const nobody = { id: "x", name: "Nowhere", items: [] };
-  check("a shop with nothing on file offers no payment link",
-    shopUpi(nobody) === null && shopQr(nobody) === null);
-  check("and no link is built for it", upiHref(nobody, { amount: 160 }) === null);
-
-  // Both shops' own counter QRs and IDs, read off the printed cards.
-  check("Mohan Da has its own UPI address", shopUpi(mohan) === "paytmqr6vv0l2@ptys");
-  check("Tagore has its own UPI address", shopUpi(tagore) === "Q871252473@ybl");
-  check("and its own QR", shopQr(tagore) === "/tuck/tagore.png");
-  check("the two shops never share a payee", shopUpi(mohan) !== shopUpi(tagore));
-  check("nor a QR", shopQr(mohan) !== shopQr(tagore));
-  check("a phone number is not a UPI address",
-    shopUpi({ upi: "8100294443" }) === null);
-  check("nor is something half-typed",
-    shopUpi({ upi: "mohanda@" }) === null && shopUpi({ upi: "@ybl" }) === null);
-
-  const withUpi = { ...mohan, upi: "mohanda@okaxis" };
-  const href = upiHref(withUpi, { amount: 160, note: "Mohan Da order" });
-  check("a real address builds a UPI link", href.startsWith("upi://pay?"));
-  check("it names the payee", href.includes("pa=mohanda%40okaxis"));
-  check("it carries the amount", href.includes("am=160.00"));
-  check("in rupees", href.includes("cu=INR"));
-  check("a zero total carries no amount",
-    !upiHref(withUpi, { amount: 0 }).includes("am="));
-
-  // One link, and the phone offers whichever UPI apps are installed. Nothing
-  // names a particular app: the chooser already puts Google Pay in front of
-  // people who use it, and PhonePe in front of people who do not.
-  check("the link names no particular app",
-    !/package=|intent:/.test(upiHref(withUpi, { amount: 160 })));
-
-  // iPhone's best effort: the same request re-addressed to one app's own
-  // scheme, because iOS never registered upi:// system-wide.
-  const generic = upiHref(withUpi, { amount: 160, note: "Mohan Da order" });
-  const query = generic.slice("upi://pay?".length);
-
-  check("the three apps asked for are offered",
-    UPI_APPS.map((a) => a.id).join() === "gpay,phonepe,paytm");
-  check("each has a name, a scheme and an Android package",
-    UPI_APPS.every((a) => a.name && /^[a-z]+:\/\//.test(a.scheme)
-      && /^[a-z0-9.]+$/.test(a.android)));
-  check("no two share a scheme",
-    new Set(UPI_APPS.map((a) => a.scheme)).size === UPI_APPS.length);
-  check("nor a package",
-    new Set(UPI_APPS.map((a) => a.android)).size === UPI_APPS.length);
-
-  // The query is carried across untouched, so the payee and the amount can
-  // never drift between the generic link and an app-specific one. That is
-  // the only property here worth guarding: everything else is a guess about
-  // iOS that a test cannot settle.
-  for (const app of UPI_APPS) {
-    const ios = forApp(generic, app.id);
-    check(`${app.name} keeps the request intact on iOS`,
-      ios === app.scheme + query && !ios.includes("upi://"));
-
-    // Android names the app to Chrome, which is what walks past a default
-    // handler — the reason a phone set to WhatsApp was swallowing payments.
-    const android = forApp(generic, app.id, { android: true });
-    check(`${app.name} is named to Android by package`,
-      android === `intent://pay?${query}#Intent;scheme=upi;package=${app.android};end`);
-    check(`${app.name} carries the same request either way`,
-      android.includes(query) && ios.includes(query));
-  }
-
-  // Other companies' marks, served from public/ rather than drawn here — a
-  // redrawn logo is subtly wrong in a place where a company's name sits next
-  // to a payment button.
-  check("every app names a logo file",
-    UPI_APPS.every((a) => /^\/upi\/[a-z]+\.png$/.test(a.logo)));
-  check("and each has its own", new Set(UPI_APPS.map((a) => a.logo)).size === 3);
-  check("an unknown app has no logo", logoFor("nope") === null);
-
-  check("no app chosen means the plain link, on either platform",
-    forApp(generic, null) === generic
-    && forApp(generic, null, { android: true }) === generic);
-
-  check("an unknown app falls back to the generic link",
-    forApp(generic, "nope") === generic);
-  check("and an unknown id resolves to nothing", appById("nope") === null);
-  survives("no link to re-address", () => forApp(null, "gpay"));
-
-  // The QR is the shop's own printed image, never one generated from the
-  // address here: encoding a payment instruction wrongly pays the wrong
-  // person, and the code on the counter already works.
-  check("a QR is served from the public folder, not bundled",
-    shopQr(mohan).startsWith("/tuck/"));
-  survives("no shop to find a QR for", () => shopQr(null));
-
-  // ---- the stand-in payee ----
-  // Mohan Da is currently pointed at a personal address for testing. The
-  // danger is not that it is there; it is that it stops being obvious. So it
-  // has to carry a warning the screen shows above the pay buttons, and that
-  // pairing is checked rather than remembered.
-  // The stand-in is gone now that both shops have their own address. The
-  // rule outlives it: any payee that is not the shop's own has to carry a
-  // warning, and none may be left over from testing.
-  const STANDIN = "anujkapse26jan@oksbi";
-  check("no stand-in payee is left on any shop",
-    SHOPS.every((s) => shopUpi(s) !== STANDIN));
-  check("and none carries a leftover test warning",
-    SHOPS.every((s) => payNote(s) === null));
-  check("every shop that can be paid has its own QR",
-    SHOPS.every((s) => !shopUpi(s) || shopQr(s)));
-  check("a shop with a real payee needs no warning",
-    payNote(tagore) === null);
-  survives("no shop to warn about", () => payNote(null));
+  // ---- no payment ----
+  // Payment was taken out with the prices: without a total there is nothing
+  // for a UPI request to carry, and the counter is who gets paid.
+  check("no shop carries payment details",
+    SHOPS.every((s) => !["upi", "pay_note", "qr", "zones", "delivery"].some((k) => k in s)));
+  check("nor the list of places", !JSON.stringify(tuckJson.locations).includes("fee"));
 
   survives("no shop at all", () => filterItems(null, { query: "x" }));
   survives("no options", () => filterItems(mohan));
@@ -1563,17 +1376,16 @@ console.log("order history");
   const at = (mins) => new Date(Date.parse("2026-09-04T23:30:00") + mins * 60000);
   const msg = "2 x Veg Roll\n1 x Chicken Momo\n\nRoom: 214\nReg. No: 0446/62";
 
-  const one = entryFor(wh, msg, { total: 211, now: at(0) });
+  const one = entryFor(wh, msg, { now: at(0) });
   check("the shop is recorded", one.canteen === "wh" && one.where === "WH");
   check("the message is kept word for word", one.message === msg);
   check("it is a night order unless said otherwise", one.kind === "night");
   check("a tuck order says so", entryFor(tagore, msg, { kind: "tuck" }).kind === "tuck");
   check("an unknown kind is not invented", entryFor(wh, msg, { kind: "lunch" }).kind === "night");
   check("the time is recorded", one.at === at(0).toISOString());
-  check("the basket total is kept", one.total === 211);
   check("surrounding whitespace is trimmed", entryFor(wh, "  hi \n").message === "hi");
   check("nothing else is recorded",
-    Object.keys(one).sort().join() === "at,canteen,kind,message,total,where");
+    Object.keys(one).sort().join() === "at,canteen,kind,message,where");
 
   // ---- entries from before the message was recorded ----
   const legacy = {
@@ -1669,18 +1481,19 @@ console.log("order history");
   // ---- the export ----
   // One row per order: the message is the record, and splitting somebody's
   // edited text back into dishes would be guessing at it.
-  const csv = toCsv([one, entryFor(tagore, "1 x Maggi — Rs 30", { kind: "tuck", total: 36, now: at(5) })]);
+  const csv = toCsv([one, entryFor(tagore, "1 x Maggi", { kind: "tuck", now: at(5) })]);
   check("the columns asked for",
-    csv.split("\n")[0] === "Date,Time,Type,From,Message,Basket total");
+    csv.split("\n")[0] === "Date,Time,Type,From,Message");
   check("the date is sortable", csv.includes("\n2026-09-04,23:30,Night canteen,WH,"));
   check("the message is one quoted cell, line breaks and all",
-    csv.includes(`"${msg}",211`));
-  check("a tuck order is labelled as one", csv.includes(",Tuck shop,Tagore,1 x Maggi — Rs 30,36"));
-  check("an old entry exports its rebuilt message", toCsv([legacy]).includes(`"${msg}",191`));
+    csv.includes(`,"${msg}"\n`));
+  check("a tuck order is labelled as one", csv.endsWith(",Tuck shop,Tagore,1 x Maggi"));
+  check("an old entry exports its rebuilt message", toCsv([legacy]).endsWith(`"${msg}"`));
+  // Orders saved before prices were taken out still carry a total.
+  check("but not its old basket total", !toCsv([legacy]).includes("191"));
 
   const quoted = toCsv([entryFor(wh, 'Say "hi", please', { now: at(0) })]);
   check("quotes and commas in a message are escaped", quoted.includes('"Say ""hi"", please"'));
-  check("no total is an empty cell, not a zero", quoted.endsWith(","));
 
   check("an empty history exports just the header", toCsv([]).split("\n").length === 1);
   survives("no history to export", () => toCsv(null));
@@ -3422,8 +3235,7 @@ console.log("\ncampus & hostel services");
   const electricians = CAMPUS_HOSTELS.map((h) => h.items.find((i) => i.name === "Campus Electrician"));
   check("every hostel lists the campus electrician", electricians.every(Boolean)
     && electricians.every((e) => JSON.stringify(e) === JSON.stringify(electricians[0])));
-  check("nor are delivery charges shown — the menu works them out",
-    items.every((i) => !/₹/.test(i.delivery)));
+  check("no delivery charge is shown", items.every((i) => !/₹|Rs/.test(i.delivery)));
   // A "contact the rep" row links to POR details with a search for that rep.
   // It must find the one person, or the link lands on a list to scroll.
   const repRows = CAMPUS_HOSTELS.flatMap((h) => h.items.filter((i) => i.rep).map((i) => [h.id, i.rep]));

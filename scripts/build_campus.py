@@ -187,9 +187,9 @@ def check_reps(por):
 
 
 def tuck_item(shop):
-    # Whether it delivers, not what it charges: the menu screen works out the
-    # fee for the student's own hostel, and a range here only competes with it.
-    d = "Delivers" if shop.get("zones") or shop.get("delivery") else ""
+    # Whether it delivers. The app shows no delivery fee anywhere — it went
+    # with the prices, which changed too often to keep up with.
+    d = "Delivers" if shop.get("delivers") else ""
     reach = TUCK_REACH.get(shop["tag"])
     if reach:
         d = f"{d} ({reach})" if d else reach

@@ -1,7 +1,11 @@
 import night from "../data/night-menu.json";
 
 /**
- * The night canteens: a priced list per hostel, the same every night.
+ * The night canteens: a list per hostel, the same every night.
+ *
+ * No prices. The canteens re-price faster than anybody re-types the card, and
+ * a stale number on screen is an argument at the counter waiting to happen —
+ * the photographed pages are where a price is read.
  *
  * Nothing like the day mess, which is a week. These are shops — you read them
  * to decide what to order at 1am, so the useful operations are "show me only
@@ -66,38 +70,27 @@ export function filterMenu(canteen, { diet = "all", query = "" } = {}) {
  * ask rather than quietly merge two menus into one order.
  */
 
-const money = (p) => (typeof p === "number" ? p : Number(String(p).split("/")[0]) || 0);
-
-/** Line totals and the bill, with the room-service charge the canteens add. */
-export function billFor(canteen, lines) {
-  const items = lines.map((l) => ({ ...l, total: money(l.price) * l.qty }));
-  const subtotal = items.reduce((n, i) => n + i.total, 0);
-  const delivery = Number(canteen?.room_service) || 0;
-  return {
-    items,
-    count: items.reduce((n, i) => n + i.qty, 0),
-    subtotal,
-    delivery,
-    total: subtotal + (subtotal > 0 ? delivery : 0),
-  };
+/**
+ * The basket's lines and how many things are in it.
+ *
+ * Only names and counts. A basket saved before prices were taken out may
+ * still carry one on a line; it is never read.
+ */
+export function basketFor(lines) {
+  const items = (lines ?? []).map(({ name, qty }) => ({ name, qty }));
+  return { items, count: items.reduce((n, i) => n + i.qty, 0) };
 }
 
 /**
  * The order, written out for a human to read.
  *
- * Deliberately short: quantities and names, then who and where. No prices —
- * the counter has its own, and a figure sent from here would be a second
- * source of truth that goes stale the moment the menu changes, inviting an
- * argument about what was quoted. No greeting line either; it lands in a
- * WhatsApp thread that already says who it is from.
- *
- * The bill still exists for the basket on screen. What a student is deciding
- * to spend and what the kitchen needs to read are different questions.
+ * Deliberately short: quantities and names, then who and where. No greeting
+ * line; it lands in a WhatsApp thread that already says who it is from.
  */
 export const itemLine = (i) => `${i.qty} x ${i.name}`;
 
-export function orderText(canteen, lines, { reg = "", room = "", notes = "" } = {}) {
-  const out = billFor(canteen, lines).items.map(itemLine);
+export function orderText(lines, { reg = "", room = "", notes = "" } = {}) {
+  const out = basketFor(lines).items.map(itemLine);
   const blocks = [out.join("\n")];
   // Above the address, because it is about the food: whoever is cooking reads
   // to the end of the dishes and straight on into how to cook them.
