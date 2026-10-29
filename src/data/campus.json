@@ -71,6 +71,25 @@
       "menu": null
     },
     {
+      "name": "DA Student Cabs",
+      "person": "",
+      "phones": [
+        {
+          "number": "6291109163",
+          "label": ""
+        },
+        {
+          "number": "8240255808",
+          "label": ""
+        }
+      ],
+      "hours": "7 AM - 11 PM, daily",
+      "delivery": "",
+      "note": "",
+      "rep": null,
+      "menu": null
+    },
+    {
       "name": "Gynecologist",
       "person": "",
       "phones": [
@@ -144,25 +163,6 @@
         }
       ],
       "hours": "",
-      "delivery": "",
-      "note": "",
-      "rep": null,
-      "menu": null
-    },
-    {
-      "name": "DA Student Cabs",
-      "person": "",
-      "phones": [
-        {
-          "number": "6291109163",
-          "label": ""
-        },
-        {
-          "number": "8240255808",
-          "label": ""
-        }
-      ],
-      "hours": "7 AM - 11 PM, daily",
       "delivery": "",
       "note": "",
       "rep": null,
@@ -363,6 +363,21 @@
           "menu": null
         },
         {
+          "name": "Laundry",
+          "person": "Kamla Aunty",
+          "phones": [
+            {
+              "number": "7044282994",
+              "label": ""
+            }
+          ],
+          "hours": "",
+          "delivery": "",
+          "note": "",
+          "rep": null,
+          "menu": null
+        },
+        {
           "name": "Electrician",
           "person": "",
           "phones": [],
@@ -401,21 +416,6 @@
           "note": "Contact NH Rep or write in NH book",
           "rep": "NH",
           "menu": null
-        },
-        {
-          "name": "Laundry",
-          "person": "Kamla Aunty",
-          "phones": [
-            {
-              "number": "7044282994",
-              "label": ""
-            }
-          ],
-          "hours": "",
-          "delivery": "",
-          "note": "",
-          "rep": null,
-          "menu": null
         }
       ]
     },
@@ -436,16 +436,6 @@
           "delivery": "",
           "note": "",
           "rep": null,
-          "menu": null
-        },
-        {
-          "name": "Plumber",
-          "person": "",
-          "phones": [],
-          "hours": "",
-          "delivery": "",
-          "note": "Contact OH Rep or write in OH book",
-          "rep": "OH",
           "menu": null
         },
         {
@@ -522,6 +512,16 @@
           "note": "",
           "rep": null,
           "menu": null
+        },
+        {
+          "name": "Plumber",
+          "person": "",
+          "phones": [],
+          "hours": "",
+          "delivery": "",
+          "note": "Contact OH Rep or write in OH book",
+          "rep": "OH",
+          "menu": null
         }
       ]
     },
@@ -561,16 +561,6 @@
           "delivery": "",
           "note": "To raise general complaint- Put it up on the register with security guard",
           "rep": null,
-          "menu": null
-        },
-        {
-          "name": "Plumber",
-          "person": "",
-          "phones": [],
-          "hours": "",
-          "delivery": "",
-          "note": "Contact LVH Rep or write in LVH book",
-          "rep": "LVH",
           "menu": null
         },
         {
@@ -621,6 +611,16 @@
           "note": "",
           "rep": null,
           "menu": null
+        },
+        {
+          "name": "Plumber",
+          "person": "",
+          "phones": [],
+          "hours": "",
+          "delivery": "",
+          "note": "Contact LVH Rep or write in LVH book",
+          "rep": "LVH",
+          "menu": null
         }
       ]
     },
@@ -634,6 +634,21 @@
           "phones": [
             {
               "number": "8777313186",
+              "label": ""
+            }
+          ],
+          "hours": "",
+          "delivery": "",
+          "note": "",
+          "rep": null,
+          "menu": null
+        },
+        {
+          "name": "Laundry",
+          "person": "Manoj",
+          "phones": [
+            {
+              "number": "9831857435",
               "label": ""
             }
           ],
@@ -671,21 +686,6 @@
           "delivery": "",
           "note": "Contact WH Rep or write in WH book",
           "rep": "WH",
-          "menu": null
-        },
-        {
-          "name": "Laundry",
-          "person": "Manoj",
-          "phones": [
-            {
-              "number": "9831857435",
-              "label": ""
-            }
-          ],
-          "hours": "",
-          "delivery": "",
-          "note": "",
-          "rep": null,
           "menu": null
         }
       ]

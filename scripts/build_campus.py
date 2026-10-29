@@ -307,6 +307,12 @@ def build(path):
             if not any(it["name"] == name for it in h["items"]):
                 h["items"].insert(0, json.loads(json.dumps(first)))
 
+    # Someone you can ring before an instruction to go and find someone (the
+    # user, 2026-10-29); sheet order kept within each half. Medical keeps the
+    # order the user set for it, doctor's timings first.
+    for group in [h["items"] for h in hostels] + [p["items"] for p in places]:
+        group.sort(key=lambda it: not it["phones"])
+
     # One number, one contact. Two names on a number means one of them is a
     # copy-paste slip — or the same person spelled twice, as the electrician was.
     seen = {}

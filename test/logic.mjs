@@ -3414,6 +3414,10 @@ console.log("\ncampus & hostel services");
   const shopNames = new Set(PLACES.flatMap((p) => p.items.map((i) => i.name)));
   check("no hostel repeats a shop", CAMPUS_HOSTELS.every((h) =>
     h.items.every((i) => !i.menu && !shopNames.has(i.name))));
+  // Rows with a number to ring come before rows without one.
+  const numbersFirst = (list) => list.every((i, n) => n === 0 || i.phones.length === 0
+    || list[n - 1].phones.length > 0);
+  check("rows with a number come first", [...CAMPUS_HOSTELS, ...PLACES].every((g) => numbersFirst(g.items)));
   // One electrician serves the whole campus: the same row in every hostel.
   const electricians = CAMPUS_HOSTELS.map((h) => h.items.find((i) => i.name === "Campus Electrician"));
   check("every hostel lists the campus electrician", electricians.every(Boolean)
