@@ -1,0 +1,1116 @@
+﻿Section,Place,Category,Sl,Item,Price (Rs),Diet
+Night canteen,New Hostel Night Canteen,(charge),,Room service,5,
+Night canteen,New Hostel Night Canteen,Milk Shake,,Vanilla Milk Shake,80,veg
+Night canteen,New Hostel Night Canteen,Milk Shake,,Butter Scotch Milk Shake,90,veg
+Night canteen,New Hostel Night Canteen,Milk Shake,,Chocolate Milk Shake,90,veg
+Night canteen,New Hostel Night Canteen,Milk Shake,,Oreo Milk Shake,95,veg
+Night canteen,New Hostel Night Canteen,Milk Shake,,Kitkat Milk Shake,100,veg
+Night canteen,New Hostel Night Canteen,Milk Shake,,Strawberry Milk Shake,95,veg
+Night canteen,New Hostel Night Canteen,Milk Shake,,Banana Milk Shake,75,veg
+Night canteen,New Hostel Night Canteen,Milk Shake,,Mango Milk Shake,85,veg
+Night canteen,New Hostel Night Canteen,Milk Shake,,Dry Fruits Milk Shake,100,veg
+Night canteen,New Hostel Night Canteen,Drink,,Tea,26,veg
+Night canteen,New Hostel Night Canteen,Drink,,Coffee,25,veg
+Night canteen,New Hostel Night Canteen,Drink,,Rasna Big,25,veg
+Night canteen,New Hostel Night Canteen,Drink,,Nimbu Pani Big,25,veg
+Night canteen,New Hostel Night Canteen,Drink,,Masala Nimbu Pani,35,veg
+Night canteen,New Hostel Night Canteen,Drink,,Plain Milk,26,veg
+Night canteen,New Hostel Night Canteen,Drink,,Haldi Milk,32,veg
+Night canteen,New Hostel Night Canteen,Drink,,Bournvita,42,veg
+Night canteen,New Hostel Night Canteen,Drink,,Horlicks,44,veg
+Night canteen,New Hostel Night Canteen,Drink,,Boost,46,veg
+Night canteen,New Hostel Night Canteen,Drink,,Lassi Big,55,veg
+Night canteen,New Hostel Night Canteen,Drink,,Cold Coffee Big,55,veg
+Night canteen,New Hostel Night Canteen,Drink,,Cold Bournvita Big,62,veg
+Night canteen,New Hostel Night Canteen,Drink,,Cold Horlicks Big,65,veg
+Night canteen,New Hostel Night Canteen,Drink,,Hot Chocolate,46,veg
+Night canteen,New Hostel Night Canteen,Drink,,Cold Chocolate Big,67,veg
+Night canteen,New Hostel Night Canteen,Maggi,,Plain Maggi,39,veg
+Night canteen,New Hostel Night Canteen,Maggi,,Double Masala Maggi,50,veg
+Night canteen,New Hostel Night Canteen,Maggi,,Veg Maggi,49,veg
+Night canteen,New Hostel Night Canteen,Maggi,,Szechwan Maggi,56,veg
+Night canteen,New Hostel Night Canteen,Maggi,,Peri Peri Maggi,52,veg
+Night canteen,New Hostel Night Canteen,Maggi,,Egg Maggi,54,egg
+Night canteen,New Hostel Night Canteen,Maggi,,Cheese Maggi,62,veg
+Night canteen,New Hostel Night Canteen,Maggi,,Chicken Maggi,62,non-veg
+Night canteen,New Hostel Night Canteen,Maggi,,Butter Maggi,56,veg
+Night canteen,New Hostel Night Canteen,Maggi,,Top Ramen Curry,56,unknown
+Night canteen,New Hostel Night Canteen,Fried Maggi,,Veg Fried Maggi,50,veg
+Night canteen,New Hostel Night Canteen,Fried Maggi,,Egg Fried Maggi,60,egg
+Night canteen,New Hostel Night Canteen,Fried Maggi,,Cheese Fried Maggi,67,veg
+Night canteen,New Hostel Night Canteen,Fried Maggi,,Chicken Fried Maggi,67,non-veg
+Night canteen,New Hostel Night Canteen,Fried Maggi,,Prawn Fried Maggi,73,non-veg
+Night canteen,New Hostel Night Canteen,Bread Bhurji,,Veg Bread Bhurji,63,veg
+Night canteen,New Hostel Night Canteen,Bread Bhurji,,Egg Bread Bhurji,68,egg
+Night canteen,New Hostel Night Canteen,Bread Bhurji,,Chicken Bread Bhurji,73,non-veg
+Night canteen,New Hostel Night Canteen,Bread Bhurji,,Cheese Bread Bhurji,73,veg
+Night canteen,New Hostel Night Canteen,Bread Bhurji,,Egg Chicken Bread Bhurji,80,non-veg
+Night canteen,New Hostel Night Canteen,Bread Bhurji,,Prawn Bread Bhurji,80,non-veg
+Night canteen,New Hostel Night Canteen,Roll,,Veg Roll,45,veg
+Night canteen,New Hostel Night Canteen,Roll,,Egg Roll,53,egg
+Night canteen,New Hostel Night Canteen,Roll,,Cheese Roll,56,veg
+Night canteen,New Hostel Night Canteen,Roll,,Chicken Roll,56,non-veg
+Night canteen,New Hostel Night Canteen,Roll,,Paneer Roll,56,veg
+Night canteen,New Hostel Night Canteen,Roll,,Egg Cheese Roll,65,egg
+Night canteen,New Hostel Night Canteen,Roll,,Egg Chicken Roll,65,non-veg
+Night canteen,New Hostel Night Canteen,Roll,,Veg Cheese Roll,60,veg
+Night canteen,New Hostel Night Canteen,Roll,,Chicken Cheese Roll,66,non-veg
+Night canteen,New Hostel Night Canteen,Roll,,Egg Chicken Cheese Roll,72,non-veg
+Night canteen,New Hostel Night Canteen,Roll,,Prawn Roll,63,non-veg
+Night canteen,New Hostel Night Canteen,Roll,,Chicken Spring Roll,64,non-veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Veg Fried Rice,95,veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Egg Fried Rice,100,egg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Chicken Fried Rice,105,non-veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Egg Chicken Fried Rice,115,non-veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,WWR,115,unknown
+Night canteen,New Hostel Night Canteen,Fried Rice,,Prawn Fried Rice,110,non-veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Mixed Fried Rice,130,unknown
+Night canteen,New Hostel Night Canteen,Fried Rice,,Veg Singapore Fried Rice,100,veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Egg Singapore Fried Rice,105,egg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Chicken Singapore Fried Rice,110,non-veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Veg Hong Kong Fried Rice,100,veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Egg Hong Kong Fried Rice,105,egg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Chicken Hong Kong Fried Rice,110,non-veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Veg Szechwan Rice,105,veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Egg Szechwan Rice,115,egg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Chicken Szechwan Rice,120,non-veg
+Night canteen,New Hostel Night Canteen,Fried Rice,,Chicken Biryani,170,non-veg
+Night canteen,New Hostel Night Canteen,Paratha,,Plain Paratha,23,veg
+Night canteen,New Hostel Night Canteen,Paratha,,Aloo Paratha,44,veg
+Night canteen,New Hostel Night Canteen,Paratha,,Onion Paratha,44,veg
+Night canteen,New Hostel Night Canteen,Paratha,,Aloo Onion Paratha,48,veg
+Night canteen,New Hostel Night Canteen,Paratha,,Gobi Paratha,46,veg
+Night canteen,New Hostel Night Canteen,Paratha,,Muli Paratha,46,veg
+Night canteen,New Hostel Night Canteen,Paratha,,Paneer Paratha,56,veg
+Night canteen,New Hostel Night Canteen,Paratha,,Egg Paratha,50,egg
+Night canteen,New Hostel Night Canteen,Paratha,,Chicken Paratha,57,non-veg
+Night canteen,New Hostel Night Canteen,Paratha,,Cheese Paratha,57,veg
+Night canteen,New Hostel Night Canteen,Paratha,,Egg Cheese Paratha,63,egg
+Night canteen,New Hostel Night Canteen,Paratha,,Chicken Cheese Paratha,66,non-veg
+Night canteen,New Hostel Night Canteen,Sandwich,,Veg Sandwich,38,veg
+Night canteen,New Hostel Night Canteen,Sandwich,,Egg Sandwich,45,egg
+Night canteen,New Hostel Night Canteen,Sandwich,,Cheese Sandwich,50,veg
+Night canteen,New Hostel Night Canteen,Sandwich,,Paneer Sandwich,50,veg
+Night canteen,New Hostel Night Canteen,Sandwich,,Chicken Sandwich,50,non-veg
+Night canteen,New Hostel Night Canteen,Sandwich,,Veg Cheese Sandwich,54,veg
+Night canteen,New Hostel Night Canteen,Sandwich,,Egg Cheese Sandwich,56,egg
+Night canteen,New Hostel Night Canteen,Sandwich,,Chicken Cheese Sandwich,60,non-veg
+Night canteen,New Hostel Night Canteen,Sandwich,,Prawn Sandwich,56,non-veg
+Night canteen,New Hostel Night Canteen,Sandwich,,Malai Sandwich,44,veg
+Night canteen,New Hostel Night Canteen,Burger,,Veg Burger,49,veg
+Night canteen,New Hostel Night Canteen,Burger,,Egg Burger,54,egg
+Night canteen,New Hostel Night Canteen,Burger,,Cheese Burger,62,veg
+Night canteen,New Hostel Night Canteen,Burger,,Chicken Burger,62,non-veg
+Night canteen,New Hostel Night Canteen,Burger,,Egg Cheese Burger,64,egg
+Night canteen,New Hostel Night Canteen,Burger,,Chicken Cheese Burger,69,non-veg
+Night canteen,New Hostel Night Canteen,Noodles,,Veg Noodles,68,veg
+Night canteen,New Hostel Night Canteen,Noodles,,Egg Noodles,74,egg
+Night canteen,New Hostel Night Canteen,Noodles,,Chicken Noodles,81,non-veg
+Night canteen,New Hostel Night Canteen,Noodles,,Egg Chicken Noodles,86,non-veg
+Night canteen,New Hostel Night Canteen,Noodles,,Prawn Noodles,89,non-veg
+Night canteen,New Hostel Night Canteen,Noodles,,Veg Singapore Noodles,73,veg
+Night canteen,New Hostel Night Canteen,Noodles,,Egg Singapore Noodles,79,egg
+Night canteen,New Hostel Night Canteen,Noodles,,Chicken Singapore Noodles,86,non-veg
+Night canteen,New Hostel Night Canteen,Noodles,,Veg Hong Kong Noodles,71,veg
+Night canteen,New Hostel Night Canteen,Noodles,,Egg Hong Kong Noodles,79,egg
+Night canteen,New Hostel Night Canteen,Noodles,,Chicken Hong Kong Noodles,86,non-veg
+Night canteen,New Hostel Night Canteen,Noodles,,Egg Szechwan Noodles,86,egg
+Night canteen,New Hostel Night Canteen,Noodles,,Veg Szechwan Noodles,83,veg
+Night canteen,New Hostel Night Canteen,Noodles,,Chicken Szechwan Noodles,96,non-veg
+Night canteen,New Hostel Night Canteen,Noodles,,Paneer Noodles,81,veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Chicken Keema,105,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Chicken Pakora,99,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Chilli Chicken,104,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Garlic Chicken,104,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Ginger Chicken,104,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Chicken 65,104,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Chicken Nuggets,99,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Cheese Nuggets,99,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Chicken Sausages,99,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Tandoori Chicken,160,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Tikka Kabab,140,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Chicken Cutlet,115,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Szechwan Chicken,109,non-veg
+Night canteen,New Hostel Night Canteen,Chicken Starter,,Chicken Butter Tikka Masala,155,non-veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Chilli Paneer,85,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Garlic Paneer,85,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Szechwan Paneer,95,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Ginger Paneer,85,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Paneer Bhurji,85,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Fries,95,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Peri Peri Fries,105,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Honey Chilli Potato,85,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Paneer Pakora,90,veg
+Night canteen,New Hostel Night Canteen,Veg Starter,,Onion Pakora,75,veg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Bread Omlette,42,egg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,French Toast,44,veg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,French Toast Sweet,48,veg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Bread Butter,23,veg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Omlette,19,egg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Egg Bhurji,19,egg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Half Fry (Poach),19,egg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Full Fry,19,egg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Boiled Egg,19,egg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Cheese Omlette,64,egg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Russian Omlette,84,egg
+Night canteen,New Hostel Night Canteen,"Bread, Egg & Omelette",,Egg Masala,67,egg
+Night canteen,New Hostel Night Canteen,Misc,,Chips Chaat,50,veg
+Night canteen,New Hostel Night Canteen,Misc,,Peanut Chaat,50,veg
+Night canteen,New Hostel Night Canteen,Misc,,Masala Papad Chaat,55,veg
+Night canteen,New Hostel Night Canteen,Misc,,Aloo Chaat,50,veg
+Night canteen,New Hostel Night Canteen,Misc,,Corn Chaat,60,veg
+Night canteen,New Hostel Night Canteen,Misc,,Pop Corn,40,veg
+Night canteen,New Hostel Night Canteen,Misc,,Egg Chaat,55,egg
+Night canteen,New Hostel Night Canteen,Misc,,Kurkure Chaat,50,veg
+Night canteen,New Hostel Night Canteen,Momos,,Cheese Corn Momo,100,veg
+Night canteen,New Hostel Night Canteen,Momos,,Cheese Corn Fried Momo,105,veg
+Night canteen,New Hostel Night Canteen,Momos,,Paneer Momo,95,veg
+Night canteen,New Hostel Night Canteen,Momos,,Paneer Fried Momo,100,veg
+Night canteen,New Hostel Night Canteen,Momos,,Chicken Momo,95,non-veg
+Night canteen,New Hostel Night Canteen,Momos,,Chicken Fried Momo,100,non-veg
+Night canteen,New Hostel Night Canteen,Momos,,Chicken Cheese Momo,110,non-veg
+Night canteen,New Hostel Night Canteen,Momos,,Chicken Cheese Fried Momo,115,non-veg
+Night canteen,New Hostel Night Canteen,Meera,,Veg Meera,71,veg
+Night canteen,New Hostel Night Canteen,Meera,,Egg Meera,76,egg
+Night canteen,New Hostel Night Canteen,Meera,,Cheese Meera,81,veg
+Night canteen,New Hostel Night Canteen,Meera,,Paneer Meera,81,veg
+Night canteen,New Hostel Night Canteen,Meera,,Chicken Meera,81,non-veg
+Night canteen,New Hostel Night Canteen,Meera,,Prawn Meera,86,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),(charge),,Room service,5,
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Plain Maggi,32,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Double Masala,42,unknown
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Veg Maggi,40,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Atta Maggi,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Cheese Maggi,52,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Butter Maggi,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Spicy Maggi,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Egg Maggi,45,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Chicken Maggi,52,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Veg F.d Maggi,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Veg Cheese F.d Maggi,55,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Egg F.d Maggi,50,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Chicken F.d Maggi,55,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Egg Chicken F.d Maggi,60,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Egg Chicken Cheese F.d Maggi,70,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Maggi,,Top Ramen Curry,45,unknown
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Plain Paratha,18,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Alu Paratha,32,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Gobi Paratha,35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Paneer Paratha,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Onion Paratha,32,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Alu Onion Paratha,36,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Egg Paratha,38,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Chicken Paratha,45,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Cheese Paratha,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Chicken Cheese Paratha,58,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Paratha,,Mix Veg Paratha,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Meera,,Veg Meera,50,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Meera,,Paneer Meera,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Meera,,Egg Meera,55,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Meera,,Chicken Meera,65,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Meera,,Veg Cheese Meera,60,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Meera,,Paneer Cheese Meera,75,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Meera,,Egg Cheese Meera,65,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Meera,,Chicken Cheese Meera,75,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Veg Roll,32,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Paneer Roll,47,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Egg Roll,40,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Chicken Roll,47,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Egg Chicken Roll,57,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Chicken Cheese Roll,60,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Egg Cheese Roll,52,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Veg Cheese Roll,46,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Egg Chicken Cheese Roll,70,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Roll,,Chicken Tikka Roll,75,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Veg Sandwich,30,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Veg Corn Sandwich,35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Veg Cheese Corn Sandwich,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Egg Sandwich,33,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Chicken Sandwich,40,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Malai Sandwich,32,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Cheese Sandwich,38,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Paneer Sandwich,40,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Paneer Cheese Sandwich,55,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Veg Cheese Sandwich,45,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Chicken Cheese Sandwich,55,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Egg Chicken Cheese Sandwich,60,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Omlette Sandwich,35,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,Bread Butter Toast,20,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,French Toast (Sweet),38,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Sandwich,,French Toast (Salt),38,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Omlette,30,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Bread Omlette,44,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Russian Omlette,80,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Cheese Omlette,55,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Half Fry,25,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Full Fry,25,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Chicken Omelette,55,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Egg Bhurji,30,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Boiled Egg,10,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Veg Bread Bhurji,48,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Egg Bread Bhurji,53,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Chicken Bread Bhurji,58,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Egg Chicken Bread Bhurji,64,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Veg Cheese Bread Bhurji,58,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Egg Cheese Bread Bhurji,63,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Chicken Cheese Bread Bhurji,68,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Omelettes,,Egg Chicken Cheese Bread Bhurji,74,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Misc,,Chips Chat,35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Misc,,Peanut Chat,38,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Misc,,Egg Chat (2 Eggs),35,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Misc,,Kurkure Chat,35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Misc,,Pasta,48,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Misc,,Masala Papad,35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Misc,,Popcorn,25,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Veg S/C Soup,40,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Veg H/S Soup,40,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Veg Clear Soup,40,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Veg Manchow Soup,40,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Veg Lemon Coriander,40,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Chicken Lemon Coriander,50,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Chicken S/C Soup,50,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Chicken H/S Soup,50,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Chicken Manchow Soup,50,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Soup,,Chicken Clear Soup,50,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Lemon Water,12,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Masala Jaljeera (L.W),18,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Big Lemon Water,30,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Water Melon Juice,35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Plain Milk (Hot),23,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Plain Milk (Cold),23,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Haldi Milk (Hot),25,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Haldi Milk (Cold),25,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Bournvita (Hot),35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Bournvita (Cold),35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Horlicks (Hot),35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Horlicks (Cold),35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Coffee (Hot),35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Coffee (Cold),35,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Ice Tea,30,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Big Ice Tea,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Apple (1 pc),22/25,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Banana (1 pc),7/8,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Tea,15,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Big Tea,25,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Drink & Fruits,,Water,20,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Veg Fried Rice,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Veg Schezwan F. Rice,70,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Veg Singapore F. Rice,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Veg Hong Kong F. Rice,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Jeera Rice,60,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Garlic Butter Rice,70,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Kaju Rice,75,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Egg Fried Rice,70,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Egg Schezwan F. Rice,80,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Egg Singapore F. Rice,75,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Egg Hong Kong F. Rice,75,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Chicken Fried Rice,80,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Chicken Schezwan F. Rice,85,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Chicken Singapore F. Rice,83,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Chicken Hong Kong F. Rice,83,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Egg Chicken Fried Rice,88,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Egg Chicken Schezwan F. Rice,95,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Egg Chicken Singapore F. Rice,90,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Egg Chicken Hong Kong F. Rice,90,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,W.W.R Fried Rice,95,unknown
+Night canteen,O.H. Night Cafeteria (Ramanujan),Rice,,Triple Fried Rice,100,unknown
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Butter Chicken,125,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Chicken Tikka Masala,135,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Kadai Chicken,125,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Chicken Afghani,125,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Chicken Hyderabadi,130,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Chicken Masala,125,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Chicken Dopiazaa,125,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Chicken Kolhapuri,125,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Chicken Keema Masala,125,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Paneer Butter Masala,125,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Kaju Paneer,130,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Paneer Masala,125,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Kadai Paneer,125,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Paneer Kolhapuri,125,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Indian Curry Items,,Egg Masala,80,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Veg Noodles,48,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Veg Singapore Noodles,50,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Veg Schezwan Noodles,55,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Veg Hong Kong Noodles,50,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Veg Hakka Noodles,55,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Paneer Noodles,67,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Veg Chili Garlic Noodles,58,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Noodles,55,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Singapore Noodles,58,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Schezwan Noodles,60,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Hakka Noodles,60,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Hong Kong Noodles,58,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Chili Garlic Noodles,60,egg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Chicken Noodles,67,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Chicken Singapore Noodles,68,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Chicken Schezwan Noodles,70,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Chicken Hakka Noodles,70,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Chicken Hong Kong Noodles,68,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Chicken Chili Garlic Noodles,70,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Chicken Noodles,77,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Chicken Singapore Noodles,79,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Chicken Schezwan Noodles,80,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Chicken Hong Kong Noodles,79,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Noodles,,Egg Chicken Chili Garlic Noodles,80,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chicken Pakoda,92,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chili Chicken,92,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Garlic Chicken,95,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Ginger Chicken,95,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chicken Manchurian,95,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Pepper Chicken,95,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chicken 65,95,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chicken Chatpatta,110,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Lemon Chicken,110,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Crispy Chicken,125,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Schezwan Chicken,110,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Dragon Chicken,110,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Red Hot Chicken,110,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Cashew Chicken,120,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chicken 99,105,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chicken Tikka,95,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chicken Nuggets,90,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Chicken Popcorn,90,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Hong Kong Chicken,110,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Majestic Chicken,120,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Chicken Starter (B/L),,Hunan Chicken,199,non-veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Paneer Pakoda,95,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Peri Peri Fries,67,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,French Fries,55,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Chili Potato,68,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Honey Chili Potato,70,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Gobi 65,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Chili Gobi,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Gobi Manchurian,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Gobi Chatpatta,70,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Crispy Corn,77,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Paneer 65,95,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Paneer Manchurian,95,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Paneer Chatpatta,100,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Dragon Paneer,110,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Schezwan Paneer,100,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Pepper Paneer,95,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Chili Paneer,92,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Mushroom Chili,90,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Garlic Mushroom,90,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Mushroom 65,90,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Pepper Mushroom,90,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Veg Starter,,Mushroom Manchurian,90,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Vanilla Milk Shake,70,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Butterscotch Milk Shake,80,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Chocolate Milk Shake,85,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Oreo Milk Shake,85,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,KitKat Milk Shake,90,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Strawberry Milk Shake,85,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Banana Milk Shake,65,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Peanut Butter Milk Shake,85,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Cold Coffee with Ice Cream,70,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Mango Milk Shake,75,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Hot Chocolate,50,veg
+Night canteen,O.H. Night Cafeteria (Ramanujan),Milk Shakes,,Cola Ice Cream,45,veg
+Night canteen,L.V.H Night Cafeteria,(charge),,Room service,5,
+Night canteen,L.V.H Night Cafeteria,Rice,,Veg Fried Rice,78,veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Plain Rice,70,veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Veg Schezwan F. Rice,83,veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Veg Singapore F. Rice,80,veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Veg Hong Kong F. Rice,80,veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Jeera Rice,78,veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Garlic Butter Rice,83,veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Kaju Rice,87,veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Egg Fried Rice,86,egg
+Night canteen,L.V.H Night Cafeteria,Rice,,Egg Schezwan F. Rice,93,egg
+Night canteen,L.V.H Night Cafeteria,Rice,,Egg Singapore F. Rice,88,egg
+Night canteen,L.V.H Night Cafeteria,Rice,,Egg Hong Kong F. Rice,88,egg
+Night canteen,L.V.H Night Cafeteria,Rice,,Chicken Fried Rice,94,non-veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Chicken Schezwan F. Rice,99,non-veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Chicken Singapore F. Rice,96,non-veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Chicken Hong Kong F. Rice,96,non-veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Egg Chicken Fried Rice,100,non-veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Egg Chicken Schezwan F. Rice,115,non-veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Egg Chicken Singapore F. Rice,103,non-veg
+Night canteen,L.V.H Night Cafeteria,Rice,,Egg Chicken Hong Kong F. Rice,103,non-veg
+Night canteen,L.V.H Night Cafeteria,Rice,,W.W.R Fried Rice,108,unknown
+Night canteen,L.V.H Night Cafeteria,Rice,,Triple Fried Rice,115,unknown
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Butter Chicken,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Chicken Tikka Masala,150,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Kadai Chicken,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Chicken Afghani,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Chicken Hyderabadi,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Chicken Masala,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Chicken Dopiazaa,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Chicken Kolhapuri,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Chicken Keema Masala,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Paneer Butter Masala,145,veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Kaju Paneer,145,veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Paneer Masala,145,veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Kadai Paneer,145,veg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Egg Curry,115,egg
+Night canteen,L.V.H Night Cafeteria,Indian Curry Items,,Chicken Mughlai,145,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Veg Noodles,64,veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Veg Singapore Noodles,66,veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Veg Schezwan Noodles,74,veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Veg Hong Kong Noodles,66,veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Veg Hakka Noodles,74,veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Paneer Noodles,82,veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Veg Chili Garlic Noodles,74,veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Noodles,69,egg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Singapore Noodles,73,egg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Schezwan Noodles,79,egg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Hakka Noodles,79,egg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Hong Kong Noodles,73,egg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Chili Garlic Noodles,79,egg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Chicken Noodles,82,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Chicken Singapore Noodles,84,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Chicken Schezwan Noodles,89,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Chicken Hakka Noodles,89,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Chicken Hong Kong Noodles,84,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Chicken Chili Garlic Noodles,90,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Chicken Noodles,90,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Chicken Singapore Noodles,92,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Chicken Schezwan Noodles,95,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Chicken Hong Kong Noodles,92,non-veg
+Night canteen,L.V.H Night Cafeteria,Noodles,,Egg Chicken Chili Garlic Noodles,95,non-veg
+Night canteen,L.V.H Night Cafeteria,Momos,,Veg Cheese Steam Momo,110,veg
+Night canteen,L.V.H Night Cafeteria,Momos,,Veg Cheese Fried Momo,115,veg
+Night canteen,L.V.H Night Cafeteria,Momos,,Chicken Steam Momo,100,non-veg
+Night canteen,L.V.H Night Cafeteria,Momos,,Chicken Fried Momo,105,non-veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Chili Mushroom,115,veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Garlic Mushroom,115,veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Pepper Mushroom,115,veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Mushroom Manchurian,115,veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Mushroom 65,115,veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Red Hot Mushroom,120,veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Schezwan Mushroom,125,veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Mushroom Chatpata,120,veg
+Night canteen,L.V.H Night Cafeteria,Mushroom,,Lemon Mushroom,115,veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken Pakoda,100,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chili Chicken,105,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Garlic Chicken,105,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Ginger Chicken,105,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken Manchurian,105,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Pepper Chicken,105,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken 65,105,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken Chatpatta,115,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Lemon Chicken,110,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Crispy Chicken,130,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Schezwan Chicken,120,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Dragon Chicken,115,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Red Hot Chicken,110,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Cashew Chicken,125,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken 99,110,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken Tikka,105,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Hong Kong Chicken,110,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Majestic Chicken,125,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken Lollipop,110,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken Nuggets,125,non-veg
+Night canteen,L.V.H Night Cafeteria,Chicken Starter (B/L),,Chicken Wings,120,non-veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Paneer Pakoda,100,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Peri Peri Fries,80,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,French Fries,65,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Chili Potato,80,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Honey Chili Potato,87,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Gobi 65,80,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Chili Gobi,80,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Gobi Manchurian,80,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Gobi Chatpatta,85,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Crispy Corn,85,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Paneer 65,100,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Paneer Manchurian,100,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Paneer Chatpatta,115,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Dragon Paneer,115,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Schezwan Paneer,120,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Pepper Paneer,100,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Chili Paneer,100,veg
+Night canteen,L.V.H Night Cafeteria,Veg Starter,,Onion Ring,95,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Plain Maggi,40,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Double Masala,52,unknown
+Night canteen,L.V.H Night Cafeteria,Maggi,,Schezwan Maggi,57,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Peri Peri Maggi,53,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Veg Maggi,49,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Atta Maggi,58,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Cheese Maggi,62,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Butter Maggi,54,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Spicy Maggi,52,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Egg Maggi,54,egg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Chicken Maggi,63,non-veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Veg F.d Maggi,52,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Veg Cheese F.d Maggi,67,veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Egg F.d Maggi,58,egg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Chicken F.d Maggi,68,non-veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Egg Chicken F.d Maggi,73,non-veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Egg Chicken Cheese F.d Maggi,84,non-veg
+Night canteen,L.V.H Night Cafeteria,Maggi,,Top Ramen Curry,58,unknown
+Night canteen,L.V.H Night Cafeteria,Korean Maggi,,Veg Korean Maggi,75,veg
+Night canteen,L.V.H Night Cafeteria,Korean Maggi,,Veg Cheese Korean Maggi,90,veg
+Night canteen,L.V.H Night Cafeteria,Korean Maggi,,Chicken Korean Maggi,80,non-veg
+Night canteen,L.V.H Night Cafeteria,Korean Maggi,,Chicken Cheese Korean Maggi,95,non-veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Plain Roti,15,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Plain Roti with Butter,18,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Plain Paratha,20,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Alu Paratha,42,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Gobi Paratha,46,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Paneer Paratha,57,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Onion Paratha,42,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Alu Onion Paratha,52,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Egg Paratha,52,egg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Chicken Paratha,58,non-veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Cheese Paratha,52,veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Chicken Cheese Paratha,74,non-veg
+Night canteen,L.V.H Night Cafeteria,Paratha,,Mix Veg Paratha,62,veg
+Night canteen,L.V.H Night Cafeteria,Combos,,Veg Meera,68,veg
+Night canteen,L.V.H Night Cafeteria,Combos,,Paneer Meera,80,veg
+Night canteen,L.V.H Night Cafeteria,Combos,,Egg Meera,78,egg
+Night canteen,L.V.H Night Cafeteria,Combos,,Chicken Meera,82,non-veg
+Night canteen,L.V.H Night Cafeteria,Combos,,Veg Cheese Meera,82,veg
+Night canteen,L.V.H Night Cafeteria,Combos,,Paneer Cheese Meera,103,veg
+Night canteen,L.V.H Night Cafeteria,Combos,,Egg Cheese Meera,93,egg
+Night canteen,L.V.H Night Cafeteria,Combos,,Chicken Cheese Meera,104,non-veg
+Night canteen,L.V.H Night Cafeteria,Roll,,Veg Roll,43,veg
+Night canteen,L.V.H Night Cafeteria,Roll,,Paneer Roll,57,veg
+Night canteen,L.V.H Night Cafeteria,Roll,,Egg Roll,52,egg
+Night canteen,L.V.H Night Cafeteria,Roll,,Chicken Roll,58,non-veg
+Night canteen,L.V.H Night Cafeteria,Roll,,Egg Chicken Roll,67,non-veg
+Night canteen,L.V.H Night Cafeteria,Roll,,Chicken Cheese Roll,73,non-veg
+Night canteen,L.V.H Night Cafeteria,Roll,,Egg Cheese Roll,62,egg
+Night canteen,L.V.H Night Cafeteria,Roll,,Veg Cheese Roll,57,veg
+Night canteen,L.V.H Night Cafeteria,Roll,,Egg Chicken Cheese Roll,83,non-veg
+Night canteen,L.V.H Night Cafeteria,Roll,,Chicken Tikka Roll,80,non-veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Veg Sandwich,37,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Veg Corn Sandwich,40,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Veg Cheese Corn Sandwich,58,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Egg Sandwich,42,egg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Chicken Sandwich,52,non-veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Malai Sandwich,38,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Cheese Sandwich,46,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Paneer Sandwich,52,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Paneer Cheese Sandwich,65,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Veg Cheese Sandwich,52,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Chicken Cheese Sandwich,65,non-veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Egg Chicken Cheese Sandwich,78,non-veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Omlette Sandwich,42,egg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Bread Butter Toast,25,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,French Toast (Sweet),46,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,French Toast (Salt),46,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Butter Cheese Toast,52,veg
+Night canteen,L.V.H Night Cafeteria,Sandwich,,Chili Cheese Toast,50,veg
+Night canteen,L.V.H Night Cafeteria,Appetizers,,Cheese Pizza Triangles (4 pcs),100,veg
+Night canteen,L.V.H Night Cafeteria,Appetizers,,Cheese Jalapeno Triangles (4 pcs),100,veg
+Night canteen,L.V.H Night Cafeteria,Appetizers,,Potato Cheese Shotz (6 pcs),80,veg
+Night canteen,L.V.H Night Cafeteria,Appetizers,,Chicken Salami Sandwich,60,non-veg
+Night canteen,L.V.H Night Cafeteria,Appetizers,,Chicken Cheese Salami Sandwich,75,non-veg
+Night canteen,L.V.H Night Cafeteria,Appetizers,,Honey Chilli Chicken,115,non-veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Big Lemon Water,30,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Masala Jaljeera,40,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Water Melon Juice,55,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Plain Milk (Hot),27,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Plain Milk (Cold),27,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Hot Haldi Milk,32,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Hot Bournvita,43,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Hot Horlicks,45,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Hot Coffee,40,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Big Ice Tea,65,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Banana (1 pc),8/9,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Tea,15,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Big Tea,25,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Hot Chocolate,55,veg
+Night canteen,L.V.H Night Cafeteria,Drink & Fruits,,Masala Cold Drink,45,unknown
+Night canteen,L.V.H Night Cafeteria,Misc,,Chips Chat,40,veg
+Night canteen,L.V.H Night Cafeteria,Misc,,Peanut Chat,48,veg
+Night canteen,L.V.H Night Cafeteria,Misc,,Egg Chat (2 Eggs),47,egg
+Night canteen,L.V.H Night Cafeteria,Misc,,Kurkure Chat,40,veg
+Night canteen,L.V.H Night Cafeteria,Misc,,Cheese Pasta,75,veg
+Night canteen,L.V.H Night Cafeteria,Misc,,Tomato Pasta,80,veg
+Night canteen,L.V.H Night Cafeteria,Misc,,Chicken Masala Pasta,80,non-veg
+Night canteen,L.V.H Night Cafeteria,Misc,,Peri Peri Popcorn,47,veg
+Night canteen,L.V.H Night Cafeteria,Misc,,Masala Papad,45,veg
+Night canteen,L.V.H Night Cafeteria,Misc,,Popcorn,36,veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Veg S/C Soup,47,veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Veg H/S Soup,47,veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Tomato Soup,47,veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Veg Clear Soup,47,veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Veg Manchow Soup,49,veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Chicken S/C Soup,57,non-veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Chicken H/S Soup,57,non-veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Chicken Manchow Soup,59,non-veg
+Night canteen,L.V.H Night Cafeteria,Soup,,Chicken Clear Soup,57,non-veg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Omlette,42,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Bread Omlette,57,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Russian Omlette,88,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Cheese Omlette,67,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Half Fry,33,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Full Fry,33,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Chicken Omelette,74,non-veg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Egg Bhurji,42,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Boiled Egg,13,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Masala Boiled Egg,45,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Veg Bread Bhurji,55,veg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Egg Bread Bhurji,60,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Chicken Bread Bhurji,67,non-veg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Egg Chicken Bread Bhurji,72,non-veg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Veg Cheese Bread Bhurji,67,veg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Egg Cheese Bread Bhurji,72,egg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Chicken Cheese Bread Bhurji,77,non-veg
+Night canteen,L.V.H Night Cafeteria,Omelettes,,Egg Chicken Cheese Bread Bhurji,83,non-veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Cold Chocolate,100,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Peanut Butter Chocolate Shake,120,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Cold Horlicks,78,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Coke Float,55,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Vanilla Shake,80,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Butterscotch Shake,85,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Chocolate Shake,85,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Oreo Shake,85,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Kitkat Shake,90,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Strawberry Shake,85,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Banana Shake,70,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Mango Shake,80,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Double Oreo Shake,100,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Special Kitkat Shake,115,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Peanut Butter Shake,100,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Special Cold Coffee,75,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Bournvita Shake,75,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Apple Shake,85,veg
+Night canteen,L.V.H Night Cafeteria,Beverages,,Add Extra Ice Cream,15,veg
+Night canteen,W.H Night Cafeteria (Tagore),(charge),,Room service,5,
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Veg Fried Rice,78,veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Plain Rice,70,veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Veg Schezwan F. Rice,83,veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Veg Singapore F. Rice,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Veg Hong Kong F. Rice,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Jeera Rice,78,veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Garlic Butter Rice,83,veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Kaju Rice,87,veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Egg Fried Rice,86,egg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Egg Schezwan F. Rice,93,egg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Egg Singapore F. Rice,88,egg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Egg Hong Kong F. Rice,88,egg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Chicken Fried Rice,94,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Chicken Schezwan F. Rice,99,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Chicken Singapore F. Rice,96,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Chicken Hong Kong F. Rice,96,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Egg Chicken Fried Rice,100,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Egg Chicken Schezwan F. Rice,115,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Egg Chicken Singapore F. Rice,103,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Egg Chicken Hong Kong F. Rice,103,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,W.W.R Fried Rice,108,unknown
+Night canteen,W.H Night Cafeteria (Tagore),Rice,,Triple Fried Rice,115,unknown
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Butter Chicken,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Chicken Tikka Masala,150,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Kadai Chicken,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Chicken Afghani,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Chicken Hyderabadi,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Chicken Masala,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Chicken Dopiazaa,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Chicken Kolhapuri,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Chicken Keema Masala,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Paneer Butter Masala,145,veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Kaju Paneer,145,veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Paneer Masala,145,veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Kadai Paneer,145,veg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Egg Curry,115,egg
+Night canteen,W.H Night Cafeteria (Tagore),Indian Curry Items,,Chicken Mughlai,145,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Veg Noodles,64,veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Veg Singapore Noodles,66,veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Veg Schezwan Noodles,74,veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Veg Hong Kong Noodles,66,veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Veg Hakka Noodles,74,veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Paneer Noodles,82,veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Veg Chili Garlic Noodles,74,veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Noodles,69,egg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Singapore Noodles,73,egg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Schezwan Noodles,79,egg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Hakka Noodles,79,egg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Hong Kong Noodles,73,egg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Chili Garlic Noodles,79,egg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Chicken Noodles,82,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Chicken Singapore Noodles,84,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Chicken Schezwan Noodles,89,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Chicken Hakka Noodles,89,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Chicken Hong Kong Noodles,84,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Chicken Chili Garlic Noodles,90,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Chicken Noodles,90,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Chicken Singapore Noodles,92,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Chicken Schezwan Noodles,95,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Chicken Hong Kong Noodles,92,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Noodles,,Egg Chicken Chili Garlic Noodles,95,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Momos,,Veg Cheese Steam Momo,110,veg
+Night canteen,W.H Night Cafeteria (Tagore),Momos,,Veg Cheese Fried Momo,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Momos,,Chicken Steam Momo,100,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Momos,,Chicken Fried Momo,105,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Chili Mushroom,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Garlic Mushroom,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Pepper Mushroom,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Mushroom Manchurian,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Mushroom 65,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Red Hot Mushroom,120,veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Schezwan Mushroom,125,veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Mushroom Chatpata,120,veg
+Night canteen,W.H Night Cafeteria (Tagore),Mushroom,,Lemon Mushroom,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chicken Pakoda,100,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chili Chicken,105,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Garlic Chicken,105,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Ginger Chicken,105,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chicken Manchurian,105,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Pepper Chicken,105,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chicken 65,105,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chicken Chatpatta,115,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Lemon Chicken,110,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Crispy Chicken,130,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Schezwan Chicken,120,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Dragon Chicken,115,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Red Hot Chicken,110,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Cashew Chicken,125,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chicken 99,110,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chicken Tikka,105,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Hong Kong Chicken,110,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Majestic Chicken,125,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chicken Lollipop,110,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Chicken Starter (B/L),,Chicken Nuggets,125,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Paneer Pakoda,100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Peri Peri Fries,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,French Fries,65,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Chili Potato,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Honey Chili Potato,87,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Gobi 65,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Chili Gobi,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Gobi Manchurian,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Gobi Chatpatta,85,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Crispy Corn,85,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Paneer 65,100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Paneer Manchurian,100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Paneer Chatpatta,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Dragon Paneer,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Schezwan Paneer,120,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Pepper Paneer,100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Chili Paneer,100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Veg Starter,,Onion Ring,95,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Plain Maggi,40,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Double Masala,52,unknown
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Schezwan Maggi,57,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Peri Peri Maggi,53,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Veg Maggi,49,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Atta Maggi,58,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Cheese Maggi,62,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Butter Maggi,54,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Spicy Maggi,52,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Egg Maggi,54,egg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Chicken Maggi,63,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Veg F.d Maggi,52,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Veg Cheese F.d Maggi,67,veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Egg F.d Maggi,58,egg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Chicken F.d Maggi,68,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Egg Chicken F.d Maggi,73,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Egg Chicken Cheese F.d Maggi,84,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Maggi,,Top Ramen Curry,58,unknown
+Night canteen,W.H Night Cafeteria (Tagore),Korean Maggi,,Veg Korean Maggi,75,veg
+Night canteen,W.H Night Cafeteria (Tagore),Korean Maggi,,Veg Cheese Korean Maggi,90,veg
+Night canteen,W.H Night Cafeteria (Tagore),Korean Maggi,,Chicken Korean Maggi,80,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Korean Maggi,,Chicken Cheese Korean Maggi,95,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Plain Roti,15,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Plain Roti with Butter,18,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Plain Paratha,20,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Alu Paratha,42,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Gobi Paratha,46,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Paneer Paratha,57,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Onion Paratha,42,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Alu Onion Paratha,52,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Egg Paratha,52,egg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Chicken Paratha,58,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Cheese Paratha,52,veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Chicken Cheese Paratha,74,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Paratha,,Mix Veg Paratha,62,veg
+Night canteen,W.H Night Cafeteria (Tagore),Combos,,Veg Meera,68,veg
+Night canteen,W.H Night Cafeteria (Tagore),Combos,,Paneer Meera,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Combos,,Egg Meera,78,egg
+Night canteen,W.H Night Cafeteria (Tagore),Combos,,Chicken Meera,82,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Combos,,Veg Cheese Meera,82,veg
+Night canteen,W.H Night Cafeteria (Tagore),Combos,,Paneer Cheese Meera,103,veg
+Night canteen,W.H Night Cafeteria (Tagore),Combos,,Egg Cheese Meera,93,egg
+Night canteen,W.H Night Cafeteria (Tagore),Combos,,Chicken Cheese Meera,104,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Veg Roll,43,veg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Paneer Roll,57,veg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Egg Roll,52,egg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Chicken Roll,58,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Egg Chicken Roll,67,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Chicken Cheese Roll,73,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Egg Cheese Roll,62,egg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Veg Cheese Roll,57,veg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Egg Chicken Cheese Roll,83,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Roll,,Chicken Tikka Roll,80,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Veg Sandwich,37,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Veg Corn Sandwich,40,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Veg Cheese Corn Sandwich,58,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Egg Sandwich,42,egg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Chicken Sandwich,52,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Malai Sandwich,38,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Cheese Sandwich,46,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Paneer Sandwich,52,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Paneer Cheese Sandwich,65,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Veg Cheese Sandwich,52,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Chicken Cheese Sandwich,65,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Egg Chicken Cheese Sandwich,78,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Omlette Sandwich,42,egg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Bread Butter Toast,25,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,French Toast (Sweet),46,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,French Toast (Salt),46,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Butter Cheese Toast,52,veg
+Night canteen,W.H Night Cafeteria (Tagore),Sandwich,,Chili Cheese Toast,50,veg
+Night canteen,W.H Night Cafeteria (Tagore),Appetizers,,Cheese Pizza Triangles (4 pcs),100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Appetizers,,Cheese Jalapeno Triangles (4 pcs),100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Appetizers,,Potato Cheese Shotz (6 pcs),80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Appetizers,,Chicken Salami Sandwich,60,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Appetizers,,Chicken Cheese Salami Sandwich,75,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Appetizers,,Honey Chilli Chicken,115,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Big Lemon Water,30,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Masala Jaljeera,40,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Water Melon Juice,55,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Plain Milk (Hot),27,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Plain Milk (Cold),27,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Hot Haldi Milk,32,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Hot Bournvita,43,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Hot Horlicks,45,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Hot Coffee,40,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Big Ice Tea,65,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Banana (1 pc),8/9,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Tea,15,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Big Tea,25,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Hot Chocolate,55,veg
+Night canteen,W.H Night Cafeteria (Tagore),Drink & Fruits,,Masala Cold Drink,45,unknown
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Chips Chat,40,veg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Peanut Chat,48,veg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Egg Chat (2 Eggs),47,egg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Kurkure Chat,40,veg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Cheese Pasta,75,veg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Tomato Pasta,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Chicken Masala Pasta,80,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Peri Peri Popcorn,47,veg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Masala Papad,45,veg
+Night canteen,W.H Night Cafeteria (Tagore),Misc,,Popcorn,36,veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Veg S/C Soup,47,veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Veg H/S Soup,47,veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Tomato Soup,47,veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Veg Clear Soup,47,veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Veg Manchow Soup,49,veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Chicken S/C Soup,57,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Chicken H/S Soup,57,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Chicken Manchow Soup,59,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Soup,,Chicken Clear Soup,57,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Omlette,42,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Bread Omlette,57,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Russian Omlette,88,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Cheese Omlette,67,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Half Fry,33,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Full Fry,33,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Chicken Omelette,74,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Egg Bhurji,42,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Boiled Egg,13,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Masala Boiled Egg,45,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Veg Bread Bhurji,55,veg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Egg Bread Bhurji,60,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Chicken Bread Bhurji,67,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Egg Chicken Bread Bhurji,72,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Veg Cheese Bread Bhurji,67,veg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Egg Cheese Bread Bhurji,72,egg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Chicken Cheese Bread Bhurji,77,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Omelettes,,Egg Chicken Cheese Bread Bhurji,83,non-veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Cold Chocolate,100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Peanut Butter Chocolate Shake,120,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Cold Horlicks,78,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Coke Float,55,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Vanilla Shake,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Butterscotch Shake,85,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Chocolate Shake,85,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Oreo Shake,85,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Kitkat Shake,90,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Strawberry Shake,85,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Banana Shake,70,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Mango Shake,80,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Double Oreo Shake,100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Special Kitkat Shake,115,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Peanut Butter Shake,100,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Special Cold Coffee,75,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Bournvita Shake,75,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Apple Shake,85,veg
+Night canteen,W.H Night Cafeteria (Tagore),Beverages,,Add Extra Ice Cream,15,veg
+Tuck shop,Mohan Da,(delivery fee),,Delivery to NH,15,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to OH,15,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to Tagore,15,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to Annexe,15,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to NAB,15,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to OAB,15,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to Tata Hall,15,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to LVH,20,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to MDC,20,
+Tuck shop,Mohan Da,(delivery fee),,Delivery to Family Quarters,20,
+Tuck shop,Mohan Da,Sandwiches,1,Plain Cheese Sandwich Grilled,40,unknown
+Tuck shop,Mohan Da,Sandwiches,2,Veg Cheese Sandwich Grilled,60,unknown
+Tuck shop,Mohan Da,Sandwiches,3,Aloo Cheese Sandwich Grilled,60,unknown
+Tuck shop,Mohan Da,Sandwiches,4,Veg Tikki cheese Sandwich Grilled,70,unknown
+Tuck shop,Mohan Da,Sandwiches,5,Paneer cheese Sandwich Grilled,70,unknown
+Tuck shop,Mohan Da,Sandwiches,6,Chicken Tikki cheese Sandwich Grilled,75,unknown
+Tuck shop,Mohan Da,Sandwiches,7,Chicken Cheese Sandwich Grilled,70,unknown
+Tuck shop,Mohan Da,Sandwiches,8,Chicken Sandwich Grilled (without cheese),50,unknown
+Tuck shop,Mohan Da,Sandwiches,9,Chicken Sausage Cheese Sandwich Grilled,70,unknown
+Tuck shop,Mohan Da,Burgers & Fries,10,French Fries,50,unknown
+Tuck shop,Mohan Da,Burgers & Fries,11,Chicken Cheese Burger,75,unknown
+Tuck shop,Mohan Da,Burgers & Fries,12,Veg Cheese Burger,70,unknown
+Tuck shop,Mohan Da,Patties & Pav,13,Paneer Masala Patty,40,unknown
+Tuck shop,Mohan Da,Patties & Pav,13,Paneer Masala Patty with Cheese,60,unknown
+Tuck shop,Mohan Da,Patties & Pav,14,Veg Masala Patty,40,unknown
+Tuck shop,Mohan Da,Patties & Pav,14,Veg Masala Patty with Cheese,60,unknown
+Tuck shop,Mohan Da,Patties & Pav,15,Chicken Masala Patty,50,unknown
+Tuck shop,Mohan Da,Patties & Pav,15,Chicken Masala Patty with Cheese,70,unknown
+Tuck shop,Mohan Da,Patties & Pav,16,Vada Pav,50,unknown
+Tuck shop,Mohan Da,Patties & Pav,16,Vada Pav with Cheese,70,unknown
+Tuck shop,Mohan Da,Patties & Pav,17,Pav Bhaji,50,unknown
+Tuck shop,Mohan Da,Patties & Pav,17,Extra Pav,15,unknown
+Tuck shop,Mohan Da,Momos,18,Chicken Steamed Momos (5 pieces),70,unknown
+Tuck shop,Mohan Da,Momos,18,Veg Steamed Momos (5 pieces),70,unknown
+Tuck shop,Mohan Da,Momos,19,Fried Veg Momo,80,unknown
+Tuck shop,Mohan Da,Momos,19,Fried Chicken Momo,80,unknown
+Tuck shop,Mohan Da,Momos,20,Pan Fried Veg Momo (5 pieces),100,unknown
+Tuck shop,Mohan Da,Momos,20,Pan Fried Chicken Momo (5 pieces),100,unknown
+Tuck shop,Mohan Da,Eggs,21,Boiled Egg (1 piece),13 / 15,unknown
+Tuck shop,Mohan Da,Eggs,22,Double Egg Bread Omelet,45,unknown
+Tuck shop,Mohan Da,Eggs,22,Double Egg Bread Omelet with Cheese,65,unknown
+Tuck shop,Mohan Da,Eggs,23,Half Fry (2 Eggs 2 Bread),45,unknown
+Tuck shop,Mohan Da,Eggs,24,Scrambled Egg (2 Eggs 2 Bread),45,unknown
+Tuck shop,Mohan Da,Eggs,25,Boiled Egg Chat,50,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,26,Chicken Nuggets (5 pieces),75,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,28,Chicken Sausage (Fry),80,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,28,Chicken Sausage (Steamed),80,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,32,Chicken Strips (1 piece),60,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,35,Chicken Spring Roll,75,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,36,Chicken Seekh Kebab (3 pieces),125,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,37,Veg Spring Roll,60,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,38,Mini Samosa (5 pieces),75,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,39,Chilli Garlic Potato Bites (8 pieces),50,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,40,Veg Cheese Nuggets (5 pieces),60,unknown
+Tuck shop,Mohan Da,Starters & Fried Snacks,41,Smiley (5 pieces),50,unknown
+Tuck shop,Mohan Da,"Rice, Oats & Paratha",43,Aloo Paratha (1 piece),50,unknown
+Tuck shop,Mohan Da,"Rice, Oats & Paratha",44,Masala Rice (Veg),50,unknown
+Tuck shop,Mohan Da,"Rice, Oats & Paratha",44,Masala Rice (Egg),70,unknown
+Tuck shop,Mohan Da,"Rice, Oats & Paratha",44,Masala Rice (Chicken),75,unknown
+Tuck shop,Mohan Da,"Rice, Oats & Paratha",44,Masala Rice (Paneer),75,unknown
+Tuck shop,Mohan Da,"Rice, Oats & Paratha",45,Oats (Veg),40,unknown
+Tuck shop,Mohan Da,"Rice, Oats & Paratha",45,Oats (Egg),60,unknown
+Tuck shop,Mohan Da,"Rice, Oats & Paratha",45,Oats (Chicken),65,unknown
+Tuck shop,Mohan Da,Soups,46,Tomato Soup,35,unknown
+Tuck shop,Mohan Da,Soups,46,Tomato Soup with Butter,45,unknown
+Tuck shop,Mohan Da,Soups,47,Veg Sweet Corn Soup,35,unknown
+Tuck shop,Mohan Da,Soups,47,Veg Sweet Corn Soup with Butter,45,unknown
+Tuck shop,Mohan Da,Soups,48,Hot and Sour Veg Soup,35,unknown
+Tuck shop,Mohan Da,Soups,48,Hot and Sour Veg Soup with Butter,45,unknown
+Tuck shop,Mohan Da,Chaat,49,Sprout Chaat (Veg),45,unknown
+Tuck shop,Mohan Da,Chaat,49,Sprout Chaat (Egg),60,unknown
+Tuck shop,Mohan Da,Chaat,49,Sprout Chaat (Chicken),65,unknown
+Tuck shop,Mohan Da,Chaat,50,Peanut Chaat,45,unknown
+Tuck shop,Mohan Da,Chaat,50,Chips Chaat,45,unknown
+Tuck shop,Mohan Da,Chaat,51,Sweet Corn Chaat,50,unknown
+Tuck shop,Mohan Da,Chaat,52,Fruit Chaat,60,unknown
+Tuck shop,Mohan Da,Pasta,53,White Sauce Pasta (Veg),70,unknown
+Tuck shop,Mohan Da,Pasta,53,White Sauce Pasta (Non-Veg),95,unknown
+Tuck shop,Mohan Da,Pasta,54,Red Sauce Pasta (Veg),80,unknown
+Tuck shop,Mohan Da,Pasta,54,Red Sauce Pasta (Non-Veg),105,unknown
+Tuck shop,Mohan Da,Drinks,55,Cold Bournvita,50,unknown
+Tuck shop,Mohan Da,Drinks,55,Hot Bournvita,50,unknown
+Tuck shop,Mohan Da,Drinks,55,Cold Coffee,50,unknown
+Tuck shop,Mohan Da,Drinks,56,Cold Milk,25,unknown
+Tuck shop,Mohan Da,Drinks,56,Hot Milk,30,unknown
+Tuck shop,Mohan Da,Drinks,56,Haldi Milk Hot,30,unknown
+Tuck shop,Mohan Da,Drinks,57,Hot Chocolate Milk,50,unknown
+Tuck shop,Mohan Da,Drinks,57,Cold Chocolate Milk,50,unknown
+Tuck shop,Mohan Da,Drinks,58,Masala Soda,40,unknown
+Tuck shop,Mohan Da,Drinks,59,Masala Coke,45,unknown
+Tuck shop,Mohan Da,Drinks,60,Ice Tea,40,unknown
+Tuck shop,Mohan Da,Indian Breakfast,61,Upma,55,unknown
+Tuck shop,Mohan Da,Indian Breakfast,61,Poha,50,unknown
+Tuck shop,Mohan Da,Maggi,62,Plain Masala Maggi,45,unknown
+Tuck shop,Mohan Da,Maggi,62,Plain Masala Maggi with Cheese,65,unknown
+Tuck shop,Mohan Da,Maggi,63,Double Masala Maggi,50,unknown
+Tuck shop,Mohan Da,Maggi,63,Double Masala Maggi with Cheese,70,unknown
+Tuck shop,Mohan Da,Maggi,64,Vegetable Maggi,50,unknown
+Tuck shop,Mohan Da,Maggi,64,Vegetable Maggi with Cheese,70,unknown
+Tuck shop,Mohan Da,Maggi,65,Chicken Masala Maggi,70,unknown
+Tuck shop,Mohan Da,Maggi,66,Fried Maggi (Veg),50,unknown
+Tuck shop,Mohan Da,Maggi,66,Fried Maggi (Egg),70,unknown
+Tuck shop,Mohan Da,Maggi,66,Fried Maggi (Chicken),75,unknown
+Tuck shop,Mohan Da,Maggi,67,Atta Maggi,50,unknown
+Tuck shop,Mohan Da,Maggi,67,Atta Maggi with Cheese,70,unknown
+Tuck shop,Mohan Da,Maggi,68,Butter Garlic Maggi,70,unknown
+Tuck shop,Mohan Da,Maggi,69,Korean Veg. Maggi,70,unknown
+Tuck shop,Mohan Da,Maggi,70,Korean Chicken Maggi,70,unknown
+Tuck shop,Tagore Tuck Shop,(charge),,Delivery,6,
+Tuck shop,Tagore Tuck Shop,Chaat,1,Fruit Chaat,50,unknown
+Tuck shop,Tagore Tuck Shop,Chaat,2,Sprout Chaat,40,unknown
+Tuck shop,Tagore Tuck Shop,Chaat,3,Boiled Egg Chaat (2 Egg),45,unknown
+Tuck shop,Tagore Tuck Shop,Chaat,4,Peanut Chaat,45,unknown
+Tuck shop,Tagore Tuck Shop,Chaat,5,Chips Chakhna,40,unknown
+Tuck shop,Tagore Tuck Shop,Soups,6,Tomato Soup,45,unknown
+Tuck shop,Tagore Tuck Shop,Soups,7,Veg Sweet Corn Soup,45,unknown
+Tuck shop,Tagore Tuck Shop,Soups,8,Chicken Sweet Corn Soup,45,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,9,Ginger Tea,15,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,10,Hot Coffee,25,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,11,Lemon Tea,15,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,12,Hot Milk,25,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,13,Nimbu Pani,25,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,14,Chocolate (Hot),48,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,14,Chocolate (Cold),48,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,15,Bournvita (Hot),42,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,15,Bournvita (Cold),42,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,16,Corn Flakes (Hot),45,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,16,Corn Flakes (Cold),45,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,17,Chocos (Hot),50,unknown
+Tuck shop,Tagore Tuck Shop,Drinks & Cereal,17,Chocos (Cold),50,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,18,Plain Maggi,36,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,19,Veg Maggi,45,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,20,Veg Atta Maggi,47,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,21,Veg Fried Maggi,45,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,22,Veg Korean Maggi,75,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,23,Chicken Korean Maggi,78,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,24,Egg Fried Maggi,55,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,25,Chicken Fried Maggi,62,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,26,Curry Maggi,48,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,27,Top Ramen Masala,46,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,28,Curry Top Ramen,50,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,29,Cheese Maggi,52,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,30,Veg Cheese Maggi,55,unknown
+Tuck shop,Tagore Tuck Shop,Maggi & Noodles,31,Chicken Cheese Maggi,62,unknown
+Tuck shop,Tagore Tuck Shop,Eggs & Breakfast,32,Bread Omelette (2 Egg),50,unknown
+Tuck shop,Tagore Tuck Shop,Eggs & Breakfast,33,Bhujiya with Bread (2 Egg),50,unknown
+Tuck shop,Tagore Tuck Shop,Eggs & Breakfast,34,Poha,45,unknown
+Tuck shop,Tagore Tuck Shop,Eggs & Breakfast,35,Upma,45,unknown
+Tuck shop,Tagore Tuck Shop,Eggs & Breakfast,36,Oats,45,unknown
+Tuck shop,Tagore Tuck Shop,Pasta & Rice,37,Maggi Pasta (Tomato),55,unknown
+Tuck shop,Tagore Tuck Shop,Pasta & Rice,37,Maggi Pasta (Cheese),55,unknown
+Tuck shop,Tagore Tuck Shop,Pasta & Rice,37,Maggi Pasta (Mushroom),55,unknown
+Tuck shop,Tagore Tuck Shop,Pasta & Rice,38,Veg Masala Rice,55,unknown
+Tuck shop,Tagore Tuck Shop,Pasta & Rice,39,Egg Masala Rice,65,unknown
+Tuck shop,Tagore Tuck Shop,Pasta & Rice,40,Egg Chicken Masala Rice,75,unknown
+Tuck shop,Tagore Tuck Shop,Corn & Popcorn,41,Sweetcorn,55,unknown
+Tuck shop,Tagore Tuck Shop,Corn & Popcorn,42,Popcorn,35,unknown
+Tuck shop,Tagore Tuck Shop,Corn & Popcorn,43,Peri Peri Popcorn,45,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,44,Plain Cheese Sandwich,35,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,45,Veg Cheese Sandwich,46,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,46,Veg Cheese Tikki Sandwich,60,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,47,Paneer Cheese Sandwich,55,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,48,Boiled Egg Cheese Sandwich,52,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,49,Chicken Sandwich,50,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,50,Chicken Cheese Sandwich,60,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,51,Chicken Cheese Tikki Sandwich,72,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,52,Mushroom Cheese Sandwich,70,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,53,Paneer Cheese Kulcha S/W,70,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,54,Mushroom Cheese Kulcha S/W,76,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,55,Veg Cheese Kulcha Sandwich,65,unknown
+Tuck shop,Tagore Tuck Shop,Sandwiches & Kulcha,56,Chicken Cheese Kulcha S/W,75,unknown
+Tuck shop,Tagore Tuck Shop,Burgers,57,Veg Cheese Burger,65,unknown
+Tuck shop,Tagore Tuck Shop,Burgers,58,Chicken Cheese Burger,75,unknown
+Tuck shop,Tagore Tuck Shop,Patties,59,Veg Masala Patty,45,unknown
+Tuck shop,Tagore Tuck Shop,Patties,60,Veg Cheese Masala Patty,55,unknown
+Tuck shop,Tagore Tuck Shop,Patties,61,Paneer Masala Patty,45,unknown
+Tuck shop,Tagore Tuck Shop,Patties,62,Paneer Cheese Masala Patty,58,unknown
+Tuck shop,Tagore Tuck Shop,Patties,63,Egg Masala Patty,45,unknown
+Tuck shop,Tagore Tuck Shop,Patties,64,Chicken Cheese Masala Patty,68,unknown
+Tuck shop,Tagore Tuck Shop,Fried Snacks,65,Chicken Nuggets (5 pieces),90,unknown
+Tuck shop,Tagore Tuck Shop,Fried Snacks,66,Chicken Popcorn (8 pieces),80,unknown
+Tuck shop,Tagore Tuck Shop,Fried Snacks,67,French Fry,55,unknown
+Tuck shop,Tagore Tuck Shop,Fried Snacks,68,Peri Peri Fry,70,unknown
