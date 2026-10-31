@@ -220,6 +220,32 @@ SECTIONS = {
         (59, 64, "Patties"),
         (65, 68, "Fried Snacks"),
     ],
+    # Machaan's card does have headings, but it is laid out as two printed
+    # pages of mains and appetisers. These are its own headings regrouped for
+    # a phone: breakfast and snacks first, its long Veg and Non-Veg blocks
+    # broken by what the dish is made of, and Milk, Butter Milk and Lassi
+    # gathered into Beverages (Lassi was printed twice). The sheet is numbered
+    # in this order, which the user approved (2026-10-31).
+    "MACHAAN": [
+        (1, 12, "Breakfast"),
+        (13, 19, "Sandwiches"),
+        (20, 28, "Maggi & Noodles"),
+        (29, 33, "Rolls"),
+        (34, 44, "Pakoda & Chinese Starters"),
+        (45, 53, "Soups"),
+        (54, 61, "Chowmein"),
+        (62, 79, "Rice & Biryani"),
+        (80, 94, "Indian Bread"),
+        (95, 102, "Thali"),
+        (103, 112, "Paneer"),
+        (113, 135, "Veg Curries"),
+        (136, 141, "Dal, Rajma & Chana"),
+        (142, 154, "Chicken"),
+        (155, 160, "Fish"),
+        (161, 164, "Egg Curries"),
+        (165, 174, "Papad, Salad & Sides"),
+        (175, 184, "Beverages"),
+    ],
 }
 
 # -------------------------------------------------------------------- splits
@@ -301,6 +327,89 @@ SPLITS = {
         "Maggi Pasta (Tomato / Cheese / Mushroom)": [
             "Maggi Pasta (Tomato)", "Maggi Pasta (Cheese)", "Maggi Pasta (Mushroom)"],
     },
+    # Machaan prints no slashes. Its choices are second price columns: CHICKEN
+    # beside the soups, B/L (boneless) beside most chicken curries, SPL beside
+    # the thalis. A line with a price in that column is two dishes; one without
+    # (Tomato Soup, Chicken Patiyala) is not split. Chicken Keema's only price
+    # sits in the B/L column, so it stays one dish.
+    #
+    # Three soups are a reading, not a transcription: a chicken price on
+    # "Cream Of Veg" and on the two egg soups, taken to be Cream of Chicken and
+    # the egg soups with chicken. Approved by the user (2026-10-31).
+    "MACHAAN": {
+        "Clear Soup": ["Clear Soup (Veg)", "Clear Soup (Chicken)"],
+        "Noodle Soup": ["Noodle Soup (Veg)", "Noodle Soup (Chicken)"],
+        "Sweet Corn Soup": ["Sweet Corn Soup (Veg)", "Sweet Corn Soup (Chicken)"],
+        "Manchow Soup": ["Manchow Soup (Veg)", "Manchow Soup (Chicken)"],
+        "Hot-n-sour Soup": ["Hot-n-Sour Soup (Veg)", "Hot-n-Sour Soup (Chicken)"],
+        "Cream Of Veg": ["Cream of Veg Soup", "Cream of Chicken Soup"],
+        "Egg Hot-N-Sour Soup": ["Egg Hot-n-Sour Soup", "Egg Chicken Hot-n-Sour Soup"],
+        "Egg Manchow Soup": ["Egg Manchow Soup", "Egg Chicken Manchow Soup"],
+        "Veg Thali": ["Veg Thali", "Veg Thali (Special)"],
+        "Egg Thali": ["Egg Thali", "Egg Thali (Special)"],
+        "Fish Thali": ["Fish Thali", "Fish Thali (Special)"],
+        "Chicken Thali": ["Chicken Thali", "Chicken Thali (Special)"],
+        "Chicken Curry": ["Chicken Curry", "Chicken Curry (Boneless)"],
+        "Chicken Kadai": ["Chicken Kadai", "Chicken Kadai (Boneless)"],
+        "Chicken Kohlapuri": ["Chicken Kolhapuri", "Chicken Kolhapuri (Boneless)"],
+        "Chicken Masala": ["Chicken Masala", "Chicken Masala (Boneless)"],
+        "Chicken Btr. Masala": [
+            "Chicken Butter Masala", "Chicken Butter Masala (Boneless)"],
+        "Chicken Do Pyaza": ["Chicken Do Pyaza", "Chicken Do Pyaza (Boneless)"],
+        "Chicken Kasha": ["Chicken Kasha", "Chicken Kasha (Boneless)"],
+        "Chicken Mughlai": ["Chicken Mughlai", "Chicken Mughlai (Boneless)"],
+        "Chicken Lahori": ["Chicken Lahori", "Chicken Lahori (Boneless)"],
+        "Chicken Chetna": ["Chicken Chetna", "Chicken Chetna (Boneless)"],
+        "Chicken Palak": ["Chicken Palak", "Chicken Palak (Boneless)"],
+    },
+}
+
+# ------------------------------------------------------------------ spelling
+#
+# A printed name the app shows spelled the usual way. The sheet stays word for
+# word with the card, so it can still be checked against the photograph; the
+# fix happens here, because a search for "paneer" has to find "Matar Panner".
+# A line that is also split is spelled inside SPLITS instead.
+#
+# Keyed by the printed name and checked like SPLITS: a reissued card that
+# drops the misspelling stops the build.
+SPELLING = {
+    # The user asked for these (2026-10-31).
+    "MACHAAN": {
+        "Omlet": "Omelette",
+        "Omlet Dabble": "Double Omelette",
+        "Omlet Masala": "Omelette Masala",
+        "Plain Maggie": "Plain Maggi",
+        "Veg Maggie": "Veg Maggi",
+        "Egg Maggie": "Egg Maggi",
+        "Chicken Maggie": "Chicken Maggi",
+        "Egg Chicken Maggie": "Egg Chicken Maggi",
+        # The card spells Szechuan three ways; one spelling, one search.
+        "Szechwan Veg Noodle": "Szechuan Veg Noodle",
+        "Szechwan Egg Noodle": "Szechuan Egg Noodle",
+        "Szechwan Chicken Noodle": "Szechuan Chicken Noodle",
+        "Szechwan Egg Chicken Noodle": "Szechuan Egg Chicken Noodle",
+        "Schezwan Chicken": "Szechuan Chicken",
+        "Szechuan Egg Chi. Rice": "Szechuan Egg Chicken Rice",
+        "Egg Ch. Chowmein (Gravy)": "Egg Chicken Chowmein (Gravy)",
+        "Baby corn chilli": "Baby Corn Chilli",
+        "Steam Rice": "Steamed Rice",
+        "Dal Kichdi": "Dal Khichdi",
+        "Veg Biriyani": "Veg Biryani",
+        "Egg Biriyani": "Egg Biryani",
+        "Chicken Biriyani": "Chicken Biryani",
+        "Matar Panner": "Matar Paneer",
+        "Shahi Panner": "Shahi Paneer",
+        "Kadai Panner": "Kadai Paneer",
+        "Paneer Makhnwala": "Paneer Makhanwala",
+        "Veg Kohlapuri": "Veg Kolhapuri",
+        "Fish Kohlapuri": "Fish Kolhapuri",
+        "Mashroom Masala": "Mushroom Masala",
+        "Baigun Masala": "Baingan Masala",
+        "Baigun Bharta": "Baingan Bharta",
+        "Chicken Patiyala": "Chicken Patiala",
+        "Egg Burjhi Masala": "Egg Bhurji Masala",
+    },
 }
 
 # Printed lines that look splittable and are deliberately left whole. Recorded
@@ -332,11 +441,15 @@ def split_items(tag, items):
     """
     rules = SPLITS.get(tag, {})
     kept = NOT_SPLIT.get(tag, {})
+    spelt = SPELLING.get(tag, {})
     by_name = {i["name"]: i for i in items}
 
     stale = [f"{n!r} is no longer on the card" for n in rules if n not in by_name]
     stale += [f"{n!r} (left unsplit) is no longer on the card" for n in kept
               if n not in by_name]
+    stale += [f"{n!r} (respelled) is no longer on the card" for n in spelt
+              if n not in by_name]
+    stale += [f"{n!r} is in both SPLITS and SPELLING" for n in spelt if n in rules]
     if stale:
         die(f"{tag}: the card has changed under SPLITS:\n   "
             + "\n   ".join(stale)
@@ -346,7 +459,7 @@ def split_items(tag, items):
     for item in items:
         rule = rules.get(item["name"])
         if not rule:
-            out.append(item)
+            out.append({**item, "name": spelt.get(item["name"], item["name"])})
             continue
         # Each piece keeps the serial it was printed under, so a split item
         # still points back at one line on the card.

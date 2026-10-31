@@ -210,6 +210,25 @@
           "menu": "tuck"
         },
         {
+          "name": "Machaan Coffee Corner",
+          "person": "",
+          "phones": [
+            {
+              "number": "8583083838",
+              "label": ""
+            },
+            {
+              "number": "9831314060",
+              "label": ""
+            }
+          ],
+          "hours": "8:30 AM - 3 PM, 6 PM - 9:30 PM",
+          "delivery": "Delivers",
+          "note": "",
+          "rep": null,
+          "menu": "tuck"
+        },
+        {
           "name": "NH Xerox Shop",
           "person": "",
           "phones": [
@@ -254,25 +273,6 @@
           ],
           "hours": "10 AM - 4 AM",
           "delivery": "",
-          "note": "",
-          "rep": null,
-          "menu": null
-        },
-        {
-          "name": "Machaan",
-          "person": "",
-          "phones": [
-            {
-              "number": "8583083838",
-              "label": ""
-            },
-            {
-              "number": "9831314060",
-              "label": ""
-            }
-          ],
-          "hours": "8:30 AM - 3 PM, 6 PM - 9:30 PM",
-          "delivery": "Delivers to hostels",
           "note": "",
           "rep": null,
           "menu": null

@@ -47,7 +47,7 @@ Workbook in `../rollcall-resources/` → `scripts/build_<x>.py` → `src/data/<x
 - Build to a temp path first, diff it against the current JSON, then copy it in.
 - **Corrections are declarative tables inside the build scripts, and each is
   verified on every run:** `CORRECTIONS` / `ADDITIONS` / `EXTRA_DATASETS` in
-  `build_por.py`, `SECTIONS` / `SPLITS` / `NOT_SPLIT` in `build_tuck.py`,
+  `build_por.py`, `SECTIONS` / `SPLITS` / `NOT_SPLIT` / `SPELLING` in `build_tuck.py`,
   `SPLITS` in `build_night_menu.py`, `NAME_FIXES` / `DEAN_NAMES` /
   `STRAY_TITLES` / `ROOM_FIXES` / `EXTRA_PEOPLE` in `build_directory_tsv.py`,
   `ALIASES` in `build_rooms.py`, `CORRECTIONS` / `SHARED` in `build_campus.py`, and

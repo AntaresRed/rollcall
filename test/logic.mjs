@@ -1133,7 +1133,7 @@ console.log("baskets");
 console.log("");
 console.log("tuck shops");
 {
-  check("both shops are there", SHOPS.length === 2);
+  check("all three shops are there", SHOPS.length === 3);
   check("each has items", SHOPS.every((s) => s.items.length > 0));
   check("every item has a name",
     SHOPS.every((s) => s.items.every((i) => i.name)));
@@ -1271,6 +1271,30 @@ console.log("tuck shops");
   // The photographs are where a price is read now, so they matter more.
   check("both shops offer their original menu",
     mohan.pages.length === 1 && tagore.pages.length === 3);
+
+  // ---- Machaan ----
+  // Its choices are second price columns rather than slashes, so the splits
+  // are a reading of the layout; these pin that reading and its limits.
+  const machaan = SHOPS.find((s) => s.id === "machaan");
+  const mac = (n) => machaan?.items.find((i) => i.name === n);
+  check("Machaan is there", machaan?.name === "Machaan Coffee Corner");
+  // The campus sheet's order, not the card's (the user's call, 2026-10-31).
+  check("and orders go to the number the campus sheet lists first",
+    shopPhone(machaan) === "8583083838");
+  check("it is grouped, both pages photographed",
+    hasCategories(machaan) && machaan.pages.length === 2);
+  check("a boneless price became a boneless dish",
+    Boolean(mac("Chicken Curry")) && Boolean(mac("Chicken Curry (Boneless)")));
+  check("but not where the card prints none",
+    Boolean(mac("Chicken Patiala")) && !mac("Chicken Patiala (Boneless)"));
+  check("a chicken price on a soup became a chicken soup",
+    Boolean(mac("Clear Soup (Veg)")) && Boolean(mac("Clear Soup (Chicken)")));
+  check("a special thali sits beside the plain one",
+    Boolean(mac("Veg Thali")) && Boolean(mac("Veg Thali (Special)")));
+  check("the card's spelling is fixed so a search finds it",
+    filterItems(machaan, { query: "paneer" }).some((i) => i.name === "Matar Paneer"));
+  check("Lassi was printed twice and is listed once",
+    machaan.items.filter((i) => i.name === "Lassi").length === 1);
 
   // ---- the basket ----
   const basket = [

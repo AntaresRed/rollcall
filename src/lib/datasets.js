@@ -38,7 +38,7 @@ export const KINDS = {
 
 const SCOPE_NAMES = {
   nh: "NH", oh: "OH", lvh: "LVH", wh: "WH",
-  mohanda: "Mohan Da", tagore: "Tagore",
+  mohanda: "Mohan Da", tagore: "Tagore", machaan: "Machaan",
   pgp1: "PGP1", pgp2: "PGP2",
 };
 

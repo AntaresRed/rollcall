@@ -1871,6 +1871,2182 @@
           "diet": "unknown"
         }
       ]
+    },
+    {
+      "id": "machaan",
+      "tag": "MACHAAN",
+      "name": "Machaan Coffee Corner",
+      "phone": "8583083838 / 9831314060",
+      "hours": "8:30 AM - 3 PM, 6 PM - 9:30 PM",
+      "delivers": true,
+      "pages": [
+        "/menu/tuck/machaan-1.jpg",
+        "/menu/tuck/machaan-2.jpg"
+      ],
+      "categories": [
+        {
+          "name": "Breakfast",
+          "items": [
+            {
+              "sl": "1",
+              "name": "Poha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "2",
+              "name": "Plain Bread (2 Slices)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "3",
+              "name": "Bread Butter Toast (4)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "4",
+              "name": "Bread Jam Toast (4)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "5",
+              "name": "Bread Egg Toast (2)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "6",
+              "name": "French Toast",
+              "diet": "unknown"
+            },
+            {
+              "sl": "7",
+              "name": "Puri Sabji",
+              "diet": "unknown"
+            },
+            {
+              "sl": "8",
+              "name": "Omelette",
+              "diet": "unknown"
+            },
+            {
+              "sl": "9",
+              "name": "Double Omelette",
+              "diet": "unknown"
+            },
+            {
+              "sl": "10",
+              "name": "Egg Half Fry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "11",
+              "name": "Boiled Egg",
+              "diet": "unknown"
+            },
+            {
+              "sl": "12",
+              "name": "2 Egg Bhurji",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Sandwiches",
+          "items": [
+            {
+              "sl": "13",
+              "name": "Veg Sandwich",
+              "diet": "unknown"
+            },
+            {
+              "sl": "14",
+              "name": "Aloo Sandwich",
+              "diet": "unknown"
+            },
+            {
+              "sl": "15",
+              "name": "Paneer Sandwich",
+              "diet": "unknown"
+            },
+            {
+              "sl": "16",
+              "name": "Veg Club Sandwich",
+              "diet": "unknown"
+            },
+            {
+              "sl": "17",
+              "name": "Egg Sandwich",
+              "diet": "unknown"
+            },
+            {
+              "sl": "18",
+              "name": "Chicken Sandwich",
+              "diet": "unknown"
+            },
+            {
+              "sl": "19",
+              "name": "Chicken Club Sandwich",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Maggi & Noodles",
+          "items": [
+            {
+              "sl": "20",
+              "name": "Plain Maggi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "21",
+              "name": "Veg Maggi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "22",
+              "name": "Egg Maggi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "23",
+              "name": "Chicken Maggi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "24",
+              "name": "Egg Chicken Maggi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "25",
+              "name": "Szechuan Veg Noodle",
+              "diet": "unknown"
+            },
+            {
+              "sl": "26",
+              "name": "Szechuan Egg Noodle",
+              "diet": "unknown"
+            },
+            {
+              "sl": "27",
+              "name": "Szechuan Chicken Noodle",
+              "diet": "unknown"
+            },
+            {
+              "sl": "28",
+              "name": "Szechuan Egg Chicken Noodle",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Rolls",
+          "items": [
+            {
+              "sl": "29",
+              "name": "Veg Roll",
+              "diet": "unknown"
+            },
+            {
+              "sl": "30",
+              "name": "Paneer Roll",
+              "diet": "unknown"
+            },
+            {
+              "sl": "31",
+              "name": "Egg Roll",
+              "diet": "unknown"
+            },
+            {
+              "sl": "32",
+              "name": "Chicken Roll",
+              "diet": "unknown"
+            },
+            {
+              "sl": "33",
+              "name": "Egg Chicken Roll",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Pakoda & Chinese Starters",
+          "items": [
+            {
+              "sl": "34",
+              "name": "Veg Pakoda",
+              "diet": "unknown"
+            },
+            {
+              "sl": "35",
+              "name": "Paneer Pakoda",
+              "diet": "unknown"
+            },
+            {
+              "sl": "36",
+              "name": "Egg Pakoda",
+              "diet": "unknown"
+            },
+            {
+              "sl": "37",
+              "name": "Chicken Pakoda",
+              "diet": "unknown"
+            },
+            {
+              "sl": "38",
+              "name": "Veg Manchurian",
+              "diet": "unknown"
+            },
+            {
+              "sl": "39",
+              "name": "Gobi Manchurian",
+              "diet": "unknown"
+            },
+            {
+              "sl": "40",
+              "name": "Paneer Chilli",
+              "diet": "unknown"
+            },
+            {
+              "sl": "41",
+              "name": "Baby Corn Chilli",
+              "diet": "unknown"
+            },
+            {
+              "sl": "42",
+              "name": "Chicken Chilli",
+              "diet": "unknown"
+            },
+            {
+              "sl": "43",
+              "name": "Chicken 65",
+              "diet": "unknown"
+            },
+            {
+              "sl": "44",
+              "name": "Szechuan Chicken",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Soups",
+          "items": [
+            {
+              "sl": "45",
+              "name": "Clear Soup (Veg)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "45",
+              "name": "Clear Soup (Chicken)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "46",
+              "name": "Noodle Soup (Veg)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "46",
+              "name": "Noodle Soup (Chicken)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "47",
+              "name": "Tomato Soup",
+              "diet": "unknown"
+            },
+            {
+              "sl": "48",
+              "name": "Sweet Corn Soup (Veg)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "48",
+              "name": "Sweet Corn Soup (Chicken)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "49",
+              "name": "Manchow Soup (Veg)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "49",
+              "name": "Manchow Soup (Chicken)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "50",
+              "name": "Hot-n-Sour Soup (Veg)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "50",
+              "name": "Hot-n-Sour Soup (Chicken)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "51",
+              "name": "Cream of Veg Soup",
+              "diet": "unknown"
+            },
+            {
+              "sl": "51",
+              "name": "Cream of Chicken Soup",
+              "diet": "unknown"
+            },
+            {
+              "sl": "52",
+              "name": "Egg Hot-n-Sour Soup",
+              "diet": "unknown"
+            },
+            {
+              "sl": "52",
+              "name": "Egg Chicken Hot-n-Sour Soup",
+              "diet": "unknown"
+            },
+            {
+              "sl": "53",
+              "name": "Egg Manchow Soup",
+              "diet": "unknown"
+            },
+            {
+              "sl": "53",
+              "name": "Egg Chicken Manchow Soup",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Chowmein",
+          "items": [
+            {
+              "sl": "54",
+              "name": "Veg Chowmein",
+              "diet": "unknown"
+            },
+            {
+              "sl": "55",
+              "name": "Egg Chowmein",
+              "diet": "unknown"
+            },
+            {
+              "sl": "56",
+              "name": "Chicken Chowmein",
+              "diet": "unknown"
+            },
+            {
+              "sl": "57",
+              "name": "Egg Chicken Chowmein",
+              "diet": "unknown"
+            },
+            {
+              "sl": "58",
+              "name": "Veg Chowmein (Gravy)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "59",
+              "name": "Egg Chowmein (Gravy)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "60",
+              "name": "Chicken Chowmein (Gravy)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "61",
+              "name": "Egg Chicken Chowmein (Gravy)",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Rice & Biryani",
+          "items": [
+            {
+              "sl": "62",
+              "name": "Steamed Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "63",
+              "name": "Jeera Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "64",
+              "name": "Curd Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "65",
+              "name": "Masala Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "66",
+              "name": "Peas Pulao",
+              "diet": "unknown"
+            },
+            {
+              "sl": "67",
+              "name": "Veg Pulao",
+              "diet": "unknown"
+            },
+            {
+              "sl": "68",
+              "name": "Dal Khichdi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "69",
+              "name": "Veg Fried Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "70",
+              "name": "Egg Fried Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "71",
+              "name": "Chicken Fried Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "72",
+              "name": "Mixed Fried Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "73",
+              "name": "Szechuan Veg Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "74",
+              "name": "Szechuan Egg Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "75",
+              "name": "Szechuan Chicken Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "76",
+              "name": "Szechuan Egg Chicken Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "77",
+              "name": "Veg Biryani",
+              "diet": "unknown"
+            },
+            {
+              "sl": "78",
+              "name": "Egg Biryani",
+              "diet": "unknown"
+            },
+            {
+              "sl": "79",
+              "name": "Chicken Biryani",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Indian Bread",
+          "items": [
+            {
+              "sl": "80",
+              "name": "Roti",
+              "diet": "unknown"
+            },
+            {
+              "sl": "81",
+              "name": "Puri",
+              "diet": "unknown"
+            },
+            {
+              "sl": "82",
+              "name": "Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "83",
+              "name": "Lachha Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "84",
+              "name": "Aloo Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "85",
+              "name": "Gobi Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "86",
+              "name": "Onion Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "87",
+              "name": "Mooli Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "88",
+              "name": "Methi Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "89",
+              "name": "Mirchi Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "90",
+              "name": "Papad Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "91",
+              "name": "Capsicum Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "92",
+              "name": "Paneer Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "93",
+              "name": "Mix Paratha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "94",
+              "name": "Chicken Paratha",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Thali",
+          "items": [
+            {
+              "sl": "95",
+              "name": "Veg Thali",
+              "diet": "unknown"
+            },
+            {
+              "sl": "95",
+              "name": "Veg Thali (Special)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "96",
+              "name": "Egg Thali",
+              "diet": "unknown"
+            },
+            {
+              "sl": "96",
+              "name": "Egg Thali (Special)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "97",
+              "name": "Fish Thali",
+              "diet": "unknown"
+            },
+            {
+              "sl": "97",
+              "name": "Fish Thali (Special)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "98",
+              "name": "Chicken Thali",
+              "diet": "unknown"
+            },
+            {
+              "sl": "98",
+              "name": "Chicken Thali (Special)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "99",
+              "name": "Mritunjoy Thali",
+              "diet": "unknown"
+            },
+            {
+              "sl": "100",
+              "name": "Extra Rice",
+              "diet": "unknown"
+            },
+            {
+              "sl": "101",
+              "name": "Sabji",
+              "diet": "unknown"
+            },
+            {
+              "sl": "102",
+              "name": "Dal",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Paneer",
+          "items": [
+            {
+              "sl": "103",
+              "name": "Matar Paneer",
+              "diet": "unknown"
+            },
+            {
+              "sl": "104",
+              "name": "Shahi Paneer",
+              "diet": "unknown"
+            },
+            {
+              "sl": "105",
+              "name": "Paneer Tikka Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "106",
+              "name": "Kadai Paneer",
+              "diet": "unknown"
+            },
+            {
+              "sl": "107",
+              "name": "Paneer Butter Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "108",
+              "name": "Paneer Pasanda",
+              "diet": "unknown"
+            },
+            {
+              "sl": "109",
+              "name": "Paneer Makhanwala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "110",
+              "name": "Paneer Kofta",
+              "diet": "unknown"
+            },
+            {
+              "sl": "111",
+              "name": "Palak Paneer",
+              "diet": "unknown"
+            },
+            {
+              "sl": "112",
+              "name": "Paneer Bhurji",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Veg Curries",
+          "items": [
+            {
+              "sl": "113",
+              "name": "Kadai Veg",
+              "diet": "unknown"
+            },
+            {
+              "sl": "114",
+              "name": "Mixed Veg",
+              "diet": "unknown"
+            },
+            {
+              "sl": "115",
+              "name": "Veg Kolhapuri",
+              "diet": "unknown"
+            },
+            {
+              "sl": "116",
+              "name": "Veg Kofta",
+              "diet": "unknown"
+            },
+            {
+              "sl": "117",
+              "name": "Veg Jaipuri",
+              "diet": "unknown"
+            },
+            {
+              "sl": "118",
+              "name": "Malai Kofta",
+              "diet": "unknown"
+            },
+            {
+              "sl": "119",
+              "name": "Aloo Gobi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "120",
+              "name": "Aloo Dum",
+              "diet": "unknown"
+            },
+            {
+              "sl": "121",
+              "name": "Dum Aloo Banarasi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "122",
+              "name": "Kashmiri Aloo Dum",
+              "diet": "unknown"
+            },
+            {
+              "sl": "123",
+              "name": "Aloo Matar",
+              "diet": "unknown"
+            },
+            {
+              "sl": "124",
+              "name": "Aloo Capsicum",
+              "diet": "unknown"
+            },
+            {
+              "sl": "125",
+              "name": "Stuffed Capsicum",
+              "diet": "unknown"
+            },
+            {
+              "sl": "126",
+              "name": "Gobi Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "127",
+              "name": "Gobi Fry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "128",
+              "name": "Bhindi Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "129",
+              "name": "Bhindi Fry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "130",
+              "name": "Lasooni Palak",
+              "diet": "unknown"
+            },
+            {
+              "sl": "131",
+              "name": "Green Pea Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "132",
+              "name": "Tomato Curry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "133",
+              "name": "Baingan Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "134",
+              "name": "Baingan Bharta",
+              "diet": "unknown"
+            },
+            {
+              "sl": "135",
+              "name": "Mushroom Masala",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Dal, Rajma & Chana",
+          "items": [
+            {
+              "sl": "136",
+              "name": "Dal Fry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "137",
+              "name": "Butter Dal Fry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "138",
+              "name": "Dal Tadka",
+              "diet": "unknown"
+            },
+            {
+              "sl": "139",
+              "name": "Tarka",
+              "diet": "unknown"
+            },
+            {
+              "sl": "140",
+              "name": "Rajma Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "141",
+              "name": "Chana Masala",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Chicken",
+          "items": [
+            {
+              "sl": "142",
+              "name": "Chicken Curry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "142",
+              "name": "Chicken Curry (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "143",
+              "name": "Chicken Kadai",
+              "diet": "unknown"
+            },
+            {
+              "sl": "143",
+              "name": "Chicken Kadai (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "144",
+              "name": "Chicken Kolhapuri",
+              "diet": "unknown"
+            },
+            {
+              "sl": "144",
+              "name": "Chicken Kolhapuri (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "145",
+              "name": "Chicken Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "145",
+              "name": "Chicken Masala (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "146",
+              "name": "Chicken Butter Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "146",
+              "name": "Chicken Butter Masala (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "147",
+              "name": "Chicken Do Pyaza",
+              "diet": "unknown"
+            },
+            {
+              "sl": "147",
+              "name": "Chicken Do Pyaza (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "148",
+              "name": "Chicken Kasha",
+              "diet": "unknown"
+            },
+            {
+              "sl": "148",
+              "name": "Chicken Kasha (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "149",
+              "name": "Chicken Patiala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "150",
+              "name": "Chicken Mughlai",
+              "diet": "unknown"
+            },
+            {
+              "sl": "150",
+              "name": "Chicken Mughlai (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "151",
+              "name": "Chicken Lahori",
+              "diet": "unknown"
+            },
+            {
+              "sl": "151",
+              "name": "Chicken Lahori (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "152",
+              "name": "Chicken Chetna",
+              "diet": "unknown"
+            },
+            {
+              "sl": "152",
+              "name": "Chicken Chetna (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "153",
+              "name": "Chicken Palak",
+              "diet": "unknown"
+            },
+            {
+              "sl": "153",
+              "name": "Chicken Palak (Boneless)",
+              "diet": "unknown"
+            },
+            {
+              "sl": "154",
+              "name": "Chicken Keema",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Fish",
+          "items": [
+            {
+              "sl": "155",
+              "name": "Fish Curry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "156",
+              "name": "Fish Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "157",
+              "name": "Fish Kadai",
+              "diet": "unknown"
+            },
+            {
+              "sl": "158",
+              "name": "Fish Kalia",
+              "diet": "unknown"
+            },
+            {
+              "sl": "159",
+              "name": "Fish Kolhapuri",
+              "diet": "unknown"
+            },
+            {
+              "sl": "160",
+              "name": "Fish Do Pyaza",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Egg Curries",
+          "items": [
+            {
+              "sl": "161",
+              "name": "Egg Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "162",
+              "name": "Egg Tadka",
+              "diet": "unknown"
+            },
+            {
+              "sl": "163",
+              "name": "Omelette Masala",
+              "diet": "unknown"
+            },
+            {
+              "sl": "164",
+              "name": "Egg Bhurji Masala",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Papad, Salad & Sides",
+          "items": [
+            {
+              "sl": "165",
+              "name": "Fry Papad",
+              "diet": "unknown"
+            },
+            {
+              "sl": "166",
+              "name": "Fry Masala Papad",
+              "diet": "unknown"
+            },
+            {
+              "sl": "167",
+              "name": "Roasted Papad",
+              "diet": "unknown"
+            },
+            {
+              "sl": "168",
+              "name": "Roasted Masala Papad",
+              "diet": "unknown"
+            },
+            {
+              "sl": "169",
+              "name": "Green Salad",
+              "diet": "unknown"
+            },
+            {
+              "sl": "170",
+              "name": "Finger Chips",
+              "diet": "unknown"
+            },
+            {
+              "sl": "171",
+              "name": "French Fry",
+              "diet": "unknown"
+            },
+            {
+              "sl": "172",
+              "name": "Curd",
+              "diet": "unknown"
+            },
+            {
+              "sl": "173",
+              "name": "Veg Raita",
+              "diet": "unknown"
+            },
+            {
+              "sl": "174",
+              "name": "Boondi Raita",
+              "diet": "unknown"
+            }
+          ]
+        },
+        {
+          "name": "Beverages",
+          "items": [
+            {
+              "sl": "175",
+              "name": "Tea",
+              "diet": "unknown"
+            },
+            {
+              "sl": "176",
+              "name": "Special Chai",
+              "diet": "unknown"
+            },
+            {
+              "sl": "177",
+              "name": "Coffee",
+              "diet": "unknown"
+            },
+            {
+              "sl": "178",
+              "name": "Cold Coffee",
+              "diet": "unknown"
+            },
+            {
+              "sl": "179",
+              "name": "Milk",
+              "diet": "unknown"
+            },
+            {
+              "sl": "180",
+              "name": "Lassi",
+              "diet": "unknown"
+            },
+            {
+              "sl": "181",
+              "name": "Butter Milk",
+              "diet": "unknown"
+            },
+            {
+              "sl": "182",
+              "name": "Lemon Water",
+              "diet": "unknown"
+            },
+            {
+              "sl": "183",
+              "name": "Soft Drink",
+              "diet": "unknown"
+            },
+            {
+              "sl": "184",
+              "name": "Juice",
+              "diet": "unknown"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "sl": "1",
+          "name": "Poha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "2",
+          "name": "Plain Bread (2 Slices)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "3",
+          "name": "Bread Butter Toast (4)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "4",
+          "name": "Bread Jam Toast (4)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "5",
+          "name": "Bread Egg Toast (2)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "6",
+          "name": "French Toast",
+          "diet": "unknown"
+        },
+        {
+          "sl": "7",
+          "name": "Puri Sabji",
+          "diet": "unknown"
+        },
+        {
+          "sl": "8",
+          "name": "Omelette",
+          "diet": "unknown"
+        },
+        {
+          "sl": "9",
+          "name": "Double Omelette",
+          "diet": "unknown"
+        },
+        {
+          "sl": "10",
+          "name": "Egg Half Fry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "11",
+          "name": "Boiled Egg",
+          "diet": "unknown"
+        },
+        {
+          "sl": "12",
+          "name": "2 Egg Bhurji",
+          "diet": "unknown"
+        },
+        {
+          "sl": "13",
+          "name": "Veg Sandwich",
+          "diet": "unknown"
+        },
+        {
+          "sl": "14",
+          "name": "Aloo Sandwich",
+          "diet": "unknown"
+        },
+        {
+          "sl": "15",
+          "name": "Paneer Sandwich",
+          "diet": "unknown"
+        },
+        {
+          "sl": "16",
+          "name": "Veg Club Sandwich",
+          "diet": "unknown"
+        },
+        {
+          "sl": "17",
+          "name": "Egg Sandwich",
+          "diet": "unknown"
+        },
+        {
+          "sl": "18",
+          "name": "Chicken Sandwich",
+          "diet": "unknown"
+        },
+        {
+          "sl": "19",
+          "name": "Chicken Club Sandwich",
+          "diet": "unknown"
+        },
+        {
+          "sl": "20",
+          "name": "Plain Maggi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "21",
+          "name": "Veg Maggi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "22",
+          "name": "Egg Maggi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "23",
+          "name": "Chicken Maggi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "24",
+          "name": "Egg Chicken Maggi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "25",
+          "name": "Szechuan Veg Noodle",
+          "diet": "unknown"
+        },
+        {
+          "sl": "26",
+          "name": "Szechuan Egg Noodle",
+          "diet": "unknown"
+        },
+        {
+          "sl": "27",
+          "name": "Szechuan Chicken Noodle",
+          "diet": "unknown"
+        },
+        {
+          "sl": "28",
+          "name": "Szechuan Egg Chicken Noodle",
+          "diet": "unknown"
+        },
+        {
+          "sl": "29",
+          "name": "Veg Roll",
+          "diet": "unknown"
+        },
+        {
+          "sl": "30",
+          "name": "Paneer Roll",
+          "diet": "unknown"
+        },
+        {
+          "sl": "31",
+          "name": "Egg Roll",
+          "diet": "unknown"
+        },
+        {
+          "sl": "32",
+          "name": "Chicken Roll",
+          "diet": "unknown"
+        },
+        {
+          "sl": "33",
+          "name": "Egg Chicken Roll",
+          "diet": "unknown"
+        },
+        {
+          "sl": "34",
+          "name": "Veg Pakoda",
+          "diet": "unknown"
+        },
+        {
+          "sl": "35",
+          "name": "Paneer Pakoda",
+          "diet": "unknown"
+        },
+        {
+          "sl": "36",
+          "name": "Egg Pakoda",
+          "diet": "unknown"
+        },
+        {
+          "sl": "37",
+          "name": "Chicken Pakoda",
+          "diet": "unknown"
+        },
+        {
+          "sl": "38",
+          "name": "Veg Manchurian",
+          "diet": "unknown"
+        },
+        {
+          "sl": "39",
+          "name": "Gobi Manchurian",
+          "diet": "unknown"
+        },
+        {
+          "sl": "40",
+          "name": "Paneer Chilli",
+          "diet": "unknown"
+        },
+        {
+          "sl": "41",
+          "name": "Baby Corn Chilli",
+          "diet": "unknown"
+        },
+        {
+          "sl": "42",
+          "name": "Chicken Chilli",
+          "diet": "unknown"
+        },
+        {
+          "sl": "43",
+          "name": "Chicken 65",
+          "diet": "unknown"
+        },
+        {
+          "sl": "44",
+          "name": "Szechuan Chicken",
+          "diet": "unknown"
+        },
+        {
+          "sl": "45",
+          "name": "Clear Soup (Veg)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "45",
+          "name": "Clear Soup (Chicken)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "46",
+          "name": "Noodle Soup (Veg)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "46",
+          "name": "Noodle Soup (Chicken)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "47",
+          "name": "Tomato Soup",
+          "diet": "unknown"
+        },
+        {
+          "sl": "48",
+          "name": "Sweet Corn Soup (Veg)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "48",
+          "name": "Sweet Corn Soup (Chicken)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "49",
+          "name": "Manchow Soup (Veg)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "49",
+          "name": "Manchow Soup (Chicken)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "50",
+          "name": "Hot-n-Sour Soup (Veg)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "50",
+          "name": "Hot-n-Sour Soup (Chicken)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "51",
+          "name": "Cream of Veg Soup",
+          "diet": "unknown"
+        },
+        {
+          "sl": "51",
+          "name": "Cream of Chicken Soup",
+          "diet": "unknown"
+        },
+        {
+          "sl": "52",
+          "name": "Egg Hot-n-Sour Soup",
+          "diet": "unknown"
+        },
+        {
+          "sl": "52",
+          "name": "Egg Chicken Hot-n-Sour Soup",
+          "diet": "unknown"
+        },
+        {
+          "sl": "53",
+          "name": "Egg Manchow Soup",
+          "diet": "unknown"
+        },
+        {
+          "sl": "53",
+          "name": "Egg Chicken Manchow Soup",
+          "diet": "unknown"
+        },
+        {
+          "sl": "54",
+          "name": "Veg Chowmein",
+          "diet": "unknown"
+        },
+        {
+          "sl": "55",
+          "name": "Egg Chowmein",
+          "diet": "unknown"
+        },
+        {
+          "sl": "56",
+          "name": "Chicken Chowmein",
+          "diet": "unknown"
+        },
+        {
+          "sl": "57",
+          "name": "Egg Chicken Chowmein",
+          "diet": "unknown"
+        },
+        {
+          "sl": "58",
+          "name": "Veg Chowmein (Gravy)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "59",
+          "name": "Egg Chowmein (Gravy)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "60",
+          "name": "Chicken Chowmein (Gravy)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "61",
+          "name": "Egg Chicken Chowmein (Gravy)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "62",
+          "name": "Steamed Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "63",
+          "name": "Jeera Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "64",
+          "name": "Curd Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "65",
+          "name": "Masala Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "66",
+          "name": "Peas Pulao",
+          "diet": "unknown"
+        },
+        {
+          "sl": "67",
+          "name": "Veg Pulao",
+          "diet": "unknown"
+        },
+        {
+          "sl": "68",
+          "name": "Dal Khichdi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "69",
+          "name": "Veg Fried Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "70",
+          "name": "Egg Fried Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "71",
+          "name": "Chicken Fried Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "72",
+          "name": "Mixed Fried Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "73",
+          "name": "Szechuan Veg Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "74",
+          "name": "Szechuan Egg Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "75",
+          "name": "Szechuan Chicken Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "76",
+          "name": "Szechuan Egg Chicken Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "77",
+          "name": "Veg Biryani",
+          "diet": "unknown"
+        },
+        {
+          "sl": "78",
+          "name": "Egg Biryani",
+          "diet": "unknown"
+        },
+        {
+          "sl": "79",
+          "name": "Chicken Biryani",
+          "diet": "unknown"
+        },
+        {
+          "sl": "80",
+          "name": "Roti",
+          "diet": "unknown"
+        },
+        {
+          "sl": "81",
+          "name": "Puri",
+          "diet": "unknown"
+        },
+        {
+          "sl": "82",
+          "name": "Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "83",
+          "name": "Lachha Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "84",
+          "name": "Aloo Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "85",
+          "name": "Gobi Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "86",
+          "name": "Onion Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "87",
+          "name": "Mooli Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "88",
+          "name": "Methi Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "89",
+          "name": "Mirchi Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "90",
+          "name": "Papad Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "91",
+          "name": "Capsicum Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "92",
+          "name": "Paneer Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "93",
+          "name": "Mix Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "94",
+          "name": "Chicken Paratha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "95",
+          "name": "Veg Thali",
+          "diet": "unknown"
+        },
+        {
+          "sl": "95",
+          "name": "Veg Thali (Special)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "96",
+          "name": "Egg Thali",
+          "diet": "unknown"
+        },
+        {
+          "sl": "96",
+          "name": "Egg Thali (Special)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "97",
+          "name": "Fish Thali",
+          "diet": "unknown"
+        },
+        {
+          "sl": "97",
+          "name": "Fish Thali (Special)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "98",
+          "name": "Chicken Thali",
+          "diet": "unknown"
+        },
+        {
+          "sl": "98",
+          "name": "Chicken Thali (Special)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "99",
+          "name": "Mritunjoy Thali",
+          "diet": "unknown"
+        },
+        {
+          "sl": "100",
+          "name": "Extra Rice",
+          "diet": "unknown"
+        },
+        {
+          "sl": "101",
+          "name": "Sabji",
+          "diet": "unknown"
+        },
+        {
+          "sl": "102",
+          "name": "Dal",
+          "diet": "unknown"
+        },
+        {
+          "sl": "103",
+          "name": "Matar Paneer",
+          "diet": "unknown"
+        },
+        {
+          "sl": "104",
+          "name": "Shahi Paneer",
+          "diet": "unknown"
+        },
+        {
+          "sl": "105",
+          "name": "Paneer Tikka Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "106",
+          "name": "Kadai Paneer",
+          "diet": "unknown"
+        },
+        {
+          "sl": "107",
+          "name": "Paneer Butter Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "108",
+          "name": "Paneer Pasanda",
+          "diet": "unknown"
+        },
+        {
+          "sl": "109",
+          "name": "Paneer Makhanwala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "110",
+          "name": "Paneer Kofta",
+          "diet": "unknown"
+        },
+        {
+          "sl": "111",
+          "name": "Palak Paneer",
+          "diet": "unknown"
+        },
+        {
+          "sl": "112",
+          "name": "Paneer Bhurji",
+          "diet": "unknown"
+        },
+        {
+          "sl": "113",
+          "name": "Kadai Veg",
+          "diet": "unknown"
+        },
+        {
+          "sl": "114",
+          "name": "Mixed Veg",
+          "diet": "unknown"
+        },
+        {
+          "sl": "115",
+          "name": "Veg Kolhapuri",
+          "diet": "unknown"
+        },
+        {
+          "sl": "116",
+          "name": "Veg Kofta",
+          "diet": "unknown"
+        },
+        {
+          "sl": "117",
+          "name": "Veg Jaipuri",
+          "diet": "unknown"
+        },
+        {
+          "sl": "118",
+          "name": "Malai Kofta",
+          "diet": "unknown"
+        },
+        {
+          "sl": "119",
+          "name": "Aloo Gobi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "120",
+          "name": "Aloo Dum",
+          "diet": "unknown"
+        },
+        {
+          "sl": "121",
+          "name": "Dum Aloo Banarasi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "122",
+          "name": "Kashmiri Aloo Dum",
+          "diet": "unknown"
+        },
+        {
+          "sl": "123",
+          "name": "Aloo Matar",
+          "diet": "unknown"
+        },
+        {
+          "sl": "124",
+          "name": "Aloo Capsicum",
+          "diet": "unknown"
+        },
+        {
+          "sl": "125",
+          "name": "Stuffed Capsicum",
+          "diet": "unknown"
+        },
+        {
+          "sl": "126",
+          "name": "Gobi Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "127",
+          "name": "Gobi Fry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "128",
+          "name": "Bhindi Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "129",
+          "name": "Bhindi Fry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "130",
+          "name": "Lasooni Palak",
+          "diet": "unknown"
+        },
+        {
+          "sl": "131",
+          "name": "Green Pea Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "132",
+          "name": "Tomato Curry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "133",
+          "name": "Baingan Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "134",
+          "name": "Baingan Bharta",
+          "diet": "unknown"
+        },
+        {
+          "sl": "135",
+          "name": "Mushroom Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "136",
+          "name": "Dal Fry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "137",
+          "name": "Butter Dal Fry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "138",
+          "name": "Dal Tadka",
+          "diet": "unknown"
+        },
+        {
+          "sl": "139",
+          "name": "Tarka",
+          "diet": "unknown"
+        },
+        {
+          "sl": "140",
+          "name": "Rajma Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "141",
+          "name": "Chana Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "142",
+          "name": "Chicken Curry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "142",
+          "name": "Chicken Curry (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "143",
+          "name": "Chicken Kadai",
+          "diet": "unknown"
+        },
+        {
+          "sl": "143",
+          "name": "Chicken Kadai (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "144",
+          "name": "Chicken Kolhapuri",
+          "diet": "unknown"
+        },
+        {
+          "sl": "144",
+          "name": "Chicken Kolhapuri (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "145",
+          "name": "Chicken Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "145",
+          "name": "Chicken Masala (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "146",
+          "name": "Chicken Butter Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "146",
+          "name": "Chicken Butter Masala (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "147",
+          "name": "Chicken Do Pyaza",
+          "diet": "unknown"
+        },
+        {
+          "sl": "147",
+          "name": "Chicken Do Pyaza (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "148",
+          "name": "Chicken Kasha",
+          "diet": "unknown"
+        },
+        {
+          "sl": "148",
+          "name": "Chicken Kasha (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "149",
+          "name": "Chicken Patiala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "150",
+          "name": "Chicken Mughlai",
+          "diet": "unknown"
+        },
+        {
+          "sl": "150",
+          "name": "Chicken Mughlai (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "151",
+          "name": "Chicken Lahori",
+          "diet": "unknown"
+        },
+        {
+          "sl": "151",
+          "name": "Chicken Lahori (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "152",
+          "name": "Chicken Chetna",
+          "diet": "unknown"
+        },
+        {
+          "sl": "152",
+          "name": "Chicken Chetna (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "153",
+          "name": "Chicken Palak",
+          "diet": "unknown"
+        },
+        {
+          "sl": "153",
+          "name": "Chicken Palak (Boneless)",
+          "diet": "unknown"
+        },
+        {
+          "sl": "154",
+          "name": "Chicken Keema",
+          "diet": "unknown"
+        },
+        {
+          "sl": "155",
+          "name": "Fish Curry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "156",
+          "name": "Fish Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "157",
+          "name": "Fish Kadai",
+          "diet": "unknown"
+        },
+        {
+          "sl": "158",
+          "name": "Fish Kalia",
+          "diet": "unknown"
+        },
+        {
+          "sl": "159",
+          "name": "Fish Kolhapuri",
+          "diet": "unknown"
+        },
+        {
+          "sl": "160",
+          "name": "Fish Do Pyaza",
+          "diet": "unknown"
+        },
+        {
+          "sl": "161",
+          "name": "Egg Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "162",
+          "name": "Egg Tadka",
+          "diet": "unknown"
+        },
+        {
+          "sl": "163",
+          "name": "Omelette Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "164",
+          "name": "Egg Bhurji Masala",
+          "diet": "unknown"
+        },
+        {
+          "sl": "165",
+          "name": "Fry Papad",
+          "diet": "unknown"
+        },
+        {
+          "sl": "166",
+          "name": "Fry Masala Papad",
+          "diet": "unknown"
+        },
+        {
+          "sl": "167",
+          "name": "Roasted Papad",
+          "diet": "unknown"
+        },
+        {
+          "sl": "168",
+          "name": "Roasted Masala Papad",
+          "diet": "unknown"
+        },
+        {
+          "sl": "169",
+          "name": "Green Salad",
+          "diet": "unknown"
+        },
+        {
+          "sl": "170",
+          "name": "Finger Chips",
+          "diet": "unknown"
+        },
+        {
+          "sl": "171",
+          "name": "French Fry",
+          "diet": "unknown"
+        },
+        {
+          "sl": "172",
+          "name": "Curd",
+          "diet": "unknown"
+        },
+        {
+          "sl": "173",
+          "name": "Veg Raita",
+          "diet": "unknown"
+        },
+        {
+          "sl": "174",
+          "name": "Boondi Raita",
+          "diet": "unknown"
+        },
+        {
+          "sl": "175",
+          "name": "Tea",
+          "diet": "unknown"
+        },
+        {
+          "sl": "176",
+          "name": "Special Chai",
+          "diet": "unknown"
+        },
+        {
+          "sl": "177",
+          "name": "Coffee",
+          "diet": "unknown"
+        },
+        {
+          "sl": "178",
+          "name": "Cold Coffee",
+          "diet": "unknown"
+        },
+        {
+          "sl": "179",
+          "name": "Milk",
+          "diet": "unknown"
+        },
+        {
+          "sl": "180",
+          "name": "Lassi",
+          "diet": "unknown"
+        },
+        {
+          "sl": "181",
+          "name": "Butter Milk",
+          "diet": "unknown"
+        },
+        {
+          "sl": "182",
+          "name": "Lemon Water",
+          "diet": "unknown"
+        },
+        {
+          "sl": "183",
+          "name": "Soft Drink",
+          "diet": "unknown"
+        },
+        {
+          "sl": "184",
+          "name": "Juice",
+          "diet": "unknown"
+        }
+      ]
     }
   ],
   "locations": [
