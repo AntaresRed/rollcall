@@ -1277,7 +1277,7 @@ console.log("tuck shops");
   // are a reading of the layout; these pin that reading and its limits.
   const machaan = SHOPS.find((s) => s.id === "machaan");
   const mac = (n) => machaan?.items.find((i) => i.name === n);
-  check("Machaan is there", machaan?.name === "Machaan Coffee Corner");
+  check("Machaan is there", machaan?.name === "Machaan");
   // The campus sheet's order, not the card's (the user's call, 2026-10-31).
   check("and orders go to the number the campus sheet lists first",
     shopPhone(machaan) === "8583083838");
