@@ -79,13 +79,11 @@ CORRECTIONS = [
     ("WH", "Electrician", "name", "Soumin", "Soumen Roy",
      "the same number as OH's Soumen Roy, and the same person (2026-10-27)"),
     # There is no LVH admin contact to give; the rep is the way in (2026-10-28).
-    ("LVH", "Plumber", "note", "Contact LVH rep or LVH admin", "Contact LVH Rep",
-     "the rep stands in for the admin"),
     ("LVH", "Housekeeping Incharge", "note", "Contact LVH rep or LVH admin", "Contact LVH Rep",
      "the rep stands in for the admin"),
     # OH, from the user (2026-10-28): the electrician and housekeeping are
-    # reached directly; only plumbing still goes through the rep (there is no
-    # permanent plumber), and its row stays as printed.
+    # reached directly. (No hostel lists a plumber: the rows were dropped from
+    # the workbook on 2026-10-31.)
     ("OH", "Electrician", "note", "For all issues Contact the OH Rep", "",
      "Soumen Roy is called directly"),
     ("OH", "Housekeeping Incharge", "phone", "", "7044698331",

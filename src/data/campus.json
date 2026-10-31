@@ -388,16 +388,6 @@
           "menu": null
         },
         {
-          "name": "Plumber",
-          "person": "",
-          "phones": [],
-          "hours": "",
-          "delivery": "",
-          "note": "Contact NH Rep or write in NH book",
-          "rep": "NH",
-          "menu": null
-        },
-        {
           "name": "Carpenter",
           "person": "",
           "phones": [],
@@ -470,21 +460,6 @@
         },
         {
           "name": "Laundry",
-          "person": "Somanat Rajak",
-          "phones": [
-            {
-              "number": "8777604565",
-              "label": ""
-            }
-          ],
-          "hours": "",
-          "delivery": "",
-          "note": "",
-          "rep": null,
-          "menu": null
-        },
-        {
-          "name": "Laundry",
           "person": "Ahmed Da",
           "phones": [
             {
@@ -511,16 +486,6 @@
           "delivery": "",
           "note": "",
           "rep": null,
-          "menu": null
-        },
-        {
-          "name": "Plumber",
-          "person": "",
-          "phones": [],
-          "hours": "",
-          "delivery": "",
-          "note": "Contact OH Rep or write in OH book",
-          "rep": "OH",
           "menu": null
         }
       ]
@@ -611,16 +576,6 @@
           "note": "",
           "rep": null,
           "menu": null
-        },
-        {
-          "name": "Plumber",
-          "person": "",
-          "phones": [],
-          "hours": "",
-          "delivery": "",
-          "note": "Contact LVH Rep or write in LVH book",
-          "rep": "LVH",
-          "menu": null
         }
       ]
     },
@@ -656,16 +611,6 @@
           "delivery": "",
           "note": "",
           "rep": null,
-          "menu": null
-        },
-        {
-          "name": "Plumber",
-          "person": "",
-          "phones": [],
-          "hours": "",
-          "delivery": "",
-          "note": "Contact WH Rep or write in WH book",
-          "rep": "WH",
           "menu": null
         },
         {
