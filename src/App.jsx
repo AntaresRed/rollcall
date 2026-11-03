@@ -333,7 +333,7 @@ export default function App() {
         setOverrides(o);
       } catch (err) {
         console.error(err);
-        setFatal("Couldn't reach IIMPresent. Check your connection and reload.");
+        setFatal("Couldn't reach IIMPresent. Check your connection, then reload.");
       } finally {
         setReady(true);
       }
@@ -825,7 +825,18 @@ export default function App() {
     return <Splash message={returnForDraft ? DRAFT_STEPS.drafting : undefined} task={returnForDraft} />;
   }
   if (!session) return <SignIn error={authError} />;
-  if (fatal) return <div className="shell"><div className="notice" style={{ marginTop: 40 }}>{fatal}</div></div>;
+  // With a button: the installed app has no browser reload, so without one the
+  // only way out of a failed first load was to close the app and reopen it.
+  if (fatal) {
+    return (
+      <div className="shell">
+        <div className="notice" style={{ marginTop: 40 }}>{fatal}</div>
+        <button className="btn block" style={{ marginTop: 12 }} onClick={() => location.reload()}>
+          Reload
+        </button>
+      </div>
+    );
+  }
 
   // A POR's role account. No tabs and no student screens: the dashboard is
   // the whole app for it.

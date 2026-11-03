@@ -16,10 +16,9 @@ const failed = new Set();
 
 /**
  * Gives every failed screen a fresh start, so its next render fetches again.
- * Only ever on purpose — a tap on Try again, or coming back to the page. Not
- * on the failure itself: React renders once more straight after an error,
- * and a fresh start there would refetch in a loop for as long as the file is
- * missing.
+ * Only ever on purpose — coming back to the page. Not on the failure itself:
+ * React renders once more straight after an error, and a fresh start there
+ * would refetch in a loop for as long as the file is missing.
  */
 function retryFailed() {
   for (const reset of [...failed]) reset();
@@ -86,47 +85,38 @@ export function ScreenLoading() {
  * the crash page. Anything else is a real crash and goes on up to the app's
  * own boundary, stack and all.
  *
- * Try again fetches in place. If that fails too, the likely cause is a new
- * deploy (the old build's files are gone from the server) or a browser that
- * won't refetch a failed module, and only a reload fixes either.
+ * The way out is a reload, offered straight away. There used to be a "Try
+ * again" first that fetched in place, but Chrome remembers a failed import
+ * for the life of the page and answers every retry with the same failure
+ * without asking the server (tested 2026-11-04: three tries, one request),
+ * so it never worked and only put a dead tap before the one that does. A
+ * reload also covers the other cause, a new deploy that took the old build's
+ * files off the server.
  *
  * App.jsx keys it by screen, so a new one means the student came back to a
- * page: that is a fresh attempt, not a replay of the last failure.
+ * page: that is a fresh attempt, not a replay of the last failure, in the
+ * browsers that do refetch.
  */
 export class ScreenBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { error: null, tries: 0 };
+    this.state = { error: null };
     retryFailed();
   }
-
-  retry = () => {
-    retryFailed();
-    this.setState(({ tries }) => ({ error: null, tries: tries + 1 }));
-  };
 
   static getDerivedStateFromError(error) {
     return { error };
   }
 
   render() {
-    const { error, tries } = this.state;
+    const { error } = this.state;
     if (!error) return this.props.children;
     if (!(error instanceof ScreenLoadError)) throw error;
 
     return (
       <div className="empty screen-stalled" role="alert">
-        {tries === 0 ? (
-          <>
-            <p>This page didn't load. Check your connection and try again.</p>
-            <button className="btn ghost" onClick={this.retry}>Try again</button>
-          </>
-        ) : (
-          <>
-            <p>It still didn't load. Reloading the app fetches a fresh copy.</p>
-            <button className="btn ghost" onClick={() => location.reload()}>Reload</button>
-          </>
-        )}
+        <p>This page didn't load. Check your connection, then reload.</p>
+        <button className="btn ghost" onClick={() => location.reload()}>Reload</button>
       </div>
     );
   }
