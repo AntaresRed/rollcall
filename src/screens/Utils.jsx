@@ -26,25 +26,25 @@ const STUDENT_DIRECTORY = "https://student.iimcal.ac.in/jd/#/";
     mails are an occasional job. */
 const GROUPS = [
   ["mess", "Day-Night Mess & Tuck",
-    "The week's mess food, plus night canteen and tuck shop menus you can "
-    + "order from over WhatsApp.",
+    "The week's mess food, plus night canteen and tuck shop menus that you "
+    + "can order.",
     MessIcon],
   ["maps", "J-Maps",
-    "Door-to-Door navigation for every classroom, faculty rooms and admin "
-    + "office in the campus.",
+    "Door-to-Door navigation for every classroom, faculty and admin room in "
+    + "the campus.",
     MapIcon],
   ["contacts", "Faculty and POR Contact Details",
     "Professors, the council, clubs and captains, and the batch directory.",
     ContactsIcon],
   ["campus", "Campus & Hostel Services",
-    "Doctor timings, ambulance, pharmacies and cabs, shops and food, gym and "
-    + "court hours, and each hostel's electrician and laundry.",
+    "Doctor timings, ambulance, each hostel's electrician and laundry and "
+    + "more.",
     CampusIcon],
   ["mail", "Mail Services",
     // Not "sent": the app only drafts them, and the student presses Send in
     // Gmail.
-    "Leave and guest entry mails, auto-drafted with the official forms "
-    + "attached, ready to send from Gmail.",
+    "Leave and guest entry mails, with official forms attached, ready to "
+    + "send from Gmail.",
     MailIcon],
 ];
 
