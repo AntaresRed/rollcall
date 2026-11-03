@@ -80,15 +80,38 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   padding: 0 var(--pad) calc(96px + env(safe-area-inset-bottom));
 }
 
-/* On a laptop-width screen, the week's timetable gets room to lay every day
-   out side by side instead of needing the horizontal scroll a phone has no
-   choice about. Scoped to the plain grid view only (see the class's home in
-   App.jsx) — Faculty, Reschedule and the rest are lists and prose, and read
-   worse stretched wide, so they keep the narrow column. The breakpoint is a
-   width, not a device: a phone rotated into a wide landscape window gets the
-   grid too, which is the correct outcome, not an edge case to guard against. */
-@media (min-width: 860px) {
+/* From iPad width up, the week's timetable gets room to lay every day out
+   side by side instead of needing the horizontal scroll a phone has no
+   choice about. 744px is the iPad mini held upright, the narrowest iPad;
+   five days fit there with long names wrapping. Scoped to the plain grid
+   view only (see the class's home in App.jsx) — Faculty, Reschedule and the
+   rest are lists and prose, and read worse stretched wide, so they keep the
+   narrow column. The breakpoint is a width, not a device: a phone rotated
+   into a wide landscape window gets the grid too, which is the correct
+   outcome, not an edge case to guard against. */
+@media (min-width: 744px) {
   .shell.shell-grid { max-width: 1040px; }
+}
+
+/* The masthead and tab bar stay full-bleed, but what is on them lines up
+   with the column below. Left at the screen's edges, an iPad put the
+   wordmark and the date a hand's width either side of the page, and four
+   tabs a quarter of the screen wide each. Half the screen minus half the
+   column puts the bar's contents exactly over the column; max() keeps the
+   phone padding wherever that comes out smaller. */
+@media (min-width: 744px) {
+  .masthead {
+    padding-left: max(var(--pad), calc(50% - 310px + var(--pad)));
+    padding-right: max(var(--pad), calc(50% - 310px + var(--pad)));
+  }
+  .masthead.masthead-wide {
+    padding-left: max(var(--pad), calc(50% - 520px + var(--pad)));
+    padding-right: max(var(--pad), calc(50% - 520px + var(--pad)));
+  }
+  .tabs {
+    padding-left: max(0px, calc(50% - 310px));
+    padding-right: max(0px, calc(50% - 310px));
+  }
 }
 
 /* ---------- masthead ---------- */
@@ -1236,13 +1259,13 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   /* Forces every column to its widest unwrapped line — a long venue name,
      mainly — rather than letting it wrap. That's the point on a phone: a
      guaranteed-readable column and a horizontal scroll are a fair trade.
-     On the wide desktop grid below, the same rule would keep forcing a
+     On the wide iPad grid below, the same rule would keep forcing a
      scrollbar no matter how much width .shell-grid hands it, since it sizes
      off content rather than the container — so it's switched off there and
      long names wrap in the cell instead. */
   min-width: max-content;
 }
-@media (min-width: 860px) {
+@media (min-width: 744px) {
   .shell-grid .tt-grid { min-width: 0; }
 }
 

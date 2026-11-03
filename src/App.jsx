@@ -912,19 +912,22 @@ export default function App() {
   }
 
   // ---- main ----
+  // Widened only for the plain grid view — the day columns are what
+  // actually benefit from an iPad's extra width. Every other screen, this
+  // one included when a sub-screen is open, reads as prose or a list and is
+  // better off at the narrow column width it already has; stretching those
+  // to a laptop would just make the lines long. The masthead widens with it
+  // so its contents stay lined up with the page.
+  const gridView = tab === "timetable" && !subScreen;
   return (
     <>
       <Masthead
         now={now}
         onBack={subScreen ? () => setSubScreen(parentOf(subScreen)) : null}
         backLabel={backLabelOf(subScreen)}
+        wide={gridView}
       />
-      {/* Widened only for the plain grid view — the day columns are what
-          actually benefit from a laptop's extra width. Every other screen,
-          this one included when a sub-screen is open, reads as prose or a
-          list and is better off at the narrow column width it already has;
-          stretching those to a 27" monitor would just make the lines long. */}
-      <div className={`shell${tab === "timetable" && !subScreen ? " shell-grid" : ""}`}>
+      <div className={`shell${gridView ? " shell-grid" : ""}`}>
         {viewAs && (
           <ViewAsBar
             viewAs={viewAs}
@@ -1197,7 +1200,7 @@ function ViewAsBar({ viewAs, onSection, onExit }) {
  * The tabs themselves are a flat choice rather than a stack, so nothing there
  * gets an arrow.
  */
-function Masthead({ now, onBack = null, backLabel = "Back" }) {
+function Masthead({ now, onBack = null, backLabel = "Back", wide = false }) {
   const label = now.toLocaleDateString(undefined, {
     weekday: "short", day: "numeric", month: "short",
   });
@@ -1224,7 +1227,7 @@ function Masthead({ now, onBack = null, backLabel = "Back" }) {
   }, []);
 
   return (
-    <header className="masthead" ref={bar}>
+    <header className={`masthead${wide ? " masthead-wide" : ""}`} ref={bar}>
       <div className="masthead-left">
         {onBack && (
           <button className="masthead-back" onClick={onBack} aria-label={backLabel} title={backLabel}>
