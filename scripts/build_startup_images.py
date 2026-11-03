@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Build public/startup/*.png — what an iPhone shows while the installed app
-starts — and the <link> tags in index.html that point at them.
+Build public/startup/*.png — what an iPhone or iPad shows while the installed
+app starts — and the <link> tags in index.html that point at them.
 
     python scripts/build_startup_images.py
 
@@ -20,8 +20,10 @@ The colour is checked on every run against --paper in src/styles.css and
 background_color in manifest.json; if either has moved, the build stops
 rather than quietly bringing the white flash back as a grey one.
 
-IPHONES lists every screen size iOS 15+ runs on. A new model with a new size
-gets white until a row is added here; an existing size needs nothing. iOS
+IPHONES and IPADS list every screen size iOS / iPadOS 15+ runs on. A new
+model with a new size gets white until a row is added here; an existing size
+needs nothing. Points are pixels over the scale, so a row needs Apple's pixel
+resolution and a scale that's been confirmed, not guessed. iOS
 fetches the image when the app is added to the Home Screen, so a phone that
 installed the app before this existed has to remove and re-add it.
 """
@@ -57,6 +59,22 @@ IPHONES = [
     (440, 956, 3, "16 Pro Max, 17 Pro Max"),
 ]
 
+# Checked against the resolutions on apple.com/ipad/compare (2026-11-04).
+# The 11" Pro is two sizes: the M4 and later is taller than gens 1-4.
+IPADS = [
+    (768, 1024, 2, "5th, 6th gen, Air 2, mini 4, mini (5th gen), Pro 9.7\""),
+    (810, 1080, 2, "7th, 8th, 9th gen"),
+    (744, 1133, 2, "mini (6th gen), mini (A17 Pro)"),
+    (834, 1112, 2, "Air (3rd gen), Pro 10.5\""),
+    (820, 1180, 2, "10th gen, A16, Air (4th, 5th gen), Air 11\" (M2 and later)"),
+    (834, 1194, 2, "Pro 11\" (1st to 4th gen)"),
+    (834, 1210, 2, "Pro 11\" (M4 and later)"),
+    (1024, 1366, 2, "Pro 12.9\", Air 13\" (M2 and later)"),
+    (1032, 1376, 2, "Pro 13\" (M4 and later)"),
+]
+
+SCREENS = [("iphone", row) for row in IPHONES] + [("ipad", row) for row in IPADS]
+
 START = "<!-- startup images: built by scripts/build_startup_images.py -->"
 END = "<!-- /startup images -->"
 
@@ -78,15 +96,15 @@ def check_colour():
 
 def links():
     lines = [START]
-    for w, h, dpr, models in IPHONES:
+    for device, (w, h, dpr, models) in SCREENS:
         pw, ph = w * dpr, h * dpr
         media = f"(device-width: {w}px) and (device-height: {h}px) and (-webkit-device-pixel-ratio: {dpr})"
-        lines.append(f"    <!-- {models} -->")
+        lines.append(f"    <!-- {'iPad ' if device == 'ipad' else ''}{models} -->")
         # iOS keeps device-width/height in portrait terms whichever way the
-        # phone is held, so landscape is the same query with its own image.
+        # device is held, so landscape is the same query with its own image.
         for orient, size in (("portrait", (pw, ph)), ("landscape", (ph, pw))):
             lines.append(
-                f'    <link rel="apple-touch-startup-image" href="/startup/iphone-{size[0]}x{size[1]}.png" '
+                f'    <link rel="apple-touch-startup-image" href="/startup/{device}-{size[0]}x{size[1]}.png" '
                 f'media="{media} and (orientation: {orient})" />'
             )
     lines.append(f"    {END}")
@@ -97,19 +115,19 @@ def main():
     check_colour()
 
     sizes = set()
-    for w, h, dpr, _ in IPHONES:
-        sizes.add((w * dpr, h * dpr))
-        sizes.add((h * dpr, w * dpr))
+    for device, (w, h, dpr, _) in SCREENS:
+        sizes.add((device, w * dpr, h * dpr))
+        sizes.add((device, h * dpr, w * dpr))
 
     OUT.mkdir(parents=True, exist_ok=True)
     rgb = tuple(int(COLOUR[i:i + 2], 16) for i in (1, 3, 5))
-    for pw, ph in sorted(sizes):
+    for device, pw, ph in sorted(sizes):
         # One palette entry: the file is a few hundred bytes, and the colour
         # is exactly COLOUR rather than whatever a lossy encoder lands on.
         img = Image.new("RGB", (pw, ph), rgb).convert("P", palette=Image.Palette.ADAPTIVE, colors=1)
-        img.save(OUT / f"iphone-{pw}x{ph}.png", optimize=True)
+        img.save(OUT / f"{device}-{pw}x{ph}.png", optimize=True)
 
-    wanted = {f"iphone-{pw}x{ph}.png" for pw, ph in sizes}
+    wanted = {f"{device}-{pw}x{ph}.png" for device, pw, ph in sizes}
     stale = sorted(p.name for p in OUT.glob("*.png") if p.name not in wanted)
     for name in stale:
         (OUT / name).unlink()
@@ -125,7 +143,7 @@ def main():
     html = block.sub(lambda _: links(), html)
     INDEX.write_bytes(html.replace("\n", eol).encode("utf-8"))
 
-    print(f"{len(sizes)} images for {len(IPHONES)} screen sizes in public/startup/"
+    print(f"{len(sizes)} images for {len(SCREENS)} screen sizes in public/startup/"
           + (f", removed {', '.join(stale)}" if stale else ""))
 
 
