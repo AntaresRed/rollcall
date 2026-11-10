@@ -31,7 +31,13 @@ function formatInstructors(list) {
  * more" is the question students are actually asking; the percentage is the
  * long way round to the same answer.
  */
-export default function Stats({ classes, attendance, term = null, now, overrides = [] }) {
+export default function Stats({
+  classes, attendance, term = null, now, overrides = [],
+  // Profile's Pre MT / Post MT ticks, drawn in the heading's row. `emptyText`
+  // replaces "pick your courses" when there are courses and the ticks are
+  // what hid them.
+  controls = null, emptyText = null,
+}) {
   const rows = useMemo(
     () => courseStats(classes, attendance, term, now ?? new Date(), overrides),
     [classes, attendance, term, now, overrides],
@@ -40,15 +46,15 @@ export default function Stats({ classes, attendance, term = null, now, overrides
   if (!rows.length) {
     return (
       <>
-        <div className="eyebrow">Attendance</div>
-        <div className="empty">Pick your courses and your budget appears here.</div>
+        <div className="eyebrow">Attendance{controls}</div>
+        <div className="empty">{emptyText ?? "Pick your courses and your budget appears here."}</div>
       </>
     );
   }
 
   return (
     <>
-      <div className="eyebrow">Attendance</div>
+      <div className="eyebrow">Attendance{controls}</div>
 
       {rows.map((r) => {
         const spent = r.allowedAbsences - r.skipsLeft;

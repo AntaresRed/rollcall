@@ -50,6 +50,8 @@ import { formFields, formAction, postBackFields, selectOptions, readGrid, hasPas
 } from "../supabase/functions/olt-attendance/parse.ts";
 import { courseKey as appCourseKey, oltCourse, pairSessions, compareWithOlt } from "../src/lib/olt.js";
 import { AVATARS, avatarByKey, avatarSvg, avatarSrc, usableExclusive, exclusiveSrc } from "../src/lib/avatars.js";
+import { defaultHalves, halfShown, rowsForHalves, coursesForHalves, courseHalf,
+  gridHasHalves, profileHasHalves, loadHalves, saveHalves } from "../src/lib/halves.js";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import catalogue from "../src/data/catalogue.json";
@@ -3286,6 +3288,75 @@ console.log("\ncampus & hostel services");
   // Annexe has no tab of its own; nor does a hostel nobody typed.
   check("Annexe opens the first tab", hostelTab("Annexe") === CAMPUS_HOSTELS[0].id);
   survives("no saved hostel", () => hostelTab(undefined));
+}
+
+console.log("");
+console.log("Pre MT / Post MT ticks");
+{
+  const t = { id: "t2", term_start: "2026-09-07", pre_mid_end: "2026-10-09", post_mid_start: "2026-11-02" };
+  const same = (a, b) => a.pre === b.pre && a.post === b.post;
+
+  check("opens on pre-mid in the first half", same(defaultHalves("2026-09-20", t), { pre: true, post: false }));
+  // The mid-term exams and Puja sit between the two halves; the first half
+  // stays until the second begins, or nothing would be ticked for three weeks.
+  check("stays on pre-mid through the gap", same(defaultHalves("2026-10-20", t), { pre: true, post: false }));
+  check("moves to post-mid the day it starts", same(defaultHalves("2026-11-02", t), { pre: false, post: true }));
+  check("with no term neither is ticked", same(defaultHalves("2026-11-02", null), { pre: false, post: false }));
+
+  // A full-term course that changes slots at the mid-term, a half-term
+  // course, and a plain full-term one.
+  const rows = [
+    { subject: "Ops", term_phase: "pre_mid", day_of_week: 1 },
+    { subject: "Ops", term_phase: "post_mid", day_of_week: 2 },
+    { subject: "Models", term_phase: "pre_mid", day_of_week: 3 },
+    { subject: "Macro", term_phase: "full", day_of_week: 4 },
+  ];
+  const postOnly = { pre: false, post: true };
+  const none = { pre: false, post: false };
+  const names = (list) => list.map((r) => `${r.subject}${r.day_of_week}`).join();
+
+  check("a full-term course shows with nothing ticked", halfShown("full", none));
+  check("a missing phase counts as full-term", halfShown(undefined, none));
+  check("the grid keeps only the ticked half's meetings", names(rowsForHalves(rows, postOnly)) === "Ops2,Macro4");
+  check("the grid with nothing ticked keeps full-term rows", names(rowsForHalves(rows, none)) === "Macro4");
+  // Profile keeps the whole course: dropping its pre-mid row would drop the
+  // marks made in it from the total.
+  check("Profile keeps every row of a course it shows",
+    names(coursesForHalves(rows, postOnly)) === "Ops1,Ops2,Macro4");
+  check("Profile hides a course of the unticked half", !coursesForHalves(rows, postOnly).some((r) => r.subject === "Models"));
+  check("a course in both halves is full-term", courseHalf(rows.filter((r) => r.subject === "Ops")) === "full");
+  check("a course in one half is that half", courseHalf(rows.filter((r) => r.subject === "Models")) === "pre_mid");
+  check("no rows is full-term", courseHalf([]) === "full");
+  // Only the split full-term course: ticks change the grid, not Profile.
+  const splitOnly = rows.filter((r) => r.subject !== "Models");
+  check("the grid offers ticks for a split full-term course", gridHasHalves(splitOnly));
+  check("Profile doesn't, since they would change nothing", !profileHasHalves(splitOnly));
+  check("Profile offers them for a half-term course", profileHasHalves(rows));
+
+  const memory = () => {
+    const m = new Map();
+    return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, String(v)) };
+  };
+  const s = memory();
+  check("nothing saved opens on the default",
+    same(loadHalves("timetable", t, "2026-11-10", s), { pre: false, post: true }));
+  saveHalves("timetable", t, { pre: true, post: true }, s);
+  check("a saved choice is what opens", same(loadHalves("timetable", t, "2026-11-10", s), { pre: true, post: true }));
+  check("the grid's choice isn't Profile's", same(loadHalves("profile", t, "2026-11-10", s), { pre: false, post: true }));
+  saveHalves("profile", t, { pre: false, post: false }, s);
+  check("Profile keeps its own", same(loadHalves("profile", t, "2026-11-10", s), { pre: false, post: false }));
+  check("and saving it left the grid's alone", same(loadHalves("timetable", t, "2026-11-10", s), { pre: true, post: true }));
+  check("a new term opens on its own default",
+    same(loadHalves("timetable", { ...t, id: "t3", post_mid_start: "2027-02-01" }, "2026-12-20", s), { pre: true, post: false }));
+
+  const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); } };
+  check("storage that throws opens on the default",
+    same(loadHalves("timetable", t, "2026-11-10", broken), { pre: false, post: true }));
+  survives("saving to storage that throws", () => saveHalves("timetable", t, { pre: true, post: true }, broken));
+  const junk = { getItem: () => "{not json", setItem: () => {} };
+  check("junk in storage opens on the default", same(loadHalves("timetable", t, "2026-11-10", junk), { pre: false, post: true }));
+  const odd = { getItem: () => JSON.stringify({ timetable: { term: "t2", pre: "yes", post: 1 } }), setItem: () => {} };
+  check("a half-written choice opens on the default", same(loadHalves("timetable", t, "2026-11-10", odd), { pre: false, post: true }));
 }
 
 Promise.all(later).catch((err) => {

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { courseStats, loadExclusiveAvatars } from "../lib/api";
+import { courseStats, loadExclusiveAvatars, isoDate } from "../lib/api";
+import { coursesForHalves, profileHasHalves } from "../lib/halves";
 import Stats from "./Stats";
+import HalfTicks, { useHalves } from "./HalfTicks";
 import { OltPasswordSettings } from "./OltSync";
 import { AVATARS, avatarSrc, usableExclusive, exclusiveSrc } from "../lib/avatars";
 import { track } from "../lib/track";
@@ -37,6 +39,8 @@ export default function Profile({
   // DPs made for this student alone; `exclusiveInitial` stands in for their
   // load in the smoke test.
   exclusiveInitial,
+  // Stands in for the remembered Pre MT / Post MT ticks in the smoke test.
+  halvesInitial,
 }) {
   const user = session?.user;
   const meta = user?.user_metadata ?? {};
@@ -70,9 +74,19 @@ export default function Profile({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
+  // The courses of the ticked halves, remembered apart from the grid's ticks:
+  // a student may keep the whole term's attendance here while the grid shows
+  // only this half. Course by course rather than row by row, so a full-term
+  // course that changes slots at the mid-term keeps every mark it has.
+  const [halves, setHalves] = useHalves("profile", term, isoDate(now ?? new Date()), halvesInitial);
+  const ticks = profileHasHalves(classes);
+  const shown = useMemo(() => coursesForHalves(classes, halves), [classes, halves]);
+
+  // The count follows the ticks too, so it never names a course the list
+  // below has hidden.
   const rows = useMemo(
-    () => courseStats(classes, attendance, term, now ?? new Date(), overrides),
-    [classes, attendance, term, now, overrides],
+    () => courseStats(shown, attendance, term, now ?? new Date(), overrides),
+    [shown, attendance, term, now, overrides],
   );
 
   // "Close to the line" is one skip or fewer — the point at which the next
@@ -160,7 +174,11 @@ export default function Profile({
         </div>
       )}
 
-      <Stats classes={classes} attendance={attendance} term={term} now={now} overrides={overrides} />
+      <Stats
+        classes={shown} attendance={attendance} term={term} now={now} overrides={overrides}
+        controls={ticks ? <HalfTicks halves={halves} onChange={setHalves} /> : null}
+        emptyText={classes?.length ? "Tick Pre MT or Post MT to see those courses." : null}
+      />
 
       <div className="profile-actions">
         {/* Testers only, and again only a way in: olt_attendance's policy

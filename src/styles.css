@@ -1233,6 +1233,36 @@ select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
   box-shadow: 0 0 0 2px var(--board);
 }
 
+/* ---------- Pre MT / Post MT ---------- */
+
+/* In the heading's own row — "TIMETABLE —— □ PRE MT ☑ POST MT" — after the
+   hairline, as .eyebrow-act is. A row of their own cost 36px above the grid
+   for two words. The labels take the heading's small capitals, so they read
+   as part of it. Each label is a 32px-tall tap target, pulled into the
+   heading's line height by the negative margin so the row doesn't grow. */
+.eyebrow .half-ticks {
+  order: 1;
+  flex: 0 0 auto;
+  display: flex;
+  gap: 14px;
+  margin: -8px 0;
+}
+.half-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  color: var(--slate);
+  cursor: pointer;
+}
+.half-tick:has(input:checked) { color: var(--ink); }
+.half-tick input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--signal);
+}
+
 /* ---------- timetable grid ---------- */
 
 .tt-scroll {

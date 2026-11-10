@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import {
-  DAYS, SLOT_STARTS, SLOT_ENDS, PHASE_LABEL,
-  pretty, toMinutes, weekdayOf, isoDate, phaseActive, breakOn, undecidedReschedules,
+  DAYS, SLOT_STARTS, SLOT_ENDS,
+  pretty, toMinutes, weekdayOf, isoDate, breakOn, undecidedReschedules,
   rescheduleProposals, loadDismissedProposals, dismissProposal,
 } from "../lib/api";
+import { HALF_LABEL, gridHasHalves, rowsForHalves } from "../lib/halves";
+import HalfTicks, { useHalves } from "./HalfTicks";
 
 const fmtWhen = (iso) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, {
@@ -24,11 +26,24 @@ export default function Timetable({
   // Classes OLT and the student have marked differently; any at all puts a
   // red mark on the button that leads to the list of them.
   oltMismatches = 0,
+  // Stands in for the remembered Pre MT / Post MT ticks in the smoke test.
+  halvesInitial,
 }) {
   const today = weekdayOf(now);
   const date = isoDate(now);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const activeBreak = breakOn(date, term);
+
+  // Only the halves the student has ticked, opening on the one that is
+  // running. Without ticks the grid drew whichever half the calendar said —
+  // right for the week, but there was no way to look at the other one, and
+  // a first-year grid runs both halves through the same five slots, so
+  // drawing both at once showed two courses in every cell.
+  const [halves, setHalves] = useHalves("timetable", term, date, halvesInitial);
+  const ticks = gridHasHalves(classes);
+  const shown = useMemo(() => rowsForHalves(classes, halves), [classes, halves]);
+  const bothHalves = halves.pre && halves.post;
+
   // The Reschedule badge counts classes still waiting for a date — the same
   // kind of number as Edit attendance's badge: something left to do, rather
   // than a tally of changes already made, which the screen itself lists.
@@ -66,25 +81,26 @@ export default function Timetable({
   };
 
   // Only render days and slots that are actually in use — an empty Sunday
-  // column is just noise, and trimming makes the columns wider.
+  // column is just noise, and trimming makes the columns wider. In use by
+  // what is shown: a slot only the unticked half meets in is an empty row.
   const days = useMemo(() => {
-    const used = new Set(classes.map((c) => c.day_of_week));
+    const used = new Set(shown.map((c) => c.day_of_week));
     const list = [1, 2, 3, 4, 5, 6, 7].filter((d) => used.has(d));
     return list.length ? list : [1, 2, 3, 4, 5];
-  }, [classes]);
+  }, [shown]);
 
   const slots = useMemo(() => {
-    const used = new Set(classes.map((c) => c.start_time));
+    const used = new Set(shown.map((c) => c.start_time));
     const known = SLOT_STARTS.filter((s) => used.has(s));
     // Anything off the standard grid (a hand-entered class) still gets a row.
     const extra = [...used].filter((s) => !SLOT_STARTS.includes(s));
     const all = [...known, ...extra].sort((a, b) => toMinutes(a) - toMinutes(b));
     return all.length ? all : SLOT_STARTS;
-  }, [classes]);
+  }, [shown]);
 
   const cell = useMemo(() => {
     const map = new Map();
-    for (const c of classes) {
+    for (const c of shown) {
       const k = `${c.day_of_week}|${c.start_time}`;
       const list = map.get(k) ?? [];
       // A fixed-date course occupies the same weekday slot on several dates.
@@ -99,7 +115,7 @@ export default function Timetable({
       map.set(k, list);
     }
     return map;
-  }, [classes]);
+  }, [shown]);
 
   if (!classes.length) {
     return (
@@ -112,7 +128,12 @@ export default function Timetable({
 
   return (
     <>
-      <div className="eyebrow">Timetable</div>
+      {/* The ticks only for a student who has a half-term course; for anyone
+          else both would do nothing. */}
+      <div className="eyebrow">
+        Timetable
+        {ticks && <HalfTicks halves={halves} onChange={setHalves} />}
+      </div>
 
       {activeBreak && (
         <div className="banner warn" style={{ marginTop: 0, marginBottom: 14 }}>
@@ -126,6 +147,9 @@ export default function Timetable({
         </div>
       )}
 
+      {shown.length === 0 ? (
+        <div className="empty">Tick Pre MT or Post MT to see those courses.</div>
+      ) : (
       <div className="tt-scroll">
         <div
           className="tt-grid"
@@ -158,13 +182,10 @@ export default function Timetable({
 
                   return (
                     <div className={`tt-cell${isNow ? " now" : ""}`} key={`${d}|${slot}`}>
-                      {/* Only the half of the term that is running. These
-                          used to all be drawn, with the other half dimmed —
-                          readable when a slot rarely held two courses, but the
-                          first-year grid runs both halves through the same five
-                          slots, so every cell showed two courses and one of
-                          them was always wrong for today. */}
-                      {items.filter((c) => phaseActive(c.term_phase, date, term)).map((c) => {
+                      {items.map((c) => {
+                        // The half is worth a tag only when both are on the
+                        // grid; with one ticked, every block would say it.
+                        const half = bothHalves ? HALF_LABEL[c.term_phase] : null;
                         return (
                           <div className="tt-block" key={c.id}>
                             <div className="tt-name">{c.subject}</div>
@@ -172,16 +193,14 @@ export default function Timetable({
                               {c.room || "—"}
                               {c.section ? ` · ${c.section}` : ""}
                             </div>
-                            {(PHASE_LABEL[c.term_phase] || c._dateCount) && (
+                            {(half || c._dateCount) && (
                               <div className="tt-tags">
                                 {c._dateCount ? (
                                   <span className="tag signal">
                                     {c._dateCount} date{c._dateCount === 1 ? "" : "s"}
                                   </span>
                                 ) : null}
-                                {PHASE_LABEL[c.term_phase] && (
-                                  <span className="tag">{PHASE_LABEL[c.term_phase]}</span>
-                                )}
+                                {half && <span className="tag">{half}</span>}
                               </div>
                             )}
                           </div>
@@ -195,6 +214,7 @@ export default function Timetable({
           })}
         </div>
       </div>
+      )}
 
       {/* Only what concerns this week's schedule: the two about what was
           recorded against it on top, as the ones reached for most, then the

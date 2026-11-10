@@ -160,6 +160,11 @@ const cases = [
       overrides={overrides} onShowCalendar={noop} onReschedule={noop} onShowBreakdown={noop}
       onShowAttendance={noop} oltSync oltMismatches={2} />],
   ["Timetable / empty", <Timetable key="tte" classes={[]} now={now} term={term} />],
+  ["Timetable / both halves ticked", <Timetable key="tth2" classes={classes} now={now} term={term}
+      halvesInitial={{ pre: true, post: true }} />],
+  // Only a half-term course, and its half unticked: nothing left to draw.
+  ["Timetable / no half ticked", <Timetable key="tth0" now={now} term={term}
+      classes={classes.filter((c) => c.term_phase === "pre_mid")} halvesInitial={{ pre: false, post: false }} />],
   ["Timetable / during a break", <Timetable key="ttb" classes={classes} now={new Date("2026-10-21T10:00:00")} term={term} overrides={[]} />],
   ["EditAttendance", <EditAttendance key="cu" classes={classes} attendance={attendance} term={term} overrides={overrides} now={now} onMark={noop} />],
   ["EditAttendance / no classes", <EditAttendance key="cue" classes={[]} attendance={[]} term={term} now={now} onMark={noop} />],
@@ -188,7 +193,13 @@ const cases = [
       email: "anuja2027@email.iimcal.ac.in",
       user_metadata: { full_name: "Anuja Sharma", avatar_url: "https://example.test/a.jpg" },
     } }} classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
-  ["Profile / no avatar or name", <Profile key="pn" session={{ user: { email: "x@email.iimcal.ac.in", user_metadata: {} } }}
+  ["Profile / both halves ticked", <Profile key="ph2" session={{ user: { email: "x@email.iimcal.ac.in", user_metadata: {} } }}
+      classes={classes} attendance={attendance} term={term} now={now}
+      halvesInitial={{ pre: true, post: true }} onChangeCourses={noop} onSignOut={noop} />],
+  ["Profile / no half ticked", <Profile key="ph0" session={{ user: { email: "x@email.iimcal.ac.in", user_metadata: {} } }}
+      classes={classes.filter((c) => c.term_phase === "pre_mid")} attendance={attendance} term={term} now={now}
+      halvesInitial={{ pre: false, post: false }} onChangeCourses={noop} onSignOut={noop} />],
+  ["Profile / no avatar or name",<Profile key="pn" session={{ user: { email: "x@email.iimcal.ac.in", user_metadata: {} } }}
       classes={classes} attendance={attendance} onChangeCourses={noop} onSignOut={noop} />],
   ["Profile / no session", <Profile key="ps" session={null}
       classes={[]} attendance={[]} onChangeCourses={noop} onSignOut={noop} />],
