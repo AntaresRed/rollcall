@@ -10,8 +10,8 @@
 -- at all. A constant compiled into the app can only decline to draw something
 -- the browser has already been handed.
 --
--- This file grants the flag and nothing else. Nothing in the app reads it yet;
--- the first feature to need it wires it up.
+-- This file grants the flag and nothing else; each feature that reads it
+-- wires up its own check, in the app and in its own policy. Safe to re-run.
 --
 --   psql "$DATABASE_URL" -f supabase/prototype-gate.sql
 -- ============================================================
@@ -22,24 +22,39 @@ alter table public.profiles
 comment on column public.profiles.is_tester is
   'Sees unreleased features. Grant by UPDATE; never settable by the account itself.';
 
+-- Who has it. The flag unlocks every feature behind it, so whoever is listed
+-- here sees all of them — today that is only the OLT reader (Official
+-- attendance, OLT Sync, its password and its mismatch marks). Before gating
+-- something new on it, check this list is still people meant to see that too.
+--
+--   anuja2027      the original tester
+--   manikkuwara2027  added 2026-11-16, for OLT Sync
+--
 -- The profile row is created by handle_new_user() on first sign-in, so this
 -- only takes effect once that account has signed in at least once. Re-run it
--- afterwards if it reports 0 rows.
+-- afterwards if it reports an address with no profile. Never revokes: taking
+-- the flag away is a separate UPDATE.
 do $$
 declare
+  addr text;
   n int;
 begin
-  update public.profiles p
-     set is_tester = true
-    from auth.users u
-   where u.id = p.id
-     and lower(u.email) = 'anuja2027@email.iimcal.ac.in';
-  get diagnostics n = row_count;
-  if n = 0 then
-    raise notice 'No profile matched anuja2027@email.iimcal.ac.in — sign in once, then re-run this file.';
-  else
-    raise notice 'Granted tester to % profile(s).', n;
-  end if;
+  foreach addr in array array[
+    'anuja2027@email.iimcal.ac.in',
+    'manikkuwara2027@email.iimcal.ac.in'
+  ] loop
+    update public.profiles p
+       set is_tester = true
+      from auth.users u
+     where u.id = p.id
+       and lower(u.email) = addr;
+    get diagnostics n = row_count;
+    if n = 0 then
+      raise notice 'No profile matched % — sign in once, then re-run this file.', addr;
+    else
+      raise notice 'Tester: %', addr;
+    end if;
+  end loop;
 end $$;
 
 -- Reads the caller's own flag. SECURITY DEFINER so it can be used inside the
